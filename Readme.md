@@ -65,7 +65,7 @@ All comments are ignored by default.
 
 For full list of allowed elements and attribute names see [ElementNames](link-to-elements) and [AttributeNames](link-to-attributes).
 
-For more details on implementation and supported scenarios see [API](##API) and [Usage](##Usage) sections.
+For more details on implementation and supported scenarios see [API](#API) and [Usage](#Usage) sections.
 
 ## Usage
 
