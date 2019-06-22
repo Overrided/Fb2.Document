@@ -8,25 +8,27 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
 
 ## Table of contents
 
-* [Installation](##Installation)
+* [Installation](#Installation)
 
-* [Document infrastructure & loading](##Document-infrastructure-&-loading)
+* [Document infrastructure & loading](#Document-infrastructure-&-loading)
 
-* [Usage](##Usage)
-    * [Loading file as a string](###Loading-file-as-a-string)
-    * [Loading file as XDocument](###Loading-file-as-XDocument)
-    * [Loading file as a stream](###Loading-file-as-a-stream)
-    * [Loading file as a stream asynchronously](###Loading-file-as-a-stream-asynchronously)
-    * [Loading particular node](###Loading-particular-node)
-    * [Querying the model](###Querying-the-model)
-    * [Encoding safety](###Encoding-safety)
+* [Usage](#Usage)
+    * [Loading file as a string](#Loading-file-as-a-string)
+    * [Loading file as XDocument](#Loading-file-as-XDocument)
+    * [Loading file as a stream](#Loading-file-as-a-stream)
+    * [Loading file as a stream asynchronously](#Loading-file-as-a-stream-asynchronously)
+    * [Loading particular node](#Loading-particular-node)
+    * [Querying the model](#Querying-the-model)
+    * [Encoding safety](#Encoding-safety)
 
-* [API](##API)
-    * [Fb2Document Class API](##Fb2Document-Class-API)
-    * [Fb2Node Class API](##Fb2Node-Class-API)
-    * [Fb2Element Class API](##Fb2Element-Class-API)
+* [API](#API)
+    * [Fb2Document Class API](#Fb2Document-Class-API)
+    * [Fb2Node Class API](#Fb2Node-Class-API)
+    * [Fb2Element Class API](#Fb2Element-Class-API)
 
-* [Utils and Constants](##Utils-and-Constants)
+* [Utils and Constants](#Utils-and-Constants)
+    * [Constants](#Constants)
+    * [Utils classes](#Utils-classes)
 
 ## Installation
 
@@ -81,7 +83,7 @@ Fb2Document fb2Document = new Fb2Document();
 fb2Document.Load(fileContent);
 ```
 
->WARNING! Method is not encoding-safe. [*](###Encoding-safety)
+>WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
 ### Loading file as XDocument
 
@@ -93,7 +95,7 @@ Fb2Document fb2Document = new Fb2Document();
 fb2Document.Load(document);
 ```
 
->WARNING! Method is not encoding-safe. [*](###Encoding-safety)
+>WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
 ### Loading file as a stream
 
@@ -106,7 +108,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 }
 ```
 
->Method is encoding-safe. [*](###Encoding-safety)
+>Method is encoding-safe. [*](#Encoding-safety)
 
 ### Loading file as a stream asynchronously
 
@@ -149,9 +151,9 @@ Also you can query by specifying exact type of descendant node you are looking f
 
 `var result = fb2Document.Book.GetDescendants<Stanza>();`
 
-For full list of properties for accessing document structural parts see [Fb2Document.Properties](###Fb2Document-Properties).
+For full list of properties for accessing document structural parts see [Fb2Document.Properties](#Fb2Document-Properties).
 
-For full list of methods for querying the model, see [Fb2Container.Methods](###Fb2Container-Methods).
+For full list of methods for querying the model, see [Fb2Container.Methods](#Fb2Container-Methods).
 
 ### Encoding safety
 
