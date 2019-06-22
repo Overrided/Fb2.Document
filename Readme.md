@@ -1,8 +1,8 @@
 # Fb2 Document Library
 
-Fb2Document is lightweight, fast .Net Standard lib with bunch of APIs to operate fb2 file's contents.
+Fb2.Document is lightweight, fast .Net Standard lib with bunch of APIs to operate fb2 file's contents.
 
-Fb2 Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
+Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
 Library can be used with any .Net application that supports .Net Standard 2.0.
 
@@ -71,7 +71,7 @@ For more details on implementation and supported scenarios see [API](#API) and [
 
 ## Usage
 
-As far as file can be read in different ways, Fb2Document class provides support for most common scenarios of loading, reading and querying data:
+As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading and querying data:
 
 ### Loading file as a string
 
