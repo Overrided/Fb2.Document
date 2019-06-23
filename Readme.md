@@ -10,7 +10,7 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
 
 * [Installation](#Installation)
 
-* [Document infrastructure & loading](#Document-infrastructure-&-loading)
+* [Document infrastructure and loading](#Document-infrastructure-and-loading)
 
 * [Usage](#Usage)
     * [Loading file as a string](#Loading-file-as-a-string)
@@ -40,7 +40,7 @@ You can download and use Fb2Document package in your app via
 
 * dotnet cli: dotnet add package Fb2.Document
 
-## Document infrastructure & loading
+## Document infrastructure and loading
 
 In fact, fb2 file is just an XML with a set of custom nodes, attributes and data relations.
 
