@@ -34,7 +34,7 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
 
 You can download and use Fb2Document package in your app via
 
-* NuGet: [Fb2.Document](https://source_of_package_onNuget_here)
+* NuGet: [Fb2.Document](https://www.nuget.org/packages/Fb2.Document/)
 
 * Package Manager Console: PM> Install-Package Fb2.Document  
 
