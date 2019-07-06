@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -40,11 +41,16 @@ namespace Fb2.Document.Models
 
         public override string ToString()
         {
-            var attributeOrDefault = Attributes.ContainsKey(AttributeNames.XHref) ?
-                this.Attributes[AttributeNames.XHref] :
-                string.Empty;
+            var attributeOrDefault =
+                Attributes != null &&
+                Attributes.Any() &&
+                Attributes.ContainsKey(AttributeNames.XHref) ?
+                    this.Attributes[AttributeNames.XHref] :
+                    string.Empty;
 
-            return $"Image {attributeOrDefault}";
+            var formattedAttributeString = string.IsNullOrWhiteSpace(attributeOrDefault) ? string.Empty : " " + attributeOrDefault;
+
+            return $"{this.Name}{formattedAttributeString}";
         }
 
         public override void Load(XNode node)

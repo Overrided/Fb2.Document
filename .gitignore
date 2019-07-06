@@ -6,3 +6,4 @@ obj/
 bin/
 .vs/
 /Fb2.Document/Fb2.Document.csproj.user
+/packages
