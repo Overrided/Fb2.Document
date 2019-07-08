@@ -8,15 +8,6 @@ namespace Fb2.Document.Tests.Common
 {
     public class Utils
     {
-        public List<PropT> GetAllPropertiesOfType<ClassT, PropT>(ClassT instance)
-        {
-            var propsInfo = instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.Default | BindingFlags.Static);
-            var values = propsInfo.Where(pi => pi.PropertyType == typeof(PropT)).Select(pi => pi.GetValue(instance));
-            var result = values.Cast<PropT>().ToList();
-
-            return result;
-        }
-
         public List<FieldInfo> GetAllFieldsOfType<ClassT, FieldInfo>(ClassT instance)
         {
             var fieldsInfo = instance.GetType().GetFields(BindingFlags.Public | BindingFlags.Default | BindingFlags.Static);
@@ -29,11 +20,24 @@ namespace Fb2.Document.Tests.Common
         public BaseType Instantiate<BaseType>(Type modelType) where BaseType : Fb2Node
         {
             if (modelType != typeof(BaseType) && !modelType.IsSubclassOf(typeof(BaseType)))
-            {
                 throw new ArgumentException($"Given {modelType} is not of Type: {typeof(BaseType)}!");
-            }
 
             return (BaseType)Activator.CreateInstance(modelType);
+        }
+
+        public bool OverridesToString(Fb2Node node)
+        {
+            var nodeType = node.GetType();
+            var methodInfo = nodeType.GetMethod("ToString");
+
+            if (methodInfo == null)
+            {
+                throw new ApplicationException("No ToString metod info!");
+            }
+
+            var isOverriden = methodInfo.DeclaringType == nodeType;
+
+            return isOverriden;
         }
     }
 }
