@@ -25,6 +25,8 @@ namespace Fb2.Document
         private IEnumerable<BookBody> bodies = null;
         private IEnumerable<BinaryImage> binaryImages = null;
 
+        private XDeclaration DefaultDeclaration = new XDeclaration("1.0", "utf-8", null);
+
         public FictionBook Book { get; private set; }
 
         private BookDescription FictionBookDescription
@@ -142,6 +144,15 @@ namespace Fb2.Document
         /// </summary>
         public bool IsLoaded { get; private set; } = false;
 
+        public static Fb2Document CreateDocument()
+        {
+            var document = new Fb2Document();
+            document.Book = new FictionBook();
+            document.IsLoaded = true;
+
+            return document;
+        }
+
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from XDocument insance
         /// </summary>
@@ -238,7 +249,7 @@ namespace Fb2.Document
         public XDocument ToXml()
         {
             var xmlRoot = Book.ToXml();
-            var xmlDoc = new XDocument(xmlRoot);
+            var xmlDoc = new XDocument(DefaultDeclaration, xmlRoot);
             return xmlDoc;
         }
 
@@ -249,7 +260,9 @@ namespace Fb2.Document
         public string ToXmlString()
         {
             var document = ToXml();
-            return string.Join(Environment.NewLine, document.Declaration.ToString(), document.ToString());
+            return string.Join(Environment.NewLine,
+                document.Declaration ?? DefaultDeclaration,
+                document.ToString());
         }
 
         private void Load(XElement root)

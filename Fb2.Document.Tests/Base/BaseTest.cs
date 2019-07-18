@@ -126,11 +126,11 @@ namespace Fb2.Document.Tests.Base
 
         // Fb2Element creation methods
 
-        public XElement GetXElementWithSimpleStringContent(string elementName)
+        public XElement GetXElementWithSimpleStringContent(string elementName, string textContent = null)
         {
             var element = new XElement(elementName);
 
-            var content = new XText("simple test text");
+            var content = new XText(textContent ?? "simple test text");
 
             element.Add(content);
 
@@ -146,6 +146,17 @@ namespace Fb2.Document.Tests.Base
             element.Add(content);
 
             return element;
+        }
+
+        // Generic element creation 
+
+        public T InstantiateAndLoad<T>(string content) where T : Fb2Node, new()
+        {
+            var instance = new T();
+            var instanceXElement = GetXElementWithSimpleStringContent(instance.Name, content);
+            instance.Load(instanceXElement);
+
+            return instance;
         }
     }
 }
