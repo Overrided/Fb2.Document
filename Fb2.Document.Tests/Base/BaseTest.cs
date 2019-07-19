@@ -158,5 +158,14 @@ namespace Fb2.Document.Tests.Base
 
             return instance;
         }
+
+        public XElement GetInvalidXNode()
+        {
+            var element = new XElement(InvalidNodeName);
+
+            element.Add(new XText("invalid content of invalid node"));
+
+            return element;
+        }
     }
 }

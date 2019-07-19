@@ -37,6 +37,7 @@ namespace Fb2.Document.Tests
                 Fb2Container_Load_Attributes_Test(modelType);
                 Fb2Container_Load_SkipsInvalidNode_Test(modelType);
                 Fb2Container_Load_SkipsInvalidAttributes_Test(modelType);
+                Fb2Node_Load_InvalidNode_ThrowsException(modelType);
             }
 
             foreach (var modelType in elementTypes)
@@ -45,6 +46,7 @@ namespace Fb2.Document.Tests
                 Fb2Element_Load_LinearizeMultilineContent_Test(modelType);
                 Fb2Element_Load_Attributes_Test(modelType);
                 Fb2Element_Load_SkipsInvalidNode_Test(modelType);
+                Fb2Node_Load_InvalidNode_ThrowsException(modelType);
             }
         }
 
@@ -265,7 +267,7 @@ namespace Fb2.Document.Tests
 
         // owerall checks
 
-        private void CheckIfCorrectModelsAreLoaded(List<Type> modelTypes)
+        public void CheckIfCorrectModelsAreLoaded(List<Type> modelTypes)
         {
             var instances = modelTypes.Select(mt => Utils.Instantiate<Fb2Node>(mt)).ToList();
             var instancesNames = instances.Select(instance => instance.Name).ToList();
@@ -274,6 +276,36 @@ namespace Fb2.Document.Tests
             var elementNames = Utils.GetAllFieldsOfType<ElementNames, string>(names);
 
             CollectionAssert.AreEquivalent(elementNames, instancesNames); // so we do know all models are loaded
+        }
+
+        public void Fb2Node_Load_InvalidNode_ThrowsException(Type modelType)
+        {
+            var element = Utils.Instantiate<Fb2Node>(modelType);
+
+            if (element.Name == ElementNames.EmptyLine)
+                return; // EmptyLine has specific override for Load method, no validation is applied
+
+            var invalidNode = GetInvalidXNode();
+
+            var argumentExThrown = false;
+            var exThrown = false;
+
+            try
+            {
+                element.Load(invalidNode);
+            }
+            catch (ArgumentException agex)
+            {
+                argumentExThrown = true;
+                Assert.AreEqual(agex.Message, $"Invalid element, local name {InvalidNodeName}, supposed name {element.Name}");
+            }
+            catch
+            {
+                exThrown = true;
+            }
+
+            Assert.IsTrue(argumentExThrown);
+            Assert.IsFalse(exThrown);
         }
     }
 }
