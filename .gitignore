@@ -6,3 +6,6 @@ obj/
 bin/
 .vs/
 /Fb2.Document/Fb2.Document.csproj.user
+/packages
+/Fb2.Document.Tests/Generated
+/Fb2.Document.Tests/Fb2.Document.Tests.csproj.user

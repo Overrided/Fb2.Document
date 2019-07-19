@@ -11,6 +11,7 @@
     <PackageLicenseUrl>https://github.com/Overrided/Fb2.Document/blob/master/License.md</PackageLicenseUrl>
     <Copyright>2019 Denys Pukhkyi</Copyright>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>

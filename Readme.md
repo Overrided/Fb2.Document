@@ -26,6 +26,8 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
     * [Fb2Node Class API](#Fb2Node-Class-API)
     * [Fb2Element Class API](#Fb2Element-Class-API)
 
+* [Tests](#Tests)
+
 * [Utils and Constants](#Utils-and-Constants)
     * [Constants](#Constants)
     * [Utils classes](#Utils-classes)
@@ -175,6 +177,7 @@ If method is encoding-safe - during loading process library will try to determin
 |  LoadAsync  |   Stream  |    Task   | Loads `Fb2Document` from a stream asynchronously. Encoding safe.       |
 |    ToXml    |           | XDocument | Serializes loaded book back to `XDocument`.                            |
 | ToXmlString |           |   string  | Serializes loaded book to xml string.                                |
+| CreateDocument |        |  Fb2Document | Static method. Introduced in v1.0.1 of `Fb2.Document` package. Return new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `false`.|
 
 ### Fb2Document Properties
 
@@ -280,6 +283,17 @@ For `GetDescendants<T>()` implementation:
 ```
 var wholeBookContent = fb2Document.Book.GetDescendants<Fb2Node>();
 ```
+
+## Tests
+
+Solution contains test project, which covers all models configurations & main element loading, validation and generation logic.
+
+As far as project contains 63 different models, which are, in fact, configs for loading of different nodes from files,
+it would be incredibly boring to write tests for each of it. Reflection comes as best solution to get all model types, create corresponding instances and try to load
+each of them with different sets of data.
+
+Also, there are separate tests for [Fb2ElementFactory](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Factories/Fb2ElementFactory.cs) and so-called 
+End-to-end test, which creates Fb2Document, saves it as a file, reads it into second model, saves again and checks if both saved files are equal.
 
 ## Utils and Constants
 

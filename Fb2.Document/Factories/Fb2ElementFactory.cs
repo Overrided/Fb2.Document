@@ -15,6 +15,7 @@ namespace Fb2.Document.Factories
             (new Dictionary<string, Type>()
                 {
                     { ElementNames.FictionBook, typeof(FictionBook) },
+                    { ElementNames.FictionBook.ToLowerInvariant(), typeof(FictionBook) },
                     { ElementNames.BinaryImage, typeof(BinaryImage) },
                     { ElementNames.Description, typeof(BookDescription) },
                     { ElementNames.TitleInfo, typeof(TitleInfo) },
@@ -104,7 +105,7 @@ namespace Fb2.Document.Factories
 
         public Fb2Node GetElementByNodeName(string nodeName)
         {
-            var normalizedNodeName = nodeName.ToLowerInvariant();
+            var normalizedNodeName = nodeName.Equals(ElementNames.FictionBook) ? nodeName : nodeName.ToLowerInvariant();
 
             if (!KnownNodes.ContainsKey(normalizedNodeName))
                 return null;
