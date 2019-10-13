@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,7 +11,9 @@
     <PackageLicenseUrl>https://github.com/Overrided/Fb2.Document/blob/master/License.md</PackageLicenseUrl>
     <Copyright>2019 Denys Pukhkyi</Copyright>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Fb2.Document.Debug</PackageId>
   </PropertyGroup>
 
 </Project>
