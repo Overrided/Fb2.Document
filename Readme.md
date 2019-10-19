@@ -177,7 +177,7 @@ If method is encoding-safe - during loading process library will try to determin
 |  LoadAsync  |   Stream  |    Task   | Loads `Fb2Document` from a stream asynchronously. Encoding safe.       |
 |    ToXml    |           | XDocument | Serializes loaded book back to `XDocument`.                            |
 | ToXmlString |           |   string  | Serializes loaded book to xml string.                                |
-| CreateDocument |        |  Fb2Document | Static method. Introduced in v1.0.1 of `Fb2.Document` package. Return new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `false`.|
+| CreateDocument |        |  Fb2Document | Static method. Introduced in v1.0.1 of `Fb2.Document` package. Return new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `true`.|
 
 ### Fb2Document Properties
 
