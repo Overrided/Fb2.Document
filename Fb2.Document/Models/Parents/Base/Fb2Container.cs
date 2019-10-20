@@ -40,9 +40,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
-        public override void Load(XNode node, bool trimWhitespaces = true)
+        public override void Load(XNode node, bool preserveWhitespace = false)
         {
-            base.Load(node, trimWhitespaces);
+            base.Load(node, preserveWhitespace);
 
             var element = node as XElement;
 
@@ -64,7 +64,7 @@ namespace Fb2.Document.Models.Base
                     ElementNames.FictionText;
 
                 var elem = Fb2ElementFactory.Instance.GetElementByNodeName(localName);
-                elem.Load(validNode, trimWhitespaces);
+                elem.Load(validNode, preserveWhitespace);
 
                 elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !this.CanContainText : !AllowedElements.Contains(localName);
 

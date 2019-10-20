@@ -41,7 +41,7 @@ namespace Fb2.Document.Models.Base
         /// Basic Load of element - validation and populating Attributes
         /// </summary>
         /// <param name="node">XNode to load as Fb2Node</param>
-        public virtual void Load(XNode node, bool trimWhitespaces = true)
+        public virtual void Load(XNode node, bool preserveWhitespace = false)
         {
             if (node == null)
                 throw new ArgumentNullException($"{nameof(node)} is null!");

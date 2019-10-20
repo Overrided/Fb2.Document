@@ -32,13 +32,13 @@ namespace Fb2.Document.Models.Base
         /// Note: original content of XNode is NOT preserved
         /// </summary>
         /// <param name="node">Node to load as Fb2Element</param>
-        public override void Load(XNode node, bool trimWhitespaces = true)
+        public override void Load(XNode node, bool preserveWhitespace = false)
         {
-            base.Load(node, trimWhitespaces);
+            base.Load(node, preserveWhitespace);
 
             var rawContent = node.GetNodeContent();
 
-            if (trimWhitespaces && rawContent.Any(rch => conditionalChars.Contains(rch)))
+            if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
                 this.Content = trimWhitespace.Replace(rawContent, " ");
             else
                 this.Content = rawContent;

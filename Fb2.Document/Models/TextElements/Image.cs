@@ -53,11 +53,11 @@ namespace Fb2.Document.Models
             return $"{this.Name}{formattedAttributeString}";
         }
 
-        public override void Load(XNode node, bool trimWhitespaces = true)
+        public override void Load(XNode node, bool preserveWhitespace = false)
         {
             this.IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
 
-            base.Load(node, trimWhitespaces);
+            base.Load(node, preserveWhitespace);
         }
 
         private bool GetInline(string parentNodeName, XmlNodeType parentNodeType)

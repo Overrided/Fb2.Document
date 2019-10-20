@@ -8,9 +8,9 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.Code;
 
-        public override void Load(XNode node, bool trimWhitespaces = true)
+        public override void Load(XNode node, bool preserveWhitespace = false)
         {
-            base.Load(node, false);
+            base.Load(node, true);
         }
     }
 }

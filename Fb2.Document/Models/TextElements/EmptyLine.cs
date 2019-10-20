@@ -9,7 +9,7 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.EmptyLine;
 
-        public override void Load(XNode element, bool trimWhitespaces = true)
+        public override void Load(XNode element, bool preserveWhitespace = false)
         {
             this.Content = Environment.NewLine;
         }
