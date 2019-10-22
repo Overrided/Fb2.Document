@@ -29,7 +29,7 @@ namespace Fb2.Document.Models.Base
 
         /// <summary>
         /// Text node loading mechanism - formatting text and removal of unwanted characters
-        /// Note: original content of XNode is NOT preserved
+        /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
         /// </summary>
         /// <param name="node">Node to load as Fb2Element</param>
         public override void Load(XNode node, bool preserveWhitespace = false)

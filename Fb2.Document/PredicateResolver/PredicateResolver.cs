@@ -6,6 +6,7 @@ namespace Fb2.Document.Resolver
     internal class PredicateResolver
     {
         private static PredicateResolver instance = null;
+
         private PredicateResolver() { }
 
         public static PredicateResolver Instance
@@ -16,7 +17,6 @@ namespace Fb2.Document.Resolver
                     instance = new PredicateResolver();
 
                 return instance;
-
             }
         }
 
