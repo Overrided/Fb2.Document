@@ -52,7 +52,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base\BaseTest.cs" />
+    <Compile Include="Base\TestBase.cs" />
     <Compile Include="ModelsTests.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Fb2ElementFactoryTests.cs" />

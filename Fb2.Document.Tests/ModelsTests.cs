@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Fb2.Document.Tests
 {
     [TestClass]
-    public class ModelsTests : BaseTest
+    public class ModelsTests : TestBase
     {
         [TestMethod]
         public void Load_And_Parsing_Tests()

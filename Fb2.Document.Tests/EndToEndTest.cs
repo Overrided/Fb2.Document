@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Fb2.Document.Tests
 {
     [TestClass]
-    public class EndToEndTest : BaseTest
+    public class EndToEndTest : TestBase
     {
         string GeneratedFolderPath = null;
 

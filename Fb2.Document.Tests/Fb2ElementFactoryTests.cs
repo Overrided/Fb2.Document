@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Fb2.Document.Tests
 {
     [TestClass]
-    public class Fb2ElementFactoryTests : BaseTest
+    public class Fb2ElementFactoryTests : TestBase
     {
         [TestMethod]
         public void Check_Known_Nodes_Test()

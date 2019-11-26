@@ -8,7 +8,7 @@ using Fb2.Document.Tests.Common;
 
 namespace Fb2.Document.Tests.Base
 {
-    public class BaseTest
+    public class TestBase
     {
         private Utils utils = null;
 
