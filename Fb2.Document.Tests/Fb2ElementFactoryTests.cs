@@ -10,7 +10,7 @@ namespace Fb2.Document.Tests
     public class Fb2ElementFactoryTests : TestBase
     {
         [TestMethod]
-        public void Check_Known_Nodes_Test()
+        public void SmokeTest()
         {
             var names = new ElementNames();
 

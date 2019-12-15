@@ -8,9 +8,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Fb2.Document.Tests
 {
     [TestClass]
-    public class EndToEndTest : TestBase
+    public class IntegrationTests : TestBase
     {
-        string GeneratedFolderPath = null;
+        private string GeneratedFolderPath = null;
 
         [TestInitialize]
         public void SetUp()
@@ -26,72 +26,9 @@ namespace Fb2.Document.Tests
         }
 
         [TestMethod]
-        public void CreateSaveLoad()
+        public void CheckDocumentIntegrity()
         {
-            var document = Fb2Document.CreateDocument();
-
-            var description = new BookDescription();
-
-            #region Title Info
-
-            var titleInfo = new TitleInfo();
-
-            var genre = InstantiateAndLoad<BookGenre>("hardcore science fiction");
-
-            titleInfo.Content.Add(genre);
-
-            var author = new Author();
-
-            var firstName = InstantiateAndLoad<FirstName>("Denys");
-
-            var middleName = InstantiateAndLoad<MiddleName>("Over");
-
-            var lastName = InstantiateAndLoad<LastName>("Pukhkyi");
-
-            var nickName = InstantiateAndLoad<Nickname>("Overrided");
-
-            author.Content.Add(firstName);
-            author.Content.Add(middleName);
-            author.Content.Add(lastName);
-            author.Content.Add(nickName);
-
-            titleInfo.Content.Add(author);
-
-            var bookTitle = InstantiateAndLoad<BookTitle>("Test Book Title");
-
-            titleInfo.Content.Add(bookTitle);
-
-            #endregion
-
-            #region Publish info
-
-            var publishInfo = new PublishInfo();
-
-            var bookName = InstantiateAndLoad<BookName>("Test Book Name");
-
-            publishInfo.Content.Add(bookName);
-
-            #endregion
-
-            description.Content.Add(titleInfo);
-            description.Content.Add(publishInfo);
-
-            document.Book.Content.Add(description);
-
-            var body = new BookBody();
-
-            var bodyTitle = new Title();
-
-            var titleParagraph = GetParagraph();
-
-            bodyTitle.Content.Add(titleParagraph);
-
-            var contentParagraph = GetParagraph("test paragraph2 text ");
-
-            body.Content.Add(bodyTitle);
-            body.Content.Add(contentParagraph);
-
-            document.Book.Content.Add(body);
+            var document = GetFb2Document();
 
             var xDoc = document.ToXml();
             var gen1FilePath = Path.Combine(GeneratedFolderPath, "gen1.fb2"); // saving initial file
@@ -123,6 +60,97 @@ namespace Fb2.Document.Tests
             var gen2StringContent = File.ReadAllText(gen2FilePath);
 
             Assert.AreEqual(gen1StringContent, gen2StringContent);
+        }
+
+        private Fb2Document GetFb2Document()
+        {
+            var document = Fb2Document.CreateDocument();
+
+            var description = GetBookDescription();
+
+            document.Book.Content.Add(description);
+
+            var body = GetBookBody();
+
+            document.Book.Content.Add(body);
+
+            return document;
+        }
+
+        private BookDescription GetBookDescription()
+        {
+            var description = new BookDescription();
+
+            var titleInfo = GetTitleInfo();
+
+            var publishInfo = GetPublishInfo();
+
+            description.Content.Add(titleInfo);
+            description.Content.Add(publishInfo);
+
+            return description;
+        }
+
+        private TitleInfo GetTitleInfo()
+        {
+            var titleInfo = new TitleInfo();
+
+            var genre = InstantiateAndLoad<BookGenre>("hardcore science fiction");
+
+            titleInfo.Content.Add(genre);
+
+            var author = new Author();
+
+            var firstName = InstantiateAndLoad<FirstName>("Denys");
+
+            var middleName = InstantiateAndLoad<MiddleName>("Over");
+
+            var lastName = InstantiateAndLoad<LastName>("Pukhkyi");
+
+            var nickName = InstantiateAndLoad<Nickname>("Overrided");
+
+            author.Content.Add(firstName);
+            author.Content.Add(middleName);
+            author.Content.Add(lastName);
+            author.Content.Add(nickName);
+
+            titleInfo.Content.Add(author);
+
+            var bookTitle = InstantiateAndLoad<BookTitle>("Test Book Title");
+
+            titleInfo.Content.Add(bookTitle);
+
+            return titleInfo;
+        }
+
+        private PublishInfo GetPublishInfo()
+        {
+            var publishInfo = new PublishInfo();
+
+            var bookName = InstantiateAndLoad<BookName>("Test Book Name");
+
+            publishInfo.Content.Add(bookName);
+
+            return publishInfo;
+        }
+
+        private BookBody GetBookBody()
+        {
+            var body = new BookBody();
+
+            var bodyTitle = new Title();
+
+            var titleParagraph = GetParagraph();
+
+            bodyTitle.Content.Add(titleParagraph);
+
+            // TODO: fix. Must not contain paragraphs, but sections etc.
+            var contentParagraph = GetParagraph("test paragraph2 text ");
+
+            body.Content.Add(bodyTitle);
+            body.Content.Add(contentParagraph);
+
+            return body;
         }
 
         private Paragraph GetParagraph(string text = null)
