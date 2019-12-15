@@ -45,7 +45,7 @@ namespace Fb2.Document.Tests
                 Fb2Element_Load_Content_Test(modelType);
                 Fb2Element_Load_LinearizeMultilineContent_Test(modelType);
                 Fb2Element_Load_Attributes_Test(modelType);
-                Fb2Element_Load_SkipsInvalidNode_Test(modelType);
+                Fb2Element_Load_SkipsInvalidAttributes_Test(modelType);
                 Fb2Node_Load_InvalidNode_ThrowsException(modelType);
             }
         }
@@ -250,7 +250,7 @@ namespace Fb2.Document.Tests
             Assert.AreEqual(containerElement.ToString(), serialized.ToString());
         }
 
-        public void Fb2Element_Load_SkipsInvalidNode_Test(Type modelType)
+        public void Fb2Element_Load_SkipsInvalidAttributes_Test(Type modelType)
         {
             var container = Utils.Instantiate<Fb2Element>(modelType);
 
