@@ -2,7 +2,7 @@
 {
     public class ElementNames
     {
-        public const string FictionBook = "FictionBook";
+        public const string FictionBook = "fictionbook";
         public const string BinaryImage = "binary";
 
         #region Body Strings

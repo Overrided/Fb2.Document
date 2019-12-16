@@ -10,7 +10,7 @@ namespace Fb2.Document.Tests
     public class Fb2ElementFactoryTests : TestBase
     {
         [TestMethod]
-        public void Check_Known_Nodes_Test()
+        public void SmokeTest()
         {
             var names = new ElementNames();
 
@@ -25,8 +25,7 @@ namespace Fb2.Document.Tests
                 var node = Fb2ElementFactory.Instance.GetElementByNodeName(elemName);
 
                 Assert.IsNotNull(node);
-
-                node = null;
+                Assert.AreEqual(elemName, node.Name);
             }
         }
 
@@ -38,6 +37,25 @@ namespace Fb2.Document.Tests
             var node = Fb2ElementFactory.Instance.GetElementByNodeName(InvalidNodeName);
 
             Assert.IsNull(node);
+        }
+
+        [TestMethod]
+        public void CaseInvariantNodeName_ReturnsInstance()
+        {
+            var titleInfoCasedNodeName = "tItLe-iNFo";
+            var strikethroughCasedNodeName = "sTrIkEtHrOuGh";
+
+            Assert.IsFalse(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(titleInfoCasedNodeName));
+            Assert.IsFalse(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(strikethroughCasedNodeName));
+
+            var titleInfo = Fb2ElementFactory.Instance.GetElementByNodeName(titleInfoCasedNodeName);
+            var strikethrough = Fb2ElementFactory.Instance.GetElementByNodeName(strikethroughCasedNodeName);
+
+            Assert.IsNotNull(titleInfo);
+            Assert.IsNotNull(strikethrough);
+
+            Assert.AreEqual(titleInfo.Name, ElementNames.TitleInfo);
+            Assert.AreEqual(strikethrough.Name, ElementNames.Strikethrough);
         }
     }
 }

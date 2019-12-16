@@ -85,5 +85,34 @@ namespace Fb2.Document.Models.Base
 
             return element;
         }
+
+        public bool HasAttribute(string key, bool ignoreCase)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
+
+            if (this.Attributes == null || !this.Attributes.Any())
+                return false;
+
+            return this.Attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+        }
+
+        public KeyValuePair<string, string> GetAttribute(string key, bool ignoreCase)
+        {
+            if (!HasAttribute(key, ignoreCase))
+                return default;
+
+            var attribute = this.Attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+
+            return attribute;
+        }
+
+        public bool TryGetAttribute(string key, bool ignoreCase, out KeyValuePair<string, string> result)
+        {
+            var attribute = GetAttribute(key, ignoreCase);
+
+            result = attribute;
+            return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
+        }
     }
 }
