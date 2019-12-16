@@ -26,7 +26,6 @@ namespace Fb2.Document.Tests.ModelsTests
             {
                 Fb2Container_Load_Content_Test(modelType);
                 Fb2Container_Load_UnsafeContent_Test(modelType);
-                Fb2Container_Load_Attributes_Test(modelType);
                 Fb2Container_Load_SkipsInvalidNode_Test(modelType);
             }
         }
@@ -94,34 +93,6 @@ namespace Fb2.Document.Tests.ModelsTests
             {
                 // so nods are not skipped, but marked as unsafe
                 Assert.IsTrue(child.Unsafe);
-            }
-
-            var serialized = container.ToXml();
-
-            Assert.AreEqual(containerElement.ToString(), serialized.ToString());
-        }
-
-        public void Fb2Container_Load_Attributes_Test(Type modelType)
-        {
-            var container = Utils.Instantiate<Fb2Container>(modelType);
-
-            var containerElement = GetXElementWithAttributes(container);
-
-            container.Load(containerElement);
-
-            Assert.AreEqual(container.Content.Count, 0);
-
-            if (container.AllowedAttributes == null || !container.AllowedAttributes.Any())
-                Assert.IsNull(container.Attributes);
-            else
-            {
-                Assert.AreEqual(container.Attributes.Count, container.AllowedAttributes.Count);
-
-                foreach (var attr in container.Attributes)
-                {
-                    Assert.IsTrue(container.AllowedAttributes.Contains(attr.Key));
-                    Assert.AreEqual($"{attr.Key} test value", attr.Value);
-                }
             }
 
             var serialized = container.ToXml();

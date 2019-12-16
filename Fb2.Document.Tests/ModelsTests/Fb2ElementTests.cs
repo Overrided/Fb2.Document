@@ -27,7 +27,6 @@ namespace Fb2.Document.Tests.ModelsTests
             {
                 Fb2Element_Load_Content_Test(modelType);
                 Fb2Element_Load_LinearizeMultilineContent_Test(modelType);
-                Fb2Element_Load_Attributes_Test(modelType);
             }
         }
 
@@ -66,37 +65,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 Assert.AreEqual(Environment.NewLine, container.Content);
             else
                 Assert.AreEqual(" row 1 row 2 row 3 ", container.Content);
-        }
-
-        public void Fb2Element_Load_Attributes_Test(Type modelType)
-        {
-            var container = Utils.Instantiate<Fb2Element>(modelType);
-
-            var containerElement = GetXElementWithAttributes(container);
-
-            container.Load(containerElement);
-
-            if (container.Name == ElementNames.EmptyLine)
-                Assert.AreEqual(Environment.NewLine, container.Content);
-            else
-                Assert.AreEqual(string.Empty, container.Content);
-
-            if (container.AllowedAttributes == null || !container.AllowedAttributes.Any())
-                Assert.IsNull(container.Attributes);
-            else
-            {
-                Assert.AreEqual(container.Attributes.Count, container.AllowedAttributes.Count);
-
-                foreach (var attr in container.Attributes)
-                {
-                    Assert.IsTrue(container.AllowedAttributes.Contains(attr.Key));
-                    Assert.AreEqual($"{attr.Key} test value", attr.Value);
-                }
-            }
-
-            var serialized = container.ToXml();
-
-            Assert.AreEqual(containerElement.ToString(), serialized.ToString());
         }
     }
 }

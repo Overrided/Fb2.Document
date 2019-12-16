@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
+using Fb2.Document.Extensions;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
@@ -11,6 +12,7 @@ namespace Fb2.Document.Models
 
         public override void Load(XNode element, bool preserveWhitespace = false)
         {
+            element.Validate(this.Name);
             this.Content = Environment.NewLine;
         }
     }

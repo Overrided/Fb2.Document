@@ -88,28 +88,31 @@ namespace Fb2.Document.Models.Base
 
         public bool HasAttribute(string key, bool ignoreCase)
         {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
+
             if (this.Attributes == null || !this.Attributes.Any())
                 return false;
 
             return this.Attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
         }
 
-        public string GetAttributeValue(string key, bool ignoreCase)
+        public KeyValuePair<string, string> GetAttribute(string key, bool ignoreCase)
         {
             if (!HasAttribute(key, ignoreCase))
-                return null;
+                return default;
 
             var attribute = this.Attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
 
-            return attribute.Value;
+            return attribute;
         }
 
-        public bool TryGetAttributeValue(string key, bool ignoreCase, out string result)
+        public bool TryGetAttribute(string key, bool ignoreCase, out KeyValuePair<string, string> result)
         {
-            var attributeValue = GetAttributeValue(key, ignoreCase);
+            var attribute = GetAttribute(key, ignoreCase);
 
-            result = attributeValue;
-            return !string.IsNullOrWhiteSpace(attributeValue);
+            result = attribute;
+            return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
         }
     }
 }
