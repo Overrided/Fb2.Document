@@ -44,18 +44,16 @@ namespace Fb2.Document.Models
             var attributeOrDefault =
                 Attributes != null &&
                 Attributes.Any() &&
-                Attributes.ContainsKey(AttributeNames.XHref) ?
-                    this.Attributes[AttributeNames.XHref] :
-                    string.Empty;
+                Attributes.ContainsKey(AttributeNames.XHref) ? Attributes[AttributeNames.XHref] : string.Empty;
 
             var formattedAttributeString = string.IsNullOrWhiteSpace(attributeOrDefault) ? string.Empty : " " + attributeOrDefault;
 
-            return $"{this.Name}{formattedAttributeString}";
+            return $"{Name}{formattedAttributeString}";
         }
 
         public override void Load(XNode node, bool preserveWhitespace = false)
         {
-            this.IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
+            IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
 
             base.Load(node, preserveWhitespace);
         }

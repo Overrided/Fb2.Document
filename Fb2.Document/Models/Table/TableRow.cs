@@ -24,7 +24,7 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            return string.Join(" ", this.Content.Select(cell => $"{cell}  |"));
+            return string.Join(" ", Content.Select(cell => $"{cell}  |"));
         }
     }
 }

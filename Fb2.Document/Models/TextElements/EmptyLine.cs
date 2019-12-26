@@ -12,8 +12,8 @@ namespace Fb2.Document.Models
 
         public override void Load(XNode element, bool preserveWhitespace = false)
         {
-            element.Validate(this.Name);
-            this.Content = Environment.NewLine;
+            element.Validate(Name);
+            Content = Environment.NewLine;
         }
     }
 }

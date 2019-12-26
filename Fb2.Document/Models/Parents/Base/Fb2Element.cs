@@ -39,9 +39,9 @@ namespace Fb2.Document.Models.Base
             var rawContent = node.GetNodeContent();
 
             if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
-                this.Content = trimWhitespace.Replace(rawContent, " ");
+                Content = trimWhitespace.Replace(rawContent, " ");
             else
-                this.Content = rawContent;
+                Content = rawContent;
         }
 
         /// <summary>

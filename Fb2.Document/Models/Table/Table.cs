@@ -24,7 +24,7 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            if (this.Content == null || !this.Content.Any())
+            if (Content == null || !Content.Any())
                 return string.Empty;
 
             var table = GetTableCellContent();
@@ -56,9 +56,8 @@ namespace Fb2.Document.Models
 
         private string[][] GetTableCellContent()
         {
-            return this.Content.Select(row => (row as Fb2Container)
-                                    .Content.Select(cell => cell.ToString() ?? string.Empty).ToArray())
-                            .ToArray();
+            return Content.Select(row => (row as Fb2Container).Content
+                          .Select(cell => cell.ToString() ?? string.Empty).ToArray()).ToArray();
         }
 
         private IEnumerable<string> ProcessColumn(IEnumerable<string> column)
