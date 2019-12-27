@@ -18,7 +18,9 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
     * [Loading file as a stream](#Loading-file-as-a-stream)
     * [Loading file as a stream asynchronously](#Loading-file-as-a-stream-asynchronously)
     * [Loading particular node](#Loading-particular-node)
-    * [Querying the model](#Querying-the-model)
+    * [Querying](#Querying-the-model)
+        * [Content Api](#Content-api)
+        * [Attributes Api](#Attributes-api)
     * [Encoding safety](#Encoding-safety)
 
 * [API](#API)
@@ -139,24 +141,89 @@ Paragraph paragraph = new Paragraph();
 paragraph.Load(node);
 ```
 
-### Querying the model
+### Querying
+
+All descendants of `Fb2Node` class has certain interface to access and query parsed data.
+
+`Fb2Container`'s descendants provides node content querying interface.
+
+Since `1.1.0` version of a library `Fb2Node` base class provides additional `Attributes` access methods, allowing more complex and precise querying.
+
+#### Content Api
 
 For instance, you want to find all `<stanza>` elements in whole book.
-There are few ways to do that:
+There's more than one way to skin a cat:
 
-`var result = fb2Document.Book.GetDescendants("stanza");`
+```
+var result = fb2Document.Book.GetDescendants("stanza");
+```
 
 or utilizing node name used by library:
 
-`var result = fb2Document.Book.GetDescendants(ElementNames.Stanza);`
+```
+var result = fb2Document.Book.GetDescendants(ElementNames.Stanza);
+```
 
 Also you can query by specifying exact type of descendant node you are looking for:
 
-`var result = fb2Document.Book.GetDescendants<Stanza>();`
+```
+var result = fb2Document.Book.GetDescendants<Stanza>();
+```
 
 For full list of properties for accessing document structural parts see [Fb2Document.Properties](#Fb2Document-Properties).
 
-For full list of methods for querying the model, see [Fb2Container.Methods](#Fb2Container-Methods).
+For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
+
+#### Attributes Api
+
+New Api added in version `1.1.0` allows to query node's `Attributes` in different ways.
+
+Let's say you need to check all `id` attributes in a book.
+
+```
+var elementsWithIds = fb2Document.Book.GetDescendants<Fb2Node>()
+                                 .Where(node => node.HasAttribute(AttributeNames.Id));
+```
+This will result in all elements with `id` attribute.
+
+```
+var allIds = elementsWithIds.Select(node => node.GetAttribute(AttributeNames.Id).Value).ToList();
+```
+Will get you clean list of all values of `id`'s in `List<string>` form.
+
+Sometimes you can bump into a book, which used cased attribute names, e.g. `Id`, `Name` etc. Examples above will fail due to case-sensitive comparison.
+
+To avoid case-sensitivity issues, pass second parameter, `ignoreCase` (which is optional and `false` by default), as `true`:
+
+```
+var elementsIgnoreCaseWithIds = fb2Document.Book.GetDescendants<Fb2Node>()
+                                 .Where(node => node.HasAttribute(AttributeNames.Id, true));
+```
+This will result in all elements with `id`/`Id`/`iD` attribute.
+
+```
+var allIgnoreCaseIds = elementsIgnoreCaseWithIds.Select(node => node.GetAttribute(AttributeNames.Id, true).Value).ToList();
+```
+Will get you clean list of all values of `id`/`Id`/`iD`'s in `List<string>` form.
+
+> Attention!
+>
+> If node has 2 attributes and only difference in keys is casing e.g. `id`/`Id` - first matching attribute is returned, rest of matches are ignored.
+
+But what if you need to parse value of a particular attribute into `int` or, let's say, `enum`?
+
+Library has `TryGetAttribute` method, which allows next approach:
+
+```
+if (cell.TryGetAttributeValue(AttributeNames.Align, true, out string align) &&
+    Enum.TryParse<TextAlignment>(align, true, out var textAlignment))
+{
+    // do some work...
+}
+```
+As one might see, given call ignores case and checks if received value can be used as `TextAlignment`.
+
+For more details on methods for querying the model's attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
 
 ### Encoding safety
 
@@ -206,13 +273,13 @@ It defines basic interface of a node. Some of descendant classes may override gi
 
 ### Fb2Node Methods
 
-|   Method name   |                    Arguments                   |            Returns            | Description                                                                                                                                                                                                                |
-|:---------------:|:----------------------------------------------:|:-----------------------------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|       Load      |                      XNode                     |              void             | Performs basic steps - validation of given `XNode` instance and reading attributes of element, if any.                                                                                                                     |
-|      ToXml      |                                                |            XElement           | Performs basic serialization of node into `fb2`/`xml` format. Creates `XElement` and writes attributes into, if any.                                                                                                           |
-|   HasAttribute  |                  string,&nbsp;bool                  |              bool             | Checks if node has attribute(s) with given key. Set `ignoreCase` param to `true` to ignore case; `false` to consider case in `key` comparison. If `key` argument is null or empty string, ArgumentNullException is thrown. |
-|   GetAttribute  |                  string,&nbsp;bool                  | KeyValuePair\<string,&nbsp;string> | Returns the first element of `Attributes` list that matches given key or a `default` value if no such element is found.                                                                                                      |
-| TryGetAttribute | string,&nbsp;bool, out&nbsp;KeyValuePair<string,&nbsp;string> |              bool             | Returns true if attribute found by given key, otherwise false. If none attribute found, result contains `default` value of `KeyValuePair<string, string>` instead of actual attribute.                                   |
+|   Method name   |                    Arguments                   |            Returns            | Description                                                                                                                                                                                                                                                                                                                                             |
+|:---------------:|:----------------------------------------------:|:-----------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|       Load      |                      XNode                     |              void             | Performs basic steps - validation of given `XNode` instance and reading attributes of element, if any.                                                                                                                                                                                                                                                  |
+|      ToXml      |                                                |            XElement           | Performs basic serialization of node into `fb2`/`xml` format. Creates `XElement` and writes attributes into, if any.                                                                                                                                                                                                                                    |
+|   HasAttribute  |                  string,&nbsp;bool                  |              bool             | Introduced in `v1.1.0`. <br>Checks if node has attribute(s) with given key. <br>`bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search. <br> If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                                        |
+|   GetAttribute  |                  string,&nbsp;bool                  | KeyValuePair\<string,&nbsp;string> | Introduced in `v1.1.0`. <br>Returns the first element of `Attributes` list that matches given key or a `default` value if no such element is found. <br> `bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown. |
+| TryGetAttribute | string,&nbsp;bool, out,&nbsp;KeyValuePair<string,&nbsp;string> |              bool             | Introduced in `v1.1.0`. <br>Returns true if attribute found by given key, otherwise `false`. <br>If none attribute found, result contains `default` value of `KeyValuePair<string, string>` instead of actual attribute.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                     |
 
 ### Fb2Node Properties
 
