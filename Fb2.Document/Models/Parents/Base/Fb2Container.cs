@@ -66,9 +66,9 @@ namespace Fb2.Document.Models.Base
                 var elem = Fb2ElementFactory.Instance.GetElementByNodeName(localName);
                 elem.Load(validNode, preserveWhitespace);
 
-                elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !this.CanContainText : !AllowedElements.Contains(localName);
+                elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
 
-                this.Content.Add(elem);
+                Content.Add(elem);
             }
         }
 
@@ -79,9 +79,9 @@ namespace Fb2.Document.Models.Base
 
             StringBuilder sb = new StringBuilder();
 
-            for (int i = 0; i < this.Content.Count; i++)
+            for (int i = 0; i < Content.Count; i++)
             {
-                var child = this.Content[i];
+                var child = Content[i];
                 var childContent = child.ToString();
 
                 sb.Append(child.IsInline ?

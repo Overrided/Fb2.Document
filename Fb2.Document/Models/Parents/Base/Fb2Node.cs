@@ -46,27 +46,26 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException($"{nameof(node)} is null!");
 
-            node.Validate(this.Name);
+            node.Validate(Name);
 
-            if (this.AllowedAttributes == null || !this.AllowedAttributes.Any())
+            if (AllowedAttributes == null || !AllowedAttributes.Any())
                 return;
 
             if (!node.GetAllAttributesOrDefault(out Dictionary<string, string> actualAttributes))
                 return;
 
             var filteredAttributes = actualAttributes
-                .Where(kvp => this.AllowedAttributes
-                                  .Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase));
+                .Where(kvp => AllowedAttributes.Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase));
 
             if (!filteredAttributes.Any())
                 return;
 
-            if (this.Attributes == null)
-                this.Attributes = new Dictionary<string, string>();
+            if (Attributes == null)
+                Attributes = new Dictionary<string, string>();
 
             foreach (var kvp in filteredAttributes)
             {
-                this.Attributes.Add(kvp.Key, kvp.Value);
+                Attributes.Add(kvp.Key, kvp.Value);
             }
         }
 
@@ -84,6 +83,57 @@ namespace Fb2.Document.Models.Base
                 element = new XElement(Name);
 
             return element;
+        }
+
+        /// <summary>
+        /// Checks if node has attribute(s) with given key
+        /// </summary>
+        /// <param name="key">Key to search attribute by</param>
+        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
+        /// <returns>True if attribute found, otherwise false</returns>
+        public bool HasAttribute(string key, bool ignoreCase = false)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
+
+            if (Attributes == null || !Attributes.Any())
+                return false;
+
+            return Attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+        }
+
+        /// <summary>
+        /// Returns the first element of Attributes list that matches given key or a default value if no such element is found.
+        /// </summary>
+        /// <param name="key">Key to search attribute by</param>
+        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
+        /// <returns>
+        /// Returns the first element of Attributes list that matches given key or a default value if no such element is found.
+        /// </returns>
+        public KeyValuePair<string, string> GetAttribute(string key, bool ignoreCase = false)
+        {
+            if (!HasAttribute(key, ignoreCase))
+                return default;
+
+            var attribute = Attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+
+            return attribute;
+        }
+
+        /// <summary>
+        /// Returns true if attribute found by given key, otherwise false.
+        /// If none attribute found, result contains default value.
+        /// </summary>
+        /// <param name="key">Key to search attribute by</param>
+        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
+        /// <param name="result">Attribute value if any found, otherwise default. </param>
+        /// <returns>True if attribute found by given key, otherwise false</returns>
+        public bool TryGetAttribute(string key, bool ignoreCase, out KeyValuePair<string, string> result)
+        {
+            var attribute = GetAttribute(key, ignoreCase);
+
+            result = attribute;
+            return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
         }
     }
 }

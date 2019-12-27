@@ -11,7 +11,7 @@
     <PackageLicenseUrl></PackageLicenseUrl>
     <Copyright>2019 Denys Pukhkyi</Copyright>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.2</Version>
+    <Version>1.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Fb2.Document</PackageId>
     <PackageLicenseFile>License.md</PackageLicenseFile>
