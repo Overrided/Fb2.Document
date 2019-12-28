@@ -18,9 +18,9 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
     * [Loading file as a stream](#Loading-file-as-a-stream)
     * [Loading file as a stream asynchronously](#Loading-file-as-a-stream-asynchronously)
     * [Loading particular node](#Loading-particular-node)
-    * [Querying](#Querying-the-model)
-        * [Content Api](#Content-api)
-        * [Attributes Api](#Attributes-api)
+    * [Querying](#Querying)
+        * [Content API](#Content-api)
+        * [Attributes API](#Attributes-api)
     * [Encoding safety](#Encoding-safety)
 
 * [API](#API)
@@ -149,7 +149,7 @@ All descendants of `Fb2Node` class has certain interface to access and query par
 
 Since `1.1.0` version of a library `Fb2Node` base class provides additional `Attributes` access methods, allowing more complex and precise querying.
 
-#### Content Api
+#### Content API
 
 For instance, you want to find all `<stanza>` elements in whole book.
 There's more than one way to skin a cat:
@@ -174,7 +174,7 @@ For full list of properties for accessing document structural parts see [Fb2Docu
 
 For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
 
-#### Attributes Api
+#### Attributes API
 
 New Api added in version `1.1.0` allows to query node's `Attributes` in different ways.
 
@@ -229,7 +229,7 @@ For more details on methods for querying the model's attributes, see [Fb2Node.Me
 
 If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
 
-If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding determination fails, .Net `Encoding.Default` is used.
+If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
 
 ## API
 
@@ -245,7 +245,7 @@ If method is encoding-safe - during loading process library will try to determin
 |  LoadAsync  |   Stream  |    Task   | Loads `Fb2Document` from a stream asynchronously. Encoding safe.       |
 |    ToXml    |           | XDocument | Serializes loaded book back to `XDocument`.                            |
 | ToXmlString |           |   string  | Serializes loaded book to `xml` string.                                |
-| CreateDocument |        |  Fb2Document | Static method. Introduced in v1.0.1 of `Fb2.Document` package. Return new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `true`.|
+| CreateDocument |        |  Fb2Document | Static method. Introduced in `v1.0.1` of `Fb2.Document` package. Returns new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `true`.|
 
 ### Fb2Document Properties
 
