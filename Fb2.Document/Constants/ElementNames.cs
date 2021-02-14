@@ -65,7 +65,7 @@
         public const string EmptyLine = "empty-line";
         public const string Epigraph = "epigraph";
         public const string Quote = "cite";
-        public const string TextAutor = "text-author";
+        public const string TextAuthor = "text-author";
         public const string Stanza = "stanza";
         public const string StanzaV = "v";
 

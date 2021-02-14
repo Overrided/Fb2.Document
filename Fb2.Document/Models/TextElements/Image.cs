@@ -29,7 +29,7 @@ namespace Fb2.Document.Models
             ElementNames.SubTitle,
             ElementNames.TableHeader,
             ElementNames.TableCell,
-            ElementNames.TextAutor
+            ElementNames.TextAuthor
         };
 
         private HashSet<string> NotInlineParentNodes => new HashSet<string>

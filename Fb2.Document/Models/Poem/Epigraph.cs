@@ -18,7 +18,7 @@ namespace Fb2.Document.Models
             ElementNames.Poem,
             ElementNames.Quote,
             ElementNames.EmptyLine,
-            ElementNames.TextAutor
+            ElementNames.TextAuthor
         };
     }
 }

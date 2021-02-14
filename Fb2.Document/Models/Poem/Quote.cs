@@ -23,7 +23,7 @@ namespace Fb2.Document.Models
             ElementNames.EmptyLine,
             ElementNames.Poem,
             ElementNames.Table,
-            ElementNames.TextAutor
+            ElementNames.TextAuthor
         };
     }
 }
