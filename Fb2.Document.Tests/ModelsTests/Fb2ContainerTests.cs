@@ -53,17 +53,11 @@ namespace Fb2.Document.Tests.ModelsTests
                 if (Utils.OverridesToString(child))
                     continue;
                 else if (child.Name == ElementNames.EmptyLine)
-                {
                     Assert.AreEqual(Environment.NewLine, child.ToString());
-                }
                 else if (child.Name == ElementNames.FictionText)
-                {
                     Assert.AreEqual($"test text", child.ToString());
-                }
                 else
-                {
                     Assert.AreEqual($"test {child.Name} text", child.ToString());
-                }
             }
 
             if (!container.CanContainText)

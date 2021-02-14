@@ -20,24 +20,20 @@ namespace Fb2.Document.Resolver
             }
         }
 
-        private Func<Fb2Node, bool> GetAbstractClassStrategy(Type targetType)
-        {
-            return element => element.GetType().IsSubclassOf(targetType);
-        }
+        private Func<Fb2Node, bool> GetAbstractClassPredicate(Type targetType)
+            => element => element.GetType().IsSubclassOf(targetType);
 
-        private Func<Fb2Node, bool> GetClassStrategy(Type targetType)
-        {
-            return element => element.GetType().Equals(targetType);
-        }
+        private Func<Fb2Node, bool> GetClassPredicate(Type targetType)
+            => element => element.GetType().Equals(targetType);
 
-        public Func<Fb2Node, bool> GetPredicateStrategy<T>() where T : Fb2Node
+        public Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
         {
             var targetType = typeof(T);
 
             if (targetType.IsAbstract)
-                return GetAbstractClassStrategy(targetType);
+                return GetAbstractClassPredicate(targetType);
 
-            return GetClassStrategy(targetType);
+            return GetClassPredicate(targetType);
         }
     }
 }

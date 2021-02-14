@@ -16,6 +16,8 @@ namespace Fb2.Document
     /// </summary>
     public sealed class Fb2Document
     {
+        private const string defaultXmlVersion = "1.0";
+
         private BookDescription description = null;
         private TitleInfo title = null;
         private SrcTitleInfo sourceTitle = null;
@@ -25,7 +27,7 @@ namespace Fb2.Document
         private IEnumerable<BookBody> bodies = null;
         private IEnumerable<BinaryImage> binaryImages = null;
 
-        private XDeclaration DefaultDeclaration = new XDeclaration("1.0", "utf-8", null);
+        private XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
 
         public FictionBook Book { get; private set; }
 

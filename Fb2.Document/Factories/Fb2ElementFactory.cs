@@ -63,7 +63,7 @@ namespace Fb2.Document.Factories
                     { ElementNames.EmptyLine, typeof(EmptyLine) },
                     { ElementNames.Epigraph, typeof(Epigraph) },
                     { ElementNames.Quote, typeof(Quote) },
-                    { ElementNames.TextAuthor, typeof(TextAutor) },
+                    { ElementNames.TextAuthor, typeof(TextAuthor) },
                     { ElementNames.Stanza, typeof(Stanza) },
                     { ElementNames.StanzaV, typeof(StanzaVerse) },
 

@@ -172,6 +172,13 @@ namespace Fb2.Document.Models.Base
             return null;
         }
 
+        public bool TryGetFirstDescendant(string name, out Fb2Node node)
+        {
+            var firstDescendant = GetFirstDescendant(name);
+            node = firstDescendant;
+            return firstDescendant != null;
+        }
+
         public IEnumerable<T> GetChildren<T>() where T : Fb2Node
         {
             if (Content == null || !Content.Any())
@@ -179,7 +186,7 @@ namespace Fb2.Document.Models.Base
 
             IEnumerable<Fb2Node> result = null;
 
-            var predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+            var predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             result = Content.Where(predicate);
 
@@ -196,7 +203,7 @@ namespace Fb2.Document.Models.Base
 
             Fb2Node result = null;
 
-            var predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+            var predicate = PredicateResolver.Instance.GetPredicate<T>();
             result = Content.FirstOrDefault(predicate);
 
             if (result == null)
@@ -205,21 +212,22 @@ namespace Fb2.Document.Models.Base
             return result as T;
         }
 
-        public List<T> GetDescendants<T>() where T : Fb2Node
-        {
-            return GetDescendantsInternal<T>(null).ToList();
-        }
+        public List<T> GetDescendants<T>() where T : Fb2Node => GetDescendantsInternal<T>().ToList();
 
-        public T GetFirstDescendant<T>() where T : Fb2Node
+        public T GetFirstDescendant<T>() where T : Fb2Node => GetFirstDescendantInternal<T>();
+
+        public bool TryGetFirstDescendant<T>(out T node) where T : Fb2Node
         {
-            return GetFirstDescendantInternal<T>(null);
+            var result = GetFirstDescendantInternal<T>();
+            node = result;
+            return result != null;
         }
 
         #endregion
 
         #region Private Methods
 
-        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate)
+        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
             if (Content == null || !Content.Any())
@@ -228,17 +236,16 @@ namespace Fb2.Document.Models.Base
             List<Fb2Node> result = new List<Fb2Node>();
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+                predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             foreach (var element in Content)
             {
                 if (predicate(element))
                     result.Add(element);
 
-                if (element is Fb2Container)
+                if (element is Fb2Container containerElement)
                 {
-                    var desc = ((Fb2Container)element).GetDescendantsInternal<T>(predicate);
-
+                    var desc = containerElement.GetDescendantsInternal<T>(predicate);
                     if (desc != null && desc.Any())
                         result.AddRange(desc);
                 }
@@ -247,23 +254,23 @@ namespace Fb2.Document.Models.Base
             return result.Cast<T>();
         }
 
-        private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate)
+        private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
             if (Content == null || !Content.Any())
                 return null;
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+                predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             foreach (var element in Content)
             {
                 if (predicate(element))
                     return (T)element;
 
-                if (element is Fb2Container)
+                if (element is Fb2Container containerElement)
                 {
-                    var desc = ((Fb2Container)element).GetFirstDescendantInternal<T>(predicate);
+                    var desc = containerElement.GetFirstDescendantInternal<T>(predicate);
                     if (desc != null)
                         return desc;
                 }

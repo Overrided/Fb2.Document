@@ -64,9 +64,7 @@ namespace Fb2.Document.Models.Base
                 Attributes = new Dictionary<string, string>();
 
             foreach (var kvp in filteredAttributes)
-            {
                 Attributes.Add(kvp.Key, kvp.Value);
-            }
         }
 
         /// <summary>
