@@ -32,6 +32,7 @@ namespace Fb2.Document.Models.Base
         /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
         /// </summary>
         /// <param name="node">Node to load as Fb2Element</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
         public override void Load(XNode node, bool preserveWhitespace = false)
         {
             base.Load(node, preserveWhitespace);
