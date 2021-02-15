@@ -24,8 +24,8 @@ namespace Fb2.Document
         private DocumentInfo documentInfo = null;
         private PublishInfo publishInfo = null;
         private CustomInfo customInfo = null;
-        private IEnumerable<BookBody> bodies = null;
-        private IEnumerable<BinaryImage> binaryImages = null;
+        private List<BookBody> bodies = null;
+        private List<BinaryImage> binaryImages = null;
 
         private XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
 
@@ -116,7 +116,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets list of BookBody elements from FictionBook.
         /// </summary>
-        public IEnumerable<BookBody> Bodies
+        public List<BookBody> Bodies
         {
             get
             {
@@ -130,7 +130,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets list of BinaryImages elements from FictionBook.
         /// </summary>
-        public IEnumerable<BinaryImage> BinaryImages
+        public List<BinaryImage> BinaryImages
         {
             get
             {
@@ -146,6 +146,10 @@ namespace Fb2.Document
         /// </summary>
         public bool IsLoaded { get; private set; } = false;
 
+        /// <summary>
+        /// Creates Fb2Document with empty FictionBook, with `IsLoaded` set to `true`.
+        /// </summary>
+        /// <returns>New instance of Fb2Document with empty FictionBook. </returns>
         public static Fb2Document CreateDocument()
         {
             var document = new Fb2Document();
