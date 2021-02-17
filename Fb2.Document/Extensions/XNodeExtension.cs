@@ -37,27 +37,6 @@ namespace Fb2.Document.Extensions
             }
         }
 
-        //public static string GetNodeContent(this XNode node)
-        //{
-        //    return node.NodeType switch
-        //    {
-        //        XmlNodeType.Element => ((XElement)node).Value,
-        //        XmlNodeType.Text => ((XText)node).Value,
-        //        _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-        //    };
-
-        //    //var rawContent = string.Empty;
-
-        //    //if (node.NodeType == XmlNodeType.Element)
-        //    //    rawContent = ((XElement)node).Value;
-        //    //else if (node.NodeType == XmlNodeType.Text)
-        //    //    rawContent = ((XText)node).Value;
-        //    //else
-        //    //    throw new ArgumentOutOfRangeException($"Unsupported nodeType: {node.NodeType}");
-
-        //    //return rawContent;
-        //}
-
         public static string GetNodeContent(this XNode node)
             => node.NodeType switch
             {
