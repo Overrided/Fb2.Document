@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
-using Fb2.Document.Extensions;
 using Fb2.Document.Models;
 
 namespace Fb2.Document
@@ -28,6 +28,13 @@ namespace Fb2.Document
         private List<BinaryImage> binaryImages = null;
 
         private XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
+        private XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
+        {
+            Async = true,
+            CheckCharacters = true,
+            IgnoreWhitespace = true,
+            ConformanceLevel = ConformanceLevel.Document
+        };
 
         public FictionBook Book { get; private set; }
 
@@ -201,16 +208,9 @@ namespace Fb2.Document
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException("Can`t read file content : CanRead is false");
+                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
 
-            Encoding encoding = null;
-            using (var encodingClone = fileContent.Clone())
-            {
-                encoding = encodingClone.GetXmlEncodingOrDefault(Encoding.Default);
-            }
-
-            var contentCopy = fileContent.Clone();
-            using (var reader = new StreamReader(contentCopy, encoding, true))
+            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
                 var document = XDocument.Load(reader);
                 Load(document.Root);
@@ -232,17 +232,9 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
 
-            Encoding encoding = null;
-            using (var encodingClone = await fileContent.CloneAsync())
+            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
-                encoding = encodingClone.GetXmlEncodingOrDefault(Encoding.Default);
-            }
-
-            var contentCopy = await fileContent.CloneAsync();
-            using (var reader = new StreamReader(contentCopy, encoding, true))
-            {
-                var content = await reader.ReadToEndAsync();
-                var document = XDocument.Parse(content);
+                var document = await XDocument.LoadAsync(reader, LoadOptions.None, default);
 
                 Load(document.Root);
             }
