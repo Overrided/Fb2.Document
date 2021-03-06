@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -45,7 +46,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Node to load as Fb2Container</param>
         /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`</param>
-        public override void Load(XNode node, bool preserveWhitespace = false)
+        public override void Load([In] XNode node, bool preserveWhitespace = false)
         {
             base.Load(node, preserveWhitespace);
 

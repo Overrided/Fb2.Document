@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Extensions;
 
@@ -41,7 +42,7 @@ namespace Fb2.Document.Models.Base
         /// Basic Load of element - validation and populating Attributes
         /// </summary>
         /// <param name="node">XNode to load as Fb2Node</param>
-        public virtual void Load(XNode node, bool preserveWhitespace = false)
+        public virtual void Load([In] XNode node, bool preserveWhitespace = false)
         {
             if (node == null)
                 throw new ArgumentNullException($"{nameof(node)} is null!");

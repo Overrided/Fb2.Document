@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -33,7 +34,8 @@ namespace Fb2.Document
             Async = true,
             CheckCharacters = true,
             IgnoreWhitespace = true,
-            ConformanceLevel = ConformanceLevel.Document
+            ConformanceLevel = ConformanceLevel.Document,
+            CloseInput = true
         };
 
         public FictionBook Book { get; private set; }
@@ -172,7 +174,7 @@ namespace Fb2.Document
         /// <param name="document">Content of a file read as xml</param>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of XDocument received.
-        public void Load(XDocument document)
+        public void Load([In] XDocument document)
         {
             if (document == null)
                 throw new ArgumentNullException("Document is null");
@@ -186,7 +188,7 @@ namespace Fb2.Document
         /// <param name="document">Content of a file read as string</param>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of string received.
-        public void Load(string fileContent)
+        public void Load([In] string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
                 throw new ArgumentNullException($"{nameof(fileContent)} is null");
@@ -202,7 +204,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public void Load(Stream fileContent)
+        public void Load([In] Stream fileContent)
         {
             if (fileContent == null)
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
@@ -224,7 +226,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public async Task LoadAsync(Stream fileContent)
+        public async Task LoadAsync([In] Stream fileContent)
         {
             if (fileContent == null)
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
@@ -235,7 +237,6 @@ namespace Fb2.Document
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
                 var document = await XDocument.LoadAsync(reader, LoadOptions.None, default);
-
                 Load(document.Root);
             }
         }
@@ -263,7 +264,7 @@ namespace Fb2.Document
                 document.ToString());
         }
 
-        private void Load(XElement root)
+        private void Load([In] XElement root)
         {
             if (root == null)
                 throw new ArgumentNullException("Root element is null");
