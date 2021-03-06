@@ -177,7 +177,7 @@ namespace Fb2.Document
         public void Load([In] XDocument document)
         {
             if (document == null)
-                throw new ArgumentNullException("Document is null");
+                throw new ArgumentNullException($"{nameof(document)} is null");
 
             Load(document.Root);
         }
@@ -210,7 +210,7 @@ namespace Fb2.Document
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
+                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
@@ -232,7 +232,7 @@ namespace Fb2.Document
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
+                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
@@ -244,9 +244,15 @@ namespace Fb2.Document
         /// <summary>
         /// Generates XDocument using previously loaded FictionBook
         /// </summary>
-        /// <returns>XDocument instance formatted accordingly to fb2 rules</returns>
+        /// <returns>
+        /// XDocument instance formatted accordingly to fb2 rules. 
+        /// Returns null if <see cref="Book"/> is null or <see cref="IsLoaded"/> is <see langword="false"/>
+        /// </returns>
         public XDocument ToXml()
         {
+            if (Book == null || !IsLoaded)
+                return null;
+
             var xmlRoot = Book.ToXml();
             var xmlDoc = new XDocument(DefaultDeclaration, xmlRoot);
             return xmlDoc;
@@ -259,15 +265,17 @@ namespace Fb2.Document
         public string ToXmlString()
         {
             var document = ToXml();
-            return string.Join(Environment.NewLine,
-                document.Declaration ?? DefaultDeclaration,
-                document.ToString());
+
+            if (document == null)
+                return null;
+
+            return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
         }
 
         private void Load([In] XElement root)
         {
             if (root == null)
-                throw new ArgumentNullException("Root element is null");
+                throw new ArgumentNullException($"{nameof(root)} element is null");
 
             Book = new FictionBook();
             Book.Load(root);
