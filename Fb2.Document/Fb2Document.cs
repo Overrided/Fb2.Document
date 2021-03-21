@@ -28,8 +28,8 @@ namespace Fb2.Document
         private List<BookBody> bodies = null;
         private List<BinaryImage> binaryImages = null;
 
-        private XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
-        private XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
+        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
+        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
         {
             Async = true,
             CheckCharacters = true,

@@ -52,7 +52,7 @@ namespace Fb2.Document.Models.Base
             if (AllowedAttributes == null || !AllowedAttributes.Any())
                 return;
 
-            if (!node.GetAllAttributesOrDefault(out Dictionary<string, string> actualAttributes))
+            if (!TryGetAttributesInternal(node, out Dictionary<string, string> actualAttributes))
                 return;
 
             var filteredAttributes = actualAttributes
@@ -133,6 +133,21 @@ namespace Fb2.Document.Models.Base
 
             result = attribute;
             return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
+        }
+
+        private static bool TryGetAttributesInternal([In] XNode node, out Dictionary<string, string> result)
+        {
+            var element = node as XElement;
+
+            if (element == null || !element.Attributes().Any())
+            {
+                result = null;
+                return false;
+            }
+
+            result = element.Attributes()
+                            .ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
+            return true;
         }
     }
 }

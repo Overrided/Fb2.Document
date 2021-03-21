@@ -4,7 +4,7 @@ Fb2.Document is lightweight, fast .Net Standard lib with bunch of APIs to operat
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
-Library can be used with any .Net application that supports .Net Standard 2.0.
+Library can be used with any .Net application that supports .Net Standard 2.1
 
 ## Table of contents
 
@@ -29,11 +29,14 @@ Library can be used with any .Net application that supports .Net Standard 2.0.
     * [Fb2Element Class API](#Fb2Element-Class-API)
     * [Fb2Container Class API](#Fb2Container-Class-API)
 
+* [Error handling](#Error-handling)
+
 * [Tests](#Tests)
 
 * [Utils and Constants](#Utils-and-Constants)
     * [Constants](#Constants)
-    * [Utils classes](#Utils-classes)
+
+
 
 ## Installation
 
@@ -75,6 +78,10 @@ For full list of allowed elements and attribute names see [ElementNames](https:/
 For more details on implementation and supported scenarios see [API](#API) and [Usage](#Usage) sections.
 
 ## Usage
+
+Although file content is `xml`, validation of given file against appropriate `xsd` scheme is not an option as there are LOTS of semi-valid `fb2` files in the wild.
+
+So, `xsd` scheme validation is ommited.
 
 As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading and querying data:
 
@@ -130,7 +137,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 ### Loading particular node
 
-In imaginary scenario you might need to load some part of a document into the model, instead of loading whole thing.
+In corner-case scenario you might need to load some part of a document into the model, instead of loading whole thing.
 
 It can be achieved by calling `Load(XNode node)` method of corresponding Fb2Node implementation instance.
 
@@ -257,8 +264,8 @@ If method is encoding-safe - during loading process library will try to determin
 |  DocumentInfo |       DocumentInfo       | Represents part of `<description>` section, `<document-info>`. Contains info about particular fb2 file.                                              |
 |  PublishInfo  |        PublishInfo       | Represents part of `<description>` section, `<publish-info>`. Contains info about published (paper) origin of a book.                                |
 |   CustomInfo  |        CustomInfo        | Represents part of `<description>` section, `<custom-info>`. Contains any additional info about book.                                                |
-|     Bodies    |   IEnumerable\<BookBody>  | Lists all `<body>` elements found in book.                                                                                                          |
-|  BinaryImages | IEnumerable\<BinaryImage> | Lists all `<binary>` elements found in book.                                                                                                        |
+|     Bodies    |     List\<BookBody>      | Lists all `<body>` elements found in book.                                                                                                          |
+|  BinaryImages |   List\<BinaryImage>     | Lists all `<binary>` elements found in book.                                                                                                        |
 |    IsLoaded   |           bool           | Indicates whether book was loaded                                                                                                                 |
 
 >Attention!
@@ -279,7 +286,7 @@ It defines basic interface of a node. Some of descendant classes may override gi
 |      ToXml      |                                                |            XElement           | Performs basic serialization of node into `fb2`/`xml` format. Creates `XElement` and writes attributes into, if any.                                                                                                                                                                                                                                    |
 |   HasAttribute  |                  string,&nbsp;bool                  |              bool             | Introduced in `v1.1.0`. <br>Checks if node has attribute(s) with given key. <br>`bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search. <br> If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                                        |
 |   GetAttribute  |                  string,&nbsp;bool                  | KeyValuePair\<string,&nbsp;string> | Introduced in `v1.1.0`. <br>Returns the first element of `Attributes` list that matches given key or a `default` value if no such element is found. <br> `bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown. |
-| TryGetAttribute | string,&nbsp;bool, out&nbsp;KeyValuePair<string,&nbsp;string> |              bool             | Introduced in `v1.1.0`. <br>Returns true if attribute found by given key, otherwise `false`. <br>If none attribute found, result contains `default` value of `KeyValuePair<string, string>` instead of actual attribute.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                     |
+| TryGetAttribute | string,&nbsp;bool |              bool,&nbsp;out&nbsp;KeyValuePair<string,&nbsp;string>             | Introduced in `v1.1.0`. <br>Returns true if attribute found by given key, otherwise `false`. <br>If none attribute found, result contains `default` value of `KeyValuePair<string, string>` instead of actual attribute.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                     |
 
 ### Fb2Node Properties
 
@@ -330,14 +337,16 @@ Node querying methods
 
 |       Method name      |Arguments|        Returns        | Description                                                                                                                                                                                                                                                             |
 |:----------------------:|:-----------:|:---------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|       GetChildren      | string | IEnumerable\<Fb2Node> | Gets children of element by given name.  Wrapper for `Content.Where(e => e.Name.EqualsInvariant(name))` query. `name` parameter is case insensitive.  If `name` is null or empty string, `ArgumentNullException` is thrown.                                                                             |
+|       GetChildren      | string | List\<Fb2Node> | Gets children of element by given name.  Wrapper for `Content.Where(e => e.Name.EqualsInvariant(name))` query. `name` parameter is case insensitive.  If `name` is null or empty string, `ArgumentNullException` is thrown.                                                                             |
 |      GetFirstChild     | string |        Fb2Node        | Gets first child of element by given name.  Wrapper for `string.IsNullOrWhiteSpace(name) ? Content.FirstOrDefault() : Content.FirstOrDefault(e => e.Name.EqualsInvariant(name));` query. `name` parameter is case insensitive.                                                                          |
 |     GetDescendants     | string |     List\<Fb2Node>    | Gets all descendants of an element by given name. Recursively iterates through sub-tree, filtering elements by name. `name` parameter is case insensitive.  If `name` is null or empty string, *all* descendant elements are  returned in flat list format.                                             |
 |   GetFirstDescendant   | string |        Fb2Node        | Gets first descendant of an element by given name. Recursively iterates through sub-tree, filtering elements by name. `name` parameter is case insensitive. If `name` is null or empty string, `ArgumentNullException` is thrown.                                                                       |
-|     GetChildren\<T>    |        |    IEnumerable\<T>    | Gets children of element by given type `T`, `where T : Fb2Node`. For example, `fb2Document.Book.GetChildren<BookDescription>()`  query returns all `BookDescription` elements from `fb2Document.Book.Content`                                                                                           |
+| TryGetFirstDescendant  | string |     bool,&nbsp;out&nbsp;Fb2Node       | Introduced in `v2.0.0`. <br>Looks for first descendant of an element by given name. Recursively iterates through sub-tree, filtering element by name. `name` parameter is case insensitive. Result node is returned as `out` parameter. <br> Returns `true` if child element found, otherwise `false`. <br>If `name` argument is null or empty string, `ArgumentNullException` is thrown.                                                                       |
+|     GetChildren\<T>    |        |    List\<T>    | Gets children of element by given type `T`, `where T : Fb2Node`. For example, `fb2Document.Book.GetChildren<BookDescription>()`  query returns all `BookDescription` elements from `fb2Document.Book.Content`                                                                                           |
 |    GetFirstChild\<T>   |        |           T           | Gets first child of element by given type `T`, `where T : Fb2Node`. For example, `fb2Document.Book.GetFirstChild<BookDescription>()`  query returns first `BookDescription` element from `fb2Document.Book.Content`                                                                                     |
 |   GetDescendants\<T>   |        |        List\<T>       | Gets all descendants of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering elements by type. For example, `fb2Document.Book.GetDescendants<Paragraph>()`  query returns all `Paragraph` element from whole book (as fb2Document.Book is root element). |
 | GetFirstDescendant\<T> |        |           T           | Gets first descendant of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering element by type. For example, `fb2Document.Book.GetFirstDescendant<Paragraph>()`  query returns first `Paragraph` element it meets in whole book.                          |
+| TryGetFirstDescendant\<T>  |  |     bool,&nbsp;out&nbsp;T       | Introduced in `v2.0.0`. <br>Looks for first descendant of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering element by type.<br> Returns `true` if child element found, otherwise `false`.                                                                      |
 
 At some point you may want to list whole node`s content in list (flat) form.
 
@@ -354,6 +363,14 @@ For `GetDescendants<T>()` implementation:
 ```
 var wholeBookContent = fb2Document.Book.GetDescendants<Fb2Node>();
 ```
+
+## Error handling
+
+Library offers no custom exceptions or any kind of error handlers (and there's no plans on implementing any so far).
+
+As in fact library operates on top of `XDocument` ([Linq to XML](https://docs.microsoft.com/en-us/dotnet/standard/linq/linq-xml-overview)) requirements on `fb2` content validity from `xml` viewpoint (correctly closed tags etc.) are relevant.
+
+In most cases, handling `XmlException` is enough to be safe from under-the-hood `xml` content flaws.
 
 ## Tests
 
@@ -376,13 +393,3 @@ Most used constants are [ElementNames](https://github.com/Overrided/Fb2.Document
 respectively, element and attribute names that are allowed to be loaded from document.
 
 All nodes / attributes, which names are not on list, will be omitted during document loading.
-
-### Utils classes
-
-Library has some helper classes to work with:
-
-* Stream extension: `SeekZero,CloneAsync,Clone`
-
-* String extension: `EqualsInvariant`
-
-* XNode extension: `GetAllAttributesOrDefault,Validate,GetNodeContent`
