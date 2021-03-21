@@ -29,13 +29,11 @@ Library can be used with any .Net application that supports .Net Standard 2.1
     * [Fb2Element Class API](#Fb2Element-Class-API)
     * [Fb2Container Class API](#Fb2Container-Class-API)
 
+* [Constants](#Constants)
+
 * [Error handling](#Error-handling)
 
 * [Tests](#Tests)
-
-* [Utils and Constants](#Utils-and-Constants)
-    * [Constants](#Constants)
-
 
 
 ## Installation
@@ -364,6 +362,13 @@ For `GetDescendants<T>()` implementation:
 var wholeBookContent = fb2Document.Book.GetDescendants<Fb2Node>();
 ```
 
+## Constants
+
+Most used constants are [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs) which contain,
+respectively, element and attribute names that are allowed to be loaded from file.
+
+All nodes / attributes, which names are not on list, will be omitted during document loading.
+
 ## Error handling
 
 Library offers no custom exceptions or any kind of error handlers (and there's no plans on implementing any so far).
@@ -382,14 +387,3 @@ each of them with different sets of data.
 
 Also, there are separate tests for [Fb2ElementFactory](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Factories/Fb2ElementFactory.cs) and  
 `IntegrationTests` test, which creates `Fb2Document`, saves it as a file, reads it into second model, saves again and checks if both saved files are equal.
-
-## Utils and Constants
-
-Also, library provides bunch of constants and utils to help end-user to deal with `fb2` file format.
-
-### Constants
-
-Most used constants are [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs) which contain,
-respectively, element and attribute names that are allowed to be loaded from document.
-
-All nodes / attributes, which names are not on list, will be omitted during document loading.
