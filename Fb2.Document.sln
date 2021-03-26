@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document", "Fb2.Documen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{7D1A37B2-70C3-416C-9327-94C5862F9D94}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		License.md = License.md
 		Readme.md = Readme.md
 	EndProjectSection
