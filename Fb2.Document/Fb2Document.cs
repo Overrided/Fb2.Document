@@ -38,6 +38,9 @@ namespace Fb2.Document
             CloseInput = true
         };
 
+        /// <summary>
+        /// Represents <FictionBook> - root element of a file.
+        /// </summary>
         public FictionBook Book { get; private set; }
 
         private BookDescription FictionBookDescription
