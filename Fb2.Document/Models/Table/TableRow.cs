@@ -22,9 +22,6 @@ namespace Fb2.Document.Models
             ElementNames.TableCell
         };
 
-        public sealed override string ToString()
-        {
-            return string.Join(" ", Content.Select(cell => $"{cell}  |"));
-        }
+        public sealed override string ToString() => string.Join(" ", Content.Select(cell => $"{cell}  |"));
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -12,9 +13,7 @@ namespace Fb2.Document.Models
         /// Specific override to preserve original string content 
         /// with all formatting done with '\t', ' ', '\r\n' etc.
         /// </summary>
-        public override void Load(XNode node, bool preserveWhitespace = false)
-        {
-            base.Load(node, true);
-        }
+        public override void Load([In] XNode node, bool preserveWhitespace = false) => base.Load(node, true);
+
     }
 }

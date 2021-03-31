@@ -4,9 +4,9 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    public class TextAutor : TextContainer
+    public class TextAuthor : TextContainer
     {
-        public override string Name => ElementNames.TextAutor;
+        public override string Name => ElementNames.TextAuthor;
 
         public override HashSet<string> AllowedAttributes => new HashSet<string> { AttributeNames.Id };
 

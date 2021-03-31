@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
-using Fb2.Document.Extensions;
 
 namespace Fb2.Document.Models.Base
 {
@@ -32,11 +34,12 @@ namespace Fb2.Document.Models.Base
         /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
         /// </summary>
         /// <param name="node">Node to load as Fb2Element</param>
-        public override void Load(XNode node, bool preserveWhitespace = false)
+        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
+        public override void Load([In] XNode node, bool preserveWhitespace = false)
         {
             base.Load(node, preserveWhitespace);
 
-            var rawContent = node.GetNodeContent();
+            var rawContent = GetNodeContent(node);
 
             if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
                 Content = trimWhitespace.Replace(rawContent, " ");
@@ -60,5 +63,13 @@ namespace Fb2.Document.Models.Base
         }
 
         public override string ToString() => Content;
+
+        private static string GetNodeContent([In] XNode node)
+            => node.NodeType switch
+            {
+                XmlNodeType.Element => ((XElement)node).Value,
+                XmlNodeType.Text => ((XText)node).Value,
+                _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+            };
     }
 }

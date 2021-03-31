@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -40,7 +41,12 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
-        public override void Load(XNode node, bool preserveWhitespace = false)
+        /// <summary>
+        /// Container node loading mechanism. Loads attributes and sequentially calls `Load` on all child nodes.
+        /// </summary>
+        /// <param name="node">Node to load as Fb2Container</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`</param>
+        public override void Load([In] XNode node, bool preserveWhitespace = false)
         {
             base.Load(node, preserveWhitespace);
 
@@ -92,6 +98,11 @@ namespace Fb2.Document.Models.Base
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Converts Fb2Container to XElement with regards to all attributes, 
+        /// by calling `ToXml()` on every node in `Content`.
+        /// </summary>
+        /// <returns>XElement reflected from given Fb2Element</returns>
         public override XElement ToXml()
         {
             var element = base.ToXml();
@@ -106,14 +117,24 @@ namespace Fb2.Document.Models.Base
 
         #region Node Actions Methods
 
-        public IEnumerable<Fb2Node> GetChildren(string name)
+        /// <summary>
+        /// Gets children of element by given name. 
+        /// </summary>
+        /// <param name="name">Name to select child elements by. Case insensitive.</param>
+        /// <returns>List of found child elements, if any. </returns>
+        public List<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use Content instead.");
+                throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use `{nameof(Content)}` property directly instead.");
 
-            return Content.Where(elem => elem.Name.EqualsInvariant(name));
+            return Content.Where(elem => elem.Name.EqualsInvariant(name)).ToList();
         }
 
+        /// <summary>
+        /// Gets first matching child of element by given name.
+        /// </summary>
+        /// <param name="name">Name to select child element by.</param>
+        /// <returns>First matched child node</returns>
         public Fb2Node GetFirstChild(string name)
         {
             return string.IsNullOrWhiteSpace(name) ?
@@ -121,6 +142,11 @@ namespace Fb2.Document.Models.Base
                             Content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
         }
 
+        /// <summary>
+        /// Recursively gets all descendants of element by given name.
+        /// </summary>
+        /// <param name="name">Name to select descendants by.</param>
+        /// <returns>List of found descendants, if any.</returns>
         public List<Fb2Node> GetDescendants(string name)
         {
             if (Content == null || !Content.Any())
@@ -147,6 +173,11 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
+        /// <summary>
+        /// Recursively looks for first matching descendant of element by given name.
+        /// </summary>
+        /// <param name="name">Name to select descendant by.</param>
+        /// <returns>First matched descendant node.</returns>
         public Fb2Node GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -172,23 +203,46 @@ namespace Fb2.Document.Models.Base
             return null;
         }
 
-        public IEnumerable<T> GetChildren<T>() where T : Fb2Node
+        /// <summary>
+        /// Recursively looks for first matching descendant of element by given name.
+        /// </summary>
+        /// <param name="name">Name to select descendant by.</param>
+        /// <param name="node">Out param, actual result of a search.</param>
+        /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
+        public bool TryGetFirstDescendant(string name, out Fb2Node node)
+        {
+            var firstDescendant = GetFirstDescendant(name);
+            node = firstDescendant;
+            return firstDescendant != null;
+        }
+
+        /// <summary>
+        /// Gets children of element by given node type (Fb2Node-based nodes). 
+        /// </summary>
+        /// <typeparam name="T">Node type to select elements by.</typeparam>
+        /// <returns>List of found child elements, if any.</returns>
+        public List<T> GetChildren<T>() where T : Fb2Node
         {
             if (Content == null || !Content.Any())
                 return null;
 
             IEnumerable<Fb2Node> result = null;
 
-            var predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+            var predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             result = Content.Where(predicate);
 
             if (result == null || !result.Any())
                 return null;
 
-            return result.Cast<T>();
+            return result.Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Gets first matching child of element by given node type (Fb2Node-based nodes). 
+        /// </summary>
+        /// <param name="name">Node type to select child element by.</param>
+        /// <returns>First matched child node</returns>
         public T GetFirstChild<T>() where T : Fb2Node
         {
             if (Content == null || !Content.Any())
@@ -196,7 +250,7 @@ namespace Fb2.Document.Models.Base
 
             Fb2Node result = null;
 
-            var predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+            var predicate = PredicateResolver.Instance.GetPredicate<T>();
             result = Content.FirstOrDefault(predicate);
 
             if (result == null)
@@ -205,21 +259,38 @@ namespace Fb2.Document.Models.Base
             return result as T;
         }
 
-        public List<T> GetDescendants<T>() where T : Fb2Node
-        {
-            return GetDescendantsInternal<T>(null).ToList();
-        }
+        /// <summary>
+        /// Recursively gets all descendants of element by given node type (Fb2Node-based nodes). 
+        /// </summary>
+        /// <param name="name">Node type to select descendants by.</param>
+        /// <returns>List of found descendants, if any.</returns>
+        public List<T> GetDescendants<T>() where T : Fb2Node => GetDescendantsInternal<T>().ToList();
 
-        public T GetFirstDescendant<T>() where T : Fb2Node
+        /// <summary>
+        /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
+        /// </summary>
+        /// <param name="name">Node type to select descendant by.</param>
+        /// <returns>First matched descendant node.</returns>
+        public T GetFirstDescendant<T>() where T : Fb2Node => GetFirstDescendantInternal<T>();
+
+        /// <summary>
+        /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
+        /// </summary>
+        /// <param name="name">Node type to select descendant by.</param>
+        /// <param name="node">Out param, actual result of a search.</param>
+        /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
+        public bool TryGetFirstDescendant<T>(out T node) where T : Fb2Node
         {
-            return GetFirstDescendantInternal<T>(null);
+            var result = GetFirstDescendantInternal<T>();
+            node = result;
+            return result != null;
         }
 
         #endregion
 
         #region Private Methods
 
-        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate)
+        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
             if (Content == null || !Content.Any())
@@ -228,17 +299,16 @@ namespace Fb2.Document.Models.Base
             List<Fb2Node> result = new List<Fb2Node>();
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+                predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             foreach (var element in Content)
             {
                 if (predicate(element))
                     result.Add(element);
 
-                if (element is Fb2Container)
+                if (element is Fb2Container containerElement)
                 {
-                    var desc = ((Fb2Container)element).GetDescendantsInternal<T>(predicate);
-
+                    var desc = containerElement.GetDescendantsInternal<T>(predicate);
                     if (desc != null && desc.Any())
                         result.AddRange(desc);
                 }
@@ -247,23 +317,23 @@ namespace Fb2.Document.Models.Base
             return result.Cast<T>();
         }
 
-        private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate)
+        private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
             if (Content == null || !Content.Any())
                 return null;
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicateStrategy<T>();
+                predicate = PredicateResolver.Instance.GetPredicate<T>();
 
             foreach (var element in Content)
             {
                 if (predicate(element))
                     return (T)element;
 
-                if (element is Fb2Container)
+                if (element is Fb2Container containerElement)
                 {
-                    var desc = ((Fb2Container)element).GetFirstDescendantInternal<T>(predicate);
+                    var desc = containerElement.GetFirstDescendantInternal<T>(predicate);
                     if (desc != null)
                         return desc;
                 }

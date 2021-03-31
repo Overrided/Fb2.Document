@@ -21,7 +21,7 @@ namespace Fb2.Document.Models
             ElementNames.Title,
             ElementNames.Epigraph,
             ElementNames.Stanza,
-            ElementNames.TextAutor,
+            ElementNames.TextAuthor,
             ElementNames.Date
         };
     }

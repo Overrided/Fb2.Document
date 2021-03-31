@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Extensions;
@@ -10,7 +11,7 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.EmptyLine;
 
-        public override void Load(XNode element, bool preserveWhitespace = false)
+        public override void Load([In] XNode element, bool preserveWhitespace = false)
         {
             element.Validate(Name);
             Content = Environment.NewLine;

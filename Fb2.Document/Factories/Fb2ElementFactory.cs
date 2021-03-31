@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -63,7 +64,7 @@ namespace Fb2.Document.Factories
                     { ElementNames.EmptyLine, typeof(EmptyLine) },
                     { ElementNames.Epigraph, typeof(Epigraph) },
                     { ElementNames.Quote, typeof(Quote) },
-                    { ElementNames.TextAutor, typeof(TextAutor) },
+                    { ElementNames.TextAuthor, typeof(TextAuthor) },
                     { ElementNames.Stanza, typeof(Stanza) },
                     { ElementNames.StanzaV, typeof(StanzaVerse) },
 
@@ -102,7 +103,7 @@ namespace Fb2.Document.Factories
             }
         }
 
-        public Fb2Node GetElementByNodeName(string nodeName)
+        public Fb2Node GetElementByNodeName([In] string nodeName)
         {
             Type result = null;
             Type resultLowerInv = null;

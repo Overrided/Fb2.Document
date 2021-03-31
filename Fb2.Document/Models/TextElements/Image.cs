@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -29,7 +30,7 @@ namespace Fb2.Document.Models
             ElementNames.SubTitle,
             ElementNames.TableHeader,
             ElementNames.TableCell,
-            ElementNames.TextAutor
+            ElementNames.TextAuthor
         };
 
         private HashSet<string> NotInlineParentNodes => new HashSet<string>
@@ -51,7 +52,7 @@ namespace Fb2.Document.Models
             return $"{Name}{formattedAttributeString}";
         }
 
-        public override void Load(XNode node, bool preserveWhitespace = false)
+        public override void Load([In] XNode node, bool preserveWhitespace = false)
         {
             IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
 

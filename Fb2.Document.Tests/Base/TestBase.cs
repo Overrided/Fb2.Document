@@ -40,9 +40,9 @@ namespace Fb2.Document.Tests.Base
 
             XElement resultElement = new XElement(instance.Name);
 
-            foreach (var elementName in (instance as Fb2Container).AllowedElements)
+            foreach (var elementName in instance.AllowedElements)
             {
-                // EmptyLine will strip any content on loading, so to simpify test we put correct one
+                // EmptyLine will strip any content on loading, so to simplify test we put correct one
                 if (elementName == ElementNames.EmptyLine)
                 {
                     resultElement.Add(new XElement(elementName));

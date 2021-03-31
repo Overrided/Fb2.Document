@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Extensions;
 
@@ -41,7 +42,7 @@ namespace Fb2.Document.Models.Base
         /// Basic Load of element - validation and populating Attributes
         /// </summary>
         /// <param name="node">XNode to load as Fb2Node</param>
-        public virtual void Load(XNode node, bool preserveWhitespace = false)
+        public virtual void Load([In] XNode node, bool preserveWhitespace = false)
         {
             if (node == null)
                 throw new ArgumentNullException($"{nameof(node)} is null!");
@@ -51,7 +52,7 @@ namespace Fb2.Document.Models.Base
             if (AllowedAttributes == null || !AllowedAttributes.Any())
                 return;
 
-            if (!node.GetAllAttributesOrDefault(out Dictionary<string, string> actualAttributes))
+            if (!TryGetAttributesInternal(node, out Dictionary<string, string> actualAttributes))
                 return;
 
             var filteredAttributes = actualAttributes
@@ -64,9 +65,7 @@ namespace Fb2.Document.Models.Base
                 Attributes = new Dictionary<string, string>();
 
             foreach (var kvp in filteredAttributes)
-            {
                 Attributes.Add(kvp.Key, kvp.Value);
-            }
         }
 
         /// <summary>
@@ -134,6 +133,21 @@ namespace Fb2.Document.Models.Base
 
             result = attribute;
             return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
+        }
+
+        private static bool TryGetAttributesInternal([In] XNode node, out Dictionary<string, string> result)
+        {
+            var element = node as XElement;
+
+            if (element == null || !element.Attributes().Any())
+            {
+                result = null;
+                return false;
+            }
+
+            result = element.Attributes()
+                            .ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
+            return true;
         }
     }
 }
