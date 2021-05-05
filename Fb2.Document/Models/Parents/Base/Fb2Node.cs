@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Fb2.Document.Extensions;
 
@@ -13,33 +16,37 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node
     {
+        protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
+
+        protected static readonly HashSet<char> conditionalChars = new HashSet<char> { '\n', '\r', '\t' };
+
         /// <summary>
-        /// Node name, used during document parsing and validation
+        /// Node name, used during document parsing and validation.
         /// </summary>
         public abstract string Name { get; }
 
         /// <summary>
-        /// Gets actual element attributes in key - value (Dictionary) form
+        /// Gets actual element attributes in key - value (Dictionary) form.
         /// </summary>
         public Dictionary<string, string> Attributes { get; private set; }
 
         /// <summary>
-        /// List of allowed attribures for particular element
+        /// List of allowed attribures for particular element.
         /// </summary>
-        public virtual HashSet<string> AllowedAttributes => null;
+        public virtual ImmutableHashSet<string> AllowedAttributes => null;
 
         /// <summary>
-        /// Indicates if element sholud be inline or start from new line
+        /// Indicates if element sholud be inline or start from new line.
         /// </summary>
         public abstract bool IsInline { get; protected set; }
 
         /// <summary>
-        /// Indicates if element is on a right place (has correct parent node etc.) accordingly to Fb2 standard
+        /// Indicates if element is on a right place (has correct parent node etc.) accordingly to Fb2 standard.
         /// </summary>
         public bool Unsafe { get; internal set; }
 
         /// <summary>
-        /// Basic Load of element - validation and populating Attributes
+        /// Basic Load of element - validation and populating Attributes.
         /// </summary>
         /// <param name="node">XNode to load as Fb2Node</param>
         public virtual void Load([In] XNode node, bool preserveWhitespace = false)
@@ -135,6 +142,102 @@ namespace Fb2.Document.Models.Base
             return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
         }
 
+        public Fb2Node WithAttribute(params Func<KeyValuePair<string, string>>[] attributeProviders)
+        {
+            if (attributeProviders == null ||
+                !attributeProviders.Any() ||
+                attributeProviders.All(ap => ap == null))
+                throw new ArgumentNullException($"No {nameof(attributeProviders)} received.");
+
+            var notNullProviders = attributeProviders.Where(ap => ap != null);
+
+            WithAttributeSafe(() =>
+            {
+                foreach (var provider in notNullProviders)
+                    WithAttribute(provider);
+            });
+
+            return this;
+        }
+
+        public Fb2Node WithAttribute(params KeyValuePair<string, string>[] attributes)
+        {
+            if (attributes == null || !attributes.Any())
+                throw new ArgumentNullException($"No {nameof(attributes)} received.");
+
+            WithAttributeSafe(() =>
+            {
+                foreach (var attribute in attributes)
+                    WithAttribute(attribute);
+            });
+
+            return this;
+        }
+
+        public Fb2Node WithAttribute(Func<KeyValuePair<string, string>> attributeProvider)
+        {
+            if (attributeProvider == null)
+                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
+
+            var attribute = attributeProvider();
+
+            return WithAttribute(attribute);
+        }
+
+        public Fb2Node WithAttribute(KeyValuePair<string, string> attribute) =>
+            WithAttribute(attribute.Key, attribute.Value);
+
+        public Fb2Node WithAttribute(string attributeName, string attributeValue)
+        {
+            if (AllowedAttributes == null || !AllowedAttributes.Any())
+                throw new InvalidOperationException($"Node {Name} has no defined attributes.");
+
+            if (string.IsNullOrWhiteSpace(attributeName))
+                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
+
+            if (string.IsNullOrWhiteSpace(attributeValue))
+                throw new ArgumentNullException($"{nameof(attributeValue)} is null or empty string.");
+
+            if (attributeName.Any(c => conditionalChars.Contains(c)))
+                throw new ArgumentException($"{nameof(attributeName)} contains invalid characters ({string.Join(',', conditionalChars)}).");
+
+            if (attributeValue.Any(c => conditionalChars.Contains(c)))
+                attributeValue = trimWhitespace.Replace(attributeValue, " ");
+
+            // TODO : encode name & value to prevent injections
+            var escapedAttrName = SecurityElement.Escape(attributeName);
+            var escapedAttrValue = SecurityElement.Escape(attributeValue);
+
+            if (!AllowedAttributes.Contains(escapedAttrName))
+                throw new ArgumentException($"Attribute {attributeName} is not valid for {Name} node.");
+
+            if (Attributes == null)
+                Attributes = new Dictionary<string, string>();
+
+            Attributes[attributeName] = escapedAttrValue;
+
+            return this;
+        }
+
+        private void WithAttributeSafe(Action attributesUpdate)
+        {
+            if (attributesUpdate == null)
+                throw new ArgumentNullException($"{nameof(attributesUpdate)}");
+
+            var prevAttributes = Attributes == null ? null : new Dictionary<string, string>(Attributes);
+
+            try
+            {
+                attributesUpdate();
+            }
+            catch (Exception)
+            {
+                Attributes?.Clear();
+                Attributes = prevAttributes;
+                throw;
+            }
+        }
+
         private static bool TryGetAttributesInternal([In] XNode node, out Dictionary<string, string> result)
         {
             var element = node as XElement;
@@ -149,5 +252,18 @@ namespace Fb2.Document.Models.Base
                             .ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
             return true;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Fb2Node node &&
+                   Name == node.Name &&
+                   //TODO: really, visual studio???
+                   EqualityComparer<Dictionary<string, string>>.Default.Equals(Attributes, node.Attributes) &&
+                   EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedAttributes, node.AllowedAttributes) &&
+                   IsInline == node.IsInline &&
+                   Unsafe == node.Unsafe;
+        }
+
+        public override int GetHashCode() => HashCode.Combine(Name, Attributes, AllowedAttributes, IsInline, Unsafe);
     }
 }

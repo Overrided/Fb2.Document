@@ -14,6 +14,5 @@ namespace Fb2.Document.Models
         /// with all formatting done with '\t', ' ', '\r\n' etc.
         /// </summary>
         public override void Load([In] XNode node, bool preserveWhitespace = false) => base.Load(node, true);
-
     }
 }

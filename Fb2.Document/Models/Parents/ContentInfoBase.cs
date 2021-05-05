@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Fb2.Document.Constants;
 
 namespace Fb2.Document.Models.Base
@@ -7,20 +7,16 @@ namespace Fb2.Document.Models.Base
     {
         public override bool CanContainText => false;
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string>
-        {
-            AttributeNames.Id,
-            AttributeNames.Language
-        };
+        public override ImmutableHashSet<string> AllowedAttributes =>
+            ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
 
-        public override HashSet<string> AllowedElements => new HashSet<string>
-        {
-            ElementNames.Paragraph,
-            ElementNames.Poem,
-            ElementNames.Quote,
-            ElementNames.SubTitle,
-            ElementNames.EmptyLine,
-            ElementNames.Table
-        };
+        public override ImmutableHashSet<string> AllowedElements =>
+            ImmutableHashSet.Create(
+                ElementNames.Paragraph,
+                ElementNames.Poem,
+                ElementNames.Quote,
+                ElementNames.SubTitle,
+                ElementNames.EmptyLine,
+                ElementNames.Table);
     }
 }

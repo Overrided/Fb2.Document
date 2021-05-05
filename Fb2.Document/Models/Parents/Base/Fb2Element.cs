@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
+using System.Security;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -14,10 +13,6 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
-        private static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
-
-        private static readonly HashSet<char> conditionalChars = new HashSet<char> { '\n', '\r', '\t' };
-
         /// <summary>
         /// Content (value) of element. Available after Load() method call
         /// </summary>
@@ -47,6 +42,39 @@ namespace Fb2.Document.Models.Base
                 Content = rawContent;
         }
 
+        //public virtual Fb2Element WithContent(Func<string> contentProvider, bool preserveWhitespace = false)
+        public Fb2Element WithContent(Func<string> contentProvider, bool preserveWhitespace = false)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException($"{nameof(contentProvider)} is null.");
+
+            var content = contentProvider();
+
+            return WithContent(content, preserveWhitespace);
+        }
+
+        // TODO : add separator params?
+        //public virtual Fb2Element WithContent(string content, bool preserveWhitespace = false)
+        public Fb2Element WithContent(string content, bool preserveWhitespace = false)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
+
+            // preventing xml injections, hopefully
+            var escapedContent = SecurityElement.Escape(content);
+
+            if (!preserveWhitespace && escapedContent.Any(c => conditionalChars.Contains(c)))
+                escapedContent = trimWhitespace.Replace(escapedContent, " ");
+
+            if (string.IsNullOrWhiteSpace(Content))
+                Content = escapedContent;
+            else
+                // TODO: not sure it should be `string.Empty` as separator
+                Content = string.Join(string.Empty, Content, content);
+
+            return this;
+        }
+
         /// <summary>
         /// Converts Fb2Element to XElement with regards to all attributes
         /// Note: only formatted content is serialized. 
@@ -71,5 +99,14 @@ namespace Fb2.Document.Models.Base
                 XmlNodeType.Text => ((XText)node).Value,
                 _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
             };
+
+        public override bool Equals(object obj)
+        {
+            return obj is Fb2Element element &&
+                   base.Equals(obj) &&
+                   Content == element.Content;
+        }
+
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Content);
     }
 }

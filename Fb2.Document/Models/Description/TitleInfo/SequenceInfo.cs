@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,11 +10,10 @@ namespace Fb2.Document.Models
 
         public override bool IsInline => false;
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string>()
-        {
-            AttributeNames.Name,
-            AttributeNames.Number,
-            AttributeNames.Language
-        };
+        public override ImmutableHashSet<string> AllowedAttributes =>
+            ImmutableHashSet.Create(
+                AttributeNames.Name,
+                AttributeNames.Number,
+                AttributeNames.Language);
     }
 }

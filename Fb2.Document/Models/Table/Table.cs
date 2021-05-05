@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Fb2.Document.Constants;
@@ -12,15 +13,9 @@ namespace Fb2.Document.Models
 
         public override bool CanContainText => false;
 
-        public override HashSet<string> AllowedElements => new HashSet<string>
-        {
-            ElementNames.TableRow
-        };
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string>
-        {
-            AttributeNames.Id
-        };
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.TableRow);
 
         public sealed override string ToString()
         {

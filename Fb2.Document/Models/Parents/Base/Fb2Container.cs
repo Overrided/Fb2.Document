@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,26 +19,26 @@ namespace Fb2.Document.Models.Base
     public abstract class Fb2Container : Fb2Node
     {
         /// <summary>
-        /// List of actual Content that is available after Load() method call
-        /// Reflectes content of given XNode
-        /// Dependant on CanContainText property can or can not contain text nodes
+        /// Actual Content that is available after `Load()` method call.
+        /// Reflectes content of given `XNode`.
+        /// `CanContainText` property indicates if node can contain text nodes.
         /// </summary>
         public List<Fb2Node> Content { get; } = new List<Fb2Node>();
 
         /// <summary>
-        /// Indicates if instance of type Fb2Container can contain text
-        /// True if element can contain text, otherwise - false
+        /// Indicates if instance of type Fb2Container can contain text.
+        /// `true` if element can contain text, otherwise - `false`.
         /// </summary>
         public abstract bool CanContainText { get; }
 
         /// <summary>
-        /// List of allowed descendant node's names
+        /// List of allowed descendant node's names.
         /// </summary>
-        public abstract HashSet<string> AllowedElements { get; }
+        public abstract ImmutableHashSet<string> AllowedElements { get; }
 
         /// <summary>
-        /// Indicates whether element should start with a new line or be inline
-        /// True if element is inline, otherwise - false
+        /// Indicates whether element should start with a new line or be inline.
+        /// `true` if element is inline, otherwise - `false`.
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
@@ -45,7 +46,7 @@ namespace Fb2.Document.Models.Base
         /// Container node loading mechanism. Loads attributes and sequentially calls `Load` on all child nodes.
         /// </summary>
         /// <param name="node">Node to load as Fb2Container</param>
-        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
         public override void Load([In] XNode node, bool preserveWhitespace = false)
         {
             base.Load(node, preserveWhitespace);
@@ -114,6 +115,83 @@ namespace Fb2.Document.Models.Base
             element.Add(children);
             return element;
         }
+
+        #region Editing Api
+
+        public Fb2Container WithContent(params Func<Fb2Node>[] elementProviders)
+        {
+            if (elementProviders == null ||
+                !elementProviders.Any() ||
+                elementProviders.All(e => e == null))
+                throw new ArgumentNullException($"No {nameof(elementProviders)} received");
+
+            var notNullNodesProviders = elementProviders.Where(n => n != null); // check if needed
+
+            WithContentSafe(() =>
+            {
+                foreach (var nodeProvider in notNullNodesProviders)
+                    WithContent(nodeProvider);
+            });
+
+            return this;
+        }
+
+        public Fb2Container WithContent(Func<Fb2Node> elementProvider)
+        {
+            if (elementProvider == null)
+                throw new ArgumentNullException($"{nameof(elementProvider)} is null");
+
+            var element = elementProvider();
+            return WithContent(element);
+        }
+
+        public Fb2Container WithContent(params Fb2Node[] nodes)
+        {
+            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+                throw new ArgumentNullException("No nodes received");
+
+            var notNullNodes = nodes.Where(n => n != null); // check if needed
+
+            WithContentSafe(() =>
+            {
+                foreach (var node in notNullNodes)
+                    WithContent(node);
+            });
+
+            return this;
+        }
+
+        public Fb2Container WithTextContent(string content, bool preserveWhitespace = false)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
+
+            if (!CanContainText)
+                throw new ArgumentException($"Element {Name} is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
+
+            var textItem = new TextItem().WithContent(content);
+            textItem.WithContent(content, preserveWhitespace);
+
+            return WithContent(textItem);
+        }
+
+        public Fb2Container WithContent(Fb2Node element)
+        {
+            if (element == null)
+                throw new ArgumentNullException($"{nameof(element)} is null.");
+
+            if (element.Name.Equals(ElementNames.FictionText) && !CanContainText)
+                throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
+
+            if (!AllowedElements.Contains(element.Name) && !element.Name.Equals(ElementNames.FictionText))
+                throw new ArgumentException($"'{element.Name}' is not valid child for '{Name}'. See {Name}.{nameof(AllowedElements)} for valid content elements.");
+
+            Content.Add(element);
+
+            return this;
+        }
+
+        #endregion
 
         #region Node Actions Methods
 
@@ -353,6 +431,35 @@ namespace Fb2.Document.Models.Base
             return element.ToXml();
         }
 
+        private void WithContentSafe(Action contentUpdate)
+        {
+            var backupContent = new List<Fb2Node>(Content);
+
+            try
+            {
+                contentUpdate();
+            }
+            catch (Exception)
+            {
+                Content.Clear(); // drop all changes if any
+                Content.AddRange(backupContent);
+
+                throw; // rollback and throw - no changes saved, no side-effects etc
+            }
+        }
+
         #endregion
+
+        public override bool Equals(object obj)
+        {
+            return obj is Fb2Container container &&
+                   base.Equals(obj) &&
+                   CanContainText == container.CanContainText &&
+                   // TODO: check if EqualityComparer is fine
+                   EqualityComparer<List<Fb2Node>>.Default.Equals(Content, container.Content) &&
+                   EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedElements, container.AllowedElements);
+        }
+
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, Content, AllowedElements);
     }
 }

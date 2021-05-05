@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -8,20 +9,20 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
+    // TODO : add override for string content - at least check for base64 validity?
     public class Image : Fb2Element
     {
         public override string Name => ElementNames.Image;
 
         public override bool IsInline { get; protected set; } = true;
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string>
-        {
-            AttributeNames.Id,
-            AttributeNames.Alt,
-            AttributeNames.Title,
-            AttributeNames.XHref,
-            AttributeNames.Type
-        };
+        public override ImmutableHashSet<string> AllowedAttributes =>
+            ImmutableHashSet.Create(
+                AttributeNames.Id,
+                AttributeNames.Alt,
+                AttributeNames.Title,
+                AttributeNames.XHref,
+                AttributeNames.Type);
 
         private HashSet<string> InlineParentNodes => new HashSet<string>
         {

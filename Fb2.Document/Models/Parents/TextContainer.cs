@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Fb2.Document.Constants;
 
 namespace Fb2.Document.Models.Base
@@ -9,17 +9,16 @@ namespace Fb2.Document.Models.Base
 
         public override bool CanContainText => true;
 
-        public sealed override HashSet<string> AllowedElements => new HashSet<string>
-        {
-            ElementNames.Strong,
-            ElementNames.Emphasis,
-            ElementNames.TextStyle,
-            ElementNames.TextLink,
-            ElementNames.Strikethrough,
-            ElementNames.Subscript,
-            ElementNames.Superscript,
-            ElementNames.Code,
-            ElementNames.Image
-        };
+        public override ImmutableHashSet<string> AllowedElements =>
+            ImmutableHashSet.Create(
+                ElementNames.Strong,
+                ElementNames.Emphasis,
+                ElementNames.TextStyle,
+                ElementNames.TextLink,
+                ElementNames.Strikethrough,
+                ElementNames.Subscript,
+                ElementNames.Superscript,
+                ElementNames.Code,
+                ElementNames.Image);
     }
 }
