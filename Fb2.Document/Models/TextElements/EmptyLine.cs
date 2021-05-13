@@ -15,7 +15,7 @@ namespace Fb2.Document.Models
         public sealed override void Load([In] XNode element, bool preserveWhitespace = false)
         {
             element.Validate(Name);
-            Content = Environment.NewLine;
+            content = Environment.NewLine;
         }
 
         // empty line has no content...only purpose )

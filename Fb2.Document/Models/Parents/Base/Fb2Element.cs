@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 
 namespace Fb2.Document.Models.Base
 {
@@ -13,10 +14,12 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
+        protected string content = string.Empty;
+
         /// <summary>
         /// Content (value) of element. Available after Load() method call
         /// </summary>
-        public string Content { get; protected set; }
+        public string Content() => string.Copy(content);
 
         /// <summary>
         /// For text nodes Inline is true by default, however, some classes override this property
@@ -37,9 +40,9 @@ namespace Fb2.Document.Models.Base
             var rawContent = GetNodeContent(node);
 
             if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
-                Content = trimWhitespace.Replace(rawContent, " ");
+                content = trimWhitespace.Replace(rawContent, " ");
             else
-                Content = rawContent;
+                content = rawContent;
         }
 
         //public virtual Fb2Element WithContent(Func<string> contentProvider, bool preserveWhitespace = false)
@@ -60,17 +63,20 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
 
+            if (Name == ElementNames.EmptyLine)
+                return this; // no content injections in empty line )
+
             // preventing xml injections, hopefully
             var escapedContent = SecurityElement.Escape(content);
 
             if (!preserveWhitespace && escapedContent.Any(c => conditionalChars.Contains(c)))
                 escapedContent = trimWhitespace.Replace(escapedContent, " ");
 
-            if (string.IsNullOrWhiteSpace(Content))
-                Content = escapedContent;
+            if (string.IsNullOrWhiteSpace(content))
+                content = escapedContent;
             else
                 // TODO: not sure it should be `string.Empty` as separator
-                Content = string.Join(string.Empty, Content, content);
+                content = string.Join(string.Empty, content, content);
 
             return this;
         }
@@ -84,13 +90,14 @@ namespace Fb2.Document.Models.Base
         public override XElement ToXml()
         {
             var element = base.ToXml();
-            if (!string.IsNullOrWhiteSpace(Content))
-                element.Value = Content;
+            if (!string.IsNullOrWhiteSpace(content))
+                element.Value = content;
 
             return element;
         }
 
-        public override string ToString() => Content;
+        // TODO : double check this, backward-compatibility?
+        public override string ToString() => string.Copy(content);
 
         private static string GetNodeContent([In] XNode node)
             => node.NodeType switch
@@ -100,13 +107,22 @@ namespace Fb2.Document.Models.Base
                 _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
             };
 
+        // TODO : double check implementation validity
         public override bool Equals(object obj)
         {
             return obj is Fb2Element element &&
                    base.Equals(obj) &&
-                   Content == element.Content;
+                   content.Equals(element.content, StringComparison.InvariantCulture);
         }
 
-        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Content);
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);
+
+        public override object Clone()
+        {
+            var element = base.Clone() as Fb2Element;
+            element.content = Content();
+
+            return element;
+        }
     }
 }

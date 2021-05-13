@@ -24,7 +24,7 @@ namespace Fb2.Document.Models
                 AttributeNames.XHref,
                 AttributeNames.Type);
 
-        private HashSet<string> InlineParentNodes => new HashSet<string>
+        private readonly HashSet<string> InlineParentNodes = new HashSet<string>
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -34,7 +34,7 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private HashSet<string> NotInlineParentNodes => new HashSet<string>
+        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,
@@ -43,10 +43,12 @@ namespace Fb2.Document.Models
 
         public override string ToString()
         {
-            var attributeOrDefault =
-                Attributes != null &&
-                Attributes.Any() &&
-                Attributes.ContainsKey(AttributeNames.XHref) ? Attributes[AttributeNames.XHref] : string.Empty;
+            var attrs = Attributes();
+
+            // TODO: remove redundant null checks and stuff
+            var attributeOrDefault = attrs != null && attrs.Any() && attrs.ContainsKey(AttributeNames.XHref) ?
+                attrs[AttributeNames.XHref] :
+                string.Empty;
 
             var formattedAttributeString = string.IsNullOrWhiteSpace(attributeOrDefault) ? string.Empty : " " + attributeOrDefault;
 

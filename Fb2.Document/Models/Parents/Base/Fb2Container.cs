@@ -18,18 +18,26 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
+        //protected List<Fb2Node> content = null; // TODO : init with `null` to use less memory?
+
+        private List<Fb2Node> content = new List<Fb2Node>();
+
         /// <summary>
-        /// Actual Content that is available after `Load()` method call.
-        /// Reflectes content of given `XNode`.
-        /// `CanContainText` property indicates if node can contain text nodes.
+        /// Creates copy of actual content. 
+        /// Actual value is available after `Load()` method call.
         /// </summary>
-        public List<Fb2Node> Content { get; } = new List<Fb2Node>();
+        /// <returns>`List<Fb2Node>` which reflects content of given `XNode`.</returns>
+        // TODO : return IEnumerable<FbNode>
+        public List<Fb2Node> Content() // TODO: this is bad, need to fully clone stuff
+        {
+            return new List<Fb2Node>(content.Select(c => c.Clone() as Fb2Node));
+        }
 
         /// <summary>
         /// Indicates if instance of type Fb2Container can contain text.
         /// `true` if element can contain text, otherwise - `false`.
         /// </summary>
-        public abstract bool CanContainText { get; }
+        public virtual bool CanContainText { get; private set; }
 
         /// <summary>
         /// List of allowed descendant node's names.
@@ -59,10 +67,12 @@ namespace Fb2.Document.Models.Base
             var nodes = element.Nodes()
                 .Where(n => (n.NodeType == XmlNodeType.Text) ||
                             ((n.NodeType == XmlNodeType.Element) &&
-                            Fb2ElementFactory.Instance.KnownNodes.ContainsKey((n as XElement).Name.LocalName.ToLowerInvariant())));
+                            Fb2ElementFactory.IsKnownNode((n as XElement).Name.LocalName.ToLowerInvariant())));
 
             if (!nodes.Any())
                 return;
+
+            //content = new List<Fb2Node>();
 
             foreach (var validNode in nodes)
             {
@@ -70,33 +80,28 @@ namespace Fb2.Document.Models.Base
                     ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
                     ElementNames.FictionText;
 
-                var elem = Fb2ElementFactory.Instance.GetElementByNodeName(localName);
+                var elem = Fb2ElementFactory.GetNodeByName(localName);
                 elem.Load(validNode, preserveWhitespace);
 
                 elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
 
-                Content.Add(elem);
+                content.Add(elem);
             }
         }
 
         public override string ToString()
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return string.Empty;
 
-            StringBuilder sb = new StringBuilder();
+            var builder = new StringBuilder();
 
-            for (int i = 0; i < Content.Count; i++)
-            {
-                var child = Content[i];
-                var childContent = child.ToString();
+            foreach (var child in content)
+                builder.Append(child.IsInline ? child.ToString() : $"{Environment.NewLine}{child}");
 
-                sb.Append(child.IsInline ?
-                    childContent :
-                    $"{Environment.NewLine}{childContent}");
-            }
-
-            return sb.ToString();
+            return builder.ToString();
         }
 
         /// <summary>
@@ -108,15 +113,17 @@ namespace Fb2.Document.Models.Base
         {
             var element = base.ToXml();
 
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return element;
 
-            var children = Content.Select(ToXmlInternal);
+            var children = content.Select(ToXmlInternal);
             element.Add(children);
             return element;
         }
 
-        #region Editing Api
+        #region Node editing
 
         public Fb2Container WithContent(params Func<Fb2Node>[] elementProviders)
         {
@@ -186,14 +193,17 @@ namespace Fb2.Document.Models.Base
             if (!AllowedElements.Contains(element.Name) && !element.Name.Equals(ElementNames.FictionText))
                 throw new ArgumentException($"'{element.Name}' is not valid child for '{Name}'. See {Name}.{nameof(AllowedElements)} for valid content elements.");
 
-            Content.Add(element);
+            //if (content == null)
+            //    content = new List<Fb2Node>();
+
+            content.Add(element);
 
             return this;
         }
 
         #endregion
 
-        #region Node Actions Methods
+        #region Node querying
 
         /// <summary>
         /// Gets children of element by given name. 
@@ -203,9 +213,9 @@ namespace Fb2.Document.Models.Base
         public List<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use `{nameof(Content)}` property directly instead.");
+                throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use `{nameof(Content)}` method instead.");
 
-            return Content.Where(elem => elem.Name.EqualsInvariant(name)).ToList();
+            return Content().Where(elem => elem.Name.EqualsInvariant(name)).ToList();
         }
 
         /// <summary>
@@ -216,8 +226,8 @@ namespace Fb2.Document.Models.Base
         public Fb2Node GetFirstChild(string name)
         {
             return string.IsNullOrWhiteSpace(name) ?
-                            Content.FirstOrDefault() :
-                            Content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
+                            Content().FirstOrDefault() :
+                            Content().FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
         }
 
         /// <summary>
@@ -227,14 +237,16 @@ namespace Fb2.Document.Models.Base
         /// <returns>List of found descendants, if any.</returns>
         public List<Fb2Node> GetDescendants(string name)
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
             List<Fb2Node> result = new List<Fb2Node>();
 
             var isEmptyName = string.IsNullOrWhiteSpace(name);
 
-            foreach (var element in Content)
+            foreach (var element in content)
             {
                 if (isEmptyName || element.Name.EqualsInvariant(name))
                     result.Add(element);
@@ -261,10 +273,12 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use {nameof(GetFirstChild)} method instead.");
 
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
-            foreach (var element in Content)
+            foreach (var element in content)
             {
                 if (element.Name.EqualsInvariant(name))
                     return element;
@@ -301,14 +315,13 @@ namespace Fb2.Document.Models.Base
         /// <returns>List of found child elements, if any.</returns>
         public List<T> GetChildren<T>() where T : Fb2Node
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
-            IEnumerable<Fb2Node> result = null;
-
-            var predicate = PredicateResolver.Instance.GetPredicate<T>();
-
-            result = Content.Where(predicate);
+            var predicate = PredicateResolver.GetPredicate<T>();
+            var result = content.Where(predicate);
 
             if (result == null || !result.Any())
                 return null;
@@ -323,13 +336,13 @@ namespace Fb2.Document.Models.Base
         /// <returns>First matched child node</returns>
         public T GetFirstChild<T>() where T : Fb2Node
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
-            Fb2Node result = null;
-
-            var predicate = PredicateResolver.Instance.GetPredicate<T>();
-            result = Content.FirstOrDefault(predicate);
+            var predicate = PredicateResolver.GetPredicate<T>();
+            var result = content.FirstOrDefault(predicate);
 
             if (result == null)
                 return null;
@@ -371,15 +384,17 @@ namespace Fb2.Document.Models.Base
         private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
             List<Fb2Node> result = new List<Fb2Node>();
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicate<T>();
+                predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in Content)
+            foreach (var element in content)
             {
                 if (predicate(element))
                     result.Add(element);
@@ -398,13 +413,15 @@ namespace Fb2.Document.Models.Base
         private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
-            if (Content == null || !Content.Any())
+            var content = Content();
+
+            if (content == null || !content.Any())
                 return null;
 
             if (predicate == null)
-                predicate = PredicateResolver.Instance.GetPredicate<T>();
+                predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in Content)
+            foreach (var element in content)
             {
                 if (predicate(element))
                     return (T)element;
@@ -433,7 +450,7 @@ namespace Fb2.Document.Models.Base
 
         private void WithContentSafe(Action contentUpdate)
         {
-            var backupContent = new List<Fb2Node>(Content);
+            var backupContent = Content();
 
             try
             {
@@ -441,8 +458,8 @@ namespace Fb2.Document.Models.Base
             }
             catch (Exception)
             {
-                Content.Clear(); // drop all changes if any
-                Content.AddRange(backupContent);
+                content.Clear(); // drop all changes if any
+                content.AddRange(backupContent);
 
                 throw; // rollback and throw - no changes saved, no side-effects etc
             }
@@ -456,10 +473,19 @@ namespace Fb2.Document.Models.Base
                    base.Equals(obj) &&
                    CanContainText == container.CanContainText &&
                    // TODO: check if EqualityComparer is fine
-                   EqualityComparer<List<Fb2Node>>.Default.Equals(Content, container.Content) &&
+                   EqualityComparer<List<Fb2Node>>.Default.Equals(content, container.content) &&
                    EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedElements, container.AllowedElements);
         }
 
-        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, Content, AllowedElements);
+        public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
+
+        public sealed override object Clone()
+        {
+            var container = base.Clone() as Fb2Container;
+            container.content = Content();
+            container.CanContainText = CanContainText;
+
+            return container;
+        }
     }
 }

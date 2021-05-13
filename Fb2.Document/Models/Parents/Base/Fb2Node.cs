@@ -7,6 +7,7 @@ using System.Security;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Fb2.Document.Extensions;
+using Fb2.Document.Factories;
 
 namespace Fb2.Document.Models.Base
 {
@@ -14,21 +15,29 @@ namespace Fb2.Document.Models.Base
     /// Base class - describes basic node of fb2 document.
     /// Has Name, list of valid attributes and actual attribute values
     /// </summary>
-    public abstract class Fb2Node
+    public abstract class Fb2Node : ICloneable
     {
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
 
         protected static readonly HashSet<char> conditionalChars = new HashSet<char> { '\n', '\r', '\t' };
+
+        private Dictionary<string, string> attributes = new Dictionary<string, string>();
 
         /// <summary>
         /// Node name, used during document parsing and validation.
         /// </summary>
         public abstract string Name { get; }
 
-        /// <summary>
-        /// Gets actual element attributes in key - value (Dictionary) form.
-        /// </summary>
-        public Dictionary<string, string> Attributes { get; private set; }
+        // /// <summary>
+        // /// Gets actual element attributes in key - value (Dictionary) form.
+        // /// </summary>
+        // public Dictionary<string, string> Attributes { get; private set; }
+
+        // TODO: check for reference-safety
+        public Dictionary<string, string> Attributes()
+        {
+            return new Dictionary<string, string>(attributes);
+        }
 
         /// <summary>
         /// List of allowed attribures for particular element.
@@ -68,11 +77,11 @@ namespace Fb2.Document.Models.Base
             if (!filteredAttributes.Any())
                 return;
 
-            if (Attributes == null)
-                Attributes = new Dictionary<string, string>();
+            //if (Attributes == null)
+            //    Attributes = new Dictionary<string, string>();
 
             foreach (var kvp in filteredAttributes)
-                Attributes.Add(kvp.Key, kvp.Value);
+                attributes.Add(kvp.Key, kvp.Value);
         }
 
         /// <summary>
@@ -83,13 +92,15 @@ namespace Fb2.Document.Models.Base
         {
             XElement element = null;
 
-            if (Attributes != null && Attributes.Any())
-                element = new XElement(Name, Attributes.Select(attr => new XAttribute(attr.Key, attr.Value)));
+            if (attributes != null && attributes.Any())
+                element = new XElement(Name, attributes.Select(attr => new XAttribute(attr.Key, attr.Value)));
             else
                 element = new XElement(Name);
 
             return element;
         }
+
+        #region Node querying
 
         /// <summary>
         /// Checks if node has attribute(s) with given key
@@ -102,10 +113,12 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
 
-            if (Attributes == null || !Attributes.Any())
+            var attributes = Attributes();
+
+            if (attributes == null || !attributes.Any())
                 return false;
 
-            return Attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            return attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
         }
 
         /// <summary>
@@ -121,7 +134,9 @@ namespace Fb2.Document.Models.Base
             if (!HasAttribute(key, ignoreCase))
                 return default;
 
-            var attribute = Attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            var attributes = Attributes();
+
+            var attribute = attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
 
             return attribute;
         }
@@ -141,6 +156,10 @@ namespace Fb2.Document.Models.Base
             result = attribute;
             return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
         }
+
+        #endregion
+
+        #region Node editing
 
         public Fb2Node WithAttribute(params Func<KeyValuePair<string, string>>[] attributeProviders)
         {
@@ -211,20 +230,23 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Contains(escapedAttrName))
                 throw new ArgumentException($"Attribute {attributeName} is not valid for {Name} node.");
 
-            if (Attributes == null)
-                Attributes = new Dictionary<string, string>();
+            //if (attributes == null)
+            //    attributes = new Dictionary<string, string>();
 
-            Attributes[attributeName] = escapedAttrValue;
+            attributes[attributeName] = escapedAttrValue;
 
             return this;
         }
+
+        #endregion
 
         private void WithAttributeSafe(Action attributesUpdate)
         {
             if (attributesUpdate == null)
                 throw new ArgumentNullException($"{nameof(attributesUpdate)}");
 
-            var prevAttributes = Attributes == null ? null : new Dictionary<string, string>(Attributes);
+            // should work as Dictionary works with primitives only
+            var prevAttributes = attributes == null ? null : new Dictionary<string, string>(attributes);
 
             try
             {
@@ -232,8 +254,8 @@ namespace Fb2.Document.Models.Base
             }
             catch (Exception)
             {
-                Attributes?.Clear();
-                Attributes = prevAttributes;
+                attributes?.Clear();
+                attributes = prevAttributes;
                 throw;
             }
         }
@@ -258,12 +280,27 @@ namespace Fb2.Document.Models.Base
             return obj is Fb2Node node &&
                    Name == node.Name &&
                    //TODO: really, visual studio???
-                   EqualityComparer<Dictionary<string, string>>.Default.Equals(Attributes, node.Attributes) &&
+                   EqualityComparer<Dictionary<string, string>>.Default.Equals(attributes, node.attributes) &&
                    EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedAttributes, node.AllowedAttributes) &&
                    IsInline == node.IsInline &&
                    Unsafe == node.Unsafe;
         }
 
-        public override int GetHashCode() => HashCode.Combine(Name, Attributes, AllowedAttributes, IsInline, Unsafe);
+        public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, Unsafe);
+
+        public virtual object Clone()
+        {
+            var node = Fb2ElementFactory.GetNodeByName(Name);
+
+            // TODO : chech if it saves references to keyValuePair's strings
+            // if it does, it's bad ))
+            if (attributes.Any())
+                node.attributes = Attributes();
+
+            node.IsInline = IsInline;
+            node.Unsafe = Unsafe;
+
+            return node;
+        }
     }
 }

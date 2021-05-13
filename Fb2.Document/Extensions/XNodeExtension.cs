@@ -6,7 +6,7 @@ namespace Fb2.Document.Extensions
 {
     internal static class XNodeExtension
     {
-        public static void Validate(this XNode node, string supposedName)
+        internal static void Validate(this XNode node, string supposedName)
         {
             if (string.IsNullOrWhiteSpace(supposedName))
                 throw new ArgumentNullException($"{nameof(supposedName)} is null or empty string");
