@@ -14,6 +14,8 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
+        const string Whitespace = " ";
+
         protected string content = string.Empty;
 
         /// <summary>
@@ -40,43 +42,52 @@ namespace Fb2.Document.Models.Base
             var rawContent = GetNodeContent(node);
 
             if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
-                content = trimWhitespace.Replace(rawContent, " ");
+                content = trimWhitespace.Replace(rawContent, Whitespace);
             else
                 content = rawContent;
         }
 
-        //public virtual Fb2Element WithContent(Func<string> contentProvider, bool preserveWhitespace = false)
-        public Fb2Element WithContent(Func<string> contentProvider, bool preserveWhitespace = false)
+        public Fb2Element WithContent(Func<string> contentProvider,
+            string separator = null,
+            bool preserveWhitespace = false)
         {
             if (contentProvider == null)
                 throw new ArgumentNullException($"{nameof(contentProvider)} is null.");
 
             var content = contentProvider();
 
-            return WithContent(content, preserveWhitespace);
+            return WithContent(content, separator, preserveWhitespace);
         }
 
-        // TODO : add separator params?
-        //public virtual Fb2Element WithContent(string content, bool preserveWhitespace = false)
-        public Fb2Element WithContent(string content, bool preserveWhitespace = false)
+        public Fb2Element WithContent(string newContent,
+            string separator = null,
+            bool preserveWhitespace = false)
         {
-            if (string.IsNullOrWhiteSpace(content))
-                throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
+            if (string.IsNullOrWhiteSpace(newContent))
+                throw new ArgumentNullException($"{nameof(newContent)} is null or empty string.");
 
             if (Name == ElementNames.EmptyLine)
                 return this; // no content injections in empty line )
 
+            // todo: move to separate method "NormalizeString" or so?
+            if (string.IsNullOrWhiteSpace(separator))
+                separator = string.Empty;
+            else
+            {
+                separator = SecurityElement.Escape(separator);
+                separator = trimWhitespace.Replace(separator, Whitespace);
+            }
+
             // preventing xml injections, hopefully
-            var escapedContent = SecurityElement.Escape(content);
+            var escapedContent = SecurityElement.Escape(newContent);
 
             if (!preserveWhitespace && escapedContent.Any(c => conditionalChars.Contains(c)))
-                escapedContent = trimWhitespace.Replace(escapedContent, " ");
+                escapedContent = trimWhitespace.Replace(escapedContent, Whitespace);
 
             if (string.IsNullOrWhiteSpace(content))
                 content = escapedContent;
             else
-                // TODO: not sure it should be `string.Empty` as separator
-                content = string.Join(string.Empty, content, content);
+                content = string.Join(separator, content, escapedContent);
 
             return this;
         }
