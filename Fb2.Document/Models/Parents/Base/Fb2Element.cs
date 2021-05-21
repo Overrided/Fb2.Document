@@ -14,7 +14,7 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
-        const string Whitespace = " ";
+        private const string Whitespace = " ";
 
         protected string content = string.Empty;
 
@@ -78,8 +78,8 @@ namespace Fb2.Document.Models.Base
                 separator = trimWhitespace.Replace(separator, Whitespace);
             }
 
-            // preventing xml injections, hopefully
-            var escapedContent = SecurityElement.Escape(newContent);
+            // preventing xml injections and creating new reference
+            var escapedContent = string.Copy(SecurityElement.Escape(newContent));
 
             if (!preserveWhitespace && escapedContent.Any(c => conditionalChars.Contains(c)))
                 escapedContent = trimWhitespace.Replace(escapedContent, Whitespace);
@@ -119,11 +119,18 @@ namespace Fb2.Document.Models.Base
             };
 
         // TODO : double check implementation validity
-        public override bool Equals(object obj)
+        public override bool Equals(object other)
         {
-            return obj is Fb2Element element &&
-                   base.Equals(obj) &&
-                   content.Equals(element.content, StringComparison.InvariantCulture);
+            if (!(other is Fb2Element otherElement))
+                return false;
+
+            //var sameContent = content.Equals(otherElement.content, StringComparison.InvariantCulture);
+            //var baseEquality = base.Equals(other);
+            //var result = sameContent && baseEquality;
+
+            var result = base.Equals(other) && content.Equals(otherElement.content, StringComparison.InvariantCulture);
+
+            return result;
         }
 
         public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);

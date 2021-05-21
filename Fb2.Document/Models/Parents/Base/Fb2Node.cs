@@ -34,10 +34,7 @@ namespace Fb2.Document.Models.Base
         // public Dictionary<string, string> Attributes { get; private set; }
 
         // TODO: check for reference-safety
-        public Dictionary<string, string> Attributes()
-        {
-            return new Dictionary<string, string>(attributes);
-        }
+        public Dictionary<string, string> Attributes() => new Dictionary<string, string>(attributes);
 
         /// <summary>
         /// List of allowed attribures for particular element.
@@ -76,9 +73,6 @@ namespace Fb2.Document.Models.Base
 
             if (!filteredAttributes.Any())
                 return;
-
-            //if (Attributes == null)
-            //    Attributes = new Dictionary<string, string>();
 
             foreach (var kvp in filteredAttributes)
                 attributes.Add(kvp.Key, kvp.Value);
@@ -275,15 +269,49 @@ namespace Fb2.Document.Models.Base
             return true;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object other)
         {
-            return obj is Fb2Node node &&
-                   Name == node.Name &&
-                   //TODO: really, visual studio???
-                   EqualityComparer<Dictionary<string, string>>.Default.Equals(attributes, node.attributes) &&
-                   EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedAttributes, node.AllowedAttributes) &&
-                   IsInline == node.IsInline &&
-                   Unsafe == node.Unsafe;
+            if (!(other is Fb2Node otherNode))
+                return false;
+
+            var result = Name == otherNode.Name &&
+                        AreAttributesEqual(otherNode.attributes) &&
+                        AreAllowedAttributesEqual(otherNode.AllowedAttributes) &&
+                        IsInline == otherNode.IsInline &&
+                        Unsafe == otherNode.Unsafe;
+
+            return result;
+        }
+
+        private bool AreAllowedAttributesEqual(ImmutableHashSet<string> otherAllowedAttributes)
+        {
+            if (AllowedAttributes == null && otherAllowedAttributes == null)
+                return true;
+
+            if ((AllowedAttributes != null && otherAllowedAttributes == null) ||
+                (AllowedAttributes == null && otherAllowedAttributes != null))
+                return false;
+
+            if (AllowedAttributes.Count != otherAllowedAttributes.Count)
+                return false;
+
+            return AllowedAttributes.SequenceEqual(otherAllowedAttributes);
+        }
+
+        private bool AreAttributesEqual(Dictionary<string, string> otherAttributes)
+        {
+            if (attributes == null && otherAttributes == null)
+                return true;
+
+            if ((attributes != null && otherAttributes == null) ||
+                (attributes == null && otherAttributes != null))
+                return false;
+
+            var sameAttrs = attributes.Keys.Count == otherAttributes.Keys.Count &&
+                attributes.Keys.All(k => otherAttributes.ContainsKey(k) &&
+                string.Equals(attributes[k], otherAttributes[k], StringComparison.InvariantCultureIgnoreCase));
+
+            return sameAttrs;
         }
 
         public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, Unsafe);

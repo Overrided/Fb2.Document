@@ -25,11 +25,8 @@ namespace Fb2.Document.Models.Base
         /// Actual value is available after `Load()` method call.
         /// </summary>
         /// <returns>`List<Fb2Node>` which reflects content of given `XNode`.</returns>
-        // TODO : return IEnumerable<FbNode>
-        public List<Fb2Node> Content() // TODO: this is bad, need to fully clone stuff
-        {
-            return new List<Fb2Node>(content.Select(c => c.Clone() as Fb2Node));
-        }
+        // TODO: check if equality override is ok + check if cloning is done right
+        public IEnumerable<Fb2Node> Content() => content.Select(c => c.Clone() as Fb2Node);
 
         /// <summary>
         /// Indicates if instance of type Fb2Container can contain text.
@@ -69,8 +66,6 @@ namespace Fb2.Document.Models.Base
 
             if (!nodes.Any())
                 return;
-
-            //content = new List<Fb2Node>();
 
             foreach (var validNode in nodes)
             {
@@ -461,14 +456,21 @@ namespace Fb2.Document.Models.Base
 
         #endregion
 
-        public override bool Equals(object obj)
+        public override bool Equals(object other)
         {
-            return obj is Fb2Container container &&
-                   base.Equals(obj) &&
-                   CanContainText == container.CanContainText &&
-                   // TODO: check if EqualityComparer is fine
-                   EqualityComparer<List<Fb2Node>>.Default.Equals(content, container.content) &&
-                   EqualityComparer<ImmutableHashSet<string>>.Default.Equals(AllowedElements, container.AllowedElements);
+            if (!(other is Fb2Container otherContainer))
+                return false;
+
+            var actualContent = content;
+            var otherContent = otherContainer.content;
+            var sameContent = actualContent.Count == otherContent.Count && actualContent.All(c => otherContent.Contains(c));
+
+            var result = sameContent &&
+                base.Equals(other) &&
+                CanContainText == otherContainer.CanContainText &&
+                AllowedElements.SequenceEqual(otherContainer.AllowedElements);
+
+            return result;
         }
 
         public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
@@ -476,7 +478,7 @@ namespace Fb2.Document.Models.Base
         public sealed override object Clone()
         {
             var container = base.Clone() as Fb2Container;
-            container.content = Content();
+            container.content = new List<Fb2Node>(Content());
             container.CanContainText = CanContainText;
 
             return container;
