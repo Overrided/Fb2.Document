@@ -155,7 +155,7 @@ namespace Fb2.Document.Models.Base
 
         #region Node editing
 
-        public Fb2Node WithAttribute(params Func<KeyValuePair<string, string>>[] attributeProviders)
+        public Fb2Node WithAttributes(params Func<KeyValuePair<string, string>>[] attributeProviders)
         {
             if (attributeProviders == null ||
                 !attributeProviders.Any() ||
@@ -173,14 +173,17 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Node WithAttribute(params KeyValuePair<string, string>[] attributes)
+        public Fb2Node WithAttributes(params KeyValuePair<string, string>[] attributes)
         {
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException($"No {nameof(attributes)} received.");
 
+            var notEmptyAttributes = attributes
+                .Where(a => !string.IsNullOrWhiteSpace(a.Key) && !string.IsNullOrWhiteSpace(a.Value));
+
             WithAttributeSafe(() =>
             {
-                foreach (var attribute in attributes)
+                foreach (var attribute in notEmptyAttributes)
                     WithAttribute(attribute);
             });
 
@@ -224,9 +227,6 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Contains(escapedAttrName))
                 throw new ArgumentException($"Attribute {attributeName} is not valid for {Name} node.");
 
-            //if (attributes == null)
-            //    attributes = new Dictionary<string, string>();
-
             attributes[attributeName] = escapedAttrValue;
 
             return this;
@@ -239,8 +239,7 @@ namespace Fb2.Document.Models.Base
             if (attributesUpdate == null)
                 throw new ArgumentNullException($"{nameof(attributesUpdate)}");
 
-            // should work as Dictionary works with primitives only
-            var prevAttributes = attributes == null ? null : new Dictionary<string, string>(attributes);
+            var prevAttributes = Attributes();
 
             try
             {
@@ -271,6 +270,12 @@ namespace Fb2.Document.Models.Base
 
         public override bool Equals(object other)
         {
+            if (other == null)
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
             if (!(other is Fb2Node otherNode))
                 return false;
 

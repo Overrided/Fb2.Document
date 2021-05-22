@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<FictionBook>
+  <stylesheet type="text/css">
+    body {
+    text-align:justify
+    }
+    stanza {
+    margin: 0.4em 0em 0.4em 1em;
+    }
+  </stylesheet>
+
+  <description>
+    <title-info>
+      <genre match="90">sf</genre>
+      <genre>sf_space</genre>
+
+      <author>
+        <first-name lang="en-us">Test_FName</first-name>
+        <middle-name>Test_MName</middle-name>
+        <last-name>Test_LName</last-name>
+        <nickname>Test_NName</nickname>
+        <home-page>test-homepage</home-page>
+        <email>test@fb2.lol</email>
+        <email>test2@fb2.lol</email>
+        <id>a17e1e96-6ffe-4619-a088-f8ce0495393e</id>
+      </author>
+
+      <book-title>Test book title</book-title>
+      <annotation>
+        <p>
+          Gotta have <strong>short</strong>, but really <strong>impressive</strong> description<sup>
+            <a href="#n_17" type="note">[17]</a>
+          </sup> of a given book.
+        </p>
+        <p>
+          This document was created for integration tests.
+        </p>
+        <empty-line/>
+        <poem>
+          <title>
+            <p>TEST POEM</p>
+            <empty-line/>
+            <p>TITLE</p>
+          </title>
+          <epigraph>
+            <p>Test epigraph here</p>
+            <text-author>
+              Epigraph <sup>
+                <a href="#n_1" type="note">[1]</a>
+              </sup> author
+            </text-author>
+          </epigraph>
+          <stanza>
+            <subtitle>simple stanza subtitle</subtitle>
+            <v>first v</v>
+            <v>second v</v>
+          </stanza>
+          <stanza>
+            <subtitle>simple stanza subtitle 2</subtitle>
+            <v>first v</v>
+            <v>second v</v>
+          </stanza>
+          <text-author>
+            <strong>
+              <emphasis>
+                Test author
+              </emphasis>
+            </strong>
+          </text-author>
+          <date>05.18.2021</date>
+        </poem>
+        <empty-line/>
+        <cite>
+          <p>Test cite start here</p>
+          <empty-line/>
+          <subtitle>Cite subtitle</subtitle>
+          <text-author>
+            <strong>
+              <emphasis>
+                Test author
+              </emphasis>
+            </strong>
+          </text-author>
+        </cite>
+      </annotation>
+      <keywords>test, integration, e2e, smoke test</keywords>
+      <date>05.18.2021</date>
+      <coverpage></coverpage>
+      <lang>En-us</lang>
+      <src-lang>Ukrainian</src-lang>
+      <translator>Noone :) (Test translator lol)</translator>
+      <sequence name="integration tests" number="1"/>
+    </title-info>
+
+    <src-title-info>
+      <genre></genre>
+      <author></author>
+      <book-title></book-title>
+      <annotation></annotation>
+      <keywords></keywords>
+      <date></date>
+      <coverpage></coverpage>
+      <lang></lang>
+      <src-lang></src-lang>
+      <translator></translator>
+      <sequence></sequence>
+    </src-title-info>
+
+    <document-info>
+      <author>
+        <first-name lang="en-us">Test_FName</first-name>
+        <middle-name>Test_MName</middle-name>
+        <last-name>Test_LName</last-name>
+        <nickname>Test_NName</nickname>
+        <home-page>test-homepage</home-page>
+        <email>test@fb2.lol</email>
+        <email>test2@fb2.lol</email>
+        <id>a17e1e96-6ffe-4619-a088-f8ce0495393e</id>
+      </author>
+      <program-used>
+        Hand-crafted for testing purposes :)
+      </program-used>
+    </document-info>
+
+    <publish-info>
+
+    </publish-info>
+
+    <custom-info>
+
+    </custom-info>
+
+    <output>
+
+    </output>
+  </description>
+
+  <body></body>
+
+  <binary></binary>
+
+</FictionBook>

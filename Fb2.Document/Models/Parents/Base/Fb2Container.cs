@@ -458,6 +458,9 @@ namespace Fb2.Document.Models.Base
 
         public override bool Equals(object other)
         {
+            if (!base.Equals(other))
+                return false;
+
             if (!(other is Fb2Container otherContainer))
                 return false;
 
@@ -466,7 +469,6 @@ namespace Fb2.Document.Models.Base
             var sameContent = actualContent.Count == otherContent.Count && actualContent.All(c => otherContent.Contains(c));
 
             var result = sameContent &&
-                base.Equals(other) &&
                 CanContainText == otherContainer.CanContainText &&
                 AllowedElements.SequenceEqual(otherContainer.AllowedElements);
 

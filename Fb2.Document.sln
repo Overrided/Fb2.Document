@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Tests", "Fb2.Document.Tests\Fb2.Document.Tests.csproj", "{5B659BAC-35B0-42F8-B643-551B8D2D39E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Documents.TestsV2", "Fb2.Documents.TestsV2\Fb2.Documents.TestsV2.csproj", "{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{5B659BAC-35B0-42F8-B643-551B8D2D39E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B659BAC-35B0-42F8-B643-551B8D2D39E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B659BAC-35B0-42F8-B643-551B8D2D39E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
