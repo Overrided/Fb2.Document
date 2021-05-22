@@ -107,12 +107,12 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
 
-            var attributes = Attributes();
+            var actualAttributes = Attributes();
 
-            if (attributes == null || !attributes.Any())
+            if (actualAttributes == null || !actualAttributes.Any())
                 return false;
 
-            return attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            return actualAttributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
         }
 
         /// <summary>
@@ -128,16 +128,15 @@ namespace Fb2.Document.Models.Base
             if (!HasAttribute(key, ignoreCase))
                 return default;
 
-            var attributes = Attributes();
+            var actualAttributes = Attributes();
 
-            var attribute = attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            var attribute = actualAttributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
 
             return attribute;
         }
 
         /// <summary>
-        /// Returns true if attribute found by given key, otherwise false.
-        /// If none attribute found, result contains default value.
+        /// Looks for attribute by given `attributeName`
         /// </summary>
         /// <param name="key">Key to search attribute by</param>
         /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
@@ -155,7 +154,7 @@ namespace Fb2.Document.Models.Base
 
         #region Node editing
 
-        public Fb2Node WithAttributes(params Func<KeyValuePair<string, string>>[] attributeProviders)
+        public Fb2Node AddAttributes(params Func<KeyValuePair<string, string>>[] attributeProviders)
         {
             if (attributeProviders == null ||
                 !attributeProviders.Any() ||
@@ -164,16 +163,16 @@ namespace Fb2.Document.Models.Base
 
             var notNullProviders = attributeProviders.Where(ap => ap != null);
 
-            WithAttributeSafe(() =>
+            AddAttributeSafe(() =>
             {
                 foreach (var provider in notNullProviders)
-                    WithAttribute(provider);
+                    AddAttribute(provider);
             });
 
             return this;
         }
 
-        public Fb2Node WithAttributes(params KeyValuePair<string, string>[] attributes)
+        public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException($"No {nameof(attributes)} received.");
@@ -181,29 +180,29 @@ namespace Fb2.Document.Models.Base
             var notEmptyAttributes = attributes
                 .Where(a => !string.IsNullOrWhiteSpace(a.Key) && !string.IsNullOrWhiteSpace(a.Value));
 
-            WithAttributeSafe(() =>
+            AddAttributeSafe(() =>
             {
                 foreach (var attribute in notEmptyAttributes)
-                    WithAttribute(attribute);
+                    AddAttribute(attribute);
             });
 
             return this;
         }
 
-        public Fb2Node WithAttribute(Func<KeyValuePair<string, string>> attributeProvider)
+        public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
         {
             if (attributeProvider == null)
                 throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
 
             var attribute = attributeProvider();
 
-            return WithAttribute(attribute);
+            return AddAttribute(attribute);
         }
 
-        public Fb2Node WithAttribute(KeyValuePair<string, string> attribute) =>
-            WithAttribute(attribute.Key, attribute.Value);
+        public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
+            AddAttribute(attribute.Key, attribute.Value);
 
-        public Fb2Node WithAttribute(string attributeName, string attributeValue)
+        public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
             if (AllowedAttributes == null || !AllowedAttributes.Any())
                 throw new InvalidOperationException($"Node {Name} has no defined attributes.");
@@ -220,7 +219,6 @@ namespace Fb2.Document.Models.Base
             if (attributeValue.Any(c => conditionalChars.Contains(c)))
                 attributeValue = trimWhitespace.Replace(attributeValue, " ");
 
-            // TODO : encode name & value to prevent injections
             var escapedAttrName = SecurityElement.Escape(attributeName);
             var escapedAttrValue = SecurityElement.Escape(attributeValue);
 
@@ -232,9 +230,71 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        public Fb2Node RemoveAttribute(string attributeName, bool ignoreCase = false)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
+
+            if (!TryGetAttribute(attributeName, ignoreCase, out var result))
+                return this;
+
+            attributes.Remove(result.Key);
+
+            return this;
+        }
+
+        public Fb2Node RemoveAttribute(string attributeName, out bool removed, bool ignoreCase = false)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
+
+            if (!TryGetAttribute(attributeName, ignoreCase, out var result))
+            {
+                removed = false;
+                return this;
+            }
+
+            removed = attributes.Remove(result.Key);
+            return this;
+        }
+
+        public Fb2Node RemoveAttribute(Func<string, bool> keyPredicate)
+        {
+            if (keyPredicate == null)
+                throw new ArgumentNullException($"{nameof(keyPredicate)} is null");
+
+            if (!attributes.Any())
+                return this;
+
+            foreach (var attribute in attributes)
+            {
+                if (keyPredicate(attribute.Key))
+                    attributes.Remove(attribute.Key);
+            }
+
+            return this;
+        }
+
+        public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
+        {
+            if (attributePredicate == null)
+                throw new ArgumentNullException($"{nameof(attributePredicate)} is null");
+
+            if (!attributes.Any())
+                return this;
+
+            foreach (var attribute in attributes)
+            {
+                if (attributePredicate(attribute))
+                    attributes.Remove(attribute.Key);
+            }
+
+            return this;
+        }
+
         #endregion
 
-        private void WithAttributeSafe(Action attributesUpdate)
+        private void AddAttributeSafe(Action attributesUpdate)
         {
             if (attributesUpdate == null)
                 throw new ArgumentNullException($"{nameof(attributesUpdate)}");

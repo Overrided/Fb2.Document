@@ -119,34 +119,34 @@ namespace Fb2.Document.Models.Base
 
         #region Node editing
 
-        public Fb2Container WithContent(params Func<Fb2Node>[] elementProviders)
+        public Fb2Container AddContent(params Func<Fb2Node>[] nodeProviders)
         {
-            if (elementProviders == null ||
-                !elementProviders.Any() ||
-                elementProviders.All(e => e == null))
-                throw new ArgumentNullException($"No {nameof(elementProviders)} received");
+            if (nodeProviders == null ||
+                !nodeProviders.Any() ||
+                nodeProviders.All(e => e == null))
+                throw new ArgumentNullException($"No {nameof(nodeProviders)} received");
 
-            var notNullNodesProviders = elementProviders.Where(n => n != null); // check if needed
+            var notNullNodeProviders = nodeProviders.Where(n => n != null); // check if needed
 
             WithContentSafe(() =>
             {
-                foreach (var nodeProvider in notNullNodesProviders)
-                    WithContent(nodeProvider);
+                foreach (var nodeProvider in notNullNodeProviders)
+                    AddContent(nodeProvider);
             });
 
             return this;
         }
 
-        public Fb2Container WithContent(Func<Fb2Node> elementProvider)
+        public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
         {
-            if (elementProvider == null)
-                throw new ArgumentNullException($"{nameof(elementProvider)} is null");
+            if (nodeProvider == null)
+                throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
 
-            var element = elementProvider();
-            return WithContent(element);
+            var node = nodeProvider();
+            return AddContent(node);
         }
 
-        public Fb2Container WithContent(params Fb2Node[] nodes)
+        public Fb2Container AddContent(params Fb2Node[] nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
                 throw new ArgumentNullException("No nodes received");
@@ -156,13 +156,13 @@ namespace Fb2.Document.Models.Base
             WithContentSafe(() =>
             {
                 foreach (var node in notNullNodes)
-                    WithContent(node);
+                    AddContent(node);
             });
 
             return this;
         }
 
-        public Fb2Container WithTextContent(string content,
+        public Fb2Container AddTextContent(string content,
             string separator = null,
             bool preserveWhitespace = false)
         {
@@ -172,23 +172,51 @@ namespace Fb2.Document.Models.Base
             if (!CanContainText)
                 throw new ArgumentException($"Element {Name} is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
 
-            var textItem = new TextItem().WithContent(content, separator, preserveWhitespace);
+            var textItem = new TextItem().AddContent(content, separator, preserveWhitespace);
 
-            return WithContent(textItem);
+            return AddContent(textItem);
         }
 
-        public Fb2Container WithContent(Fb2Node element)
+        public Fb2Container AddContent(Fb2Node node)
         {
-            if (element == null)
-                throw new ArgumentNullException($"{nameof(element)} is null.");
+            if (node == null)
+                throw new ArgumentNullException($"{nameof(node)} is null.");
 
-            if (element.Name.Equals(ElementNames.FictionText) && !CanContainText)
+            if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
                 throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
 
-            if (!AllowedElements.Contains(element.Name) && !element.Name.Equals(ElementNames.FictionText))
-                throw new ArgumentException($"'{element.Name}' is not valid child for '{Name}'. See {Name}.{nameof(AllowedElements)} for valid content elements.");
+            if (!AllowedElements.Contains(node.Name) && !node.Name.Equals(ElementNames.FictionText))
+                throw new ArgumentException($"'{node.Name}' is not valid child for '{Name}'. See {Name}.{nameof(AllowedElements)} for valid content elements.");
 
-            content.Add(element);
+            content.Add(node);
+
+            return this;
+        }
+
+        public Fb2Container RemoveContent(Fb2Node node)
+        {
+            if (node == null)
+                throw new ArgumentNullException($"{nameof(node)} is null.");
+
+            if (content.Any())
+                content.Remove(node);
+
+            return this;
+        }
+
+        public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
+        {
+            if (nodePredicate == null)
+                throw new ArgumentNullException($"{nameof(nodePredicate)} is null.");
+
+            if (!content.Any())
+                return this;
+
+            foreach (var item in content)
+            {
+                if (nodePredicate(item))
+                    content.Remove(item);
+            }
 
             return this;
         }

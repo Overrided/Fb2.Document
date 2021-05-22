@@ -47,7 +47,7 @@ namespace Fb2.Document.Models.Base
                 content = rawContent;
         }
 
-        public Fb2Element WithContent(Func<string> contentProvider,
+        public Fb2Element AddContent(Func<string> contentProvider,
             string separator = null,
             bool preserveWhitespace = false)
         {
@@ -56,10 +56,10 @@ namespace Fb2.Document.Models.Base
 
             var content = contentProvider();
 
-            return WithContent(content, separator, preserveWhitespace);
+            return AddContent(content, separator, preserveWhitespace);
         }
 
-        public Fb2Element WithContent(string newContent,
+        public Fb2Element AddContent(string newContent,
             string separator = null,
             bool preserveWhitespace = false)
         {
@@ -69,14 +69,9 @@ namespace Fb2.Document.Models.Base
             if (Name == ElementNames.EmptyLine)
                 return this; // no content injections in empty line )
 
-            // todo: move to separate method "NormalizeString" or so?
-            if (string.IsNullOrWhiteSpace(separator))
-                separator = string.Empty;
-            else
-            {
-                separator = SecurityElement.Escape(separator);
-                separator = trimWhitespace.Replace(separator, Whitespace);
-            }
+            separator = string.IsNullOrWhiteSpace(separator) ?
+                string.Empty :
+                trimWhitespace.Replace(SecurityElement.Escape(separator), Whitespace);
 
             // preventing xml injections and creating new reference
             var escapedContent = string.Copy(SecurityElement.Escape(newContent));
@@ -88,6 +83,14 @@ namespace Fb2.Document.Models.Base
                 content = escapedContent;
             else
                 content = string.Join(separator, content, escapedContent);
+
+            return this;
+        }
+
+        public Fb2Element RemoveContent()
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+                content = string.Empty;
 
             return this;
         }

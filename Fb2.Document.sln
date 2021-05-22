@@ -8,13 +8,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{7D1A37B2-70C3-416C-9327-94C5862F9D94}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		License.md = License.md
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Tests", "Fb2.Document.Tests\Fb2.Document.Tests.csproj", "{5B659BAC-35B0-42F8-B643-551B8D2D39E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Documents.TestsV2", "Fb2.Documents.TestsV2\Fb2.Documents.TestsV2.csproj", "{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Documents.TestsV2", "Fb2.Documents.TestsV2\Fb2.Documents.TestsV2.csproj", "{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
