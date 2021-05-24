@@ -117,7 +117,7 @@ namespace Fb2.Document.Models.Base
             return element;
         }
 
-        #region Node editing
+        #region Content editing
 
         public Fb2Container AddContent(params Func<Fb2Node>[] nodeProviders)
         {
@@ -128,7 +128,7 @@ namespace Fb2.Document.Models.Base
 
             var notNullNodeProviders = nodeProviders.Where(n => n != null); // check if needed
 
-            WithContentSafe(() =>
+            ModifyContentSafe(() =>
             {
                 foreach (var nodeProvider in notNullNodeProviders)
                     AddContent(nodeProvider);
@@ -142,8 +142,9 @@ namespace Fb2.Document.Models.Base
             if (nodeProvider == null)
                 throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
 
-            var node = nodeProvider();
-            return AddContent(node);
+            ModifyContentSafe(() => AddContent(nodeProvider()));
+
+            return this;
         }
 
         public Fb2Container AddContent(params Fb2Node[] nodes)
@@ -153,7 +154,7 @@ namespace Fb2.Document.Models.Base
 
             var notNullNodes = nodes.Where(n => n != null); // check if needed
 
-            WithContentSafe(() =>
+            ModifyContentSafe(() =>
             {
                 foreach (var node in notNullNodes)
                     AddContent(node);
@@ -212,30 +213,31 @@ namespace Fb2.Document.Models.Base
             if (!content.Any())
                 return this;
 
-            foreach (var item in content)
+            ModifyContentSafe(() =>
             {
-                if (nodePredicate(item))
-                    content.Remove(item);
-            }
+                foreach (var item in content)
+                    if (nodePredicate(item))
+                        content.Remove(item);
+            });
 
             return this;
         }
 
         #endregion
 
-        #region Node querying
+        #region Content querying
 
         /// <summary>
         /// Gets children of element by given name. 
         /// </summary>
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
         /// <returns>List of found child elements, if any. </returns>
-        public List<Fb2Node> GetChildren(string name)
+        public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException($"{nameof(name)} is null or empty string. Use `{nameof(Content)}` method instead.");
 
-            return Content().Where(elem => elem.Name.EqualsInvariant(name)).ToList();
+            return Content().Where(elem => elem.Name.EqualsInvariant(name));
         }
 
         /// <summary>
@@ -253,7 +255,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
-        public List<Fb2Node> GetDescendants(string name)
+        public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             var actualContent = Content();
 
@@ -330,7 +332,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <typeparam name="T">Node type to select elements by.</typeparam>
         /// <returns>List of found child elements, if any.</returns>
-        public List<T> GetChildren<T>() where T : Fb2Node
+        public IEnumerable<T> GetChildren<T>() where T : Fb2Node
         {
             var actualContent = Content();
 
@@ -343,7 +345,7 @@ namespace Fb2.Document.Models.Base
             if (result == null || !result.Any())
                 return null;
 
-            return result.Cast<T>().ToList();
+            return result.Cast<T>();
         }
 
         /// <summary>
@@ -372,7 +374,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Node type to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
-        public List<T> GetDescendants<T>() where T : Fb2Node => GetDescendantsInternal<T>().ToList();
+        public IEnumerable<T> GetDescendants<T>() where T : Fb2Node => GetDescendantsInternal<T>();
 
         /// <summary>
         /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
@@ -465,7 +467,7 @@ namespace Fb2.Document.Models.Base
             return element.ToXml();
         }
 
-        private void WithContentSafe(Action contentUpdate)
+        private void ModifyContentSafe(Action contentUpdate)
         {
             var backupContent = Content();
 
@@ -473,7 +475,7 @@ namespace Fb2.Document.Models.Base
             {
                 contentUpdate();
             }
-            catch (Exception)
+            catch
             {
                 content.Clear(); // drop all changes if any
                 content.AddRange(backupContent);

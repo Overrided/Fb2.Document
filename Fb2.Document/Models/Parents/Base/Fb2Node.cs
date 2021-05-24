@@ -34,7 +34,7 @@ namespace Fb2.Document.Models.Base
         // public Dictionary<string, string> Attributes { get; private set; }
 
         // TODO: check for reference-safety
-        public Dictionary<string, string> Attributes() => new Dictionary<string, string>(attributes);
+        public IDictionary<string, string> Attributes() => new Dictionary<string, string>(attributes);
 
         /// <summary>
         /// List of allowed attribures for particular element.
@@ -163,7 +163,7 @@ namespace Fb2.Document.Models.Base
 
             var notNullProviders = attributeProviders.Where(ap => ap != null);
 
-            AddAttributeSafe(() =>
+            ModifyAttributeSafe(() =>
             {
                 foreach (var provider in notNullProviders)
                     AddAttribute(provider);
@@ -180,7 +180,7 @@ namespace Fb2.Document.Models.Base
             var notEmptyAttributes = attributes
                 .Where(a => !string.IsNullOrWhiteSpace(a.Key) && !string.IsNullOrWhiteSpace(a.Value));
 
-            AddAttributeSafe(() =>
+            ModifyAttributeSafe(() =>
             {
                 foreach (var attribute in notEmptyAttributes)
                     AddAttribute(attribute);
@@ -194,9 +194,9 @@ namespace Fb2.Document.Models.Base
             if (attributeProvider == null)
                 throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
 
-            var attribute = attributeProvider();
+            ModifyAttributeSafe(() => AddAttribute(attributeProvider()));
 
-            return AddAttribute(attribute);
+            return this;
         }
 
         public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
@@ -243,38 +243,6 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Node RemoveAttribute(string attributeName, out bool removed, bool ignoreCase = false)
-        {
-            if (string.IsNullOrWhiteSpace(attributeName))
-                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
-
-            if (!TryGetAttribute(attributeName, ignoreCase, out var result))
-            {
-                removed = false;
-                return this;
-            }
-
-            removed = attributes.Remove(result.Key);
-            return this;
-        }
-
-        public Fb2Node RemoveAttribute(Func<string, bool> keyPredicate)
-        {
-            if (keyPredicate == null)
-                throw new ArgumentNullException($"{nameof(keyPredicate)} is null");
-
-            if (!attributes.Any())
-                return this;
-
-            foreach (var attribute in attributes)
-            {
-                if (keyPredicate(attribute.Key))
-                    attributes.Remove(attribute.Key);
-            }
-
-            return this;
-        }
-
         public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
         {
             if (attributePredicate == null)
@@ -283,23 +251,24 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            foreach (var attribute in attributes)
+            ModifyAttributeSafe(() =>
             {
-                if (attributePredicate(attribute))
-                    attributes.Remove(attribute.Key);
-            }
+                foreach (var attribute in attributes)
+                    if (attributePredicate(attribute))
+                        attributes.Remove(attribute.Key);
+            });
 
             return this;
         }
 
         #endregion
 
-        private void AddAttributeSafe(Action attributesUpdate)
+        private void ModifyAttributeSafe(Action attributesUpdate)
         {
             if (attributesUpdate == null)
                 throw new ArgumentNullException($"{nameof(attributesUpdate)}");
 
-            var prevAttributes = Attributes();
+            var prevAttributes = new Dictionary<string, string>(Attributes());
 
             try
             {
@@ -388,7 +357,7 @@ namespace Fb2.Document.Models.Base
             // TODO : chech if it saves references to keyValuePair's strings
             // if it does, it's bad ))
             if (attributes.Any())
-                node.attributes = Attributes();
+                node.attributes = new Dictionary<string, string>(Attributes());
 
             node.IsInline = IsInline;
             node.Unsafe = Unsafe;

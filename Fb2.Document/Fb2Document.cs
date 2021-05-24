@@ -133,7 +133,7 @@ namespace Fb2.Document
             get
             {
                 if (bodies == null || !bodies.Any())
-                    bodies = Book?.GetChildren<BookBody>();
+                    bodies = Book?.GetChildren<BookBody>()?.ToList();
 
                 return bodies;
             }
@@ -147,7 +147,7 @@ namespace Fb2.Document
             get
             {
                 if (binaryImages == null || !binaryImages.Any())
-                    binaryImages = Book?.GetChildren<BinaryImage>();
+                    binaryImages = Book?.GetChildren<BinaryImage>()?.ToList();
 
                 return binaryImages;
             }
