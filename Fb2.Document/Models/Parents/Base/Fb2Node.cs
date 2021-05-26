@@ -161,11 +161,9 @@ namespace Fb2.Document.Models.Base
                 attributeProviders.All(ap => ap == null))
                 throw new ArgumentNullException($"No {nameof(attributeProviders)} received.");
 
-            var notNullProviders = attributeProviders.Where(ap => ap != null);
-
             ModifyAttributeSafe(() =>
             {
-                foreach (var provider in notNullProviders)
+                foreach (var provider in attributeProviders)
                     AddAttribute(provider);
             });
 
@@ -174,15 +172,14 @@ namespace Fb2.Document.Models.Base
 
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
-            if (attributes == null || !attributes.Any())
+            if (attributes == null ||
+                !attributes.Any() ||
+                attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
                 throw new ArgumentNullException($"No {nameof(attributes)} received.");
-
-            var notEmptyAttributes = attributes
-                .Where(a => !string.IsNullOrWhiteSpace(a.Key) && !string.IsNullOrWhiteSpace(a.Value));
 
             ModifyAttributeSafe(() =>
             {
-                foreach (var attribute in notEmptyAttributes)
+                foreach (var attribute in attributes)
                     AddAttribute(attribute);
             });
 
@@ -195,6 +192,22 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
 
             ModifyAttributeSafe(() => AddAttribute(attributeProvider()));
+
+            return this;
+        }
+
+        public Fb2Node AddAttributes(IDictionary<string, string> attributes)
+        {
+            if (attributes == null ||
+                !attributes.Any() ||
+                attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
+                throw new ArgumentNullException("No attributes received");
+
+            ModifyAttributeSafe(() =>
+            {
+                foreach (var attribute in attributes)
+                    AddAttribute(attribute);
+            });
 
             return this;
         }
@@ -213,20 +226,22 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(attributeValue))
                 throw new ArgumentNullException($"{nameof(attributeValue)} is null or empty string.");
 
-            if (attributeName.Any(c => conditionalChars.Contains(c)))
+            // TODO : do we need both checks? Regex should be ok, double check
+            if (trimWhitespace.IsMatch(attributeName) || attributeName.Any(c => conditionalChars.Contains(c)))
                 throw new ArgumentException($"{nameof(attributeName)} contains invalid characters ({string.Join(',', conditionalChars)}).");
 
-            if (attributeValue.Any(c => conditionalChars.Contains(c)))
-                attributeValue = trimWhitespace.Replace(attributeValue, " ");
+            // TODO : do we need both checks? Regex should be ok
+            if (trimWhitespace.IsMatch(attributeValue) || attributeValue.Any(c => conditionalChars.Contains(c)))
+                throw new ArgumentException($"{nameof(attributeValue)} contains invalid characters ({string.Join(",", conditionalChars)}).");
 
             var escapedAttrName = SecurityElement.Escape(attributeName);
-            var escapedAttrValue = SecurityElement.Escape(attributeValue);
 
             if (!AllowedAttributes.Contains(escapedAttrName))
                 throw new ArgumentException($"Attribute {attributeName} is not valid for {Name} node.");
 
-            attributes[attributeName] = escapedAttrValue;
+            var escapedAttrValue = SecurityElement.Escape(attributeValue);
 
+            attributes[attributeName] = escapedAttrValue;
             return this;
         }
 

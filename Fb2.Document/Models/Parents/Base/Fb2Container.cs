@@ -126,11 +126,9 @@ namespace Fb2.Document.Models.Base
                 nodeProviders.All(e => e == null))
                 throw new ArgumentNullException($"No {nameof(nodeProviders)} received");
 
-            var notNullNodeProviders = nodeProviders.Where(n => n != null); // check if needed
-
             ModifyContentSafe(() =>
             {
-                foreach (var nodeProvider in notNullNodeProviders)
+                foreach (var nodeProvider in nodeProviders)
                     AddContent(nodeProvider);
             });
 
@@ -152,11 +150,9 @@ namespace Fb2.Document.Models.Base
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
                 throw new ArgumentNullException("No nodes received");
 
-            var notNullNodes = nodes.Where(n => n != null); // check if needed
-
             ModifyContentSafe(() =>
             {
-                foreach (var node in notNullNodes)
+                foreach (var node in nodes)
                     AddContent(node);
             });
 
@@ -167,15 +163,29 @@ namespace Fb2.Document.Models.Base
             string separator = null,
             bool preserveWhitespace = false)
         {
+            if (!CanContainText)
+                throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
+
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
-
-            if (!CanContainText)
-                throw new ArgumentException($"Element {Name} is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
 
             var textItem = new TextItem().AddContent(content, separator, preserveWhitespace);
 
             return AddContent(textItem);
+        }
+
+        public Fb2Container AddContent(IEnumerable<Fb2Node> nodes)
+        {
+            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+                throw new ArgumentNullException($"No nodes received");
+
+            ModifyContentSafe(() =>
+            {
+                foreach (var node in nodes)
+                    AddContent(node);
+            });
+
+            return this;
         }
 
         public Fb2Container AddContent(Fb2Node node)
@@ -194,13 +204,16 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Container RemoveContent(Fb2Node node)
+        public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
-            if (node == null)
-                throw new ArgumentNullException($"{nameof(node)} is null.");
+            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+                throw new ArgumentNullException($"No nodes received");
 
-            if (content.Any())
-                content.Remove(node);
+            ModifyContentSafe(() =>
+            {
+                foreach (var node in nodes)
+                    RemoveContent(node);
+            });
 
             return this;
         }
@@ -217,8 +230,19 @@ namespace Fb2.Document.Models.Base
             {
                 foreach (var item in content)
                     if (nodePredicate(item))
-                        content.Remove(item);
+                        RemoveContent(item);
             });
+
+            return this;
+        }
+
+        public Fb2Container RemoveContent(Fb2Node node)
+        {
+            if (node == null)
+                throw new ArgumentNullException($"{nameof(node)} is null.");
+
+            if (content.Any())
+                content.Remove(node);
 
             return this;
         }
