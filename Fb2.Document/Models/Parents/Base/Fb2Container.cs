@@ -140,9 +140,7 @@ namespace Fb2.Document.Models.Base
             if (nodeProvider == null)
                 throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
 
-            ModifyContentSafe(() => AddContent(nodeProvider()));
-
-            return this;
+            return AddContent(nodeProvider());
         }
 
         public Fb2Container AddContent(params Fb2Node[] nodes)

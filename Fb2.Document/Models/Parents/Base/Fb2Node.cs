@@ -332,6 +332,7 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
+        // todo: this is awful, rewrite
         private bool AreAllowedAttributesEqual(ImmutableHashSet<string> otherAllowedAttributes)
         {
             if (AllowedAttributes == null && otherAllowedAttributes == null)
@@ -347,6 +348,7 @@ namespace Fb2.Document.Models.Base
             return AllowedAttributes.SequenceEqual(otherAllowedAttributes);
         }
 
+        // todo: this is awful, rewrite
         private bool AreAttributesEqual(Dictionary<string, string> otherAttributes)
         {
             if (attributes == null && otherAttributes == null)
