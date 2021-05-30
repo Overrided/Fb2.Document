@@ -245,6 +245,14 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        public Fb2Container ClearContent()
+        {
+            if (content.Any())
+                content.Clear();
+
+            return this;
+        }
+
         #endregion
 
         #region Content querying

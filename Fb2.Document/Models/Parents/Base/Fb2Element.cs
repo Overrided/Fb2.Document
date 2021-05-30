@@ -87,7 +87,7 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Element RemoveContent()
+        public Fb2Element ClearContent()
         {
             if (!string.IsNullOrWhiteSpace(content))
                 content = string.Empty;

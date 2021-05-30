@@ -8,8 +8,8 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.Publisher;
 
-        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
-
         public override bool CanContainText => true;
+
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
     }
 }

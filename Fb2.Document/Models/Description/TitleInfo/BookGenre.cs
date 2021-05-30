@@ -8,8 +8,8 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.Genre;
 
-        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Match);
-
         public override bool IsInline => false;
+
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Match);
     }
 }

@@ -34,12 +34,12 @@ namespace Fb2.Document.Models.Base
         // public Dictionary<string, string> Attributes { get; private set; }
 
         // TODO: check for reference-safety
-        public IDictionary<string, string> Attributes() => new Dictionary<string, string>(attributes);
+        public IDictionary<string, string> Attributes() => attributes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         /// <summary>
         /// List of allowed attribures for particular element.
         /// </summary>
-        public virtual ImmutableHashSet<string> AllowedAttributes => null;
+        public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create<string>();
 
         /// <summary>
         /// Indicates if element sholud be inline or start from new line.
@@ -62,7 +62,7 @@ namespace Fb2.Document.Models.Base
 
             node.Validate(Name);
 
-            if (AllowedAttributes == null || !AllowedAttributes.Any())
+            if (!AllowedAttributes.Any())
                 return;
 
             if (!TryGetAttributesInternal(node, out Dictionary<string, string> actualAttributes))
@@ -217,7 +217,7 @@ namespace Fb2.Document.Models.Base
 
         public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
-            if (AllowedAttributes == null || !AllowedAttributes.Any())
+            if (!AllowedAttributes.Any())
                 throw new InvalidOperationException($"Node {Name} has no defined attributes.");
 
             if (string.IsNullOrWhiteSpace(attributeName))
@@ -276,6 +276,14 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        public Fb2Node ClearAttributes()
+        {
+            if (attributes.Any())
+                attributes.Clear();
+
+            return this;
+        }
+
         #endregion
 
         private void ModifyAttributeSafe(Action attributesUpdate)
@@ -324,41 +332,20 @@ namespace Fb2.Document.Models.Base
                 return false;
 
             var result = Name == otherNode.Name &&
+                        AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
                         AreAttributesEqual(otherNode.attributes) &&
-                        AreAllowedAttributesEqual(otherNode.AllowedAttributes) &&
                         IsInline == otherNode.IsInline &&
                         Unsafe == otherNode.Unsafe;
 
             return result;
         }
 
-        // todo: this is awful, rewrite
-        private bool AreAllowedAttributesEqual(ImmutableHashSet<string> otherAllowedAttributes)
-        {
-            if (AllowedAttributes == null && otherAllowedAttributes == null)
-                return true;
-
-            if ((AllowedAttributes != null && otherAllowedAttributes == null) ||
-                (AllowedAttributes == null && otherAllowedAttributes != null))
-                return false;
-
-            if (AllowedAttributes.Count != otherAllowedAttributes.Count)
-                return false;
-
-            return AllowedAttributes.SequenceEqual(otherAllowedAttributes);
-        }
-
-        // todo: this is awful, rewrite
         private bool AreAttributesEqual(Dictionary<string, string> otherAttributes)
         {
-            if (attributes == null && otherAttributes == null)
+            if (ReferenceEquals(attributes, otherAttributes))
                 return true;
 
-            if ((attributes != null && otherAttributes == null) ||
-                (attributes == null && otherAttributes != null))
-                return false;
-
-            var sameAttrs = attributes.Keys.Count == otherAttributes.Keys.Count &&
+            var sameAttrs = attributes.Count == otherAttributes.Count &&
                 attributes.Keys.All(k => otherAttributes.ContainsKey(k) &&
                 string.Equals(attributes[k], otherAttributes[k], StringComparison.InvariantCultureIgnoreCase));
 

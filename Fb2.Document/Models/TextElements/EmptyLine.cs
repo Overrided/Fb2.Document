@@ -17,8 +17,5 @@ namespace Fb2.Document.Models
             element.Validate(Name);
             content = Environment.NewLine;
         }
-
-        // empty line has no content...only purpose )
-        //public override Fb2Element WithContent(string content, bool preserveWhitespace = false) => this;
     }
 }
