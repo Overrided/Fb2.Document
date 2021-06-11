@@ -21,7 +21,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Content (value) of element. Available after Load() method call
         /// </summary>
-        public string Content() => string.Copy(content);
+        public string Content => string.Copy(content);
 
         /// <summary>
         /// For text nodes Inline is true by default, however, some classes override this property
@@ -140,7 +140,7 @@ namespace Fb2.Document.Models.Base
         public override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element.content = Content();
+            element.content = Content;
 
             return element;
         }

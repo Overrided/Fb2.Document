@@ -16,6 +16,6 @@ namespace Fb2.Document.Models
         public override ImmutableHashSet<string> AllowedElements =>
             ImmutableHashSet.Create(ElementNames.TableHeader, ElementNames.TableCell);
 
-        public sealed override string ToString() => string.Join(" ", Content().Select(cell => $"{cell}  |"));
+        public sealed override string ToString() => string.Join(" ", Content.Select(cell => $"{cell}  |"));
     }
 }

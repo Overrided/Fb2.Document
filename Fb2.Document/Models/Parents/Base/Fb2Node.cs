@@ -34,7 +34,7 @@ namespace Fb2.Document.Models.Base
         // public Dictionary<string, string> Attributes { get; private set; }
 
         // TODO: check for reference-safety
-        public IDictionary<string, string> Attributes() => attributes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        public ImmutableDictionary<string, string> Attributes => attributes.ToImmutableDictionary();
 
         /// <summary>
         /// List of allowed attribures for particular element.
@@ -84,12 +84,9 @@ namespace Fb2.Document.Models.Base
         /// <returns>XElement instance with attributes reflecting Attributes property </returns>
         public virtual XElement ToXml()
         {
-            XElement element = null;
-
-            if (attributes != null && attributes.Any())
-                element = new XElement(Name, attributes.Select(attr => new XAttribute(attr.Key, attr.Value)));
-            else
-                element = new XElement(Name);
+            var element = attributes.Any() ?
+                new XElement(Name, attributes.Select(attr => new XAttribute(attr.Key, attr.Value))) :
+                new XElement(Name);
 
             return element;
         }
@@ -107,12 +104,10 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
 
-            var actualAttributes = Attributes();
-
-            if (actualAttributes == null || !actualAttributes.Any())
+            if (!attributes.Any())
                 return false;
 
-            return actualAttributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            return attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
         }
 
         /// <summary>
@@ -128,9 +123,7 @@ namespace Fb2.Document.Models.Base
             if (!HasAttribute(key, ignoreCase))
                 return default;
 
-            var actualAttributes = Attributes();
-
-            var attribute = actualAttributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            var attribute = attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
 
             return attribute;
         }
@@ -161,11 +154,8 @@ namespace Fb2.Document.Models.Base
                 attributeProviders.All(ap => ap == null))
                 throw new ArgumentNullException($"No {nameof(attributeProviders)} received.");
 
-            ModifyAttributeSafe(() =>
-            {
-                foreach (var provider in attributeProviders)
-                    AddAttribute(provider);
-            });
+            foreach (var provider in attributeProviders)
+                AddAttribute(provider);
 
             return this;
         }
@@ -177,11 +167,8 @@ namespace Fb2.Document.Models.Base
                 attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
                 throw new ArgumentNullException($"No {nameof(attributes)} received.");
 
-            ModifyAttributeSafe(() =>
-            {
-                foreach (var attribute in attributes)
-                    AddAttribute(attribute);
-            });
+            foreach (var attribute in attributes)
+                AddAttribute(attribute);
 
             return this;
         }
@@ -191,9 +178,7 @@ namespace Fb2.Document.Models.Base
             if (attributeProvider == null)
                 throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
 
-            ModifyAttributeSafe(() => AddAttribute(attributeProvider()));
-
-            return this;
+            return AddAttribute(attributeProvider());
         }
 
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
@@ -203,11 +188,8 @@ namespace Fb2.Document.Models.Base
                 attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
                 throw new ArgumentNullException("No attributes received");
 
-            ModifyAttributeSafe(() =>
-            {
-                foreach (var attribute in attributes)
-                    AddAttribute(attribute);
-            });
+            foreach (var attribute in attributes)
+                AddAttribute(attribute);
 
             return this;
         }
@@ -266,12 +248,9 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            ModifyAttributeSafe(() =>
-            {
-                foreach (var attribute in attributes)
-                    if (attributePredicate(attribute))
-                        attributes.Remove(attribute.Key);
-            });
+            foreach (var attribute in attributes)
+                if (attributePredicate(attribute))
+                    attributes.Remove(attribute.Key);
 
             return this;
         }
@@ -285,25 +264,6 @@ namespace Fb2.Document.Models.Base
         }
 
         #endregion
-
-        private void ModifyAttributeSafe(Action attributesUpdate)
-        {
-            if (attributesUpdate == null)
-                throw new ArgumentNullException($"{nameof(attributesUpdate)}");
-
-            var prevAttributes = new Dictionary<string, string>(Attributes());
-
-            try
-            {
-                attributesUpdate();
-            }
-            catch (Exception)
-            {
-                attributes?.Clear();
-                attributes = prevAttributes;
-                throw;
-            }
-        }
 
         private static bool TryGetAttributesInternal([In] XNode node, out Dictionary<string, string> result)
         {
@@ -361,7 +321,7 @@ namespace Fb2.Document.Models.Base
             // TODO : chech if it saves references to keyValuePair's strings
             // if it does, it's bad ))
             if (attributes.Any())
-                node.attributes = new Dictionary<string, string>(Attributes());
+                node.attributes = new Dictionary<string, string>(attributes);
 
             node.IsInline = IsInline;
             node.Unsafe = Unsafe;

@@ -26,7 +26,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <returns>`List<Fb2Node>` which reflects content of given `XNode`.</returns>
         // TODO: check if equality override is ok + check if cloning is done right
-        public IEnumerable<Fb2Node> Content() => content.Select(c => c.Clone() as Fb2Node);
+        public ImmutableList<Fb2Node> Content => content.ToImmutableList();
 
         /// <summary>
         /// Indicates if instance of type Fb2Container can contain text.
@@ -84,14 +84,12 @@ namespace Fb2.Document.Models.Base
 
         public override string ToString()
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any()) // TODO test if .content > 0 is faster
                 return string.Empty;
 
             var builder = new StringBuilder();
 
-            foreach (var child in actualContent)
+            foreach (var child in content)
                 builder.Append(child.IsInline ? child.ToString() : $"{Environment.NewLine}{child}");
 
             return builder.ToString();
@@ -106,12 +104,10 @@ namespace Fb2.Document.Models.Base
         {
             var element = base.ToXml();
 
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return element;
 
-            var children = actualContent.Select(ToXmlInternal);
+            var children = content.Select(ToXmlInternal);
             element.Add(children);
 
             return element;
@@ -126,11 +122,8 @@ namespace Fb2.Document.Models.Base
                 nodeProviders.All(e => e == null))
                 throw new ArgumentNullException($"No {nameof(nodeProviders)} received");
 
-            ModifyContentSafe(() =>
-            {
-                foreach (var nodeProvider in nodeProviders)
-                    AddContent(nodeProvider);
-            });
+            foreach (var nodeProvider in nodeProviders)
+                AddContent(nodeProvider);
 
             return this;
         }
@@ -148,11 +141,8 @@ namespace Fb2.Document.Models.Base
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
                 throw new ArgumentNullException("No nodes received");
 
-            ModifyContentSafe(() =>
-            {
-                foreach (var node in nodes)
-                    AddContent(node);
-            });
+            foreach (var node in nodes)
+                AddContent(node);
 
             return this;
         }
@@ -177,11 +167,8 @@ namespace Fb2.Document.Models.Base
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
                 throw new ArgumentNullException($"No nodes received");
 
-            ModifyContentSafe(() =>
-            {
-                foreach (var node in nodes)
-                    AddContent(node);
-            });
+            foreach (var node in nodes)
+                AddContent(node);
 
             return this;
         }
@@ -207,11 +194,8 @@ namespace Fb2.Document.Models.Base
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
                 throw new ArgumentNullException($"No nodes received");
 
-            ModifyContentSafe(() =>
-            {
-                foreach (var node in nodes)
-                    RemoveContent(node);
-            });
+            foreach (var node in nodes)
+                RemoveContent(node);
 
             return this;
         }
@@ -224,12 +208,9 @@ namespace Fb2.Document.Models.Base
             if (!content.Any())
                 return this;
 
-            ModifyContentSafe(() =>
-            {
-                foreach (var item in content)
-                    if (nodePredicate(item))
-                        RemoveContent(item);
-            });
+            foreach (var item in content)
+                if (nodePredicate(item))
+                    RemoveContent(item);
 
             return this;
         }
@@ -267,7 +248,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException($"{nameof(name)} is null or empty string. Use `{nameof(Content)}` method instead.");
 
-            return Content().Where(elem => elem.Name.EqualsInvariant(name));
+            return content.Where(elem => elem.Name.EqualsInvariant(name));
         }
 
         /// <summary>
@@ -277,8 +258,8 @@ namespace Fb2.Document.Models.Base
         /// <returns>First matched child node</returns>
         public Fb2Node GetFirstChild(string name) =>
             string.IsNullOrWhiteSpace(name) ?
-                Content().FirstOrDefault() :
-                Content().FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
+                content.FirstOrDefault() :
+                content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
 
         /// <summary>
         /// Recursively gets all descendants of element by given name.
@@ -287,14 +268,12 @@ namespace Fb2.Document.Models.Base
         /// <returns>List of found descendants, if any.</returns>
         public IEnumerable<Fb2Node> GetDescendants(string name)
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
             var result = new List<Fb2Node>();
 
-            foreach (var element in actualContent)
+            foreach (var element in content)
             {
                 if (string.IsNullOrWhiteSpace(name) ||
                     element.Name.EqualsInvariant(name))
@@ -322,12 +301,10 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use {nameof(GetFirstChild)} method instead.");
 
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
-            foreach (var element in actualContent)
+            foreach (var element in content)
             {
                 if (element.Name.EqualsInvariant(name))
                     return element;
@@ -364,13 +341,11 @@ namespace Fb2.Document.Models.Base
         /// <returns>List of found child elements, if any.</returns>
         public IEnumerable<T> GetChildren<T>() where T : Fb2Node
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
             var predicate = PredicateResolver.GetPredicate<T>();
-            var result = actualContent.Where(predicate);
+            var result = content.Where(predicate);
 
             if (result == null || !result.Any())
                 return null;
@@ -385,13 +360,11 @@ namespace Fb2.Document.Models.Base
         /// <returns>First matched child node</returns>
         public T GetFirstChild<T>() where T : Fb2Node
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
             var predicate = PredicateResolver.GetPredicate<T>();
-            var result = actualContent.FirstOrDefault(predicate);
+            var result = content.FirstOrDefault(predicate);
 
             if (result == null)
                 return null;
@@ -433,9 +406,7 @@ namespace Fb2.Document.Models.Base
         private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
             var result = new List<Fb2Node>();
@@ -443,7 +414,7 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in actualContent)
+            foreach (var element in content)
             {
                 if (predicate(element))
                     result.Add(element);
@@ -462,15 +433,13 @@ namespace Fb2.Document.Models.Base
         private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate = null)
             where T : Fb2Node
         {
-            var actualContent = Content();
-
-            if (actualContent == null || !actualContent.Any())
+            if (!content.Any())
                 return null;
 
             if (predicate == null)
                 predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in actualContent)
+            foreach (var element in content)
             {
                 if (predicate(element))
                     return (T)element;
@@ -495,23 +464,6 @@ namespace Fb2.Document.Models.Base
             }
 
             return element.ToXml();
-        }
-
-        private void ModifyContentSafe(Action contentUpdate)
-        {
-            var backupContent = Content();
-
-            try
-            {
-                contentUpdate();
-            }
-            catch
-            {
-                content.Clear(); // drop all changes if any
-                content.AddRange(backupContent);
-
-                throw; // rollback and throw - no changes saved, no side-effects etc
-            }
         }
 
         #endregion
@@ -540,7 +492,7 @@ namespace Fb2.Document.Models.Base
         public sealed override object Clone()
         {
             var container = base.Clone() as Fb2Container;
-            container.content = new List<Fb2Node>(Content());
+            container.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
             container.CanContainText = CanContainText;
 
             return container;

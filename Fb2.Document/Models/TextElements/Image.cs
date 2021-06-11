@@ -43,14 +43,7 @@ namespace Fb2.Document.Models
 
         public override string ToString()
         {
-            var attrs = Attributes();
-
-            // TODO: remove redundant null checks and stuff
-            var attributeOrDefault = attrs != null && attrs.Any() && attrs.ContainsKey(AttributeNames.XHref) ?
-                attrs[AttributeNames.XHref] :
-                string.Empty;
-
-            var formattedAttributeString = string.IsNullOrWhiteSpace(attributeOrDefault) ? string.Empty : " " + attributeOrDefault;
+            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, true, out var result) ? $" {result.Value}" : string.Empty;
 
             return $"{Name}{formattedAttributeString}";
         }

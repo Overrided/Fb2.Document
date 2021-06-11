@@ -19,7 +19,7 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            var content = Content();
+            var content = Content;
 
             if (content == null || !content.Any())
                 return string.Empty;
@@ -54,7 +54,7 @@ namespace Fb2.Document.Models
         private string[][] GetTableCellContent()
         {
             // TODO : SelectMany ?
-            return Content().Select(row => (row as Fb2Container).Content()
+            return Content.Select(row => (row as Fb2Container).Content
                             .Select(cell => cell.ToString() ?? string.Empty).ToArray()).ToArray();
         }
 
