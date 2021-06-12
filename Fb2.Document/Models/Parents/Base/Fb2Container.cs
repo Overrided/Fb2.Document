@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -115,17 +116,13 @@ namespace Fb2.Document.Models.Base
 
         #region Content editing
 
-        public Fb2Container AddContent(params Func<Fb2Node>[] nodeProviders)
+        public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
         {
-            if (nodeProviders == null ||
-                !nodeProviders.Any() ||
-                nodeProviders.All(e => e == null))
-                throw new ArgumentNullException($"No {nameof(nodeProviders)} received");
+            if (nodeProvider == null)
+                throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
 
-            foreach (var nodeProvider in nodeProviders)
-                AddContent(nodeProvider);
-
-            return this;
+            var newNode = await nodeProvider();
+            return AddContent(newNode);
         }
 
         public Fb2Container AddContent(Func<Fb2Node> nodeProvider)

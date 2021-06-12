@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
@@ -147,19 +148,6 @@ namespace Fb2.Document.Models.Base
 
         #region Node editing
 
-        public Fb2Node AddAttributes(params Func<KeyValuePair<string, string>>[] attributeProviders)
-        {
-            if (attributeProviders == null ||
-                !attributeProviders.Any() ||
-                attributeProviders.All(ap => ap == null))
-                throw new ArgumentNullException($"No {nameof(attributeProviders)} received.");
-
-            foreach (var provider in attributeProviders)
-                AddAttribute(provider);
-
-            return this;
-        }
-
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
             if (attributes == null ||
@@ -171,14 +159,6 @@ namespace Fb2.Document.Models.Base
                 AddAttribute(attribute);
 
             return this;
-        }
-
-        public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
-        {
-            if (attributeProvider == null)
-                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
-
-            return AddAttribute(attributeProvider());
         }
 
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
@@ -194,12 +174,30 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        public async Task<Fb2Node> AddAttributeAsync(Func<Task<KeyValuePair<string, string>>> attributeProvider)
+        {
+            if (attributeProvider == null)
+                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
+
+            var newAttribute = await attributeProvider();
+
+            return AddAttribute(newAttribute);
+        }
+
+        public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
+        {
+            if (attributeProvider == null)
+                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
+
+            return AddAttribute(attributeProvider());
+        }
+
         public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
             AddAttribute(attribute.Key, attribute.Value);
 
         public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
-            if (!AllowedAttributes.Any())
+            if (!AllowedAttributes.Any()) // TODO : custom exceptions?
                 throw new InvalidOperationException($"Node {Name} has no defined attributes.");
 
             if (string.IsNullOrWhiteSpace(attributeName))
