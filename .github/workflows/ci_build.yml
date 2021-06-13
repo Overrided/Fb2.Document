@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -15,7 +18,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.x"
-      - name: Build library
+      - name: Build library on ${{matrix.os}}
         run: dotnet build --configuration release
       - name: Run tests
-        run: dotnet test --verbosity normal
+        run: dotnet test
