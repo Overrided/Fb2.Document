@@ -41,9 +41,9 @@ namespace Fb2.Document.Tests.ModelsTests
             if (container.Name == ElementNames.Image)
                 Assert.AreEqual("image", container.ToString());
             else if (container.Name == ElementNames.EmptyLine)
-                Assert.AreEqual(Environment.NewLine, container.Content);
+                Assert.AreEqual(Environment.NewLine, container.Content());
             else
-                Assert.AreEqual("simple test text", container.Content);
+                Assert.AreEqual("simple test text", container.Content());
 
             var serialized = container.ToXml().ToString();
 
@@ -62,9 +62,9 @@ namespace Fb2.Document.Tests.ModelsTests
             container.Load(containerElement);
 
             if (container.Name == ElementNames.EmptyLine) // empty line should have no content
-                Assert.AreEqual(Environment.NewLine, container.Content);
+                Assert.AreEqual(Environment.NewLine, container.Content());
             else
-                Assert.AreEqual(" row 1 row 2 row 3 ", container.Content);
+                Assert.AreEqual(" row 1 row 2 row 3 ", container.Content());
         }
     }
 }

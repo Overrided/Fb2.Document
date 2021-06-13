@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -14,25 +17,50 @@ namespace Fb2.Documents.TestsV2.ModelsTests
     {
         [Theory]
         [ClassData(typeof(Fb2ContainerTypeData))]
-        public void ContainerModel_WithContent_NullNode(Type modelType)
+        public void ContainerModel_AddContent_NullNode(Type modelType)
         {
             var node = Activator.CreateInstance(modelType) as Fb2Container;
 
-            node.Invoking(n => n.WithContent((Fb2Node)null))
+            node.Invoking(n => n.AddContent((Fb2Node)null))
                 .Should()
                 .Throw<ArgumentNullException>();
+
+            //var p = new Paragraph()
+            //    .AddContent(new Strong().AddTextContent("strong"))
+            //    .AddContent(new Emphasis().AddContent(new Strong().AddTextContent("italic bold")))
+            //    .AddTextContent("direct paragraph text")
+            //    .RemoveContent((n) => n.Name == ElementNames.FictionText);
+
+            //var p = new Paragraph()
+            //    .AddContent(
+            //        new Strong().AddTextContent("strong"),
+            //        new Emphasis().AddContent(new Strong().AddTextContent("italic bold")))
+            //    .AddTextContent("direct paragraph text")
+            //    .RemoveContent((n) => n.Name == ElementNames.FictionText);
+
+            //var p = new Paragraph()
+            //    .AddContent(
+            //        () => new Strong().AddTextContent("strong"),
+            //        () => new Emphasis().AddContent(new Strong().AddTextContent("italic bold")))
+            //    .AddTextContent("direct paragraph text")
+            //    .RemoveContent((n) => n.Name == ElementNames.FictionText);
         }
 
         [Theory]
         [ClassData(typeof(Fb2ContainerTypeData))]
-        public void ContainerModel_WithContent_CantContainText(Type modelType)
+        public void ContainerModel_AddTextContent_CantContainText(Type modelType)
         {
             var node = Activator.CreateInstance(modelType) as Fb2Container;
 
             if (node.CanContainText)
                 return;
 
-            node.Invoking(n => n.WithContent(new TextItem()))
+            node.Invoking(n => n.AddContent(new TextItem()))
+                .Should()
+                .Throw<ArgumentException>()
+                .WithMessage($"Element '{node.Name}' is not designed to contain text (direct content). See {node.Name}.{nameof(node.CanContainText)}.");
+
+            node.Invoking(n => n.AddTextContent("test text"))
                 .Should()
                 .Throw<ArgumentException>()
                 .WithMessage($"Element '{node.Name}' is not designed to contain text (direct content). See {node.Name}.{nameof(node.CanContainText)}.");
@@ -40,7 +68,7 @@ namespace Fb2.Documents.TestsV2.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerTypeData))]
-        public void ContainerModel_WithContent_NotAllowedElement(Type modelType)
+        public void ContainerModel_AddContent_NotAllowedElement(Type modelType)
         {
             var node = Activator.CreateInstance(modelType) as Fb2Container;
             var dataCollection = new Fb2ContainerTypeData();
@@ -49,7 +77,7 @@ namespace Fb2.Documents.TestsV2.ModelsTests
 
             var notAllowedElement = Fb2ElementFactory.GetNodeByName(notAllowedElementName);
 
-            node.Invoking(n => n.WithContent(() => notAllowedElement))
+            node.Invoking(n => n.AddContent(() => notAllowedElement))
                 .Should()
                 .Throw<ArgumentException>()
                 .WithMessage($"'{notAllowedElement.Name}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");

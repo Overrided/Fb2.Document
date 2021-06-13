@@ -43,7 +43,10 @@ namespace Fb2.Document
         /// </summary>
         public FictionBook Book { get; private set; }
 
-        private BookDescription FictionBookDescription
+        /// <summary>
+        /// Represents Description element of a FictionBook
+        /// </summary>
+        public BookDescription BookDescription
         {
             get
             {
@@ -65,7 +68,7 @@ namespace Fb2.Document
             get
             {
                 if (title == null)
-                    title = FictionBookDescription?.GetFirstChild<TitleInfo>();
+                    title = BookDescription?.GetFirstChild<TitleInfo>();
 
                 return title;
             }
@@ -80,7 +83,7 @@ namespace Fb2.Document
             get
             {
                 if (sourceTitle == null)
-                    sourceTitle = FictionBookDescription?.GetFirstChild<SrcTitleInfo>();
+                    sourceTitle = BookDescription?.GetFirstChild<SrcTitleInfo>();
 
                 return sourceTitle;
             }
@@ -94,7 +97,7 @@ namespace Fb2.Document
             get
             {
                 if (documentInfo == null)
-                    documentInfo = FictionBookDescription?.GetFirstChild<DocumentInfo>();
+                    documentInfo = BookDescription?.GetFirstChild<DocumentInfo>();
 
                 return documentInfo;
             }
@@ -108,7 +111,7 @@ namespace Fb2.Document
             get
             {
                 if (publishInfo == null)
-                    publishInfo = FictionBookDescription?.GetFirstChild<PublishInfo>();
+                    publishInfo = BookDescription?.GetFirstChild<PublishInfo>();
 
                 return publishInfo;
             }
@@ -122,7 +125,7 @@ namespace Fb2.Document
             get
             {
                 if (customInfo == null)
-                    customInfo = FictionBookDescription?.GetFirstChild<CustomInfo>();
+                    customInfo = BookDescription?.GetFirstChild<CustomInfo>();
 
                 return customInfo;
             }
