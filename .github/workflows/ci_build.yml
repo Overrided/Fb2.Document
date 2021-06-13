@@ -1,4 +1,4 @@
-name: .NET
+name: Fb2.Document CI
 
 on:
   push:
@@ -18,6 +18,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build library
-        run: dotnet build "Fb2.Document\Fb2.Document.csproj" --no-restore --configuration release
-      - name: Tests
-        run: dotnet test "Fb2.Document.Tests\Fb2.Document.Tests.csproj" --verbosity normal
+        run: dotnet build --no-restore --configuration release
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal

@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{7D1A37B2-70C3-416C-9327-94C5862F9D94}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\workflows\ci_build.yml = .github\workflows\ci_build.yml
 		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		License.md = License.md
 		Readme.md = Readme.md
