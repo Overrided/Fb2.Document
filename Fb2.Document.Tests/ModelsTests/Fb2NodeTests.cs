@@ -3,158 +3,122 @@ using System.Collections.Generic;
 using System.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Factories;
+using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
-using Fb2.Document.Tests.Base;
-using Fb2.Document.Tests.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Fb2.Document.Tests.DataCollections;
+using FluentAssertions;
+using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests
 {
-    [TestClass]
-    public class Fb2NodeTests : TestBase
+    public class Fb2NodeTests
     {
-        [TestMethod]
-        public void Smoke_Tests()
+        [Theory]
+        [ClassData(typeof(Fb2NodeNamesData))]
+        public void EmptyNodes_EqualityNullTest(string nodeName)
         {
-            var assembly = Fb2ElementFactory.Instance.GetType().Assembly;
-
-            var modelTypes = assembly.GetExportedTypes()
-                .Where(type => type.FullName.StartsWith("Fb2.Document.Models.") &&
-                       !type.IsAbstract && type.IsClass).ToList();
-
-            CheckIfCorrectModelsAreLoaded(modelTypes);
-
-            foreach (var modelType in modelTypes)
-            {
-                Fb2Node_Load_InvalidNode_ThrowsException(modelType);
-                Fb2Node_Load_Attributes_Test(modelType);
-                Fb2Node_AttributeAccessMethods_Test(modelType);
-                Fb2Node_Load_SkipsInvalidAttributes_Test(modelType);
-            }
+            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
+            var equals = instanceOne.Equals(null);
+            equals.Should().BeFalse();
         }
 
-        public void CheckIfCorrectModelsAreLoaded(List<Type> modelTypes)
+        [Theory]
+        [ClassData(typeof(Fb2NodeNamesData))]
+        public void EmptyNodes_EqualityTest(string nodeName)
         {
-            var instances = modelTypes.Select(mt => Utils.Instantiate<Fb2Node>(mt)).ToList();
-            var instancesNames = instances.Select(instance => instance.Name).ToList();
+            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
+            var instanceTwo = Fb2ElementFactory.GetNodeByName(nodeName);
 
-            var names = new ElementNames();
-            var elementNames = Utils.GetAllFieldsOfType<ElementNames, string>(names);
-
-            CollectionAssert.AreEquivalent(elementNames, instancesNames); // so we do know all models are loaded
+            var equals = instanceOne.Equals(instanceTwo);
+            equals.Should().BeTrue();
+            instanceOne.Should().BeEquivalentTo(instanceTwo);
         }
 
-        public void Fb2Node_Load_InvalidNode_ThrowsException(Type modelType)
+        [Theory]
+        [ClassData(typeof(Fb2NodeNamesData))]
+        public void CloneNode_EqualityTest(string nodeName)
         {
-            var element = Utils.Instantiate<Fb2Node>(modelType);
+            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
+            var instanceTwo = instanceOne.Clone();
 
-            var invalidNode = GetInvalidXNode();
-
-            Assert.ThrowsException<ArgumentException>(() => { element.Load(invalidNode); });
+            var equals = instanceOne.Equals(instanceTwo);
+            equals.Should().BeTrue();
+            instanceOne.Should().BeEquivalentTo(instanceTwo);
         }
 
-        public void Fb2Node_Load_Attributes_Test(Type modelType)
+        [Theory]
+        [ClassData(typeof(Fb2NodeNamesData))]
+        public void Clone_AddAttribute_NotEquals(string nodeName)
         {
-            var container = Utils.Instantiate<Fb2Node>(modelType);
+            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
+            if (instanceOne.AllowedAttributes == null || !instanceOne.AllowedAttributes.Any())
+                return;
 
-            var containerElement = GetXElementWithAttributes(container);
+            var instanceTwo = instanceOne.Clone() as Fb2Node;
+            //instanceTwo.AddAttribute(() => new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
+            //instanceTwo.AddAttribute(new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
+            instanceTwo.AddAttribute(instanceOne.AllowedAttributes.First(), "testValue");
 
-            container.Load(containerElement);
+            var equals = instanceOne.Equals(instanceTwo);
+            equals.Should().BeFalse();
 
-            if (container.AllowedAttributes == null || !container.AllowedAttributes.Any())
-                Assert.IsNull(container.Attributes);
-            else
-            {
-                Assert.AreEqual(container.Attributes.Count, container.AllowedAttributes.Count);
-
-                foreach (var attr in container.Attributes)
-                {
-                    Assert.IsTrue(container.AllowedAttributes.Contains(attr.Key));
-                    Assert.AreEqual($"{attr.Key} test value", attr.Value);
-                }
-            }
-
-            var serialized = container.ToXml();
-
-            Assert.AreEqual(containerElement.ToString(), serialized.ToString());
+            instanceOne.Attributes.Should().BeEmpty();
+            instanceTwo.Attributes.Should().NotBeEmpty();
+            instanceTwo.Attributes.Count.Should().Be(1);
         }
 
-        public void Fb2Node_AttributeAccessMethods_Test(Type modelType)
+        [Fact]
+        public void SimilarModifications_ElementsEquality()
         {
-            var container = Utils.Instantiate<Fb2Node>(modelType);
+            var paragOne = new Paragraph();
+            var paragTwo = new Paragraph();
 
-            var containerElement = GetXElementWithAttributes(container);
+            paragOne.Should().Be(paragTwo);
 
-            container.Load(containerElement);
+            paragOne.AddContent(new Emphasis().AddTextContent("test text content"));
+            paragOne.Should().NotBe(paragTwo);
 
-            if (container.AllowedAttributes == null || !container.AllowedAttributes.Any())
-                Assert.IsNull(container.Attributes);
-            else
-            {
-                Assert.AreEqual(container.Attributes.Count, container.AllowedAttributes.Count);
+            paragTwo.AddContent(new Emphasis().AddTextContent("test text content"));
+            paragOne.Should().Be(paragTwo);
 
-                var casedAllowedAttrs = container.AllowedAttributes.Select(aa => string.Join(string.Empty,
-                    aa.Select((char ch, int index) =>
-                    {
-                        return index % 2 == 0 ? char.ToUpper(ch) : ch;
-                    })));
+            paragOne.AddAttribute(AttributeNames.Id, "testId");
+            paragOne.Should().NotBe(paragTwo);
 
-                foreach (var attr in casedAllowedAttrs)
-                {
-                    Assert.IsTrue(container.HasAttribute(attr, true));
-                    Assert.IsFalse(container.HasAttribute(attr, false));
-
-                    var attributeCaseInvariant = container.GetAttribute(attr, true);
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(attributeCaseInvariant.Key));
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(attributeCaseInvariant.Value));
-                    Assert.AreEqual($"{attributeCaseInvariant.Key} test value", attributeCaseInvariant.Value);
-
-                    var attributeCaseSencitive = container.GetAttribute(attr, false);
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(attributeCaseSencitive.Key));
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(attributeCaseSencitive.Value));
-
-                    var tryCaseInvariant = container.TryGetAttribute(attr, true, out var resultInvariant);
-                    Assert.IsTrue(tryCaseInvariant);
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(resultInvariant.Key));
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(resultInvariant.Value));
-                    Assert.AreEqual($"{resultInvariant.Key} test value", resultInvariant.Value);
-
-                    var tryCaseSensitive = container.TryGetAttribute(attr, false, out var resultSensitive);
-                    Assert.IsFalse(tryCaseSensitive);
-                }
-            }
-
-            Assert.IsFalse(container.HasAttribute(InvalidAttributeName, true));
-            Assert.IsFalse(container.HasAttribute(InvalidAttributeName, false));
-
-            Assert.IsTrue(string.IsNullOrWhiteSpace(container.GetAttribute(InvalidAttributeName, true).Key));
-            Assert.IsTrue(string.IsNullOrWhiteSpace(container.GetAttribute(InvalidAttributeName, false).Key));
-
-            Assert.IsFalse(container.TryGetAttribute(InvalidAttributeName, true, out var invalidIgnoreCase));
-            Assert.IsFalse(container.TryGetAttribute(InvalidAttributeName, false, out var invalid));
-
-            Assert.ThrowsException<ArgumentNullException>(() => { container.HasAttribute(null, true); });
-            Assert.ThrowsException<ArgumentNullException>(() => { container.GetAttribute(string.Empty, true); });
-            Assert.ThrowsException<ArgumentNullException>(() => { container.TryGetAttribute(null, true, out var res); });
-
-            var serialized = container.ToXml();
-
-            Assert.AreEqual(containerElement.ToString(), serialized.ToString());
+            paragTwo.AddAttribute(AttributeNames.Id, "testId");
+            paragOne.Should().Be(paragTwo);
         }
 
-        public void Fb2Node_Load_SkipsInvalidAttributes_Test(Type modelType)
-        {
-            var container = Utils.Instantiate<Fb2Node>(modelType);
+        //[Theory]
+        //[ClassData(typeof(Fb2NodeNamesData))]
+        //public void ContentReferencesAreIndependant(string nodeName)
+        //{
+        //}
 
-            var containerElement = GetXElementWithInvalidAttribute(container.Name);
+        //[Theory]
+        //[ClassData(typeof(Fb2NodeNamesData))]
+        //public void Clone_RemoveAttribute_Equals(string nodeName)
+        //{
+        //    var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
+        //    if (instanceOne.AllowedAttributes == null || !instanceOne.AllowedAttributes.Any())
+        //        return;
 
-            container.Load(containerElement);
+        //    var firstAllowedAttributeName = instanceOne.AllowedAttributes.First();
 
-            Assert.IsNull(container.Attributes);
+        //    var instanceTwo = instanceOne.Clone() as Fb2Node;
+        //    instanceTwo.AddAttribute(() => new KeyValuePair<string, string>(firstAllowedAttributeName, "testValue"));
 
-            var serialized = container.ToXml();
+        //    var equals = instanceOne.Equals(instanceTwo);
+        //    equals.Should().BeFalse();
 
-            Assert.AreNotEqual(containerElement.ToString(), serialized.ToString());
-        }
+        //    instanceOne.Attributes().Should().BeEmpty();
+        //    instanceTwo.Attributes().Should().NotBeEmpty();
+        //    instanceTwo.Attributes().Count.Should().Be(1);
+
+        //    instanceTwo.RemoveAttribute(firstAllowedAttributeName);
+        //    instanceTwo.Attributes().Should().BeEmpty();
+
+        //    var equals2 = instanceOne.Equals(instanceTwo);
+        //    equals2.Should().BeTrue();
+        //}
     }
 }

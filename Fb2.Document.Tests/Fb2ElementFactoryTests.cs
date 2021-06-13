@@ -1,62 +1,45 @@
-﻿using System.Collections.Immutable;
 using Fb2.Document.Constants;
 using Fb2.Document.Factories;
-using Fb2.Document.Tests.Base;
-using Fb2.Document.Tests.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentAssertions;
+using Xunit;
 
 namespace Fb2.Document.Tests
 {
-    [TestClass]
-    public class Fb2ElementFactoryTests : TestBase
+    public class Fb2ElementFactoryTests
     {
-        [TestMethod]
-        public void SmokeTest()
+        [Fact]
+        public void IsKnownNode_InvalidNodeName_ReturnsFalse()
         {
-            var names = new ElementNames();
-
-            var elementNames = Utils.GetAllFieldsOfType<ElementNames, string>(names);
-
-            Assert.AreEqual(63, elementNames.Count); // no node will be added / removed without noticing
-
-            foreach (var elemName in elementNames)
-            {
-                Assert.IsTrue(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(elemName));
-
-                var node = Fb2ElementFactory.Instance.GetElementByNodeName(elemName);
-
-                Assert.IsNotNull(node);
-                Assert.AreEqual(elemName, node.Name);
-            }
+            var invalidNodeName = "invalidNodeName";
+            var node = Fb2ElementFactory.IsKnownNode(invalidNodeName);
+            node.Should().BeFalse();
         }
 
-        [TestMethod]
-        public void InvalidNodeName_ReturnsNull()
+        [Fact]
+        public void GetElementByNodeName_InvalidNodeName_ReturnsNull()
         {
-            Assert.IsFalse(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(InvalidNodeName));
-
-            var node = Fb2ElementFactory.Instance.GetElementByNodeName(InvalidNodeName);
-
-            Assert.IsNull(node);
+            var invalidNodeName = "invalidNodeName";
+            var node = Fb2ElementFactory.GetNodeByName(invalidNodeName);
+            node.Should().BeNull();
         }
 
-        [TestMethod]
-        public void CaseInvariantNodeName_ReturnsInstance()
+        [Fact]
+        public void ValidNodeName_CaseInvariantNodeName_ReturnsInstance()
         {
             var titleInfoCasedNodeName = "tItLe-iNFo";
             var strikethroughCasedNodeName = "sTrIkEtHrOuGh";
 
-            Assert.IsFalse(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(titleInfoCasedNodeName));
-            Assert.IsFalse(Fb2ElementFactory.Instance.KnownNodes.ContainsKey(strikethroughCasedNodeName));
+            Fb2ElementFactory.IsKnownNode(titleInfoCasedNodeName).Should().BeTrue();
+            Fb2ElementFactory.IsKnownNode(strikethroughCasedNodeName).Should().BeTrue();
 
-            var titleInfo = Fb2ElementFactory.Instance.GetElementByNodeName(titleInfoCasedNodeName);
-            var strikethrough = Fb2ElementFactory.Instance.GetElementByNodeName(strikethroughCasedNodeName);
+            var titleInfo = Fb2ElementFactory.GetNodeByName(titleInfoCasedNodeName);
+            var strikethrough = Fb2ElementFactory.GetNodeByName(strikethroughCasedNodeName);
 
-            Assert.IsNotNull(titleInfo);
-            Assert.IsNotNull(strikethrough);
+            titleInfo.Should().NotBeNull();
+            strikethrough.Should().NotBeNull();
 
-            Assert.AreEqual(titleInfo.Name, ElementNames.TitleInfo);
-            Assert.AreEqual(strikethrough.Name, ElementNames.Strikethrough);
+            titleInfo.Name.Should().Be(ElementNames.TitleInfo);
+            strikethrough.Name.Should().Be(ElementNames.Strikethrough);
         }
     }
 }

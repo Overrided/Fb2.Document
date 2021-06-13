@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 using Xunit;
 
-namespace Fb2.Documents.TestsV2.Fixtures
+namespace Fb2.Document.Tests.Fixtures
 {
     public class Fb2ContainerFixture : FixtureBase
     {

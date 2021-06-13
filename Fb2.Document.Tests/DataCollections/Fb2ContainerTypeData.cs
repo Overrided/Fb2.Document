@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Documents.TestsV2.DataCollections
+namespace Fb2.Document.Tests.DataCollections
 {
     public class Fb2ContainerTypeData : Fb2ModelsDataCollectionBase, IEnumerable<object[]>
     {

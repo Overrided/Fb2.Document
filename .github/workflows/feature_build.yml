@@ -2,6 +2,8 @@ name: .NET
 
 on:
   push:
+    branches:
+      - "features/**"
 
 jobs:
   build:
@@ -9,13 +11,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET 2.1.x
+      - name: Setup .NET 5.0.x
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "3.1.x"
+          dotnet-version: "5.0.x"
       - name: Restore dependencies
         run: dotnet restore
       - name: Build library
         run: dotnet build "Fb2.Document\Fb2.Document.csproj" --no-restore --configuration release
       - name: Tests
-        run: dotnet test "Fb2.Documents.TestsV2\Fb2.Documents.TestsV2.csproj" --no-build --verbosity normal
+        run: dotnet test "Fb2.Document.Tests\Fb2.Document.Tests.csproj" --no-build --verbosity normal

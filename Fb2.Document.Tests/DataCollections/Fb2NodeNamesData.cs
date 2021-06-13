@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Fb2.Documents.TestsV2.DataCollections
+namespace Fb2.Document.Tests.DataCollections
 {
     public class Fb2NodeNamesData : Fb2ModelsDataCollectionBase, IEnumerable<object[]>
     {
