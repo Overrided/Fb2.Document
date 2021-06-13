@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -25,8 +25,8 @@ namespace Fb2.Document
         private DocumentInfo documentInfo = null;
         private PublishInfo publishInfo = null;
         private CustomInfo customInfo = null;
-        private List<BookBody> bodies = null;
-        private List<BinaryImage> binaryImages = null;
+        private ImmutableList<BookBody> bodies = null;
+        private ImmutableList<BinaryImage> binaryImages = null;
 
         private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
         private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
@@ -47,6 +47,9 @@ namespace Fb2.Document
         {
             get
             {
+                if (!IsLoaded)
+                    return null;
+
                 if (description == null)
                     description = Book?.GetFirstChild<BookDescription>();
 
@@ -128,12 +131,15 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets list of BookBody elements from FictionBook.
         /// </summary>
-        public List<BookBody> Bodies
+        public ImmutableList<BookBody> Bodies
         {
             get
             {
+                if (!IsLoaded)
+                    return null;
+
                 if (bodies == null || !bodies.Any())
-                    bodies = Book?.GetChildren<BookBody>()?.ToList();
+                    bodies = Book?.GetChildren<BookBody>()?.ToImmutableList();
 
                 return bodies;
             }
@@ -142,12 +148,15 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets list of BinaryImages elements from FictionBook.
         /// </summary>
-        public List<BinaryImage> BinaryImages
+        public ImmutableList<BinaryImage> BinaryImages
         {
             get
             {
+                if (!IsLoaded)
+                    return null;
+
                 if (binaryImages == null || !binaryImages.Any())
-                    binaryImages = Book?.GetChildren<BinaryImage>()?.ToList();
+                    binaryImages = Book?.GetChildren<BinaryImage>()?.ToImmutableList();
 
                 return binaryImages;
             }
