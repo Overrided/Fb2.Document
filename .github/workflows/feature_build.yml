@@ -1,0 +1,22 @@
+name: .NET
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: code checkout
+      - uses: actions/checkout@v2
+      - name: Setup .NET 2.1.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "2.1.x"
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build library
+        run: dotnet build "Fb2.Document\Fb2.Document.csproj" --no-restore --configuration release
+      - name: Tests
+        run: dotnet test "Fb2.Documents.TestsV2\Fb2.Documents.TestsV2.csproj" --no-build --verbosity normal
