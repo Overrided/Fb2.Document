@@ -171,13 +171,16 @@ namespace Fb2.Document
         public bool IsLoaded { get; private set; } = false;
 
         /// <summary>
-        /// Creates Fb2Document with empty FictionBook, with `IsLoaded` set to `true`.
+        /// Creates new instance of Fb2Document with `IsLoaded` set to `true`.
         /// </summary>
+        /// <param name="fictionBook">
+        /// Optional parameter. Book to use with Fb2Document. If ommited, new instance of `FictionBook` is used.
+        /// </param>
         /// <returns>New instance of Fb2Document with empty FictionBook. </returns>
-        public static Fb2Document CreateDocument()
+        public static Fb2Document CreateDocument(FictionBook fictionBook = null)
         {
             var document = new Fb2Document();
-            document.Book = new FictionBook();
+            document.Book = fictionBook ?? new FictionBook();
             document.IsLoaded = true;
 
             return document;
