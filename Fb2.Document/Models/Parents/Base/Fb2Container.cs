@@ -119,7 +119,7 @@ namespace Fb2.Document.Models.Base
         public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
         {
             if (nodeProvider == null)
-                throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
+                throw new ArgumentNullException(nameof(nodeProvider));
 
             var newNode = await nodeProvider();
             return AddContent(newNode);
@@ -128,7 +128,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
         {
             if (nodeProvider == null)
-                throw new ArgumentNullException($"{nameof(nodeProvider)} is null");
+                throw new ArgumentNullException(nameof(nodeProvider));
 
             return AddContent(nodeProvider());
         }
@@ -136,7 +136,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container AddContent(params Fb2Node[] nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
-                throw new ArgumentNullException("No nodes received");
+                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
             foreach (var node in nodes)
                 AddContent(node);
@@ -152,7 +152,7 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
 
             if (string.IsNullOrWhiteSpace(content))
-                throw new ArgumentNullException($"{nameof(content)} is null or empty string.");
+                throw new ArgumentNullException(nameof(content), $"{nameof(content)} is null or empty string.");
 
             var textItem = new TextItem().AddContent(content, separator, preserveWhitespace);
 
@@ -162,7 +162,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container AddContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
-                throw new ArgumentNullException($"No nodes received");
+                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
             foreach (var node in nodes)
                 AddContent(node);
@@ -173,7 +173,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container AddContent(Fb2Node node)
         {
             if (node == null)
-                throw new ArgumentNullException($"{nameof(node)} is null.");
+                throw new ArgumentNullException(nameof(node));
 
             if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
                 throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
@@ -205,9 +205,7 @@ namespace Fb2.Document.Models.Base
             if (!content.Any())
                 return this;
 
-            foreach (var item in content)
-                if (nodePredicate(item))
-                    RemoveContent(item);
+            content.RemoveAll(n => nodePredicate(n));
 
             return this;
         }
@@ -467,10 +465,10 @@ namespace Fb2.Document.Models.Base
 
         public override bool Equals(object other)
         {
-            if (!base.Equals(other))
+            if (!(other is Fb2Container otherContainer))
                 return false;
 
-            if (!(other is Fb2Container otherContainer))
+            if (!base.Equals(other))
                 return false;
 
             var actualContent = content;

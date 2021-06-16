@@ -283,11 +283,11 @@ namespace Fb2.Document.Models.Base
             if (other == null)
                 return false;
 
-            if (ReferenceEquals(this, other))
-                return true;
-
             if (!(other is Fb2Node otherNode))
                 return false;
+
+            if (ReferenceEquals(this, otherNode))
+                return true;
 
             var result = Name == otherNode.Name &&
                         AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&

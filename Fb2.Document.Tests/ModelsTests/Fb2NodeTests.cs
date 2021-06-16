@@ -93,32 +93,5 @@ namespace Fb2.Document.Tests.ModelsTests
         //public void ContentReferencesAreIndependant(string nodeName)
         //{
         //}
-
-        //[Theory]
-        //[ClassData(typeof(Fb2NodeNamesData))]
-        //public void Clone_RemoveAttribute_Equals(string nodeName)
-        //{
-        //    var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
-        //    if (instanceOne.AllowedAttributes == null || !instanceOne.AllowedAttributes.Any())
-        //        return;
-
-        //    var firstAllowedAttributeName = instanceOne.AllowedAttributes.First();
-
-        //    var instanceTwo = instanceOne.Clone() as Fb2Node;
-        //    instanceTwo.AddAttribute(() => new KeyValuePair<string, string>(firstAllowedAttributeName, "testValue"));
-
-        //    var equals = instanceOne.Equals(instanceTwo);
-        //    equals.Should().BeFalse();
-
-        //    instanceOne.Attributes().Should().BeEmpty();
-        //    instanceTwo.Attributes().Should().NotBeEmpty();
-        //    instanceTwo.Attributes().Count.Should().Be(1);
-
-        //    instanceTwo.RemoveAttribute(firstAllowedAttributeName);
-        //    instanceTwo.Attributes().Should().BeEmpty();
-
-        //    var equals2 = instanceOne.Equals(instanceTwo);
-        //    equals2.Should().BeTrue();
-        //}
     }
 }
