@@ -7,15 +7,19 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    // TODO : CHECK HOW TO PREVENT TINKERING WITH CONTENT HERE
     public class EmptyLine : Fb2Element
     {
         public override string Name => ElementNames.EmptyLine;
 
-        public sealed override void Load([In] XNode element, bool preserveWhitespace = false)
-        {
-            element.Validate(Name);
-            content = Environment.NewLine;
-        }
+        public EmptyLine() => content = Environment.NewLine;
+
+        public sealed override void Load([In] XNode element, bool preserveWhitespace = false) => element.Validate(Name);
+
+        public sealed override Fb2Element AddContent(
+            string newContent,
+            string separator = null,
+            bool preserveWhitespace = false) => this;
+
+        public sealed override Fb2Element ClearContent() => this;
     }
 }

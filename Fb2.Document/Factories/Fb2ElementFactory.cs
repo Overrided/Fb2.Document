@@ -89,7 +89,7 @@ namespace Fb2.Document.Factories
         public static Fb2Node GetNodeByName([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
-                throw new ArgumentNullException($"{nameof(nodeName)} is null or empty string");
+                throw new ArgumentNullException(nameof(nodeName));
 
             Type result = null;
             Type resultLowerInv = null;
@@ -111,7 +111,7 @@ namespace Fb2.Document.Factories
         public static bool IsKnownNode([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
-                throw new ArgumentNullException($"{nameof(nodeName)} is null or empty string");
+                throw new ArgumentNullException(nameof(nodeName));
 
             return KnownNodes.ContainsKey(nodeName) || KnownNodes.ContainsKey(nodeName.ToLowerInvariant());
         }

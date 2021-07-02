@@ -195,7 +195,7 @@ namespace Fb2.Document
         public void Load([In] XDocument document)
         {
             if (document == null)
-                throw new ArgumentNullException($"{nameof(document)} is null");
+                throw new ArgumentNullException(nameof(document));
 
             Load(document.Root);
         }
@@ -209,7 +209,7 @@ namespace Fb2.Document
         public void Load([In] string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
-                throw new ArgumentNullException($"{nameof(fileContent)} is null");
+                throw new ArgumentNullException(nameof(fileContent));
 
             var document = XDocument.Parse(fileContent);
             Load(document.Root);
@@ -225,7 +225,7 @@ namespace Fb2.Document
         public void Load([In] Stream fileContent)
         {
             if (fileContent == null)
-                throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
+                throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
@@ -247,7 +247,7 @@ namespace Fb2.Document
         public async Task LoadAsync([In] Stream fileContent)
         {
             if (fileContent == null)
-                throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
+                throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
@@ -293,7 +293,7 @@ namespace Fb2.Document
         private void Load([In] XElement root)
         {
             if (root == null)
-                throw new ArgumentNullException($"{nameof(root)} element is null");
+                throw new ArgumentNullException(nameof(root));
 
             Book = new FictionBook();
             Book.Load(root);

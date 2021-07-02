@@ -189,7 +189,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
-                throw new ArgumentNullException($"No nodes received");
+                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
             foreach (var node in nodes)
                 RemoveContent(node);
@@ -200,7 +200,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
         {
             if (nodePredicate == null)
-                throw new ArgumentNullException($"{nameof(nodePredicate)} is null.");
+                throw new ArgumentNullException(nameof(nodePredicate));
 
             if (!content.Any())
                 return this;
@@ -213,7 +213,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Container RemoveContent(Fb2Node node)
         {
             if (node == null)
-                throw new ArgumentNullException($"{nameof(node)} is null.");
+                throw new ArgumentNullException(nameof(node));
 
             if (content.Any())
                 content.Remove(node);
@@ -241,7 +241,7 @@ namespace Fb2.Document.Models.Base
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException($"{nameof(name)} is null or empty string. Use `{nameof(Content)}` method instead.");
+                throw new ArgumentNullException(nameof(name), $"{nameof(name)} is null or empty string. Use `{nameof(Content)}` instead.");
 
             return content.Where(elem => elem.Name.EqualsInvariant(name));
         }
@@ -294,7 +294,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Node GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException($"{nameof(name)} is null or empty string! Use {nameof(GetFirstChild)} method instead.");
+                throw new ArgumentNullException(nameof(name), $"{nameof(name)} is null or empty string! Use {nameof(GetFirstChild)} method instead.");
 
             if (!content.Any())
                 return null;

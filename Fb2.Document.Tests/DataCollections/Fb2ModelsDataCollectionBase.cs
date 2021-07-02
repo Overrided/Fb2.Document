@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Tests.Common;
+using FluentAssertions;
 
 namespace Fb2.Document.Tests.DataCollections
 {
@@ -22,6 +23,8 @@ namespace Fb2.Document.Tests.DataCollections
             AllModelTypes = assembly.GetExportedTypes()
                 .Where(type => type.FullName.StartsWith("Fb2.Document.Models.") && !type.IsAbstract && type.IsClass)
                 .ToList();
+
+            AllElementsNames.Count.Should().Be(AllModelTypes.Count);
         }
     }
 }

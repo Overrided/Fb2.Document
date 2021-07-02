@@ -7,6 +7,7 @@ using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 
@@ -59,7 +60,7 @@ namespace Fb2.Document.Models.Base
         public virtual void Load([In] XNode node, bool preserveWhitespace = false)
         {
             if (node == null)
-                throw new ArgumentNullException($"{nameof(node)} is null!");
+                throw new ArgumentNullException(nameof(node));
 
             node.Validate(Name);
 
@@ -103,7 +104,7 @@ namespace Fb2.Document.Models.Base
         public bool HasAttribute(string key, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException($"{nameof(key)} is null or empty string.");
+                throw new ArgumentNullException(nameof(key));
 
             if (!attributes.Any())
                 return false;
@@ -150,26 +151,22 @@ namespace Fb2.Document.Models.Base
 
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
-            if (attributes == null ||
-                !attributes.Any() ||
-                attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
-                throw new ArgumentNullException($"No {nameof(attributes)} received.");
+            if (attributes == null || !attributes.Any())
+                throw new ArgumentNullException(nameof(attributes));
 
             foreach (var attribute in attributes)
-                AddAttribute(attribute);
+                AddAttribute(attribute.Key, attribute.Value);
 
             return this;
         }
 
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
         {
-            if (attributes == null ||
-                !attributes.Any() ||
-                attributes.All(a => string.IsNullOrWhiteSpace(a.Key) || string.IsNullOrWhiteSpace(a.Value)))
-                throw new ArgumentNullException("No attributes received");
+            if (attributes == null || !attributes.Any())
+                throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
             foreach (var attribute in attributes)
-                AddAttribute(attribute);
+                AddAttribute(attribute.Key, attribute.Value);
 
             return this;
         }
@@ -177,19 +174,21 @@ namespace Fb2.Document.Models.Base
         public async Task<Fb2Node> AddAttributeAsync(Func<Task<KeyValuePair<string, string>>> attributeProvider)
         {
             if (attributeProvider == null)
-                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
+                throw new ArgumentNullException(nameof(attributeProvider));
 
-            var newAttribute = await attributeProvider();
+            var attribute = await attributeProvider();
 
-            return AddAttribute(newAttribute);
+            return AddAttribute(attribute.Key, attribute.Value);
         }
 
         public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
         {
             if (attributeProvider == null)
-                throw new ArgumentNullException($"{nameof(attributeProvider)} is null");
+                throw new ArgumentNullException(nameof(attributeProvider));
 
-            return AddAttribute(attributeProvider());
+            var attribute = attributeProvider();
+
+            return AddAttribute(attribute.Key, attribute.Value);
         }
 
         public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
@@ -197,27 +196,24 @@ namespace Fb2.Document.Models.Base
 
         public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
-            if (!AllowedAttributes.Any()) // TODO : custom exceptions?
-                throw new InvalidOperationException($"Node {Name} has no defined attributes.");
+            if (!AllowedAttributes.Any())
+                throw new NoAttributesAllowedException($"{Name} has no allowed attributes.");
 
-            if (string.IsNullOrWhiteSpace(attributeName))
-                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
+            if (string.IsNullOrWhiteSpace(attributeName) ||
+                attributeName.Any(c => conditionalChars.Contains(c)) ||
+                trimWhitespace.IsMatch(attributeName))
+                throw new InvalidAttributeException($"{nameof(attributeName)} is null or empty string, or contains invalid characters.");
 
-            if (string.IsNullOrWhiteSpace(attributeValue))
-                throw new ArgumentNullException($"{nameof(attributeValue)} is null or empty string.");
-
-            // TODO : do we need both checks? Regex should be ok, double check
-            if (trimWhitespace.IsMatch(attributeName) || attributeName.Any(c => conditionalChars.Contains(c)))
-                throw new ArgumentException($"{nameof(attributeName)} contains invalid characters ({string.Join(',', conditionalChars)}).");
-
-            // TODO : do we need both checks? Regex should be ok
-            if (trimWhitespace.IsMatch(attributeValue) || attributeValue.Any(c => conditionalChars.Contains(c)))
-                throw new ArgumentException($"{nameof(attributeValue)} contains invalid characters ({string.Join(",", conditionalChars)}).");
+            // TODO : check if 2 checks - both regex & conditional chars - are needed
+            if (string.IsNullOrWhiteSpace(attributeValue) ||
+                attributeValue.Any(c => conditionalChars.Contains(c)) ||
+                trimWhitespace.IsMatch(attributeValue))
+                throw new InvalidAttributeException($"{nameof(attributeValue)} is null or empty string, or contains invalid characters.");
 
             var escapedAttrName = SecurityElement.Escape(attributeName);
 
             if (!AllowedAttributes.Contains(escapedAttrName))
-                throw new ArgumentException($"Attribute {attributeName} is not valid for {Name} node.");
+                throw new UnexpectedAtrributeException($"Attribute {attributeName} is not allowed for {Name} node.");
 
             var escapedAttrValue = SecurityElement.Escape(attributeValue);
 
@@ -228,27 +224,27 @@ namespace Fb2.Document.Models.Base
         public Fb2Node RemoveAttribute(string attributeName, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(attributeName))
-                throw new ArgumentNullException($"{nameof(attributeName)} is null or empty string.");
+                throw new ArgumentNullException(nameof(attributeName));
 
             if (!TryGetAttribute(attributeName, ignoreCase, out var result))
                 return this;
 
             attributes.Remove(result.Key);
-
             return this;
         }
 
         public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
         {
             if (attributePredicate == null)
-                throw new ArgumentNullException($"{nameof(attributePredicate)} is null");
+                throw new ArgumentNullException(nameof(attributePredicate));
 
             if (!attributes.Any())
                 return this;
 
-            foreach (var attribute in attributes)
-                if (attributePredicate(attribute))
-                    attributes.Remove(attribute.Key);
+            var attrsToRemove = attributes.Where(a => attributePredicate(a));
+
+            foreach (var attributeToRemove in attrsToRemove)
+                attributes.Remove(attributeToRemove.Key);
 
             return this;
         }

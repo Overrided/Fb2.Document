@@ -52,7 +52,7 @@ namespace Fb2.Document.Models.Base
             bool preserveWhitespace = false)
         {
             if (contentProvider == null)
-                throw new ArgumentNullException($"{nameof(contentProvider)} is null.");
+                throw new ArgumentNullException(nameof(contentProvider));
 
             var content = contentProvider();
 
@@ -64,8 +64,9 @@ namespace Fb2.Document.Models.Base
             bool preserveWhitespace = false)
         {
             if (string.IsNullOrWhiteSpace(newContent))
-                throw new ArgumentNullException($"{nameof(newContent)} is null or empty string.");
+                throw new ArgumentNullException(nameof(newContent));
 
+            // TODO : make this method virtual + add override in Empty line for proper flow?
             if (Name == ElementNames.EmptyLine)
                 return this; // no content injections in empty line )
 

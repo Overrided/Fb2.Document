@@ -18,6 +18,7 @@ namespace Fb2.Document.Tests.ModelsTests
         public void Container_AddContent_NullNode_Throws(Type modelType)
         {
             var node = Activator.CreateInstance(modelType) as Fb2Container;
+            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.First());
 
             node.Invoking(n => n.AddContent((Fb2Node)null)) // Fb2Node 
                .Should()
@@ -40,6 +41,14 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Throw<ArgumentNullException>();
 
             node.Invoking(n => n.AddContent((List<Fb2Node>)null)) // IEnumerable<Fb2Node>
+                .Should()
+                .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.AddContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+                .Should()
+                .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.AddContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
@@ -75,6 +84,34 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .Throw<ArgumentException>()
                 .WithMessage($"Element '{node.Name}' is not designed to contain text (direct content). See {node.Name}.{nameof(node.CanContainText)}.");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerTypeData))]
+        public void Container_CanContainText_AddTextContent_Works(Type modelType)
+        {
+            var node = Activator.CreateInstance(modelType) as Fb2Container;
+
+            if (!node.CanContainText)
+                return;
+
+            node.AddContent(new TextItem().AddContent("test text"));
+
+            node.Content.Count.Should().Be(1);
+            var first = node.Content.First();
+            first.Should().BeOfType(typeof(TextItem));
+            (first as Fb2Element).Content.Should().Be("test text");
+
+            ClearContainerContent(node);
+
+            node.AddTextContent("test text");
+
+            node.Content.Count.Should().Be(1);
+            var second = node.Content.First();
+            second.Should().BeOfType(typeof(TextItem));
+            (second as Fb2Element).Content.Should().Be("test text");
+
+            ClearContainerContent(node);
         }
 
         [Theory]
@@ -162,6 +199,34 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
 
             ClearContainerContent(node);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerTypeData))]
+        public void Container_RemoveContent_NullNode_Throws(Type modelType)
+        {
+            var node = Activator.CreateInstance(modelType) as Fb2Container;
+            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.First());
+
+            node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
+               .Should()
+               .Throw<ArgumentNullException>();
         }
 
         [Theory]
