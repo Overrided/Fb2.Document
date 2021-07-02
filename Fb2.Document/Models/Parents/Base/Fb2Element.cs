@@ -41,7 +41,7 @@ namespace Fb2.Document.Models.Base
 
             var rawContent = GetNodeContent(node);
 
-            if (!preserveWhitespace && rawContent.Any(rch => conditionalChars.Contains(rch)))
+            if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
                 content = trimWhitespace.Replace(rawContent, Whitespace);
             else
                 content = rawContent;
@@ -59,26 +59,21 @@ namespace Fb2.Document.Models.Base
             return AddContent(content, separator, preserveWhitespace);
         }
 
-        public Fb2Element AddContent(string newContent,
+        public virtual Fb2Element AddContent(string newContent,
             string separator = null,
             bool preserveWhitespace = false)
         {
             if (string.IsNullOrWhiteSpace(newContent))
                 throw new ArgumentNullException(nameof(newContent));
 
-            // TODO : make this method virtual + add override in Empty line for proper flow?
-            if (Name == ElementNames.EmptyLine)
-                return this; // no content injections in empty line )
-
             separator = string.IsNullOrWhiteSpace(separator) ?
                 string.Empty :
-                trimWhitespace.Replace(SecurityElement.Escape(separator), Whitespace);
+                SecurityElement.Escape(trimWhitespace.Replace(separator, Whitespace));
 
-            // preventing xml injections and creating new reference
-            var escapedContent = string.Copy(SecurityElement.Escape(newContent));
+            if (!preserveWhitespace && trimWhitespace.IsMatch(newContent))
+                newContent = trimWhitespace.Replace(newContent, Whitespace);
 
-            if (!preserveWhitespace && escapedContent.Any(c => conditionalChars.Contains(c)))
-                escapedContent = trimWhitespace.Replace(escapedContent, Whitespace);
+            var escapedContent = SecurityElement.Escape(newContent);
 
             if (string.IsNullOrWhiteSpace(content))
                 content = escapedContent;
@@ -88,7 +83,7 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Element ClearContent()
+        public virtual Fb2Element ClearContent()
         {
             if (!string.IsNullOrWhiteSpace(content))
                 content = string.Empty;

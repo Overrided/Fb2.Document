@@ -21,8 +21,6 @@ namespace Fb2.Document.Models.Base
     {
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
 
-        protected static readonly HashSet<char> conditionalChars = new HashSet<char> { '\n', '\r', '\t' };
-
         private Dictionary<string, string> attributes = new Dictionary<string, string>();
 
         /// <summary>
@@ -200,13 +198,10 @@ namespace Fb2.Document.Models.Base
                 throw new NoAttributesAllowedException($"{Name} has no allowed attributes.");
 
             if (string.IsNullOrWhiteSpace(attributeName) ||
-                attributeName.Any(c => conditionalChars.Contains(c)) ||
                 trimWhitespace.IsMatch(attributeName))
                 throw new InvalidAttributeException($"{nameof(attributeName)} is null or empty string, or contains invalid characters.");
 
-            // TODO : check if 2 checks - both regex & conditional chars - are needed
             if (string.IsNullOrWhiteSpace(attributeValue) ||
-                attributeValue.Any(c => conditionalChars.Contains(c)) ||
                 trimWhitespace.IsMatch(attributeValue))
                 throw new InvalidAttributeException($"{nameof(attributeValue)} is null or empty string, or contains invalid characters.");
 
