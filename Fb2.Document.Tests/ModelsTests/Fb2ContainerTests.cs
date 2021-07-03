@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -77,13 +78,13 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(new TextItem().AddContent("test text")))
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"Element '{node.Name}' is not designed to contain text (direct content). See {node.Name}.{nameof(node.CanContainText)}.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node 'text'.");
 
             node.Invoking(n => n.AddTextContent("test text"))
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"Element '{node.Name}' is not designed to contain text (direct content). See {node.Name}.{nameof(node.CanContainText)}.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node 'text'.");
         }
 
         [Theory]
@@ -127,24 +128,24 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(notAllowedNode)) // Fb2Node 
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"'{notAllowedElementName}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
 
             // params Fb2Node[] nodes
             node.Invoking(n => n.AddContent(notAllowedNode, notAllowedNode)) // lol
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"'{notAllowedElementName}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AddContent(() => notAllowedNode)) // Func<Fb2Node>
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"'{notAllowedElementName}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AddContent(new List<Fb2Node> { notAllowedNode })) // IEnumerable<Fb2Node>
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"'{notAllowedElementName}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
 
             node.Invoking(
                 async n => await n.AddContentAsync(async () =>
@@ -153,8 +154,8 @@ namespace Fb2.Document.Tests.ModelsTests
                     return notAllowedNode;
                 }))
                 .Should()
-                .Throw<ArgumentException>()
-                .WithMessage($"'{notAllowedElementName}' is not valid child for '{node.Name}'. See {node.Name}.{nameof(Fb2Container.AllowedElements)} for valid content elements.");
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
         }
 
         [Theory]

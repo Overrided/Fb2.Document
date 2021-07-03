@@ -97,7 +97,7 @@ namespace Fb2.Document.Factories
 
             if (!KnownNodes.TryGetValue(nodeName, out result) &&
                 !KnownNodes.TryGetValue(nodeName.ToLowerInvariant(), out resultLowerInv))
-                throw new UnknownNodeNameException($"{nameof(nodeName)} is not valid Fb2 node name.");
+                throw new UnknownNodeNameException(nodeName);
 
             var modelType = result ?? resultLowerInv;
 

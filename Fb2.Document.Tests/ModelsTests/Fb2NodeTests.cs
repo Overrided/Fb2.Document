@@ -88,19 +88,19 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Invoking(i => i.AddAttribute("testKey", "testValue"))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(i => i.AddAttribute(() => new KeyValuePair<string, string>("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(i => i.AddAttribute(new KeyValuePair<string, string>("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(i => i.AddAttributes(
@@ -108,7 +108,7 @@ namespace Fb2.Document.Tests.ModelsTests
                     new("testKey2", "testValue2")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(i => i.AddAttributes(
@@ -118,13 +118,13 @@ namespace Fb2.Document.Tests.ModelsTests
                     }))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new KeyValuePair<string, string>("testKey", "testValue"))))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"{instance.Name} has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
         }
 
         [Theory]

@@ -195,20 +195,18 @@ namespace Fb2.Document.Models.Base
         public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
             if (!AllowedAttributes.Any())
-                throw new NoAttributesAllowedException($"{Name} has no allowed attributes.");
+                throw new NoAttributesAllowedException(Name);
 
-            if (string.IsNullOrWhiteSpace(attributeName) ||
-                trimWhitespace.IsMatch(attributeName))
-                throw new InvalidAttributeException($"{nameof(attributeName)} is null or empty string, or contains invalid characters.");
+            if (trimWhitespace.IsMatch(attributeName) || string.IsNullOrWhiteSpace(attributeName))
+                throw new InvalidAttributeException(nameof(attributeName));
 
-            if (string.IsNullOrWhiteSpace(attributeValue) ||
-                trimWhitespace.IsMatch(attributeValue))
-                throw new InvalidAttributeException($"{nameof(attributeValue)} is null or empty string, or contains invalid characters.");
+            if (trimWhitespace.IsMatch(attributeValue) || string.IsNullOrWhiteSpace(attributeValue))
+                throw new InvalidAttributeException(nameof(attributeValue));
 
             var escapedAttrName = SecurityElement.Escape(attributeName);
 
             if (!AllowedAttributes.Contains(escapedAttrName))
-                throw new UnexpectedAtrributeException($"Attribute {attributeName} is not allowed for {Name} node.");
+                throw new UnexpectedAtrributeException(Name, escapedAttrName);
 
             var escapedAttrValue = SecurityElement.Escape(attributeValue);
 

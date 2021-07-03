@@ -4,6 +4,8 @@ namespace Fb2.Document.Exceptions
 {
     public class InvalidAttributeException : Exception
     {
-        public InvalidAttributeException(string message) : base(message) { }
+        public InvalidAttributeException(string issueName) :
+            base($"{issueName} is null or empty string, or contains invalid characters.")
+        { }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Resolver;
@@ -179,7 +180,7 @@ namespace Fb2.Document.Models.Base
             bool preserveWhitespace = false)
         {
             if (!CanContainText)
-                throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
+                throw new UnexpectedNodeException(Name, "text");
 
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentNullException(nameof(content), $"{nameof(content)} is null or empty string.");
@@ -206,10 +207,10 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(node));
 
             if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
-                throw new ArgumentException($"Element '{Name}' is not designed to contain text (direct content). See {Name}.{nameof(CanContainText)}.");
+                throw new UnexpectedNodeException(Name, "text");
 
             if (!AllowedElements.Contains(node.Name) && !node.Name.Equals(ElementNames.FictionText))
-                throw new ArgumentException($"'{node.Name}' is not valid child for '{Name}'. See {Name}.{nameof(AllowedElements)} for valid content elements.");
+                throw new UnexpectedNodeException(Name, node.Name);
 
             content.Add(node);
 
