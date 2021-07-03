@@ -63,7 +63,7 @@ namespace Fb2.Document.Models.Base
             var nodes = element.Nodes()
                 .Where(n => (n.NodeType == XmlNodeType.Text) ||
                             ((n.NodeType == XmlNodeType.Element) &&
-                            Fb2ElementFactory.IsKnownNode((n as XElement).Name.LocalName.ToLowerInvariant())));
+                            Fb2NodeFactory.IsKnownNode((n as XElement).Name.LocalName.ToLowerInvariant())));
 
             if (!nodes.Any())
                 return;
@@ -74,7 +74,7 @@ namespace Fb2.Document.Models.Base
                     ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
                     ElementNames.FictionText;
 
-                var elem = Fb2ElementFactory.GetNodeByName(localName);
+                var elem = Fb2NodeFactory.GetNodeByName(localName);
                 elem.Load(validNode, preserveWhitespace);
 
                 elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
@@ -112,6 +112,36 @@ namespace Fb2.Document.Models.Base
             element.Add(children);
 
             return element;
+        }
+
+        public override bool Equals(object other)
+        {
+            if (!(other is Fb2Container otherContainer))
+                return false;
+
+            if (!base.Equals(other))
+                return false;
+
+            var actualContent = content;
+            var otherContent = otherContainer.content;
+            var sameContent = actualContent.Count == otherContent.Count && actualContent.All(c => otherContent.Contains(c));
+
+            var result = sameContent &&
+                CanContainText == otherContainer.CanContainText &&
+                AllowedElements.SequenceEqual(otherContainer.AllowedElements);
+
+            return result;
+        }
+
+        public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
+
+        public sealed override object Clone()
+        {
+            var container = base.Clone() as Fb2Container;
+            container.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+            container.CanContainText = CanContainText;
+
+            return container;
         }
 
         #region Content editing
@@ -462,35 +492,5 @@ namespace Fb2.Document.Models.Base
         }
 
         #endregion
-
-        public override bool Equals(object other)
-        {
-            if (!(other is Fb2Container otherContainer))
-                return false;
-
-            if (!base.Equals(other))
-                return false;
-
-            var actualContent = content;
-            var otherContent = otherContainer.content;
-            var sameContent = actualContent.Count == otherContent.Count && actualContent.All(c => otherContent.Contains(c));
-
-            var result = sameContent &&
-                CanContainText == otherContainer.CanContainText &&
-                AllowedElements.SequenceEqual(otherContainer.AllowedElements);
-
-            return result;
-        }
-
-        public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
-
-        public sealed override object Clone()
-        {
-            var container = base.Clone() as Fb2Container;
-            container.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
-            container.CanContainText = CanContainText;
-
-            return container;
-        }
     }
 }

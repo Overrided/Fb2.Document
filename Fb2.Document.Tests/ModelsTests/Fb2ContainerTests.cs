@@ -14,11 +14,11 @@ namespace Fb2.Document.Tests.ModelsTests
     public class Fb2ContainerTests
     {
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_AddContent_NullNode_Throws(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_AddContent_NullNode_Throws(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
-            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.First());
+            node.Should().NotBeNull();
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
             node.Invoking(n => n.AddContent((Fb2Node)null)) // Fb2Node 
                .Should()
@@ -67,10 +67,10 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_CantContainText_AddTextContent_Throws(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CantContainText_AddTextContent_Throws(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
+            node.Should().NotBeNull();
 
             if (node.CanContainText)
                 return;
@@ -87,10 +87,10 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_CanContainText_AddTextContent_Works(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CanContainText_AddTextContent_Works(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
+            node.Should().NotBeNull();
 
             if (!node.CanContainText)
                 return;
@@ -115,15 +115,15 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_AddContent_NotAllowedElement_Throws(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_AddContent_NotAllowedElement_Throws(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
-            var dataCollection = new Fb2ContainerTypeData();
+            node.Should().NotBeNull();
+            var dataCollection = new Fb2ContainerCollection();
 
             var notAllowedElementName = dataCollection.AllElementsNames.Except(node.AllowedElements).Skip(5).First();
 
-            var notAllowedNode = Fb2ElementFactory.GetNodeByName(notAllowedElementName);
+            var notAllowedNode = Fb2NodeFactory.GetNodeByName(notAllowedElementName);
 
             node.Invoking(n => n.AddContent(notAllowedNode)) // Fb2Node 
                 .Should()
@@ -158,12 +158,12 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public async Task Container_AddContent_AllowedElement_Works(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public async Task Container_AddContent_AllowedElement_Works(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
+            node.Should().NotBeNull();
             var allowedElementName = node.AllowedElements.First();
-            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(allowedElementName);
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(allowedElementName);
 
             node.AddContent(firstAllowedNode);
 
@@ -202,11 +202,10 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_RemoveContent_NullNode_Throws(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_RemoveContent_NullNode_Throws(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
-            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.First());
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
             node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
                .Should()
@@ -230,13 +229,13 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2ContainerTypeData))]
-        public void Container_RemoveContent_AllowedElement_Works(Type modelType)
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_RemoveContent_AllowedElement_Works(Fb2Container node)
         {
-            var node = Activator.CreateInstance(modelType) as Fb2Container;
+            node.Should().NotBeNull();
 
-            var firstAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.First());
-            var lastAllowedNode = Fb2ElementFactory.GetNodeByName(node.AllowedElements.Last());
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
+            var lastAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.Last());
 
             var nodesEquals = firstAllowedNode.Equals(lastAllowedNode);
 

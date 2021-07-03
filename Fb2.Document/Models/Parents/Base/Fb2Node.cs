@@ -305,7 +305,7 @@ namespace Fb2.Document.Models.Base
 
         public virtual object Clone()
         {
-            var node = Fb2ElementFactory.GetNodeByName(Name);
+            var node = Fb2NodeFactory.GetNodeByName(Name);
 
             // TODO : chech if it saves references to keyValuePair's strings
             // if it does, it's bad ))

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Factories
 {
-    public static class Fb2ElementFactory
+    public static class Fb2NodeFactory
     {
         private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>
         {
@@ -96,12 +97,9 @@ namespace Fb2.Document.Factories
 
             if (!KnownNodes.TryGetValue(nodeName, out result) &&
                 !KnownNodes.TryGetValue(nodeName.ToLowerInvariant(), out resultLowerInv))
-                return null;
+                throw new UnknownNodeNameException($"{nameof(nodeName)} is not valid Fb2 node name.");
 
             var modelType = result ?? resultLowerInv;
-
-            if (modelType == null)
-                return null;
 
             var model = Activator.CreateInstance(modelType) as Fb2Node;
 

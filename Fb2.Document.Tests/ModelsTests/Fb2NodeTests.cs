@@ -16,44 +16,40 @@ namespace Fb2.Document.Tests.ModelsTests
     public class Fb2NodeTests
     {
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void EmptyNodes_EqualityNullTest(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void EmptyNodes_EqualityNullTest(Fb2Node instance)
         {
-            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
-            instanceOne.Should().NotBe(null);
+            instance.Should().NotBe(null);
 
-            var instanceTwo = Fb2ElementFactory.GetNodeByName(nodeName);
+            var instanceTwo = Fb2NodeFactory.GetNodeByName(instance.Name);
             instanceTwo.Should().NotBe(null);
 
-            instanceOne.Should().Be(instanceTwo);
+            instance.Should().Be(instanceTwo);
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void CloneNode_EqualityTest(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void CloneNode_EqualityTest(Fb2Node instance)
         {
-            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
-            var instanceTwo = instanceOne.Clone();
-
-            instanceOne.Should().Be(instanceTwo);
+            var instanceTwo = Fb2NodeFactory.GetNodeByName(instance.Name);
+            instance.Should().Be(instanceTwo);
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void Clone_AddAttribute_NotEquals(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void Clone_AddAttribute_NotEquals(Fb2Node instance)
         {
-            var instanceOne = Fb2ElementFactory.GetNodeByName(nodeName);
-            if (instanceOne.AllowedAttributes == null || !instanceOne.AllowedAttributes.Any())
+            if (instance.AllowedAttributes == null || !instance.AllowedAttributes.Any())
                 return;
 
-            var instanceTwo = instanceOne.Clone() as Fb2Node;
+            var instanceTwo = instance.Clone() as Fb2Node;
             //instanceTwo.AddAttribute(() => new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
             //instanceTwo.AddAttribute(new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
-            instanceTwo.AddAttribute(instanceOne.AllowedAttributes.First(), "testValue");
+            instanceTwo.AddAttribute(instance.AllowedAttributes.First(), "testValue");
 
-            instanceOne.Should().NotBe(instanceTwo);
+            instance.Should().NotBe(instanceTwo);
 
-            instanceOne.Attributes.Should().BeEmpty();
+            instance.Attributes.Should().BeEmpty();
             instanceTwo.Attributes.Should().NotBeEmpty();
             instanceTwo.Attributes.Count.Should().Be(1);
         }
@@ -80,10 +76,9 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void AddAttribute_NoAttributesAllowed_Throws(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_NoAttributesAllowed_Throws(Fb2Node instance)
         {
-            var instance = Fb2ElementFactory.GetNodeByName(nodeName);
             instance.Should().NotBe(null);
 
             if (instance.AllowedAttributes.Any())
@@ -133,10 +128,9 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void AddAttribute_EmptyOrNull_Throws(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_EmptyOrNull_Throws(Fb2Node instance)
         {
-            var instance = Fb2ElementFactory.GetNodeByName(nodeName);
             instance.Should().NotBe(null);
 
             if (!instance.AllowedAttributes.Any())
@@ -174,10 +168,9 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void AddAttribute_InvalidAttribute_Throws(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_InvalidAttribute_Throws(Fb2Node instance)
         {
-            var instance = Fb2ElementFactory.GetNodeByName(nodeName);
             instance.Should().NotBe(null);
 
             if (!instance.AllowedAttributes.Any())
@@ -225,10 +218,64 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Theory]
-        [ClassData(typeof(Fb2NodeNamesData))]
-        public void AddAttribute_NotAllowedAttribute_Throws(string nodeName)
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_Whitespaces_Throws(Fb2Node instance)
         {
-            var instance = Fb2ElementFactory.GetNodeByName(nodeName);
+            instance.Should().NotBe(null);
+
+            if (!instance.AllowedAttributes.Any())
+                return;
+
+            instance // whitespace
+                .Invoking(i => i.AddAttribute("  NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // whitespace
+                .Invoking(i => i.AddAttribute(" NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute('\t' + "NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute(Environment.NewLine + "NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute('\n' + "NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute('\r' + "NotExistingKey", "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // whitespace
+                .Invoking(i => i.AddAttribute("NotExistingKey", "NotExistingValue "))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute("NotExistingKey", '\t' + "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            instance // /t 2, lol
+                .Invoking(i => i.AddAttribute("NotExistingKey", Environment.NewLine + "NotExistingValue"))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_NotAllowedAttribute_Throws(Fb2Node instance)
+        {
             instance.Should().NotBe(null);
 
             if (!instance.AllowedAttributes.Any())
@@ -240,19 +287,65 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<UnexpectedAtrributeException>();
         }
 
-        //[Theory]
-        //[ClassData(typeof(Fb2NodeNamesData))]
-        //public void AddAttribute_AllowedAttribute_Works(string nodeName)
-        //{
-        //    var instance = Fb2ElementFactory.GetNodeByName(nodeName);
-        //    instance.Should().NotBe(null);
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_AllowedAttribute_Works(Fb2Node instance)
+        {
+            instance.Should().NotBe(null);
 
-        //    if (!instance.AllowedAttributes.Any())
-        //        return;
+            if (!instance.AllowedAttributes.Any())
+                return;
 
-        //    var firstAlowedAttributeName = instance.AllowedAttributes.First();
+            var firstAlowedAttributeName = instance.AllowedAttributes.First();
 
-        //    instance.AddAttribute(firstAlowedAttributeName, "testValue");
-        //}
+            instance.AddAttribute(firstAlowedAttributeName, "testValue");
+
+            var attributes = instance.Attributes;
+            attributes.Should().HaveCount(1);
+            attributes.Should().ContainKey(firstAlowedAttributeName);
+            attributes[firstAlowedAttributeName].Should().Be("testValue");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void AddAttribute_AllowedAttribute_EscapesAttributeValue_Works(Fb2Node instance)
+        {
+            instance.Should().NotBe(null);
+
+            if (!instance.AllowedAttributes.Any())
+                return;
+
+            var firstAlowedAttributeName = instance.AllowedAttributes.First();
+
+            instance.AddAttribute(firstAlowedAttributeName, "<testValue");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;testValue");
+
+            instance.AddAttribute(firstAlowedAttributeName, "testValue>");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&gt;");
+
+            instance.AddAttribute(firstAlowedAttributeName, @"""testValue");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "&quot;testValue");
+
+            instance.AddAttribute(firstAlowedAttributeName, "testValue'tv");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&apos;tv");
+
+            instance.AddAttribute(firstAlowedAttributeName, "testValue&tv");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&amp;tv");
+
+            instance.AddAttribute(firstAlowedAttributeName, @"<""testValue&tv'2"">");
+            CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;&quot;testValue&amp;tv&apos;2&quot;&gt;");
+        }
+
+        private void CheckAttributes(
+            Fb2Node instance,
+            int expectedCount,
+            string expectedName,
+            string expectedValue)
+        {
+            instance.Should().NotBeNull();
+            instance.Attributes.Should().HaveCount(expectedCount);
+            instance.Attributes.Should().ContainKey(expectedName);
+            instance.Attributes[expectedName].Should().Be(expectedValue);
+        }
     }
 }

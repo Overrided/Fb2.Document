@@ -1,26 +1,31 @@
+using System;
 using Fb2.Document.Constants;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Factories;
 using FluentAssertions;
 using Xunit;
 
 namespace Fb2.Document.Tests
 {
-    public class Fb2ElementFactoryTests
+    public class Fb2NodeFactoryTests
     {
         [Fact]
         public void IsKnownNode_InvalidNodeName_ReturnsFalse()
         {
             var invalidNodeName = "invalidNodeName";
-            var node = Fb2ElementFactory.IsKnownNode(invalidNodeName);
+            var node = Fb2NodeFactory.IsKnownNode(invalidNodeName);
             node.Should().BeFalse();
         }
 
         [Fact]
-        public void GetElementByNodeName_InvalidNodeName_ReturnsNull()
+        public void GetElementByNodeName_InvalidNodeName_Throws()
         {
             var invalidNodeName = "invalidNodeName";
-            var node = Fb2ElementFactory.GetNodeByName(invalidNodeName);
-            node.Should().BeNull();
+
+            Action act = () => { var node = Fb2NodeFactory.GetNodeByName(invalidNodeName); };
+
+            act.Should().Throw<UnknownNodeNameException>()
+                .WithMessage("nodeName is not valid Fb2 node name.");
         }
 
         [Fact]
@@ -29,11 +34,11 @@ namespace Fb2.Document.Tests
             var titleInfoCasedNodeName = "tItLe-iNFo";
             var strikethroughCasedNodeName = "sTrIkEtHrOuGh";
 
-            Fb2ElementFactory.IsKnownNode(titleInfoCasedNodeName).Should().BeTrue();
-            Fb2ElementFactory.IsKnownNode(strikethroughCasedNodeName).Should().BeTrue();
+            Fb2NodeFactory.IsKnownNode(titleInfoCasedNodeName).Should().BeTrue();
+            Fb2NodeFactory.IsKnownNode(strikethroughCasedNodeName).Should().BeTrue();
 
-            var titleInfo = Fb2ElementFactory.GetNodeByName(titleInfoCasedNodeName);
-            var strikethrough = Fb2ElementFactory.GetNodeByName(strikethroughCasedNodeName);
+            var titleInfo = Fb2NodeFactory.GetNodeByName(titleInfoCasedNodeName);
+            var strikethrough = Fb2NodeFactory.GetNodeByName(strikethroughCasedNodeName);
 
             titleInfo.Should().NotBeNull();
             strikethrough.Should().NotBeNull();
