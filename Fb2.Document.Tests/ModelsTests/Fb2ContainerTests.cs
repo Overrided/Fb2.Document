@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
@@ -275,6 +277,40 @@ namespace Fb2.Document.Tests.ModelsTests
             }
 
             ClearContainerContent(node);
+        }
+
+        [Fact]
+        public void ContainerNode_Load_IgnoreUnsafeNode()
+        {
+            var strong = new Strong();
+
+            var validStrongXNodeText = "simple bold text";
+            var validBoldXNode = new XElement(ElementNames.Strong, validStrongXNodeText);
+
+            // normal scenario
+            strong.Load(validBoldXNode);
+
+            strong.Content.Should().HaveCount(1);
+            strong.Content.First().Should().BeOfType<TextItem>();
+            (strong.Content.First() as TextItem).Content.Should().Be(validStrongXNodeText);
+
+            ClearContainerContent(strong);
+
+            var unsafeParagraph = new XElement(ElementNames.Paragraph, "render-breaking text"); // this will really bend rendering
+            var boldXNodeWithParagraph = new XElement(ElementNames.Strong, unsafeParagraph);
+
+            // bad scenario
+            strong.Load(boldXNodeWithParagraph);
+
+            strong.Content.Should().HaveCount(1);
+            strong.Content.First().Should().BeOfType<Paragraph>(); // this is bad as most readers will not comply
+
+            ClearContainerContent(strong);
+
+            // bad scenario, now without unsafe elements
+            strong.Load(boldXNodeWithParagraph, loadUnsafe: false);
+            
+            strong.Content.Should().BeEmpty();
         }
 
         private void ClearContainerContent(Fb2Container node)

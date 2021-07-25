@@ -52,7 +52,11 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Node to load as Fb2Container</param>
         /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
-        public override void Load([In] XNode node, bool preserveWhitespace = false)
+        /// <param name="loadUnsafe"> Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
+        public override void Load(
+            [In] XNode node,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
             base.Load(node, preserveWhitespace);
 
@@ -74,6 +78,11 @@ namespace Fb2.Document.Models.Base
                 string localName = validNode.NodeType == XmlNodeType.Element ?
                     ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
                     ElementNames.FictionText;
+
+                var isUnsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
+
+                if (isUnsafe && !loadUnsafe)
+                    continue;
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
                 elem.Load(validNode, preserveWhitespace);

@@ -47,7 +47,10 @@ namespace Fb2.Document.Models
             return $"{Name}{formattedAttributeString}";
         }
 
-        public override void Load([In] XNode node, bool preserveWhitespace = false)
+        public override void Load(
+            [In] XNode node,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
             IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
 

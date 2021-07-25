@@ -11,6 +11,7 @@ using Fb2.Document.Models;
 
 namespace Fb2.Document
 {
+    // TODO : add exceptions instead of allowing XDocumentException-like stuff to be unhandled
     /// <summary>
     /// Represents Fiction Book at file level.
     /// Provides API for loading, reading and serializing fb2 files to FictionBook model and vice versa.
@@ -171,10 +172,10 @@ namespace Fb2.Document
         public bool IsLoaded { get; private set; } = false;
 
         /// <summary>
-        /// Creates new instance of Fb2Document with `IsLoaded` set to `true`.
+        /// Creates new, empty instance of Fb2Document with `IsLoaded` set to `true`.
         /// </summary>
         /// <param name="fictionBook">
-        /// Optional parameter. Book to use with Fb2Document. If ommited, new instance of `FictionBook` is used.
+        /// Optional parameter. Book to use with Fb2Document. If ommited, new, empty instance of `FictionBook` is used.
         /// </param>
         /// <returns>New instance of Fb2Document with empty FictionBook. </returns>
         public static Fb2Document CreateDocument(FictionBook fictionBook = null)
@@ -190,39 +191,42 @@ namespace Fb2.Document
         /// Loads fb2 file's content into Fb2Document model from XDocument insance
         /// </summary>
         /// <param name="document">Content of a file read as xml</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of XDocument received.
-        public void Load([In] XDocument document)
+        public void Load([In] XDocument document, bool loadUnsafeElements = true)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
 
-            Load(document.Root);
+            Load(document.Root, loadUnsafeElements);
         }
 
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from string
         /// </summary>
         /// <param name="document">Content of a file read as string</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of string received.
-        public void Load([In] string fileContent)
+        public void Load([In] string fileContent, bool loadUnsafeElements = true)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
                 throw new ArgumentNullException(nameof(fileContent));
 
             var document = XDocument.Parse(fileContent);
-            Load(document.Root);
+            Load(document.Root, loadUnsafeElements);
         }
 
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public void Load([In] Stream fileContent)
+        public void Load([In] Stream fileContent, bool loadUnsafeElements = true)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -233,7 +237,7 @@ namespace Fb2.Document
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
                 var document = XDocument.Load(reader);
-                Load(document.Root);
+                Load(document.Root, loadUnsafeElements);
             }
         }
 
@@ -241,10 +245,11 @@ namespace Fb2.Document
         /// Loads fb2 file's content into Fb2Document model from stream asynchronously.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public async Task LoadAsync([In] Stream fileContent)
+        public async Task LoadAsync([In] Stream fileContent, bool loadUnsafeElements = true)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -255,7 +260,7 @@ namespace Fb2.Document
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
                 var document = await XDocument.LoadAsync(reader, LoadOptions.None, default);
-                Load(document.Root);
+                Load(document.Root, loadUnsafeElements);
             }
         }
 
@@ -290,13 +295,13 @@ namespace Fb2.Document
             return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
         }
 
-        private void Load([In] XElement root)
+        private void Load([In] XElement root, bool loadUnsafeElements)
         {
             if (root == null)
                 throw new ArgumentNullException(nameof(root));
 
             Book = new FictionBook();
-            Book.Load(root);
+            Book.Load(root, loadUnsafe: loadUnsafeElements);
 
             IsLoaded = true;
         }

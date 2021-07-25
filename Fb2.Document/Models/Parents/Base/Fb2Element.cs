@@ -35,7 +35,11 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Node to load as Fb2Element</param>
         /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
-        public override void Load([In] XNode node, bool preserveWhitespace = false)
+        /// <param name="loadUnsafe"> Is ignored by Fb2Element loading.</param>
+        public override void Load(
+            [In] XNode node,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
             base.Load(node, preserveWhitespace);
 

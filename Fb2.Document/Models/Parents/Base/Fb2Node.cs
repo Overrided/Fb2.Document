@@ -55,7 +55,12 @@ namespace Fb2.Document.Models.Base
         /// Basic Load of element - validation and populating Attributes.
         /// </summary>
         /// <param name="node">XNode to load as Fb2Node</param>
-        public virtual void Load([In] XNode node, bool preserveWhitespace = false)
+        /// <param name="preserveWhitespace"> Is ignored by Fb2Node loading.</param>
+        /// <param name="loadUnsafe"> Is ignored by Fb2Node loading.</param>
+        public virtual void Load(
+            [In] XNode node,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
