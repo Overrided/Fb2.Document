@@ -89,13 +89,17 @@
    <p>Test <a l:href="#c_1">link sub <sub><strong>bold2 <emphasis>emphasis</emphasis> str</strong> sssub </sub> not sub </a></p>
 
    <p><a l:href="#c_1">text image link <image id="i_1" l:href="#vin.png" alt="Vignette" title="Chapter end (image title)" /></a></p>
+   
+   <p>Test <a l:href="#c_1">link sub <sub><strong>bold2 <emphasis>emphasis</emphasis> str</strong> <sub> second level sub </sub> </sub> not sub </a></p>
+   <p>Test <a l:href="#c_1">link sub <sub><strong>bold2 <emphasis>emphasis</emphasis> str <sub>second level sub bold</sub></strong></sub> not sub </a></p>
+
    <p>Subtitle is created with <emphasis>&lt;subtitle&gt;</emphasis> tag. It can contain <emphasis>&lt;emphasis&gt;</emphasis> and <emphasis>&lt;strong&gt;</emphasis>, images and links.</p>
 
    <p>Also there is pretty heavily combined pieces of text, like <strikethrough><sub><emphasis><strong>word 1</strong></emphasis></sub></strikethrough>(strikethrough-subscript-italics-bold) and <sub><emphasis><strong><strikethrough>word 2</strikethrough></strong></emphasis></sub> (subscript-italics-bold-strikethrough).</p>
 
    <empty-line/>
 
-   <subtitle><image l:href="#subtitle2.png" alt="Subtitle 1 (inline)"/></subtitle>
+   <subtitle><image l:href="#subtitle2.png" alt="Subtitle 2 (inline)"/></subtitle>
 
    <p><emphasis><strong>Accents:</strong></emphasis></p>
    <p>All them symbols with accenst/umlauts áéíÓÚ àèìÒÙ âêîÔÛ äëüÖÜ ãõñÃÕÑ, and then some: ç, œ, å, Ç, Œ, Å, ß, æ, ø, ¡, Æ, Ø, ¿. <sup><a l:href="#n_2" type="note">[2]</a></sup></p>
@@ -106,6 +110,7 @@
 
    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. <strong>Lorem ipsum dolor sit amet, consectetur adipiscing elit</strong>. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. </p>
    <p>Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. <strong>Praesent mauris</strong>. Curabitur tortor. Pellentesque nibh. <strong>Fusce nec tellus sed augue semper porta</strong>. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. <emphasis>Lorem ipsum dolor sit amet, consectetur adipiscing elit</emphasis>. Fusce ac turpis quis ligula lacinia aliquet. <emphasis>Lorem ipsum dolor sit amet, consectetur adipiscing elit</emphasis>. Mauris ipsum. Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. </p>
+   <p>&#160;&#160;–&#160;(c) Lorem ipsum generator;</p>
 
    <empty-line/>
 
@@ -123,9 +128,9 @@
    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. </p>
    <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. <emphasis>Lorem ipsum dolor sit amet, consectetur adipiscing elit</emphasis>. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. <emphasis>Lorem ipsum dolor sit amet, consectetur adipiscing elit</emphasis>. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet. Mauris ipsum. Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. </p>
    <p>Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis, tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam. Etiam ultrices. Suspendisse in justo eu magna luctus suscipit. </p>
-   <p>Sed lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae pharetra auctor, sem massa mattis sem, at interdum magna augue eget diam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel, egestas et, augue. Vestibulum tincidunt malesuada tellus. Ut ultrices ultrices enim. <emphasis>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh</emphasis>. Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper. <emphasis>Quisque volutpat condimentum velit</emphasis>. Nulla facilisi. </p>
-   <p>Integer lacinia sollicitudin massa. Cras metus. Sed aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis, venenatis tristique, dignissim in, ultrices sit amet, augue. Proin sodales libero eget ante. Nulla quam. Aenean laoreet. Vestibulum nisi lectus, commodo ac, facilisis ac, ultricies eu, pede. Ut orci risus, accumsan porttitor, cursus quis, aliquet eget, justo. </p>
-
+   <p>Sed lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae pharetra auctor, sem massa mattis sem, <emphasis>at interdum magna augue eget diam</emphasis>. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel, egestas et, augue. Vestibulum tincidunt malesuada tellus. Ut ultrices ultrices enim. <emphasis>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh</emphasis>. Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper. <emphasis>Quisque volutpat condimentum velit</emphasis>. Nulla facilisi. </p>
+   <p>Integer <emphasis>lacinia sollicitudin massa</emphasis>. Cras metus. Sed aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis, venenatis tristique, dignissim in, ultrices sit amet, augue. Proin sodales libero eget ante. Nulla quam. Aenean laoreet. Vestibulum nisi lectus,<emphasis> commodo ac, facilisis ac, ultricies eu,</emphasis> pede. Ut orci risus, accumsan porttitor, cursus quis, aliquet eget, justo. </p>
+   <p>&#160;&#160;–&#160;<emphasis>(c) Lorem ipsum generator</emphasis>;</p>
 
    <empty-line/>
 
@@ -140,34 +145,34 @@
    <empty-line/>
 
    <p>
-     <code>
-    &lt;xsl:template match="fb:code"&gt;<sup><a l:href="#n_17" type="note">[17]</a></sup>
-        &lt;xsl:element name="programlisting"&gt;
-            &lt;xsl:apply-templates select="@xml:lang|@id"/&gt;
-            &lt;xsl:apply-templates/&gt;
-        &lt;/xsl:element&gt;
-    &lt;/xsl:template&gt;
+    <code>
+        &lt;xsl:template match="fb:code"&gt;<sup><a l:href="#n_17" type="note">[17]</a></sup>
+            &lt;xsl:element name="programlisting"&gt;
+                &lt;xsl:apply-templates select="@xml:lang|@id"/&gt;
+                &lt;xsl:apply-templates/&gt;
+            &lt;/xsl:element&gt;
+        &lt;/xsl:template&gt;
     </code>
    </p>
    <empty-line/>
    <p>
-     <code>
-    &lt;xsl:template match="fb:stanza"&gt;
-        &lt;xsl:choose&gt;
-            &lt;xsl:when test="count(fb:title) &gt; 0"&gt;
-                &lt;formalpara role="poem"&gt;
-                    &lt;xsl:call-template name="section_title"/&gt;
-                    &lt;para role="poem"&gt;
-                        &lt;xsl:apply-templates select="@xml:lang|@id"/&gt;
-                        &lt;literallayout xml:space="preserve" role="poem"&gt;&lt;xsl:apply-templates select="fb:v"/&gt;&lt;/literallayout&gt;
-                    &lt;/para&gt;
-                &lt;/formalpara&gt;
-            &lt;/xsl:when&gt;
-            &lt;xsl:otherwise&gt;
-                &lt;literallayout xml:space="preserve" role="poem"&gt;&lt;xsl:apply-templates select="@xml:lang|@id"/&gt;&lt;xsl:apply-templates select="fb:v"/&gt;&lt;/literallayout&gt;
-            &lt;/xsl:otherwise&gt;
-        &lt;/xsl:choose&gt;
-    &lt;/xsl:template&gt;
+    <code>
+        &lt;xsl:template match="fb:stanza"&gt;
+            &lt;xsl:choose&gt;
+                &lt;xsl:when test="count(fb:title) &gt; 0"&gt;
+                    &lt;formalpara role="poem"&gt;
+                        &lt;xsl:call-template name="section_title"/&gt;
+                        &lt;para role="poem"&gt;
+                            &lt;xsl:apply-templates select="@xml:lang|@id"/&gt;
+                            &lt;literallayout xml:space="preserve" role="poem"&gt;&lt;xsl:apply-templates select="fb:v"/&gt;&lt;/literallayout&gt;
+                        &lt;/para&gt;
+                    &lt;/formalpara&gt;
+                &lt;/xsl:when&gt;
+                &lt;xsl:otherwise&gt;
+                    &lt;literallayout xml:space="preserve" role="poem"&gt;&lt;xsl:apply-templates select="@xml:lang|@id"/&gt;&lt;xsl:apply-templates select="fb:v"/&gt;&lt;/literallayout&gt;
+                &lt;/xsl:otherwise&gt;
+            &lt;/xsl:choose&gt;
+        &lt;/xsl:template&gt;
     </code>
    </p>
 
@@ -291,7 +296,7 @@
     <empty-line/>
     <text-author>Christopher Tolkien</text-author>
    </cite>
-   <image l:href="#i_001.png" alt="Map" title="Lotr map"/>
+   <image l:href="#i_001.png" alt="Map" title="Part of Shire map"/>
   </section>
 
   <section id="s_4">
@@ -487,12 +492,13 @@
    </title>
 
    <empty-line/>
-   <subtitle><emphasis>Cross-text links</emphasis></subtitle>
+   <subtitle>
+    <p><emphasis>Cross-text links</emphasis></p>
+    <image l:href="#subtitle1.png" alt="Subtitle 1"/>
+   </subtitle>
    <p><emphasis><a l:href="#s_5">Chapter 5</a> | <a l:href="#s_7">Chapter 7</a></emphasis></p>
    <empty-line/>
 
-   <subtitle>Newly added subtitle with nonexisting image
-   <image l:href="#subtitle1Y.png" alt="Subtitle 2 (inline)"/></subtitle>
    <empty-line/>
    <p><emphasis><strong>images in text</strong>: all images are inline. In theory text should look like written using real letters only, but it goes how it goes.</emphasis>.</p>
    <empty-line/>
@@ -11295,11 +11301,12 @@ FNRw5fn+/fd1ckF8Wzv8JUldi1vWeZ3zFpNqAKAm5xKmJzlYVJN3ANCuU6ukAyCTpHcyM9g6
 Ph1GLZlLveqCmiSbsCIAVNMiEWunEauJ9E6GFmfBXiQtVQ32MJKdeKVZg0TFWEBNT+8ifzqE
 T9aYv1lN0qzIWF3M7wYbVmRZ1V3mUgIGDEH1TvmT6vrmKcQAjhbmcQrtnvf9xvW1YbvxVPz2
 r3wDuyuAKlP8n68AAAAASUVORK5CYII=</binary>
- <binary id="word_image.png" content-type="image/png">iVBORw0KGgoAAAANSUhEUgAAADkAAAAbCAIAAABJHrDvAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
- YQUAAAAJcEhZcwAAJOgAACToAYJjBRwAAAITSURBVFhH7Vi7kcIwEDVXiyFgqECugCEhogS5HTulBCIScAdUcEOA3ItP+9Ff9l2AZ44Zv+BkrXffPq1XEnOrYRiKD8EXj5+AR
- es8WLTOg0XrPPjnWrt6pVG1PUyWus6DRes8QK3Uwau6Q5NF31ZeZzvk3PuurSt0R1RV3XZRGMdBWN/V7OuTIweZ9Ys6iS/076xhuEt8lnecGbA1NqtGRNa7RAtAAPgZfBS7AIhPNhTP
- MDTMCnAMkohFgzSklWnYxjBSA1mpVJNE+MKUke9TOkJtJmel6LUlse7q7okPtLJvwkxLDNbA1TFSWUDggjDp3UKt1mDtAH4T26MVsNZULBr0lCQ7JURrDSNZAAllFOrAnhmSI
- MScA+XhBP6Pp6J5f7s8imK3KddbbX9cbtzo3fWs/4rTocRp//qGQWzXOA1QbnYwWMpxqKfOlSfxYc8sFnu+0u7GcHncs90kJG1W6jRwmW+EO18DsVg+WiiVh8xU7T9K5XK9D95
- dwN/s+9VT+Yyk/RGaBsVidl/q1Hee6o8cfm8WbGGG7WTs9WgDa7MZ2YygmMy+SLbW+N4aI2EKExJo5RgpYfACKUagOSHkPJowPF/J6nuPa7Uk7oy2J7RGVquNiSjNAjXSAvpv8d
- 7ix0TWhFY/s7u3BN9xea02JE5j5GSkAhSUwYnU6cLrFTGpVUM1Xiklfib+ohTyOf93KYof6gGxWzx+8moAAAAASUVORK5CYII=</binary>
+ <binary id="word_image.png" content-type="image/png">
+ iVBORw0KGgoAAAANSUhEUgAAADsAAAAUCAYAAAAz30VQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAJOgAACToAYJjBRwAAAKlSURBVFhH7Zg7ktswDEChnEV24dkTUCfYSeMqR6DKbJMuZ
+ bptpDI+wlbbWLqBTuBxYeouCvgBCX6kyY5TOftmsKIIfgAQAj1bLQj8J3xxz8djbKGqKiPE4zpb4NPZR8U42zc2t/vZ9CWM0Lrcr6qmPGbuodH6dnQdMW3T+O9HS9O0TpMye1uqp
+ sc37Bn7aN4Y7T/D2LfYH9Zu4wExuhovqlsENkEO5pWjOqGrdZDCmEFaXadch2FYJJ9XFImjOGrphNMJYW3iwvbOdIkInE9twrXIsHTzJWxOIjo0iROc4v0UAC2iG5hOLQMPYBQ85iwJ7kc6vkYYIxY5BF20thPCt6
+ xxIjmdxTsSIpUEZJCuPyzqMyXtZ5Au3jN1Ng++we+Z22tgNmkhQgsNNMokTe0EvWk4QeF34GlHJ0CBs1LIegs3yA+KnS3PpTErjhKFQwjVuP5qn5ebKQwR8gjPsIMDHpdmuirbmM/wNtk
+ mPO1dY4bbxTVBwGHnmim7A2odpT1X5yq4mj2fYF+bjjJ8fQe7etzM6QVeqahildWbdj+e8VnD9594tprTL/MYX1/A+iph+K3HpGwYVO9RewfigOHfoLB+dM86V+D0br2dz2/4lxnso6VdHOH9ZF7cyZe4wG3tJphv
+ qL2D6Ypn/DEiZ4/krUmrGc46R3kEMdW/UW4wY+WRu1rD3od0Asr4DHV1WYHgJ7CVkTH0OW0EUlMKpvt2LayKSmk/8LRI0L0rWGHK6sQ/qcYbBYiKKUqxiK3sn1iSln7IS3+
+ yUKjMMfffs9vV1s/HcZKtP3Qysk8LkYd95Y4KcINW7kFC4XWVBM+LwLmZM3/v7PbaOtvCVUkUvAmD+ECO/wlZvggzJPvppkWgo2U+4KxD4eH4TwolnHLu7Od/Kh4TgD9TXnSfF1HiHAAAAABJRU5ErkJggg==</binary>
 </FictionBook>
