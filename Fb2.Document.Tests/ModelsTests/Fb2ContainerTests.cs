@@ -280,7 +280,7 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Fact]
-        public void ContainerNode_Load_IgnoreUnsafeNode()
+        public void ContainerNode_Load_IgnoreUnsafeNode_Works()
         {
             var strong = new Strong();
 
@@ -309,8 +309,36 @@ namespace Fb2.Document.Tests.ModelsTests
 
             // bad scenario, now without unsafe elements
             strong.Load(boldXNodeWithParagraph, loadUnsafe: false);
-            
+
             strong.Content.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ContainerNode_ChangeChildrenContent_Works()
+        {
+            var paragraph = new Paragraph();
+            paragraph.Content.Should().BeEmpty();
+
+            paragraph.AddContent(new Strong()); // the only child
+            paragraph.Content.Should().HaveCount(1);
+
+            var firstChild = paragraph.Content.First();
+            firstChild.Should().BeOfType<Strong>();
+
+            var firstStrongChild = firstChild as Strong;
+            firstStrongChild.Content.Should().BeEmpty();
+
+            firstStrongChild.AddTextContent("strong");
+
+            firstStrongChild.Content.Should().HaveCount(1);
+            firstStrongChild.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
+
+            //re-use prev variables, assert paragraph children anew
+            var firstChild1 = paragraph.Content.First();
+            firstChild1.Should().BeOfType<Strong>();
+            var firstStrongChild1 = firstChild1 as Strong;
+            firstStrongChild1.Content.Should().HaveCount(1);
+            firstStrongChild1.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
         }
 
         private void ClearContainerContent(Fb2Container node)
