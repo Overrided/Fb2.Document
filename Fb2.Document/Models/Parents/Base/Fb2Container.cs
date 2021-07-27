@@ -210,16 +210,31 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        public Fb2Container AddContent(string nodeName)
+        {
+            if (string.IsNullOrWhiteSpace(nodeName))
+                throw new ArgumentNullException(nameof(nodeName));
+
+            var node = Fb2NodeFactory.GetNodeByName(nodeName);
+
+            return AddContent(node);
+        }
+
         public Fb2Container AddContent(Fb2Node node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
-                throw new UnexpectedNodeException(Name, "text");
+            var nodeName = node.Name;
 
-            if (!AllowedElements.Contains(node.Name) && !node.Name.Equals(ElementNames.FictionText))
-                throw new UnexpectedNodeException(Name, node.Name);
+            if (!Fb2NodeFactory.IsKnownNode(nodeName)) // just for lulz
+                throw new UnknownNodeException(nodeName);
+
+            if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
+                throw new UnexpectedNodeException(Name, nodeName);
+
+            if (!AllowedElements.Contains(nodeName) && !nodeName.Equals(ElementNames.FictionText))
+                throw new UnexpectedNodeException(Name, nodeName);
 
             content.Add(node);
 

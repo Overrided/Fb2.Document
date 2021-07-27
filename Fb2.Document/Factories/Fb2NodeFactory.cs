@@ -97,10 +97,9 @@ namespace Fb2.Document.Factories
 
             if (!KnownNodes.TryGetValue(nodeName, out result) &&
                 !KnownNodes.TryGetValue(nodeName.ToLowerInvariant(), out resultLowerInv))
-                throw new UnknownNodeNameException(nodeName);
+                throw new UnknownNodeException(nodeName);
 
             var modelType = result ?? resultLowerInv;
-
             var model = Activator.CreateInstance(modelType) as Fb2Node;
 
             return model;

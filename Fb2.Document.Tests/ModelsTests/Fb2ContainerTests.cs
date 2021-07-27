@@ -27,6 +27,12 @@ namespace Fb2.Document.Tests.ModelsTests
                .Should()
                .Throw<ArgumentNullException>();
 
+            //string nodeName
+            node.Invoking(n => n.AddContent("")).Should().Throw<ArgumentNullException>();
+
+            //string nodeName
+            node.Invoking(n => n.AddContent((string)null)).Should().Throw<ArgumentNullException>();
+
             // params Fb2Node[] nodes
             node.Invoking(n => n.AddContent()).Should().Throw<ArgumentNullException>();
 
@@ -56,17 +62,36 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Throw<ArgumentNullException>();
 
             node.Invoking(async n => await n.AddContentAsync(
-                async () =>
-                {
-                    await Task.Delay(10); // async node provider
-                    return null;
-                }))
+                async () => await Task.FromResult<Fb2Node>(null))) // async node provider
                 .Should()
                 .Throw<ArgumentNullException>();
 
             node.Invoking(async n => await n.AddContentAsync(null))
                 .Should()
                 .Throw<ArgumentNullException>();
+        }
+
+        // just for lulz
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_AddUnknownNode_Throws(Fb2Container node)
+        {
+            var impostor = new ImpostorNode();
+
+            node.Invoking(n => n.AddContent(impostor)) // Fb2Node 
+               .Should()
+               .Throw<UnknownNodeException>()
+               .WithMessage("'Impostor' is not valid Fb2 node.");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_AddContent_ByInvalidName_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.AddContent("impostorNodeName"))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .WithMessage("'impostorNodeName' is not valid Fb2 node.");
         }
 
         [Theory]
@@ -81,12 +106,12 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(n => n.AddContent(new TextItem().AddContent("test text")))
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node 'text'.");
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
 
             node.Invoking(n => n.AddTextContent("test text"))
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node 'text'.");
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
         }
 
         [Theory]
@@ -128,36 +153,37 @@ namespace Fb2.Document.Tests.ModelsTests
 
             var notAllowedNode = Fb2NodeFactory.GetNodeByName(notAllowedElementName);
 
+            node.Invoking(n => n.AddContent(notAllowedNode.Name)) // string nodeName
+                .Should()
+                .Throw<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
+
             node.Invoking(n => n.AddContent(notAllowedNode)) // Fb2Node 
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             // params Fb2Node[] nodes
             node.Invoking(n => n.AddContent(notAllowedNode, notAllowedNode)) // lol
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AddContent(() => notAllowedNode)) // Func<Fb2Node>
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AddContent(new List<Fb2Node> { notAllowedNode })) // IEnumerable<Fb2Node>
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
-            node.Invoking(
-                async n => await n.AddContentAsync(async () =>
-                {
-                    await Task.Delay(10); // async node provider
-                    return notAllowedNode;
-                }))
+            node.Invoking(async n =>
+                await n.AddContentAsync(async () => await Task.FromResult(notAllowedNode))) // async node provider
                 .Should()
                 .Throw<UnexpectedNodeException>()
-                .WithMessage($"Node '{node.Name}' can not contain node '{notAllowedNode.Name}'.");
+                .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
         }
 
         [Theory]
@@ -170,38 +196,40 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.AddContent(firstAllowedNode);
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 
             ClearContainerContent(node);
 
             // params Fb2Node[] nodes
             node.AddContent(firstAllowedNode, firstAllowedNode); // lol
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(2);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
 
             ClearContainerContent(node);
 
             node.AddContent(() => firstAllowedNode); // Func<Fb2Node>
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 
             ClearContainerContent(node);
 
             node.AddContent(new List<Fb2Node> { firstAllowedNode }); // IEnumerable<Fb2Node>
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 
             ClearContainerContent(node);
 
-            await node.AddContentAsync(async () =>
-            {
-                await Task.Delay(10); // async node provider
-                return firstAllowedNode;
-            });
+            // async node provider
+            await node.AddContentAsync(async () => await Task.FromResult(firstAllowedNode));
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 
             ClearContainerContent(node);
+
+            //string name
+            node.AddContent(node.AllowedElements.First());
+
+            node.Content.Should().HaveCount(1);
         }
 
         [Theory]
@@ -233,7 +261,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void Container_RemoveContent_AllowedElement_Works(Fb2Container node)
+        public void Container_RemoveContent_ExistingElement_Works(Fb2Container node)
         {
             node.Should().NotBeNull();
 
@@ -243,27 +271,30 @@ namespace Fb2.Document.Tests.ModelsTests
             var nodesEquals = firstAllowedNode.Equals(lastAllowedNode);
 
             node.AddContent(firstAllowedNode, lastAllowedNode);
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(2);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
 
             node.RemoveContent(firstAllowedNode); // Fb2Node
 
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
             node.Content.Should().Contain(lastAllowedNode);
 
+            // empty nodes (without sub tree) of same type are, basically, equal lol
+            // so if you add 2 empty "bold" elements to "paragraph"
+            // and then use RemoveContent(firstAllowedNode), and check Contains - it will return true
             if (!nodesEquals) // when container can have only one type child
                 node.Content.Contains(firstAllowedNode).Should().BeFalse();
 
             ClearContainerContent(node);
 
             node.AddContent(firstAllowedNode, lastAllowedNode);
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(2);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
 
             node.RemoveContent(new List<Fb2Node> { firstAllowedNode, lastAllowedNode }); // IEnumerable<Fb2Node>
 
             node.Content.Should().BeEmpty();
 
             node.AddContent(firstAllowedNode, lastAllowedNode);
-            node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(2);
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
 
             node.RemoveContent(n => n.Name.Equals(firstAllowedNode.Name)); // Func<Fb2Node, bool> predicate
 
@@ -271,7 +302,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 node.Content.Should().BeEmpty();
             else
             {
-                node.Content.Should().NotBeEmpty().And.Subject.Count().Should().Be(1);
+                node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
                 node.Content.Should().Contain(lastAllowedNode);
                 node.Content.Should().NotContain(firstAllowedNode);
             }
@@ -345,6 +376,18 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             node.ClearContent();
             node.Content.Should().BeEmpty();
+        }
+    }
+
+    // just for what? ...you've got it, lulz!)
+    public class ImpostorNode : Fb2Node
+    {
+        public override string Name => "Impostor";
+
+        public override bool IsInline
+        {
+            get;
+            protected set;
         }
     }
 }

@@ -7,13 +7,11 @@ namespace Fb2.Document.Tests.DataCollections
 {
     public class Fb2ContainerCollection : Fb2NodeCollection, IEnumerable<object[]>
     {
-        public override IEnumerator<object[]> GetEnumerator()
-        {
-            return AllElementsNames
+        public override IEnumerator<object[]> GetEnumerator() =>
+            AllElementsNames
                 .Select(name => Fb2NodeFactory.GetNodeByName(name))
                 .OfType<Fb2Container>()
                 .Select(container => new object[1] { container })
                 .GetEnumerator();
-        }
     }
 }

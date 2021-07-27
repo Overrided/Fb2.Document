@@ -2,6 +2,7 @@ using System;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Factories;
+using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
 using Xunit;
 
@@ -17,6 +18,14 @@ namespace Fb2.Document.Tests
             node.Should().BeFalse();
         }
 
+        [Theory]
+        [ClassData(typeof(Fb2NodeNameCollection))]
+        public void IsKnownNode_ValidNodeName_ReturnsTrue(string nodeName)
+        {
+            var node = Fb2NodeFactory.IsKnownNode(nodeName);
+            node.Should().BeTrue();
+        }
+
         [Fact]
         public void GetElementByNodeName_InvalidNodeName_Throws()
         {
@@ -24,12 +33,12 @@ namespace Fb2.Document.Tests
 
             Action act = () => { var node = Fb2NodeFactory.GetNodeByName(invalidNodeName); };
 
-            act.Should().Throw<UnknownNodeNameException>()
-                .WithMessage($"'{invalidNodeName}' is not valid Fb2 node name.");
+            act.Should().Throw<UnknownNodeException>()
+                .WithMessage($"'{invalidNodeName}' is not valid Fb2 node.");
         }
 
         [Fact]
-        public void ValidNodeName_CaseInvariantNodeName_ReturnsInstance()
+        public void ValidNodeName_CaseInvariantNodeName_Works()
         {
             var titleInfoCasedNodeName = "tItLe-iNFo";
             var strikethroughCasedNodeName = "sTrIkEtHrOuGh";
