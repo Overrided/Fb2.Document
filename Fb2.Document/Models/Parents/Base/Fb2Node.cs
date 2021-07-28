@@ -49,7 +49,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element is on a right place (has correct parent node etc.) accordingly to Fb2 standard.
         /// </summary>
-        public bool Unsafe { get; internal set; }
+        public bool IsUnsafe { get; internal set; }
 
         /// <summary>
         /// Basic Load of element - validation and populating Attributes.
@@ -287,7 +287,7 @@ namespace Fb2.Document.Models.Base
                         AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
                         AreAttributesEqual(otherNode.attributes) &&
                         IsInline == otherNode.IsInline &&
-                        Unsafe == otherNode.Unsafe;
+                        IsUnsafe == otherNode.IsUnsafe;
 
             return result;
         }
@@ -304,7 +304,7 @@ namespace Fb2.Document.Models.Base
             return sameAttrs;
         }
 
-        public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, Unsafe);
+        public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
 
         public virtual object Clone()
         {
@@ -316,7 +316,7 @@ namespace Fb2.Document.Models.Base
                 node.attributes = new Dictionary<string, string>(attributes);
 
             node.IsInline = IsInline;
-            node.Unsafe = Unsafe;
+            node.IsUnsafe = IsUnsafe;
 
             return node;
         }

@@ -87,7 +87,7 @@ namespace Fb2.Document.Models.Base
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
                 elem.Load(validNode, preserveWhitespace);
 
-                elem.Unsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
+                elem.IsUnsafe = isUnsafe;
 
                 content.Add(elem);
             }

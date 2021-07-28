@@ -124,10 +124,10 @@ namespace Fb2.Document.Models.Base
         // TODO : double check implementation validity
         public override bool Equals(object other)
         {
-            if (!base.Equals(other))
+            if (!(other is Fb2Element otherElement))
                 return false;
 
-            if (!(other is Fb2Element otherElement))
+            if (!base.Equals(otherElement))
                 return false;
 
             var result = content.Equals(otherElement.content, StringComparison.InvariantCulture);
