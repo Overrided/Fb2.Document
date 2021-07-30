@@ -12,6 +12,7 @@ using Fb2.Document.Models;
 namespace Fb2.Document
 {
     // TODO : add exceptions instead of allowing XDocumentException-like stuff to be unhandled
+    // TODO : add equals & get hash code override
     /// <summary>
     /// Represents Fiction Book at file level.
     /// Provides API for loading, reading and serializing fb2 files to FictionBook model and vice versa.
@@ -35,8 +36,7 @@ namespace Fb2.Document
             Async = true,
             CheckCharacters = true,
             IgnoreWhitespace = true,
-            ConformanceLevel = ConformanceLevel.Document,
-            CloseInput = true
+            ConformanceLevel = ConformanceLevel.Document
         };
 
         /// <summary>
@@ -181,9 +181,11 @@ namespace Fb2.Document
         public static Fb2Document CreateDocument(FictionBook fictionBook = null)
         {
             var document = new Fb2Document();
-            document.Book = fictionBook ?? new FictionBook();
-            document.IsLoaded = true;
 
+            if (fictionBook != null)
+                document.Book = fictionBook;
+
+            document.IsLoaded = true;
             return document;
         }
 
@@ -259,7 +261,10 @@ namespace Fb2.Document
 
             using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
             {
-                var document = await XDocument.LoadAsync(reader, LoadOptions.None, default);
+                var document = await XDocument
+                    .LoadAsync(reader, LoadOptions.None, default)
+                    .ConfigureAwait(false);
+
                 Load(document.Root, loadUnsafeElements);
             }
         }

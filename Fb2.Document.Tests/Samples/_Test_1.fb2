@@ -323,6 +323,8 @@
 
    <subtitle><strong>Subscript symbols and characters</strong>.</subtitle>
 
+    <!-- <p>simple <strong>bold <p>IMPOSSIBLE PARAGRAPH</p> bold</strong> simple</p> -->
+
    <empty-line/>
 
    <p>What about some <strong>chemistry </strong>with <sub>SubScript (subscript)</sub></p>
@@ -494,7 +496,7 @@
    <empty-line/>
    <subtitle>
     <p><emphasis>Cross-text links</emphasis></p>
-    <image l:href="#subtitle1.png" alt="Subtitle 1"/>
+    <image l:href="#subtitle1.png" alt="Subtitle 1 (inline)"/>
    </subtitle>
    <p><emphasis><a l:href="#s_5">Chapter 5</a> | <a l:href="#s_7">Chapter 7</a></emphasis></p>
    <empty-line/>
