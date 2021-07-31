@@ -11,6 +11,9 @@ namespace Fb2.Document.Tests.IntegrationTests
         private const string SamplesFolderName = "Samples";
         private const string SampleFileName = "_Test_1.fb2";
 
+        // TODO : add tests for all available Load methods:
+        // string, XDocument, synchronous stream etc.
+
         [Fact]
         public async Task InstancesOfBookAreSame()
         {
@@ -19,22 +22,23 @@ namespace Fb2.Document.Tests.IntegrationTests
             if (!sampleFileInfo.Exists)
                 throw new Exception("Sample file does not exist");
 
-            var fileReadStream = sampleFileInfo.OpenRead();
+            using (var fileReadStream = sampleFileInfo.OpenRead())
+            {
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(fileReadStream);
 
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(fileReadStream);
+                RewindStream(fileReadStream);
 
-            //reset stream
-            fileReadStream.Seek(0, SeekOrigin.Begin);
-            fileReadStream.Position = 0;
+                var secondDocument = Fb2Document.CreateDocument();
+                await secondDocument.LoadAsync(fileReadStream);
 
-            var secondDocument = Fb2Document.CreateDocument();
-            await secondDocument.LoadAsync(fileReadStream);
+                var firstBook = firstDocument.Book;
+                var secondBook = secondDocument.Book;
 
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
+                firstBook.Should().Be(secondBook);
 
-            firstBook.Should().Be(secondBook);
+                fileReadStream.Close();
+            }
         }
 
         private FileInfo GetSampleFileInfo()
@@ -50,6 +54,15 @@ namespace Fb2.Document.Tests.IntegrationTests
 
             var fileInfo = new FileInfo(filePath);
             return fileInfo;
+        }
+
+        private void RewindStream(Stream stream)
+        {
+            if (!stream.CanSeek)
+                return;
+
+            stream.Seek(0, SeekOrigin.Begin);
+            stream.Position = 0;
         }
     }
 }
