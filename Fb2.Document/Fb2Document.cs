@@ -13,6 +13,7 @@ namespace Fb2.Document
 {
     // TODO : add exceptions instead of allowing XDocumentException-like stuff to be unhandled
     // TODO : add equals & get hash code override
+    // TODO : add check if book is rtl
     /// <summary>
     /// Represents Fiction Book at file level.
     /// Provides API for loading, reading and serializing fb2 files to FictionBook model and vice versa.
