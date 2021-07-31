@@ -41,6 +41,24 @@ namespace Fb2.Document.Tests.IntegrationTests
             }
         }
 
+        [Fact]
+        public async Task BookContentCheck()
+        {
+            var sampleFileInfo = GetSampleFileInfo();
+
+            if (!sampleFileInfo.Exists)
+                throw new Exception("Sample file does not exist");
+
+            using (var fileReadStream = sampleFileInfo.OpenRead())
+            {
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(fileReadStream);
+
+                firstDocument.Bodies.Should().HaveCount(3);
+                firstDocument.BinaryImages.Should().HaveCount(33);
+            }
+        }
+
         private FileInfo GetSampleFileInfo()
         {
             var samplesFolderPath = Path.Combine(Environment.CurrentDirectory, SamplesFolderName);
