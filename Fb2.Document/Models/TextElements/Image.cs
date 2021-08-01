@@ -47,6 +47,7 @@ namespace Fb2.Document.Models
             return $"{Name}{formattedAttributeString}";
         }
 
+        // TODO : add comment on why loadUnsafe is ignored?
         public override void Load(
             [In] XNode node,
             bool preserveWhitespace = false,

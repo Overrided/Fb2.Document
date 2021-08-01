@@ -58,7 +58,7 @@ namespace Fb2.Document.Models.Base
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            base.Load(node, preserveWhitespace);
+            base.Load(node, preserveWhitespace, loadUnsafe);
 
             var element = node as XElement;
 
@@ -85,7 +85,7 @@ namespace Fb2.Document.Models.Base
                     continue;
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
-                elem.Load(validNode, preserveWhitespace);
+                elem.Load(validNode, preserveWhitespace, loadUnsafe);
 
                 elem.IsUnsafe = isUnsafe;
 
