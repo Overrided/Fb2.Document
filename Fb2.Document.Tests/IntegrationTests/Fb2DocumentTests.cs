@@ -18,6 +18,34 @@ namespace Fb2.Document.Tests.IntegrationTests
         // string, XDocument, synchronous stream etc.
 
         [Fact]
+        public void Fb2Document_EmptyBooks_EqualityTest()
+        {
+            var emptyFirstDocument = new Fb2Document();
+            emptyFirstDocument.Book.Should().BeNull();
+            emptyFirstDocument.IsLoaded.Should().BeFalse();
+
+            emptyFirstDocument.Equals(null).Should().BeFalse();
+
+            var emptySecondDocument = new Fb2Document();
+            emptySecondDocument.Book.Should().BeNull();
+            emptySecondDocument.IsLoaded.Should().BeFalse();
+
+            emptyFirstDocument.Should().Be(emptySecondDocument);
+
+            var emptyCreatedFirstDocument = Fb2Document.CreateDocument();
+            emptyCreatedFirstDocument.Book.Should().BeNull();
+            emptyCreatedFirstDocument.IsLoaded.Should().BeTrue();
+
+            var emptyCreatedSecondDocument = Fb2Document.CreateDocument();
+            emptyCreatedSecondDocument.Book.Should().BeNull();
+            emptyCreatedSecondDocument.IsLoaded.Should().BeTrue();
+
+            emptyCreatedFirstDocument.Should().Be(emptyCreatedSecondDocument);
+
+            emptyFirstDocument.Should().NotBe(emptyCreatedFirstDocument);
+        }
+
+        [Fact]
         public async Task InstancesOfBookAreSame()
         {
             var sampleFileInfo = GetSampleFileInfo();
@@ -32,11 +60,12 @@ namespace Fb2.Document.Tests.IntegrationTests
                 var secondDocument = Fb2Document.CreateDocument();
                 await secondDocument.LoadAsync(fileReadStream);
 
+                firstDocument.Should().Be(secondDocument);
+
                 var firstBook = firstDocument.Book;
                 var secondBook = secondDocument.Book;
 
                 firstBook.Should().Be(secondBook);
-
                 fileReadStream.Close();
             }
         }
@@ -79,8 +108,9 @@ namespace Fb2.Document.Tests.IntegrationTests
             }
         }
 
+        // TODO : add same check for toXmlString() method
         [Fact]
-        public async Task RewriteContent_StaysSame()
+        public async Task ExportDocument_AsXDoc_ContentCheck()
         {
             var sampleFileInfo = GetSampleFileInfo();
 
@@ -93,6 +123,8 @@ namespace Fb2.Document.Tests.IntegrationTests
                 var firstDocXml = firstDocument.ToXml();
                 var secondDocument = new Fb2Document();
                 secondDocument.Load(firstDocXml);
+
+                firstDocument.Should().Be(secondDocument);
 
                 var firstBook = firstDocument.Book;
                 var secondBook = secondDocument.Book;
@@ -117,6 +149,8 @@ namespace Fb2.Document.Tests.IntegrationTests
                 // loading document without unsafe nodes
                 var secondDocument = new Fb2Document();
                 await secondDocument.LoadAsync(fileReadStream, false);
+
+                firstDocument.Should().NotBe(secondDocument);
 
                 var firstBook = firstDocument.Book;
                 var secondBook = secondDocument.Book;

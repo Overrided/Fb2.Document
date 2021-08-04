@@ -12,7 +12,6 @@ using Fb2.Document.Models;
 namespace Fb2.Document
 {
     // TODO : add exceptions instead of allowing XDocumentException-like stuff to be unhandled
-    // TODO : add equals & get hash code override
     // TODO : add check if book is rtl
     /// <summary>
     /// Represents Fiction Book at file level.
@@ -176,9 +175,9 @@ namespace Fb2.Document
         /// Creates new, empty instance of Fb2Document with `IsLoaded` set to `true`.
         /// </summary>
         /// <param name="fictionBook">
-        /// Optional parameter. Book to use with Fb2Document. If ommited, new, empty instance of `FictionBook` is used.
+        /// Optional parameter. Book to use with Fb2Document. If ommited, `Book` property of created document returns `null`.
         /// </param>
-        /// <returns>New instance of Fb2Document with empty FictionBook. </returns>
+        /// <returns>New instance of Fb2Document.</returns>
         public static Fb2Document CreateDocument(FictionBook fictionBook = null)
         {
             var document = new Fb2Document();
@@ -311,5 +310,13 @@ namespace Fb2.Document
 
             IsLoaded = true;
         }
+
+        public override bool Equals(object obj) =>
+            obj != null &&
+            obj is Fb2Document other &&
+            IsLoaded == other.IsLoaded && // if `Book` is `null` and `other.Book` is also null - those are equal
+            (Book?.Equals(other.Book) ?? other.Book == null);
+
+        public override int GetHashCode() => HashCode.Combine(Book?.GetHashCode() ?? 0, IsLoaded);
     }
 }

@@ -73,6 +73,7 @@ namespace Fb2.Document.Models.Base
             if (!nodes.Any())
                 return;
 
+            // TODO : implement `for` as micro-optimization?)
             foreach (var validNode in nodes)
             {
                 string localName = validNode.NodeType == XmlNodeType.Element ?
@@ -86,7 +87,6 @@ namespace Fb2.Document.Models.Base
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
                 elem.Load(validNode, preserveWhitespace, loadUnsafe);
-
                 elem.IsUnsafe = isUnsafe;
 
                 content.Add(elem);
