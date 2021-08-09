@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Models;
 
 namespace Fb2.Document
 {
-    // TODO : add exceptions instead of allowing XDocumentException-like stuff to be unhandled
+    // TODO : add saving of original namespaces? This will allow for more correct ToXml serialization
+    // TODO : add Fb2StreamLoadingOptions with 2 options: load unsafe + close source stream
     // TODO : add check if book is rtl
     /// <summary>
     /// Represents Fiction Book at file level.
@@ -182,10 +184,9 @@ namespace Fb2.Document
         {
             var document = new Fb2Document();
 
-            if (fictionBook != null)
-                document.Book = fictionBook;
+            document.Book = fictionBook;
+            document.IsLoaded = fictionBook != null;
 
-            document.IsLoaded = true;
             return document;
         }
 
@@ -201,7 +202,7 @@ namespace Fb2.Document
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
 
-            Load(document.Root, loadUnsafeElements);
+            LoadHandled(() => Load(document.Root, loadUnsafeElements));
         }
 
         /// <summary>
@@ -216,8 +217,11 @@ namespace Fb2.Document
             if (string.IsNullOrWhiteSpace(fileContent))
                 throw new ArgumentNullException(nameof(fileContent));
 
-            var document = XDocument.Parse(fileContent);
-            Load(document.Root, loadUnsafeElements);
+            LoadHandled(() =>
+            {
+                var document = XDocument.Parse(fileContent);
+                Load(document.Root, loadUnsafeElements);
+            });
         }
 
         /// <summary>
@@ -236,11 +240,14 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
-            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+            LoadHandled(() =>
             {
-                var document = XDocument.Load(reader);
-                Load(document.Root, loadUnsafeElements);
-            }
+                using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+                {
+                    var document = XDocument.Load(reader);
+                    Load(document.Root, loadUnsafeElements);
+                }
+            });
         }
 
         /// <summary>
@@ -259,13 +266,21 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
-            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+            // not extracting wrapper for one use-case only
+            try
             {
-                var document = await XDocument
-                    .LoadAsync(reader, LoadOptions.None, default)
-                    .ConfigureAwait(false);
+                using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+                {
+                    var document = await XDocument
+                        .LoadAsync(reader, LoadOptions.None, default)
+                        .ConfigureAwait(false);
 
-                Load(document.Root, loadUnsafeElements);
+                    Load(document.Root, loadUnsafeElements);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Fb2DocumentLoadingException("Document LoadAsync failed.", ex);
             }
         }
 
@@ -300,6 +315,19 @@ namespace Fb2.Document
             return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
         }
 
+        // wraps any exception with Fb2DocumentLoadingException
+        private void LoadHandled(Action loadingAction)
+        {
+            try
+            {
+                loadingAction();
+            }
+            catch (Exception ex)
+            {
+                throw new Fb2DocumentLoadingException("Document Load failed.", ex);
+            }
+        }
+
         private void Load([In] XElement root, bool loadUnsafeElements)
         {
             if (root == null)
@@ -313,8 +341,8 @@ namespace Fb2.Document
 
         public override bool Equals(object obj) =>
             obj != null &&
-            obj is Fb2Document other &&
-            IsLoaded == other.IsLoaded && // if `Book` is `null` and `other.Book` is also null - those are equal
+            obj is Fb2Document other && // if `Book` is `null` and `other.Book` is also null - those are equal
+            IsLoaded == other.IsLoaded &&
             (Book?.Equals(other.Book) ?? other.Book == null);
 
         public override int GetHashCode() => HashCode.Combine(Book?.GetHashCode() ?? 0, IsLoaded);

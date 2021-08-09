@@ -28,6 +28,9 @@
     <None Update="Samples\_Test_1.fb2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Samples\_Test_Invalid.fb2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

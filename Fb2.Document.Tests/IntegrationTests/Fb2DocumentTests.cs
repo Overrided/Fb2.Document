@@ -2,7 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using Fb2.Document.Constants;
+using Fb2.Document.Exceptions;
 using Fb2.Document.Models;
 using FluentAssertions;
 using Xunit;
@@ -13,12 +16,10 @@ namespace Fb2.Document.Tests.IntegrationTests
     {
         private const string SamplesFolderName = "Samples";
         private const string SampleFileName = "_Test_1.fb2";
-
-        // TODO : add tests for all available Load methods:
-        // string, XDocument, synchronous stream etc.
+        private const string InvalidSampleFileName = "_Test_Invalid.fb2";
 
         [Fact]
-        public void Fb2Document_EmptyBooks_EqualityTest()
+        public void Fb2Document_Empty_EqualityTest()
         {
             var emptyFirstDocument = new Fb2Document();
             emptyFirstDocument.Book.Should().BeNull();
@@ -34,21 +35,30 @@ namespace Fb2.Document.Tests.IntegrationTests
 
             var emptyCreatedFirstDocument = Fb2Document.CreateDocument();
             emptyCreatedFirstDocument.Book.Should().BeNull();
-            emptyCreatedFirstDocument.IsLoaded.Should().BeTrue();
+            emptyCreatedFirstDocument.IsLoaded.Should().BeFalse();
 
             var emptyCreatedSecondDocument = Fb2Document.CreateDocument();
             emptyCreatedSecondDocument.Book.Should().BeNull();
-            emptyCreatedSecondDocument.IsLoaded.Should().BeTrue();
+            emptyCreatedSecondDocument.IsLoaded.Should().BeFalse();
 
             emptyCreatedFirstDocument.Should().Be(emptyCreatedSecondDocument);
 
-            emptyFirstDocument.Should().NotBe(emptyCreatedFirstDocument);
+            emptyFirstDocument.Should().Be(emptyCreatedFirstDocument);
+        }
+
+        [Fact]
+        public void Fb2Document_CreateWithContent_Test()
+        {
+            // let's imagine there was real content, right?
+            var emptyCreatedFirstDocument = Fb2Document.CreateDocument(new FictionBook());
+            emptyCreatedFirstDocument.Book.Should().NotBeNull();
+            emptyCreatedFirstDocument.IsLoaded.Should().BeTrue();
         }
 
         [Fact]
         public async Task InstancesOfBookAreSame()
         {
-            var sampleFileInfo = GetSampleFileInfo();
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
 
             using (var fileReadStream = sampleFileInfo.OpenRead())
             {
@@ -73,7 +83,7 @@ namespace Fb2.Document.Tests.IntegrationTests
         [Fact]
         public async Task BookContentCheck()
         {
-            var sampleFileInfo = GetSampleFileInfo();
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
 
             using (var fileReadStream = sampleFileInfo.OpenRead())
             {
@@ -108,11 +118,10 @@ namespace Fb2.Document.Tests.IntegrationTests
             }
         }
 
-        // TODO : add same check for toXmlString() method
         [Fact]
-        public async Task ExportDocument_AsXDoc_ContentCheck()
+        public async Task ExportDocument_AndReload_SameContent()
         {
-            var sampleFileInfo = GetSampleFileInfo();
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
 
             using (var fileReadStream = sampleFileInfo.OpenRead())
             {
@@ -134,9 +143,9 @@ namespace Fb2.Document.Tests.IntegrationTests
         }
 
         [Fact]
-        public async Task LoadWithoutUnsafeNodes_DifferentBooks()
+        public async Task LoadWithoutUnsafeNodes_DifferentContent()
         {
-            var sampleFileInfo = GetSampleFileInfo();
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
 
             using (var fileReadStream = sampleFileInfo.OpenRead())
             {
@@ -160,14 +169,82 @@ namespace Fb2.Document.Tests.IntegrationTests
             }
         }
 
-        private FileInfo GetSampleFileInfo()
+        [Fact]
+        public async Task SameFile_DifferentLoads_SameContent()
+        {
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+            var fileStringContent = await ReadFileAsString(sampleFileInfo);
+            var xDocument = await ReadFileAsXDocument(sampleFileInfo);
+
+            var stringLoadedFb2Document = new Fb2Document();
+            stringLoadedFb2Document.Load(fileStringContent); // string
+
+            var xmlLoadedFb2Document = new Fb2Document();
+            xmlLoadedFb2Document.Load(xDocument); // xDocument
+
+            var streamLoadedFb2Document = new Fb2Document();
+            var streamLoadedAsyncFb2Document = new Fb2Document();
+
+            using (var stream = sampleFileInfo.OpenRead())
+            {
+                streamLoadedFb2Document.Load(stream); // sync stream
+                RewindStream(stream);
+                await streamLoadedAsyncFb2Document.LoadAsync(stream); // async stream
+            }
+
+            stringLoadedFb2Document.Should().Be(xmlLoadedFb2Document);
+            streamLoadedFb2Document.Should().Be(streamLoadedAsyncFb2Document);
+            stringLoadedFb2Document.Should().Be(streamLoadedFb2Document);
+            xmlLoadedFb2Document.Should().Be(streamLoadedAsyncFb2Document);
+
+            stringLoadedFb2Document.Book.Should().Be(xmlLoadedFb2Document.Book);
+            streamLoadedFb2Document.Book.Should().Be(streamLoadedAsyncFb2Document.Book);
+            stringLoadedFb2Document.Book.Should().Be(streamLoadedFb2Document.Book);
+            xmlLoadedFb2Document.Book.Should().Be(streamLoadedAsyncFb2Document.Book);
+        }
+
+        [Fact]
+        public async Task Load_InvalidFile_Throws()
+        {
+            var invalidFileInfo = GetSampleFileInfo(InvalidSampleFileName);
+
+            using (var stream = invalidFileInfo.OpenRead())
+            {
+                var fb2Document = new Fb2Document();
+
+                await fb2Document
+                    .Invoking(async f => await f.LoadAsync(stream))
+                    .Should()
+                    .ThrowExactlyAsync<Fb2DocumentLoadingException>()
+                    .WithMessage("Document LoadAsync failed.");
+
+                RewindStream(stream);
+
+                fb2Document
+                    .Invoking(f => f.Load(stream))
+                    .Should()
+                    .ThrowExactly<Fb2DocumentLoadingException>()
+                    .WithMessage("Document Load failed.");
+            }
+
+            var invalidSampleXmlString = await ReadFileAsString(invalidFileInfo);
+            var secondDocument = new Fb2Document();
+            secondDocument
+                .Invoking(s => s.Load(invalidSampleXmlString))
+                .Should()
+                .ThrowExactly<Fb2DocumentLoadingException>()
+                .WithMessage("Document Load failed.");
+        }
+
+        private FileInfo GetSampleFileInfo(string fileName)
         {
             var samplesFolderPath = Path.Combine(Environment.CurrentDirectory, SamplesFolderName);
 
             if (!Directory.Exists(samplesFolderPath))
                 throw new Exception($"{samplesFolderPath} folder does not exist.");
 
-            var filePath = Path.Combine(samplesFolderPath, SampleFileName);
+            var filePath = Path.Combine(samplesFolderPath, fileName);
             if (!File.Exists(filePath))
                 throw new Exception($"{filePath} file does not exist.");
 
@@ -176,6 +253,33 @@ namespace Fb2.Document.Tests.IntegrationTests
                 throw new Exception("Sample file does not exist");
 
             return fileInfo;
+        }
+
+        private async Task<string> ReadFileAsString(FileInfo fileInfo)
+        {
+            using (var stream = fileInfo.OpenRead())
+            using (var streamReader = new StreamReader(stream, true))
+            {
+                var text = await streamReader.ReadToEndAsync();
+                return text;
+            }
+        }
+
+        // recommended setting to read xml
+        private async Task<XDocument> ReadFileAsXDocument(FileInfo fileInfo)
+        {
+            using (var stream = fileInfo.OpenRead())
+            using (var reader = XmlReader.Create(stream, new XmlReaderSettings
+            {
+                Async = true,
+                CheckCharacters = true,
+                IgnoreWhitespace = true,
+                ConformanceLevel = ConformanceLevel.Document
+            }))
+            {
+                var xDocument = await XDocument.LoadAsync(reader, LoadOptions.None, default);
+                return xDocument;
+            }
         }
 
         private void RewindStream(Stream stream)
