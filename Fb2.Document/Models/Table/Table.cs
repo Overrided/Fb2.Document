@@ -51,11 +51,18 @@ namespace Fb2.Document.Models
             return ToStringInternal(processedColumns);
         }
 
+        // taking unsafe elements into account
         private string[][] GetTableCellContent()
         {
-            // TODO : SelectMany ?
-            return Content.Select(row => (row as Fb2Container).Content
-                            .Select(cell => cell.ToString() ?? string.Empty).ToArray()).ToArray();
+            return Content.Select(row =>
+            {
+                if (row is Fb2Container rowContainer)
+                    return rowContainer.Content.Select(cell => cell.ToString() ?? string.Empty).ToArray();
+                else if (row is Fb2Element elementRow)
+                    return new string[1] { elementRow.ToString() };
+
+                return new string[0];
+            }).ToArray();
         }
 
         private IEnumerable<string> ProcessColumn(IEnumerable<string> column)
@@ -70,9 +77,7 @@ namespace Fb2.Document.Models
             var tableConcatanator = new StringBuilder();
 
             foreach (var item in columns)
-            {
                 tableConcatanator.AppendLine(string.Join(" ", item));
-            }
 
             return tableConcatanator.ToString();
         }

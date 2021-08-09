@@ -129,12 +129,13 @@ namespace Fb2.Document.Models.Base
             if (!(other is Fb2Container otherContainer))
                 return false;
 
-            if (!base.Equals(other))
+            if (!base.Equals(otherContainer))
                 return false;
 
             var actualContent = content;
             var otherContent = otherContainer.content;
-            var sameContent = actualContent.Count == otherContent.Count && actualContent.All(c => otherContent.Contains(c));
+            var sameContent = actualContent.Count == otherContent.Count &&
+                              actualContent.SequenceEqual(otherContent);
 
             var result = sameContent &&
                 CanContainText == otherContainer.CanContainText &&
@@ -189,7 +190,7 @@ namespace Fb2.Document.Models.Base
             bool preserveWhitespace = false)
         {
             if (!CanContainText)
-                throw new UnexpectedNodeException(Name, "text");
+                throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentNullException(nameof(content), $"{nameof(content)} is null or empty string.");
@@ -230,7 +231,7 @@ namespace Fb2.Document.Models.Base
             if (!Fb2NodeFactory.IsKnownNode(nodeName)) // just for lulz
                 throw new UnknownNodeException(nodeName);
 
-            if (node.Name.Equals(ElementNames.FictionText) && !CanContainText)
+            if (node.Name.EqualsInvariant(ElementNames.FictionText) && !CanContainText)
                 throw new UnexpectedNodeException(Name, nodeName);
 
             if (!AllowedElements.Contains(nodeName) && !nodeName.Equals(ElementNames.FictionText))
