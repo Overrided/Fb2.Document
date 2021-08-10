@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
+using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
 using FluentAssertions;
 using Xunit;
@@ -157,7 +158,7 @@ namespace Fb2.Document.Tests.IntegrationTests
 
                 // loading document without unsafe nodes
                 var secondDocument = new Fb2Document();
-                await secondDocument.LoadAsync(fileReadStream, false);
+                await secondDocument.LoadAsync(fileReadStream, new Fb2StreamLoadingOptions(false));
 
                 firstDocument.Should().NotBe(secondDocument);
 
@@ -166,6 +167,25 @@ namespace Fb2.Document.Tests.IntegrationTests
 
                 // different content due to skipped unsafe nodes
                 firstBook.Should().NotBe(secondBook);
+            }
+        }
+
+        [Fact]
+        public async Task Load_WithCloseInput_ClosesStream()
+        {
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+            using (var fileReadStream = sampleFileInfo.OpenRead())
+            {
+                // loading document without unsafe nodes
+                var firstDocument = new Fb2Document();
+                await firstDocument
+                    .LoadAsync(fileReadStream, new Fb2StreamLoadingOptions(closeInputStream: true));
+
+                await fileReadStream
+                    .Invoking(async s => await s.WriteAsync(new byte[5] { 4, 2, 0, 6, 9 }))
+                    .Should()
+                    .ThrowExactlyAsync<ObjectDisposedException>();
             }
         }
 

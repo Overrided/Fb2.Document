@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Exceptions;
+using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
 
 namespace Fb2.Document
@@ -232,7 +233,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public void Load([In] Stream fileContent, bool loadUnsafeElements = true)
+        public void Load([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -240,12 +241,16 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
+            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
+            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+            xmlReaderSetting.CloseInput = options.CloseInputStream;
+
             LoadHandled(() =>
             {
-                using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
                 {
                     var document = XDocument.Load(reader);
-                    Load(document.Root, loadUnsafeElements);
+                    Load(document.Root, options.LoadUnsafeElements);
                 }
             });
         }
@@ -258,7 +263,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public async Task LoadAsync([In] Stream fileContent, bool loadUnsafeElements = true)
+        public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -266,16 +271,19 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
 
+            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
+            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+            xmlReaderSetting.CloseInput = options.CloseInputStream;
+
             // not extracting wrapper for one use-case only
             try
             {
-                using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
                 {
                     var document = await XDocument
                         .LoadAsync(reader, LoadOptions.None, default)
                         .ConfigureAwait(false);
-
-                    Load(document.Root, loadUnsafeElements);
+                    Load(document.Root, options.LoadUnsafeElements);
                 }
             }
             catch (Exception ex)
