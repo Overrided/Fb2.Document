@@ -162,7 +162,7 @@ namespace Fb2.Document.Models.Base
             if (nodeProvider == null)
                 throw new ArgumentNullException(nameof(nodeProvider));
 
-            var newNode = await nodeProvider();
+            var newNode = await nodeProvider().ConfigureAwait(false);
             return AddContent(newNode);
         }
 

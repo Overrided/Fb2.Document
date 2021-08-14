@@ -13,8 +13,6 @@ using Fb2.Document.Models;
 
 namespace Fb2.Document
 {
-    // TODO : add saving of original namespaces? This will allow for more correct ToXml serialization
-    // TODO : add Fb2StreamLoadingOptions with 2 options: load unsafe + close source stream
     // TODO : add check if book is rtl
     /// <summary>
     /// Represents Fiction Book at file level.
