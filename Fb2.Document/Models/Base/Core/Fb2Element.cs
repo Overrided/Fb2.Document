@@ -67,10 +67,10 @@ namespace Fb2.Document.Models.Base
             string separator = null,
             bool preserveWhitespace = false)
         {
-            if (string.IsNullOrWhiteSpace(newContent))
+            if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent));
 
-            separator = string.IsNullOrWhiteSpace(separator) ?
+            separator = string.IsNullOrEmpty(separator) ?
                 string.Empty :
                 SecurityElement.Escape(trimWhitespace.Replace(separator, Whitespace));
 
@@ -79,7 +79,7 @@ namespace Fb2.Document.Models.Base
 
             var escapedContent = SecurityElement.Escape(newContent);
 
-            if (string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrEmpty(content)) // nothing to join new content to
                 content = escapedContent;
             else
                 content = string.Join(separator, content, escapedContent);
@@ -89,7 +89,7 @@ namespace Fb2.Document.Models.Base
 
         public virtual Fb2Element ClearContent()
         {
-            if (!string.IsNullOrWhiteSpace(content))
+            if (!string.IsNullOrEmpty(content))
                 content = string.Empty;
 
             return this;
@@ -104,7 +104,7 @@ namespace Fb2.Document.Models.Base
         public override XElement ToXml()
         {
             var element = base.ToXml();
-            if (!string.IsNullOrWhiteSpace(content))
+            if (!string.IsNullOrEmpty(content))
                 element.Value = content;
 
             return element;

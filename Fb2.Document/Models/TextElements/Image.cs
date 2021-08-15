@@ -13,8 +13,6 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.Image;
 
-        public override bool IsInline { get; protected set; } = true;
-
         public override ImmutableHashSet<string> AllowedAttributes =>
             ImmutableHashSet.Create(
                 AttributeNames.Id,
@@ -47,15 +45,14 @@ namespace Fb2.Document.Models
             return $"{Name}{formattedAttributeString}";
         }
 
-        // TODO : add comment on why loadUnsafe is ignored?
         public override void Load(
             [In] XNode node,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
+            base.Load(node, preserveWhitespace, loadUnsafe);
 
-            base.Load(node, preserveWhitespace);
+            IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
         }
 
         private bool GetInline(string parentNodeName, XmlNodeType parentNodeType)

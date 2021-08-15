@@ -281,7 +281,7 @@ namespace Fb2.Document.Models.Base
             var element = node as XElement;
 
             if (!element.Name.LocalName.EqualsInvariant(Name))
-                throw new ArgumentException($"Invalid element, local name {element.Name.LocalName}, expected name {Name}");
+                throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
         }
 
         public override bool Equals(object other)

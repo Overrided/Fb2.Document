@@ -192,7 +192,7 @@ namespace Fb2.Document.Models.Base
             if (!CanContainText)
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-            if (string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrEmpty(content))
                 throw new ArgumentNullException(nameof(content), $"{nameof(content)} is null or empty string.");
 
             var textItem = new TextItem().AddContent(content, separator, preserveWhitespace);

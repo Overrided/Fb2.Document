@@ -15,7 +15,13 @@ namespace Fb2.Document.Models
         public sealed override void Load(
             [In] XNode element,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true) => Validate(element);
+            bool loadUnsafe = true)
+        {
+            if (element == null)
+                throw new ArgumentNullException(nameof(element));
+
+            Validate(element);
+        }
 
         public sealed override Fb2Element AddContent(
             string newContent,
