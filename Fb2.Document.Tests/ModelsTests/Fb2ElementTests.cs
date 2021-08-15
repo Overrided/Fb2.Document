@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Models;
@@ -97,6 +94,15 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Content
                 .Should() // separator always getting trimmed, even when preserving whitespaces
                 .Be($"test content 1 test content 2test content 3 _blah_ test content 4 _blah_ test {Environment.NewLine} content 5");
+        }
+
+        [Fact]
+        public void BinaryImage_Load_TrimsAllWhitespaces()
+        {
+            var binaryImageNode = new XElement(ElementNames.BinaryImage, "some text with spaces");
+            var binaryImage = new BinaryImage();
+            binaryImage.Load(binaryImageNode);
+            binaryImage.Content.Should().Be("sometextwithspaces");
         }
     }
 }
