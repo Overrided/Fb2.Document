@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
-using Fb2.Document.Extensions;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
@@ -16,7 +15,7 @@ namespace Fb2.Document.Models
         public sealed override void Load(
             [In] XNode element,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true) => element.Validate(Name);
+            bool loadUnsafe = true) => Validate(element);
 
         public sealed override Fb2Element AddContent(
             string newContent,

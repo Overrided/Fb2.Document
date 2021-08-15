@@ -5,9 +5,8 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Extensions
 {
-    // "strong typed" extensions
+    // "type accurate" extensions
     // returns original type of child node instead of basic Fb2Container
-    // TODO : add tests?
     public static class Fb2ContainerExtensions
     {
         public static Task<T> WithContentAsync<T>(this T fb2Container, Func<Task<Fb2Node>> nodeProvider) where T : Fb2Container =>

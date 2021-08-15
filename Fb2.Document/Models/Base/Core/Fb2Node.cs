@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
@@ -65,7 +66,7 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            node.Validate(Name);
+            Validate(node);
 
             if (!AllowedAttributes.Any())
                 return;
@@ -270,6 +271,17 @@ namespace Fb2.Document.Models.Base
             result = element.Attributes()
                             .ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
             return true;
+        }
+
+        protected void Validate(XNode node)
+        {
+            if (node.NodeType != XmlNodeType.Element)
+                return;
+
+            var element = node as XElement;
+
+            if (!element.Name.LocalName.EqualsInvariant(Name))
+                throw new ArgumentException($"Invalid element, local name {element.Name.LocalName}, expected name {Name}");
         }
 
         public override bool Equals(object other)
