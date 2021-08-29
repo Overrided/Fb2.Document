@@ -23,11 +23,9 @@ namespace Fb2.Document.Models.Base
         private List<Fb2Node> content = new List<Fb2Node>();
 
         /// <summary>
-        /// Creates copy of actual content. 
         /// Actual value is available after `Load()` method call.
         /// </summary>
-        /// <returns>`List<Fb2Node>` which reflects content of given `XNode`.</returns>
-        // TODO: check if equality override is ok + check if cloning is done right
+        /// <returns>`ImmutableList<Fb2Node>` which reflects content of given `XNode`.</returns>
         public ImmutableList<Fb2Node> Content => content.ToImmutableList();
 
         /// <summary>

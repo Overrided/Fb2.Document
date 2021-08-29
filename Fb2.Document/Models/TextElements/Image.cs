@@ -8,7 +8,6 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    // TODO : add override for string content - at least check for base64 validity?
     public class Image : Fb2Element
     {
         public override string Name => ElementNames.Image;

@@ -110,8 +110,7 @@ namespace Fb2.Document.Models.Base
             return element;
         }
 
-        // TODO : double check this, backward-compatibility?
-        public override string ToString() => string.Copy(content);
+        public override string ToString() => Content;
 
         private static string GetNodeContent([In] XNode node)
             => node.NodeType switch
@@ -121,7 +120,6 @@ namespace Fb2.Document.Models.Base
                 _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
             };
 
-        // TODO : double check implementation validity
         public override bool Equals(object other)
         {
             if (!(other is Fb2Element otherElement))

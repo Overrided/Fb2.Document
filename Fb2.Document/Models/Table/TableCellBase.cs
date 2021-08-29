@@ -4,7 +4,7 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    public abstract class TableCellBase : TextContainer
+    public abstract class TableCellBase : TextContainerBase
     {
         public override ImmutableHashSet<string> AllowedAttributes =>
             ImmutableHashSet.Create(

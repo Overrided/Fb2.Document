@@ -336,7 +336,7 @@ namespace Fb2.Document.Tests.ModelsTests
             CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;&quot;testValue&amp;tv&apos;2&quot;&gt;");
         }
 
-        private void CheckAttributes(
+        private static void CheckAttributes(
             Fb2Node instance,
             int expectedCount,
             string expectedName,

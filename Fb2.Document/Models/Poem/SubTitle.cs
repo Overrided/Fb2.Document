@@ -4,7 +4,7 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    public class SubTitle : TextContainer
+    public class SubTitle : TextContainerBase
     {
         public override string Name => ElementNames.SubTitle;
 

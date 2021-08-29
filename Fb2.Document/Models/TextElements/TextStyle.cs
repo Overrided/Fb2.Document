@@ -4,7 +4,7 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    public class TextStyle : TextContainer
+    public class TextStyle : TextContainerBase
     {
         public override string Name => ElementNames.TextStyle;
 

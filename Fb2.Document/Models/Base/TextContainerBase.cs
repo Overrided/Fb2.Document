@@ -3,7 +3,7 @@ using Fb2.Document.Constants;
 
 namespace Fb2.Document.Models.Base
 {
-    public abstract class TextContainer : Fb2Container
+    public abstract class TextContainerBase : Fb2Container
     {
         public override bool IsInline => true;
 

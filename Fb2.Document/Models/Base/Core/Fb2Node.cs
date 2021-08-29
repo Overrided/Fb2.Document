@@ -29,12 +29,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public abstract string Name { get; }
 
-        // /// <summary>
-        // /// Gets actual element attributes in key - value (Dictionary) form.
-        // /// </summary>
-        // public Dictionary<string, string> Attributes { get; private set; }
-
-        // TODO: check for reference-safety
+        /// <summary>
+        /// Gets actual element attributes in key - value (Dictionary) form.
+        /// </summary>
         public ImmutableDictionary<string, string> Attributes => attributes.ToImmutableDictionary();
 
         /// <summary>

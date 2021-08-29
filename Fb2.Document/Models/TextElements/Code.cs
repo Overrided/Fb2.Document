@@ -6,7 +6,7 @@ using Fb2.Document.Models.Base;
 namespace Fb2.Document.Models
 {
     // TODO : add comments on how parameters get ignored on Load call
-    public class Code : TextContainer
+    public class Code : TextContainerBase
     {
         public override string Name => ElementNames.Code;
 
