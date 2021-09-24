@@ -43,15 +43,12 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             var instanceTwo = instance.Clone() as Fb2Node;
-            //instanceTwo.AddAttribute(() => new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
-            //instanceTwo.AddAttribute(new KeyValuePair<string, string>(instanceOne.AllowedAttributes.First(), "testValue"));
             instanceTwo.AddAttribute(instance.AllowedAttributes.First(), "testValue");
 
             instance.Should().NotBe(instanceTwo);
 
             instance.Attributes.Should().BeEmpty();
-            instanceTwo.Attributes.Should().NotBeEmpty();
-            instanceTwo.Attributes.Count.Should().Be(1);
+            instanceTwo.Attributes.Should().NotBeEmpty().And.HaveCount(1);
         }
 
         [Fact]
@@ -236,22 +233,22 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute('\t' + "NotExistingKey", "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute(Environment.NewLine + "NotExistingKey", "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute('\n' + "NotExistingKey", "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute('\r' + "NotExistingKey", "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
@@ -261,12 +258,12 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute("NotExistingKey", '\t' + "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance // /t 2, lol
+            instance
                 .Invoking(i => i.AddAttribute("NotExistingKey", Environment.NewLine + "NotExistingValue"))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
@@ -301,8 +298,7 @@ namespace Fb2.Document.Tests.ModelsTests
             instance.AddAttribute(firstAlowedAttributeName, "testValue");
 
             var attributes = instance.Attributes;
-            attributes.Should().HaveCount(1);
-            attributes.Should().ContainKey(firstAlowedAttributeName);
+            attributes.Should().HaveCount(1).And.ContainKey(firstAlowedAttributeName);
             attributes[firstAlowedAttributeName].Should().Be("testValue");
         }
 

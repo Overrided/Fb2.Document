@@ -13,7 +13,6 @@ using Fb2.Document.Models;
 
 namespace Fb2.Document
 {
-    // TODO : add check if book is rtl
     /// <summary>
     /// Represents Fiction Book at file level.
     /// Provides API for loading, reading and serializing fb2 files to FictionBook model and vice versa.
@@ -207,7 +206,7 @@ namespace Fb2.Document
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from string
         /// </summary>
-        /// <param name="document">Content of a file read as string</param>
+        /// <param name="fileContent">Content of a file read as string</param>
         /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of string received.
@@ -220,6 +219,30 @@ namespace Fb2.Document
             {
                 var document = XDocument.Parse(fileContent);
                 Load(document.Root, loadUnsafeElements);
+            });
+        }
+
+        /// <summary>
+        /// Loads fb2 file's content into Fb2Document model from string asynchronously
+        /// </summary>
+        /// <param name="fileContent">Content of a file read as string</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// this method exists mostly for lulz
+        public async Task LoadAsync([In] string fileContent, bool loadUnsafeElements = true)
+        {
+            if (string.IsNullOrWhiteSpace(fileContent))
+                throw new ArgumentNullException(nameof(fileContent));
+
+            await LoadHandledAsync(async () =>
+            {
+                using (var reader = new StringReader(fileContent))
+                {
+                    var document = await XDocument
+                        .LoadAsync(reader, LoadOptions.None, default)
+                        .ConfigureAwait(false);
+
+                    Load(document.Root, loadUnsafeElements);
+                }
             });
         }
 
@@ -273,21 +296,17 @@ namespace Fb2.Document
             var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
             xmlReaderSetting.CloseInput = options.CloseInputStream;
 
-            // not extracting wrapper for one use-case only
-            try
+            await LoadHandledAsync(async () =>
             {
                 using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
                 {
                     var document = await XDocument
                         .LoadAsync(reader, LoadOptions.None, default)
                         .ConfigureAwait(false);
+
                     Load(document.Root, options.LoadUnsafeElements);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Fb2DocumentLoadingException("Document LoadAsync failed.", ex);
-            }
+            });
         }
 
         /// <summary>
@@ -330,7 +349,19 @@ namespace Fb2.Document
             }
             catch (Exception ex)
             {
-                throw new Fb2DocumentLoadingException("Document Load failed.", ex);
+                throw new Fb2DocumentLoadingException("Document loading failed.", ex);
+            }
+        }
+
+        private async Task LoadHandledAsync(Func<Task> loadingAsync)
+        {
+            try
+            {
+                await loadingAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Fb2DocumentLoadingException("Document asynchronous loading failed.", ex);
             }
         }
 

@@ -13,15 +13,16 @@ Library can be used with any .Net application that supports .Net Standard 2.1
 * [Document infrastructure and loading](#Document-infrastructure-and-loading)
 
 * [Usage](#Usage)
-    * [Loading file as a string](#Loading-file-as-a-string)
-    * [Loading file as XDocument](#Loading-file-as-XDocument)
-    * [Loading file as a stream](#Loading-file-as-a-stream)
-    * [Loading file as a stream asynchronously](#Loading-file-as-a-stream-asynchronously)
-    * [Loading particular node](#Loading-particular-node)
+    * [Loading](#Loading)
+        * [...from string](#...from-string)
+        * [...from XDocument](#...from-XDocument)
+        * [...from stream](#...from-stream)
+        * [...from stream asynchronously](#...from-stream-asynchronously)
+        * [...particular node](#...particular-node)
+    * [Encoding safety](#Encoding-safety)
     * [Querying](#Querying)
         * [Content API](#Content-api)
         * [Attributes API](#Attributes-api)
-    * [Encoding safety](#Encoding-safety)
 
 * [API](#API)
     * [Fb2Document Class API](#Fb2Document-Class-API)
@@ -56,19 +57,19 @@ Base abstract classes are `Fb2Node` and it's descendants - `Fb2Container` and `F
 
 `Fb2Node` is lowest abstract level of `fb2` document node implementation.
 
-`Fb2Container` is element, which can - unexpectedly! - contain other elements.
+`Fb2Container` is container node, which can - unexpectedly! - contain other elements (nodes).
 
 `Fb2Element` is mainly text container element.
 
 `Fb2Document`, in turn, is not derived from `Fb2Node`, but still plays major role in file processing.
-That class serves as a container, which is capable of loading and representing `fb2` file structure, providing access to `Fb2Container`/`Fb2Element` basic API's.
+That class serves as a topmost container, which is capable of loading and representing `fb2` file structure, providing access to `Fb2Container`/`Fb2Element` basic API's.
 
 `Book` property of an `Fb2Document` is populated after call to `Load` (or `LoadAsync`) method ended and represents actual `<FictionBook>` element of `fb2` file.
 
 >Attention!
 >
 >During load process all nodes or attributes which do not meet `Fb2` standard will be skipped.
-Misplaced elements, like a plain text in root of a book, are not ignored, but marked with `Unsafe` flag instead.
+Misplaced elements, like a plain text in root of a book, are not ignored, but marked with `IsUnsafe` flag instead.
 All comments are ignored by default.
 
 For full list of allowed elements and attribute names see [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs).
@@ -81,9 +82,13 @@ Although file content is `xml`, validation of given file against appropriate `xs
 
 So, `xsd` scheme validation is ommited.
 
-As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading and querying data:
+As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading and querying data, along with ways to modify node's content.
 
-### Loading file as a string
+## Loading
+
+There are API's that enable loading `fb2 DOM` in different scenarios, for both `Fb2Document` and any particular node.
+
+### ...from string
 
 ```
 string fileContent = await dataService.GetFileContent(Fb2FilePath);
@@ -95,7 +100,7 @@ fb2Document.Load(fileContent);
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
-### Loading file as XDocument
+### ...from XDocument
 
 ```
 XDocument document = dataService.GetFileAsXDoc(Fb2FilePath);
@@ -107,7 +112,7 @@ fb2Document.Load(document);
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
-### Loading file as a stream
+### ...from stream
 
 ```
 Fb2Document fb2Document = new Fb2Document();
@@ -120,7 +125,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-### Loading file as a stream asynchronously
+### ...from stream asynchronously
 
 ```
 Fb2Document fb2Document = new Fb2Document();
@@ -133,11 +138,11 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-### Loading particular node
+### ...particular node
 
 In corner-case scenario you might need to load some part of a document into the model, instead of loading whole thing.
 
-It can be achieved by calling `Load(XNode node)` method of corresponding Fb2Node implementation instance.
+It can be achieved by directly calling `Load(XNode node)` method on corresponding Fb2Node implementation instance.
 
 ```
 Paragraph paragraph = new Paragraph();
@@ -146,7 +151,16 @@ Paragraph paragraph = new Paragraph();
 paragraph.Load(node);
 ```
 
-### Querying
+
+### Encoding safety
+
+If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
+
+If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
+
+
+
+## Querying
 
 All descendants of `Fb2Node` class has certain interface to access and query parsed data.
 
@@ -154,7 +168,7 @@ All descendants of `Fb2Node` class has certain interface to access and query par
 
 Since `1.1.0` version of a library `Fb2Node` base class provides additional `Attributes` access methods, allowing more complex and precise querying.
 
-#### Content API
+### Content API
 
 For instance, you want to find all `<stanza>` elements in whole book.
 There's more than one way to skin a cat:
@@ -179,7 +193,7 @@ For full list of properties for accessing document structural parts see [Fb2Docu
 
 For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
 
-#### Attributes API
+### Attributes API
 
 Let's say you need to check all `id` attributes in a book.
 
@@ -227,12 +241,6 @@ if (cell.TryGetAttributeValue(AttributeNames.Align, true, out string align) &&
 As one might see, given call ignores case and checks if received value can be used as `TextAlignment`.
 
 For more details on methods for querying the model's attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
-
-### Encoding safety
-
-If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
-
-If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
 
 ## API
 

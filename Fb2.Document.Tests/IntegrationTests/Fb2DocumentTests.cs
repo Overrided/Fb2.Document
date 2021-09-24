@@ -200,6 +200,9 @@ namespace Fb2.Document.Tests.IntegrationTests
             var stringLoadedFb2Document = new Fb2Document();
             stringLoadedFb2Document.Load(fileStringContent); // string
 
+            var stringLoadedAsyncFb2Document = new Fb2Document();
+            await stringLoadedAsyncFb2Document.LoadAsync(fileStringContent);
+
             var xmlLoadedFb2Document = new Fb2Document();
             xmlLoadedFb2Document.Load(xDocument); // xDocument
 
@@ -213,15 +216,18 @@ namespace Fb2.Document.Tests.IntegrationTests
                 await streamLoadedAsyncFb2Document.LoadAsync(stream); // async stream
             }
 
-            stringLoadedFb2Document.Should().Be(xmlLoadedFb2Document);
-            streamLoadedFb2Document.Should().Be(streamLoadedAsyncFb2Document);
-            stringLoadedFb2Document.Should().Be(streamLoadedFb2Document);
-            xmlLoadedFb2Document.Should().Be(streamLoadedAsyncFb2Document);
+            stringLoadedFb2Document
+                .Should().Be(stringLoadedAsyncFb2Document)
+                .And.Be(xmlLoadedFb2Document)
+                .And.Be(streamLoadedFb2Document)
+                .And.Be(streamLoadedAsyncFb2Document);
 
-            stringLoadedFb2Document.Book.Should().Be(xmlLoadedFb2Document.Book);
-            streamLoadedFb2Document.Book.Should().Be(streamLoadedAsyncFb2Document.Book);
-            stringLoadedFb2Document.Book.Should().Be(streamLoadedFb2Document.Book);
-            xmlLoadedFb2Document.Book.Should().Be(streamLoadedAsyncFb2Document.Book);
+
+            stringLoadedFb2Document.Book
+                .Should().Be(stringLoadedAsyncFb2Document.Book)
+                .And.Be(xmlLoadedFb2Document.Book)
+                .And.Be(streamLoadedFb2Document.Book)
+                .And.Be(streamLoadedAsyncFb2Document.Book);
         }
 
         [Fact]
@@ -237,7 +243,7 @@ namespace Fb2.Document.Tests.IntegrationTests
                     .Invoking(async f => await f.LoadAsync(stream))
                     .Should()
                     .ThrowExactlyAsync<Fb2DocumentLoadingException>()
-                    .WithMessage("Document LoadAsync failed.");
+                    .WithMessage("Document asynchronous loading failed.");
 
                 RewindStream(stream);
 
@@ -245,7 +251,7 @@ namespace Fb2.Document.Tests.IntegrationTests
                     .Invoking(f => f.Load(stream))
                     .Should()
                     .ThrowExactly<Fb2DocumentLoadingException>()
-                    .WithMessage("Document Load failed.");
+                    .WithMessage("Document loading failed.");
             }
 
             var invalidSampleXmlString = await ReadFileAsString(invalidFileInfo);
@@ -254,7 +260,7 @@ namespace Fb2.Document.Tests.IntegrationTests
                 .Invoking(s => s.Load(invalidSampleXmlString))
                 .Should()
                 .ThrowExactly<Fb2DocumentLoadingException>()
-                .WithMessage("Document Load failed.");
+                .WithMessage("Document loading failed.");
         }
 
         private FileInfo GetSampleFileInfo(string fileName)
