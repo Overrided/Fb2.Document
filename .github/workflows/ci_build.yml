@@ -1,9 +1,6 @@
 name: Fb2.Document CI
 
-on:
-  push:
-    branches:
-      - "features/**"
+on: [push, pull_request]
 
 jobs:
   build:
@@ -11,13 +8,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        dotnet: [ '2.1.x', '3.1.x', '5.0.x' ]
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET 5.0.x
+      - name: Setup .NET ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "5.0.x"
+          dotnet-version: ${{ matrix.dotnet }}
       - name: Build library on ${{matrix.os}}
         run: dotnet build --configuration release
       - name: Run tests
