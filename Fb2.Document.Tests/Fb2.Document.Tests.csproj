@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fb2.Document\Fb2.Document.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Samples\_Test_1.fb2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -35,6 +31,10 @@
 
   <ItemGroup>
     <Folder Include="ExtensionsTests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fb2.Document\Fb2.Document.csproj" />
   </ItemGroup>
 
 </Project>
