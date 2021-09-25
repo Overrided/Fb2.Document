@@ -15,6 +15,7 @@ Library can be used with any .Net application that supports .Net Standard 2.1
 * [Usage](#Usage)
     * [Loading](#Loading)
         * [...from string](#from-string)
+        * [...from string asynchronously](#from-string-asynchronously)
         * [...from XDocument](#from-XDocument)
         * [...from stream](#from-stream)
         * [...from stream asynchronously](#from-stream-asynchronously)
@@ -82,7 +83,7 @@ Although file content is `xml`, validation of given file against appropriate `xs
 
 So, `xsd` scheme validation is ommited.
 
-As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading and querying data, along with ways to modify node's content.
+As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading, querying and manipulating `fb2 book` contents and attributes.
 
 ## Loading
 
@@ -96,6 +97,18 @@ string fileContent = await dataService.GetFileContent(Fb2FilePath);
 Fb2Document fb2Document = new Fb2Document();
 
 fb2Document.Load(fileContent);
+```
+
+>WARNING! Method is not encoding-safe. [*](#Encoding-safety)
+
+### ...from string asynchronously
+
+```
+Fb2Document fb2Document = new Fb2Document();
+
+string fileContent = await dataService.GetFileContent(Fb2FilePath);
+
+await fb2Document.LoadAsync(stream);
 ```
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
