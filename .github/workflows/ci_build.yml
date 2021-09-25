@@ -1,9 +1,9 @@
 name: Fb2.Document CI
 
-on: 
+on:
   push:
     paths:
-    - '!Readme.md'
+      - '!Readme.md'
 
 jobs:
   build:
