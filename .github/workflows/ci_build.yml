@@ -2,9 +2,9 @@ name: Fb2.Document CI
 
 on:
   push:
-  pull_request:
     paths-ignore:
       - "Readme.md"
+  pull_request:
 
 jobs:
   build:
