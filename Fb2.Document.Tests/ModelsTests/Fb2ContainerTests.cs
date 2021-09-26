@@ -372,7 +372,7 @@ namespace Fb2.Document.Tests.ModelsTests
             firstStrongChild1.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
         }
 
-        private void ClearContainerContent(Fb2Container node)
+        private static void ClearContainerContent(Fb2Container node)
         {
             node.ClearContent();
             node.Content.Should().BeEmpty();

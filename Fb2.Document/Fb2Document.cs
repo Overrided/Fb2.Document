@@ -30,8 +30,8 @@ namespace Fb2.Document
         private ImmutableList<BookBody> bodies = null;
         private ImmutableList<BinaryImage> binaryImages = null;
 
-        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
-        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
+        private static readonly XDeclaration DefaultDeclaration = new(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
+        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new()
         {
             Async = true,
             CheckCharacters = true,
@@ -180,10 +180,11 @@ namespace Fb2.Document
         /// <returns>New instance of Fb2Document.</returns>
         public static Fb2Document CreateDocument(FictionBook fictionBook = null)
         {
-            var document = new Fb2Document();
-
-            document.Book = fictionBook;
-            document.IsLoaded = fictionBook != null;
+            var document = new Fb2Document
+            {
+                Book = fictionBook,
+                IsLoaded = fictionBook != null
+            };
 
             return document;
         }
@@ -341,7 +342,7 @@ namespace Fb2.Document
         }
 
         // wraps any exception with Fb2DocumentLoadingException
-        private void LoadHandled(Action loadingAction)
+        private static void LoadHandled(Action loadingAction)
         {
             try
             {
@@ -353,7 +354,7 @@ namespace Fb2.Document
             }
         }
 
-        private async Task LoadHandledAsync(Func<Task> loadingAsync)
+        private static async Task LoadHandledAsync(Func<Task> loadingAsync)
         {
             try
             {

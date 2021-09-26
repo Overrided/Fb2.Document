@@ -10,7 +10,7 @@ namespace Fb2.Document.Factories
 {
     public static class Fb2NodeFactory
     {
-        private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>
+        private static readonly Dictionary<string, Type> KnownNodes = new()
         {
             { ElementNames.FictionBook, typeof(FictionBook) },
             { ElementNames.BinaryImage, typeof(BinaryImage) },
@@ -20,7 +20,7 @@ namespace Fb2.Document.Factories
             { ElementNames.SrcTitleInfo, typeof(SrcTitleInfo) },
             { ElementNames.DocumentInfo, typeof(DocumentInfo) },
             { ElementNames.PublishInfo, typeof(PublishInfo) },
-            { ElementNames.CustomInfo, typeof(CustomInfo)},
+            { ElementNames.CustomInfo, typeof(CustomInfo) },
 
             { ElementNames.Genre, typeof(BookGenre) },
             { ElementNames.Author, typeof(Author) },

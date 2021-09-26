@@ -20,9 +20,9 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
+        protected static readonly Regex trimWhitespace = new(@"\s+", RegexOptions.Multiline);
 
-        private Dictionary<string, string> attributes = new Dictionary<string, string>();
+        private Dictionary<string, string> attributes = new();
 
         /// <summary>
         /// Node name, used during document parsing and validation.
