@@ -13,6 +13,7 @@ using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Resolver;
 
+//TODO : add comments to all methods
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
@@ -20,7 +21,7 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
-        private List<Fb2Node> content = new List<Fb2Node>();
+        private List<Fb2Node> content = new();
 
         /// <summary>
         /// Actual value is available after `Load()` method call.
@@ -291,32 +292,77 @@ namespace Fb2.Document.Models.Base
         /// Gets children of element by given name. 
         /// </summary>
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
-        /// <returns>List of found child elements, if any. </returns>
+        /// <returns>List of found child elements, if any.</returns>
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException(nameof(name), $"{nameof(name)} is null or empty string. Use `{nameof(Content)}` instead.");
+                throw new ArgumentNullException(nameof(name));
+
+            if (!Fb2NodeFactory.IsKnownNode(name))
+                throw new UnknownNodeException(name);
 
             return content.Where(elem => elem.Name.EqualsInvariant(name));
+        }
+
+        /// <summary>
+        /// Gets children of element that match given predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate to match child node against.</param>
+        /// <returns>List of found child elements, if any.</returns>
+        public IEnumerable<Fb2Node> GetChildren(Func<Fb2Node, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return content.Where(c => predicate(c));
         }
 
         /// <summary>
         /// Gets first matching child of element by given name.
         /// </summary>
         /// <param name="name">Name to select child element by.</param>
-        /// <returns>First matched child node</returns>
-        public Fb2Node GetFirstChild(string name) =>
-            string.IsNullOrWhiteSpace(name) ?
+        /// <returns>First matched child node.</returns>
+        public Fb2Node? GetFirstChild(string? name)
+        {
+            if (!string.IsNullOrWhiteSpace(name) &&
+                !Fb2NodeFactory.IsKnownNode(name))
+                throw new UnknownNodeException(name);
+
+            if (!content.Any())
+                return null;
+
+            return string.IsNullOrWhiteSpace(name) ?
                 content.FirstOrDefault() :
                 content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
+        }
+
+        /// <summary>
+        /// Gets first child of element that matches given predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate to match child node against.</param>
+        /// <returns>First matched child node.</returns>
+        public Fb2Node? GetFirstChild(Func<Fb2Node, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return content.FirstOrDefault(predicate);
+        }
 
         /// <summary>
         /// Recursively gets all descendants of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
-        public IEnumerable<Fb2Node> GetDescendants(string name)
+        public IEnumerable<Fb2Node>? GetDescendants(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
+
+            if (!Fb2NodeFactory.IsKnownNode(name))
+                throw new UnknownNodeException(name);
+
+            //TODO: fix null vs empty
             if (!content.Any())
                 return null;
 
@@ -324,8 +370,7 @@ namespace Fb2.Document.Models.Base
 
             foreach (var element in content)
             {
-                if (string.IsNullOrWhiteSpace(name) ||
-                    element.Name.EqualsInvariant(name))
+                if (element.Name.EqualsInvariant(name))
                     result.Add(element);
 
                 if (element is Fb2Container containerElement)
@@ -341,14 +386,50 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
+        /// Recursively gets all descendants of element that match given predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate to match descendant node against.</param>
+        /// <returns>List of found descendants, if any.</returns>
+        public IEnumerable<Fb2Node>? GetDescendants(Func<Fb2Node, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            // TODO : fix inconsistency in behavior? null vs empty
+            if (!content.Any())
+                return null;
+
+            var result = new List<Fb2Node>();
+
+            foreach (var element in content)
+            {
+                if (predicate(element))
+                    result.Add(element);
+
+                if (element is Fb2Container containerElement)
+                {
+                    var desc = containerElement.GetDescendants(predicate);
+
+                    if (desc != null && desc.Any())
+                        result.AddRange(desc);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Recursively looks for first matching descendant of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
         /// <returns>First matched descendant node.</returns>
-        public Fb2Node GetFirstDescendant(string name)
+        public Fb2Node? GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException(nameof(name), $"{nameof(name)} is null or empty string! Use {nameof(GetFirstChild)} method instead.");
+                throw new ArgumentNullException(nameof(name));
+
+            if (!Fb2NodeFactory.IsKnownNode(name))
+                throw new UnknownNodeException(name);
 
             if (!content.Any())
                 return null;
@@ -371,14 +452,51 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
+        /// Recursively looks for first descendant of element that matches given predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate to match descendant node against.</param>
+        /// <returns></returns>
+        public Fb2Node? GetFirstDescendant(Func<Fb2Node, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            if (!content.Any())
+                return null;
+
+            foreach (var element in content)
+            {
+                if (predicate(element))
+                    return element;
+
+                if (element is Fb2Container containerElement)
+                {
+                    var firstDesc = containerElement.GetFirstDescendant(predicate);
+
+                    if (firstDesc != null)
+                        return firstDesc;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Recursively looks for first matching descendant of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
         /// <param name="node">Out param, actual result of a search.</param>
         /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
-        public bool TryGetFirstDescendant(string name, out Fb2Node node)
+        public bool TryGetFirstDescendant(string name, out Fb2Node? node)
         {
             var firstDescendant = GetFirstDescendant(name);
+            node = firstDescendant;
+            return firstDescendant != null;
+        }
+
+        public bool TryGetFirstDescendant(Func<Fb2Node, bool> predicate, out Fb2Node? node)
+        {
+            var firstDescendant = GetFirstDescendant(predicate);
             node = firstDescendant;
             return firstDescendant != null;
         }
@@ -388,7 +506,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <typeparam name="T">Node type to select elements by.</typeparam>
         /// <returns>List of found child elements, if any.</returns>
-        public IEnumerable<T> GetChildren<T>() where T : Fb2Node
+        public IEnumerable<T>? GetChildren<T>() where T : Fb2Node
         {
             if (!content.Any())
                 return null;
@@ -407,7 +525,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Node type to select child element by.</param>
         /// <returns>First matched child node</returns>
-        public T GetFirstChild<T>() where T : Fb2Node
+        public T? GetFirstChild<T>() where T : Fb2Node
         {
             if (!content.Any())
                 return null;

@@ -372,6 +372,150 @@ namespace Fb2.Document.Tests.ModelsTests
             firstStrongChild1.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
         }
 
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void GetChildren_InvalidParam_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.GetChildren((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetChildren(""))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetChildren("balhNameInvalid"))
+                .Should()
+                .ThrowExactly<UnknownNodeException>();
+
+            node.Invoking(n => n.GetChildren((Func<Fb2Node, bool>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void GetDescendants_InvalidParam_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.GetDescendants((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetDescendants(""))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetDescendants("balhNameInvalid"))
+                .Should()
+                .ThrowExactly<UnknownNodeException>();
+
+            node.Invoking(n => n.GetDescendants((Func<Fb2Node, bool>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void GetFirstChild_InvalidParam_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.GetFirstChild("balhNameInvalid"))
+                .Should()
+                .ThrowExactly<UnknownNodeException>();
+
+            node.Invoking(n => n.GetFirstChild((Func<Fb2Node, bool>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void GetFirstDescendant_InvalidParam_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.GetFirstDescendant((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetFirstDescendant(""))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.GetFirstDescendant("balhNameInvalid"))
+                .Should()
+                .ThrowExactly<UnknownNodeException>();
+
+            node.Invoking(n => n.GetFirstDescendant((Func<Fb2Node, bool>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void TryGetFirstDescendant_InvalidParam_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.TryGetFirstDescendant((string)null, out var result))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.TryGetFirstDescendant("", out var result))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.TryGetFirstDescendant("balhNameInvalid", out var result))
+                .Should()
+                .ThrowExactly<UnknownNodeException>();
+
+            node.Invoking(n => n.TryGetFirstDescendant((Func<Fb2Node, bool>)null, out var result))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void EmpyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
+        {
+            var firstAllowedChildName = node.AllowedElements.First();
+            Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
+
+            node.GetChildren(firstAllowedChildName).Should().BeEmpty();
+            node.GetChildren(firstAllowedChildPredicate).Should().BeEmpty();
+            node.GetChildren<Fb2Node>().Should().BeNull();
+
+            node.GetFirstChild(firstAllowedChildName).Should().BeNull();
+            node.GetFirstChild(firstAllowedChildPredicate).Should().BeNull();
+            node.GetFirstChild((string)null).Should().BeNull();
+            node.GetFirstChild("").Should().BeNull();
+            node.GetFirstChild<Fb2Node>().Should().BeNull();
+
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void EmpyContainerNode_QueryDescendantNodes_ReturnsNullOrEmpty(Fb2Container node)
+        {
+            var firstAllowedChildName = node.AllowedElements.First();
+            Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
+
+            node.GetDescendants(firstAllowedChildName).Should().BeNull();
+            node.GetDescendants(firstAllowedChildPredicate).Should().BeNull();
+            node.GetDescendants<Fb2Node>().Should().BeNull();
+
+            node.GetFirstDescendant(firstAllowedChildName).Should().BeNull();
+            node.GetFirstDescendant(firstAllowedChildPredicate).Should().BeNull();
+            node.GetFirstDescendant<Fb2Node>().Should().BeNull();
+
+            var success = node.TryGetFirstDescendant(firstAllowedChildName, out var resultNode);
+            success.Should().BeFalse();
+            resultNode.Should().BeNull();
+
+            var predicateSuccess = node.TryGetFirstDescendant(firstAllowedChildPredicate, out var resultPredicateNode);
+            predicateSuccess.Should().BeFalse();
+            resultPredicateNode.Should().BeNull();
+
+            var genericSuccess = node.TryGetFirstDescendant<Fb2Node>(out var resultGenericNode);
+            genericSuccess.Should().BeFalse();
+            resultGenericNode.Should().BeNull();
+        }
+
         private static void ClearContainerContent(Fb2Container node)
         {
             node.ClearContent();

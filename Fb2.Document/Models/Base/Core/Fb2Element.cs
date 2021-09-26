@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Xml;
 using System.Xml.Linq;
-using Fb2.Document.Constants;
+using Fb2.Document.Exceptions;
 
 namespace Fb2.Document.Models.Base
 {
@@ -117,7 +116,7 @@ namespace Fb2.Document.Models.Base
             {
                 XmlNodeType.Element => ((XElement)node).Value,
                 XmlNodeType.Text => ((XText)node).Value,
-                _ => throw new Exception($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
             };
 
         public override bool Equals(object other)
