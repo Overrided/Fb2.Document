@@ -22,8 +22,11 @@ Library can be used with any .Net application that supports .Net Standard 2.1
         * [...particular node](#particular-node)
     * [Encoding safety](#Encoding-safety)
     * [Querying](#Querying)
-        * [Content API](#Content-api)
-        * [Attributes API](#Attributes-api)
+        * [Querying Content API](#querying-content-api)
+        * [Querying Attributes API](#querying-attributes-api)
+    * [Editing](#Editing)
+        * [Editing Content API](#editing-content-api)
+        * [Editing Attributes API](#editing-attributes-api)
 
 * [API](#API)
     * [Fb2Document Class API](#Fb2Document-Class-API)
@@ -164,14 +167,11 @@ Paragraph paragraph = new Paragraph();
 paragraph.Load(node);
 ```
 
-
 ### Encoding safety
 
 If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
 
 If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
-
-
 
 ## Querying
 
@@ -181,7 +181,7 @@ All descendants of `Fb2Node` class has certain interface to access and query par
 
 Since `1.1.0` version of a library `Fb2Node` base class provides additional `Attributes` access methods, allowing more complex and precise querying.
 
-### Content API
+### Querying Content API
 
 For instance, you want to find all `<stanza>` elements in whole book.
 There's more than one way to skin a cat:
@@ -206,7 +206,7 @@ For full list of properties for accessing document structural parts see [Fb2Docu
 
 For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
 
-### Attributes API
+### Querying Attributes API
 
 Let's say you need to check all `id` attributes in a book.
 
@@ -254,6 +254,24 @@ if (cell.TryGetAttributeValue(AttributeNames.Align, true, out string align) &&
 As one might see, given call ignores case and checks if received value can be used as `TextAlignment`.
 
 For more details on methods for querying the model's attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
+
+## Editing
+
+All descendants of `Fb2Node` class has certain interface to perform basic CRUD operations on node's data.
+
+Since `2.1.0` version of a library all nodes provide content manipulation APIs along with `Attributes` modification methods.
+
+### Editing Content API
+
+For any descendant of `Fb2Container` basic method of adding other nodes to actual content is `AddContent(Fb2Node node)`.
+
+Let's say you want to add `Strong` node to `Paragraph`.
+
+Different methods based on above-mentioned `AddContent` are covering most of common use-cases.
+
+
+
+### Editing Attributes API
 
 ## API
 
