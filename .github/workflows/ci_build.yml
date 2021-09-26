@@ -3,7 +3,7 @@ name: Fb2.Document CI
 on:
   push:
     paths-ignore:
-      - "Readme.md"
+      - "**/Readme.md"
   pull_request:
 
 jobs:
