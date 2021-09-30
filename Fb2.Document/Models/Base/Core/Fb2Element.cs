@@ -50,8 +50,15 @@ namespace Fb2.Document.Models.Base
                 content = rawContent;
         }
 
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/> using provider function.
+        /// </summary>
+        /// <param name="contentProvider">Content provider function.</param>
+        /// <param name="separator">Separator to split text from rest of the content.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
+        /// <returns>Current element.</returns>
         public Fb2Element AddContent(Func<string> contentProvider,
-            string separator = null,
+            string? separator = null,
             bool preserveWhitespace = false)
         {
             if (contentProvider == null)
@@ -62,8 +69,15 @@ namespace Fb2.Document.Models.Base
             return AddContent(content, separator, preserveWhitespace);
         }
 
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="newContent">Plain text to append.</param>
+        /// <param name="separator">Separator to split text from rest of the content.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
+        /// <returns>Current element.</returns>
         public virtual Fb2Element AddContent(string newContent,
-            string separator = null,
+            string? separator = null,
             bool preserveWhitespace = false)
         {
             if (string.IsNullOrEmpty(newContent))
@@ -86,6 +100,10 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Clears <see cref="Content"/>.
+        /// </summary>
+        /// <returns>Current element.</returns>
         public virtual Fb2Element ClearContent()
         {
             if (!string.IsNullOrEmpty(content))
@@ -119,9 +137,12 @@ namespace Fb2.Document.Models.Base
                 _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
             };
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
-            if (!(other is Fb2Element otherElement))
+            if (other == null)
+                return false;
+
+            if (other is not Fb2Element otherElement)
                 return false;
 
             if (!base.Equals(otherElement))

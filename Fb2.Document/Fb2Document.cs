@@ -21,12 +21,12 @@ namespace Fb2.Document
     {
         private const string defaultXmlVersion = "1.0";
 
-        private BookDescription description = null;
-        private TitleInfo title = null;
-        private SrcTitleInfo sourceTitle = null;
-        private DocumentInfo documentInfo = null;
-        private PublishInfo publishInfo = null;
-        private CustomInfo customInfo = null;
+        private BookDescription? description = null;
+        private TitleInfo? title = null;
+        private SrcTitleInfo? sourceTitle = null;
+        private DocumentInfo? documentInfo = null;
+        private PublishInfo? publishInfo = null;
+        private CustomInfo? customInfo = null;
         private ImmutableList<BookBody> bodies = null;
         private ImmutableList<BinaryImage> binaryImages = null;
 
@@ -42,20 +42,20 @@ namespace Fb2.Document
         /// <summary>
         /// Represents <FictionBook> - root element of a file.
         /// </summary>
-        public FictionBook Book { get; private set; }
+        public FictionBook? Book { get; private set; }
 
         /// <summary>
         /// Represents Description element of a FictionBook
         /// </summary>
-        public BookDescription BookDescription
+        public BookDescription? BookDescription
         {
             get
             {
-                if (!IsLoaded)
+                if (!IsLoaded || Book == null)
                     return null;
 
                 if (description == null)
-                    description = Book?.GetFirstChild<BookDescription>();
+                    description = Book.GetFirstChild<BookDescription>();
 
                 return description;
             }
@@ -64,7 +64,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets Title of Description from FictionBook
         /// </summary>
-        public TitleInfo Title
+        public TitleInfo? Title
         {
             get
             {
@@ -79,7 +79,7 @@ namespace Fb2.Document
         /// Shortcut property. Gets SrcTitle of Description from FictionBook
         /// Mainly exists if book is translated - and contains Title in original language
         /// </summary>
-        public SrcTitleInfo SourceTitle
+        public SrcTitleInfo? SourceTitle
         {
             get
             {
@@ -93,7 +93,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets DocumentInfo of Description from FictionBook
         /// </summary>
-        public DocumentInfo DocumentInfo
+        public DocumentInfo? DocumentInfo
         {
             get
             {
@@ -107,7 +107,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets PublishInfo of Description from FictionBook
         /// </summary>
-        public PublishInfo PublishInfo
+        public PublishInfo? PublishInfo
         {
             get
             {
@@ -121,7 +121,7 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets CustomInfo of Description from FictionBook
         /// </summary>
-        public CustomInfo CustomInfo
+        public CustomInfo? CustomInfo
         {
             get
             {
@@ -139,11 +139,11 @@ namespace Fb2.Document
         {
             get
             {
-                if (!IsLoaded)
-                    return null;
+                if (!IsLoaded || Book == null)
+                    return ImmutableList<BookBody>.Empty;
 
                 if (bodies == null || !bodies.Any())
-                    bodies = Book?.GetChildren<BookBody>()?.ToImmutableList();
+                    bodies = Book.GetChildren<BookBody>().ToImmutableList();
 
                 return bodies;
             }
@@ -156,11 +156,11 @@ namespace Fb2.Document
         {
             get
             {
-                if (!IsLoaded)
-                    return null;
+                if (!IsLoaded || Book == null)
+                    return ImmutableList<BinaryImage>.Empty;
 
                 if (binaryImages == null || !binaryImages.Any())
-                    binaryImages = Book?.GetChildren<BinaryImage>()?.ToImmutableList();
+                    binaryImages = Book.GetChildren<BinaryImage>().ToImmutableList();
 
                 return binaryImages;
             }
@@ -178,7 +178,7 @@ namespace Fb2.Document
         /// Optional parameter. Book to use with Fb2Document. If ommited, `Book` property of created document returns `null`.
         /// </param>
         /// <returns>New instance of Fb2Document.</returns>
-        public static Fb2Document CreateDocument(FictionBook fictionBook = null)
+        public static Fb2Document CreateDocument(FictionBook? fictionBook = null)
         {
             var document = new Fb2Document
             {
@@ -317,7 +317,7 @@ namespace Fb2.Document
         /// XDocument instance formatted accordingly to fb2 rules. 
         /// Returns null if <see cref="Book"/> is null or <see cref="IsLoaded"/> is <see langword="false"/>
         /// </returns>
-        public XDocument ToXml()
+        public XDocument? ToXml()
         {
             if (Book == null || !IsLoaded)
                 return null;
@@ -331,7 +331,7 @@ namespace Fb2.Document
         /// Renders content of FictionBook as formatted xml string
         /// </summary>
         /// <returns>String content of a XDocument</returns>
-        public string ToXmlString()
+        public string? ToXmlString()
         {
             var document = ToXml();
 
@@ -377,7 +377,7 @@ namespace Fb2.Document
             IsLoaded = true;
         }
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj != null &&
             obj is Fb2Document other && // if `Book` is `null` and `other.Book` is also null - those are equal
             IsLoaded == other.IsLoaded &&

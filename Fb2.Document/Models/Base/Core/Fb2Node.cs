@@ -150,6 +150,11 @@ namespace Fb2.Document.Models.Base
 
         #region Node editing
 
+        /// <summary>
+        /// Adds multiple attributes in `params KeyValuePair<string, string>[]` form to <see cref="Attributes"/>.
+        /// </summary>
+        /// <param name="attributes">Attributes to add.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
             if (attributes == null || !attributes.Any())
@@ -161,6 +166,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Adds multiple attributes in `IDictionary<string, string>` form to <see cref="Attributes"/>.
+        /// </summary>
+        /// <param name="attributes">Attributes to add.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
         {
             if (attributes == null || !attributes.Any())
@@ -172,6 +182,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Adds single attribute to <see cref="Attributes"/> using asynchronous provider function.
+        /// </summary>
+        /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
+        /// <returns>Current node.</returns>
         public async Task<Fb2Node> AddAttributeAsync(Func<Task<KeyValuePair<string, string>>> attributeProvider)
         {
             if (attributeProvider == null)
@@ -182,6 +197,11 @@ namespace Fb2.Document.Models.Base
             return AddAttribute(attribute.Key, attribute.Value);
         }
 
+        /// <summary>
+        /// Adds single attribute to <see cref="Attributes"/> using provider function.
+        /// </summary>
+        /// <param name="attributeProvider">Attribute provider function.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
         {
             if (attributeProvider == null)
@@ -192,9 +212,20 @@ namespace Fb2.Document.Models.Base
             return AddAttribute(attribute.Key, attribute.Value);
         }
 
+        /// <summary>
+        /// Adds single attribute to <see cref="Attributes"/>.
+        /// </summary>
+        /// <param name="attribute">Attribute to add to <see cref="Attribute"/>.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
             AddAttribute(attribute.Key, attribute.Value);
 
+        /// <summary>
+        /// Adds single attribute to <see cref="Attributes"/> using separate key & value.
+        /// </summary>
+        /// <param name="attributeName">Attribute key.</param>
+        /// <param name="attributeValue">Attribute value.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttribute(string attributeName, string attributeValue)
         {
             if (!AllowedAttributes.Any())
@@ -217,6 +248,12 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes attribute from <see cref="Attributes"/> by given attribute key.
+        /// </summary>
+        /// <param name="attributeName">Name to remove attribute by.</param>
+        /// <param name="ignoreCase">Indicates if matching attributes against <paramref name="attributeName"/> should be case-sensitive.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node RemoveAttribute(string attributeName, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(attributeName))
@@ -229,6 +266,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes attributes matching given predicate.
+        /// </summary>
+        /// <param name="attributePredicate">Predicate function to match attributes against.</param>
+        /// <returns>Current node.</returns>
         public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
         {
             if (attributePredicate == null)
@@ -245,6 +287,10 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Clears <see cref="Attributes"/>
+        /// </summary>
+        /// <returns>Current node.</returns>
         public Fb2Node ClearAttributes()
         {
             if (attributes.Any())
@@ -281,12 +327,12 @@ namespace Fb2.Document.Models.Base
                 throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (other == null)
                 return false;
 
-            if (!(other is Fb2Node otherNode))
+            if (other is not Fb2Node otherNode)
                 return false;
 
             if (ReferenceEquals(this, otherNode))

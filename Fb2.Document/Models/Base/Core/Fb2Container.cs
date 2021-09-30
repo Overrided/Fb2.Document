@@ -13,7 +13,6 @@ using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Resolver;
 
-//TODO : add comments to all methods
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
@@ -79,7 +78,9 @@ namespace Fb2.Document.Models.Base
                     ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
                     ElementNames.FictionText;
 
-                var isUnsafe = validNode.NodeType == XmlNodeType.Text ? !CanContainText : !AllowedElements.Contains(localName);
+                var isUnsafe = validNode.NodeType == XmlNodeType.Text ?
+                    !CanContainText :
+                    !AllowedElements.Contains(localName);
 
                 if (isUnsafe && !loadUnsafe)
                     continue;
@@ -123,9 +124,12 @@ namespace Fb2.Document.Models.Base
             return element;
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
-            if (!(other is Fb2Container otherContainer))
+            if (other == null)
+                return false;
+
+            if (other is not Fb2Container otherContainer)
                 return false;
 
             if (!base.Equals(otherContainer))
@@ -148,7 +152,7 @@ namespace Fb2.Document.Models.Base
         public sealed override object Clone()
         {
             var container = base.Clone() as Fb2Container;
-            container.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+            container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
             container.CanContainText = CanContainText;
 
             return container;
@@ -156,6 +160,11 @@ namespace Fb2.Document.Models.Base
 
         #region Content editing
 
+        /// <summary>
+        /// Adds node to <see cref="Content"/> using asynchronous provider function.
+        /// </summary>
+        /// <param name="nodeProvider">Asynchronous node provider function.</param>
+        /// <returns>Current container.</returns>
         public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
         {
             if (nodeProvider == null)
@@ -165,6 +174,11 @@ namespace Fb2.Document.Models.Base
             return AddContent(newNode);
         }
 
+        /// <summary>
+        /// Adds node to <see cref="Content"/> using provider function 
+        /// </summary>
+        /// <param name="nodeProvider">Provider function for a child node.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
         {
             if (nodeProvider == null)
@@ -173,6 +187,11 @@ namespace Fb2.Document.Models.Base
             return AddContent(nodeProvider());
         }
 
+        /// <summary>
+        /// Adds `params Fb2Node[]` nodes to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="nodes">Nodes to add to <see cref="Content"/> property.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container AddContent(params Fb2Node[] nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -184,21 +203,33 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        public Fb2Container AddTextContent(string content,
-            string separator = null,
+        /// <summary>
+        /// Appends plain text node to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="newContent">Plain text content to add.</param>
+        /// <param name="separator">Separator to split text from rest of the content.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
+        /// <returns>Current container.</returns>
+        public Fb2Container AddTextContent(string newContent,
+            string? separator = null,
             bool preserveWhitespace = false)
         {
             if (!CanContainText)
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-            if (string.IsNullOrEmpty(content))
-                throw new ArgumentNullException(nameof(content), $"{nameof(content)} is null or empty string.");
+            if (string.IsNullOrEmpty(newContent))
+                throw new ArgumentNullException(nameof(newContent), $"{nameof(newContent)} is null or empty string.");
 
-            var textItem = new TextItem().AddContent(content, separator, preserveWhitespace);
+            var textItem = new TextItem().AddContent(newContent, separator, preserveWhitespace);
 
             return AddContent(textItem);
         }
 
+        /// <summary>
+        /// Set of Fb2Nodes to add to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="nodes">Set of nodes to add to <see cref="Content"/>.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container AddContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -210,6 +241,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Adds new node to <see cref="Content"/> using node's `Name`.
+        /// </summary>
+        /// <param name="nodeName">Name to instantiate node by.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container AddContent(string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
@@ -220,6 +256,11 @@ namespace Fb2.Document.Models.Base
             return AddContent(node);
         }
 
+        /// <summary>
+        /// Adds given node to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="node">Child node to add to Content.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container AddContent(Fb2Node node)
         {
             if (node == null)
@@ -241,6 +282,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes set of nodes from <see cref="Content"/>
+        /// </summary>
+        /// <param name="nodes">Set of nodes to remove.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -252,6 +298,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes matching nodes from <see cref="Content"/> by given predicate.
+        /// </summary>
+        /// <param name="nodePredicate">Predicate to match node against.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
         {
             if (nodePredicate == null)
@@ -265,6 +316,11 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes given node from <see cref="Content"/>.
+        /// </summary>
+        /// <param name="node">Node to remove.</param>
+        /// <returns>Current container.</returns>
         public Fb2Container RemoveContent(Fb2Node node)
         {
             if (node == null)
@@ -276,6 +332,10 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Clears all <see cref="Content"/> of given container.
+        /// </summary>
+        /// <returns></returns>
         public Fb2Container ClearContent()
         {
             if (content.Any())
@@ -354,7 +414,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
-        public IEnumerable<Fb2Node>? GetDescendants(string name)
+        public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
@@ -362,11 +422,10 @@ namespace Fb2.Document.Models.Base
             if (!Fb2NodeFactory.IsKnownNode(name))
                 throw new UnknownNodeException(name);
 
-            //TODO: fix null vs empty
-            if (!content.Any())
-                return null;
-
             var result = new List<Fb2Node>();
+
+            if (!content.Any())
+                return result;
 
             foreach (var element in content)
             {
@@ -390,16 +449,15 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="predicate">Predicate to match descendant node against.</param>
         /// <returns>List of found descendants, if any.</returns>
-        public IEnumerable<Fb2Node>? GetDescendants(Func<Fb2Node, bool> predicate)
+        public IEnumerable<Fb2Node> GetDescendants(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            // TODO : fix inconsistency in behavior? null vs empty
-            if (!content.Any())
-                return null;
-
             var result = new List<Fb2Node>();
+
+            if (!content.Any())
+                return result;
 
             foreach (var element in content)
             {
@@ -486,7 +544,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
         /// <param name="node">Out param, actual result of a search.</param>
-        /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
+        /// <returns>Boolean value indicating if any matching node was actually found.</returns>
         public bool TryGetFirstDescendant(string name, out Fb2Node? node)
         {
             var firstDescendant = GetFirstDescendant(name);
@@ -494,6 +552,12 @@ namespace Fb2.Document.Models.Base
             return firstDescendant != null;
         }
 
+        /// <summary>
+        /// Recursively looks for first matching descendant of element by given predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate to match nodes against.</param>
+        /// <param name="node">Out param, actual result of a search.</param>
+        /// <returns>Boolean value indicating if any matching node was actually found.</returns>
         public bool TryGetFirstDescendant(Func<Fb2Node, bool> predicate, out Fb2Node? node)
         {
             var firstDescendant = GetFirstDescendant(predicate);
@@ -506,16 +570,16 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <typeparam name="T">Node type to select elements by.</typeparam>
         /// <returns>List of found child elements, if any.</returns>
-        public IEnumerable<T>? GetChildren<T>() where T : Fb2Node
+        public IEnumerable<T> GetChildren<T>() where T : Fb2Node
         {
             if (!content.Any())
-                return null;
+                return Enumerable.Empty<T>();
 
             var predicate = PredicateResolver.GetPredicate<T>();
             var result = content.Where(predicate);
 
             if (result == null || !result.Any())
-                return null;
+                return Enumerable.Empty<T>();
 
             return result.Cast<T>();
         }
@@ -551,7 +615,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Node type to select descendant by.</param>
         /// <returns>First matched descendant node.</returns>
-        public T GetFirstDescendant<T>() where T : Fb2Node => GetFirstDescendantInternal<T>();
+        public T? GetFirstDescendant<T>() where T : Fb2Node => GetFirstDescendantInternal<T>();
 
         /// <summary>
         /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
@@ -559,7 +623,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Node type to select descendant by.</param>
         /// <param name="node">Out param, actual result of a search.</param>
         /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
-        public bool TryGetFirstDescendant<T>(out T node) where T : Fb2Node
+        public bool TryGetFirstDescendant<T>(out T? node) where T : Fb2Node
         {
             var result = GetFirstDescendantInternal<T>();
             node = result;
@@ -570,11 +634,11 @@ namespace Fb2.Document.Models.Base
 
         #region Private Methods
 
-        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool> predicate = null)
+        private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool>? predicate = null)
             where T : Fb2Node
         {
             if (!content.Any())
-                return null;
+                return Enumerable.Empty<T>();
 
             var result = new List<Fb2Node>();
 
@@ -589,7 +653,7 @@ namespace Fb2.Document.Models.Base
                 if (element is Fb2Container containerElement)
                 {
                     var desc = containerElement.GetDescendantsInternal<T>(predicate);
-                    if (desc != null && desc.Any())
+                    if (desc.Any())
                         result.AddRange(desc);
                 }
             }
@@ -597,7 +661,7 @@ namespace Fb2.Document.Models.Base
             return result.Cast<T>();
         }
 
-        private T GetFirstDescendantInternal<T>(Func<Fb2Node, bool> predicate = null)
+        private T? GetFirstDescendantInternal<T>(Func<Fb2Node, bool>? predicate = null)
             where T : Fb2Node
         {
             if (!content.Any())
@@ -622,16 +686,8 @@ namespace Fb2.Document.Models.Base
             return null;
         }
 
-        private XNode ToXmlInternal(Fb2Node element)
-        {
-            if (element.Name.Equals(ElementNames.FictionText))
-            {
-                var text = element as Fb2Element;
-                return new XText(text.ToString());
-            }
-
-            return element.ToXml();
-        }
+        private XNode ToXmlInternal(Fb2Node element) =>
+            element is TextItem textItem ? new XText(textItem.Content) : element.ToXml();
 
         #endregion
     }

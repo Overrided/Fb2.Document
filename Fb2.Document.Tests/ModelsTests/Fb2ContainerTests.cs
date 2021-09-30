@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
+using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -478,7 +479,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.GetChildren(firstAllowedChildName).Should().BeEmpty();
             node.GetChildren(firstAllowedChildPredicate).Should().BeEmpty();
-            node.GetChildren<Fb2Node>().Should().BeNull();
+            node.GetChildren<Fb2Node>().Should().BeEmpty();
 
             node.GetFirstChild(firstAllowedChildName).Should().BeNull();
             node.GetFirstChild(firstAllowedChildPredicate).Should().BeNull();
@@ -495,9 +496,9 @@ namespace Fb2.Document.Tests.ModelsTests
             var firstAllowedChildName = node.AllowedElements.First();
             Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
 
-            node.GetDescendants(firstAllowedChildName).Should().BeNull();
-            node.GetDescendants(firstAllowedChildPredicate).Should().BeNull();
-            node.GetDescendants<Fb2Node>().Should().BeNull();
+            node.GetDescendants(firstAllowedChildName).Should().BeEmpty();
+            node.GetDescendants(firstAllowedChildPredicate).Should().BeEmpty();
+            node.GetDescendants<Fb2Node>().Should().BeEmpty();
 
             node.GetFirstDescendant(firstAllowedChildName).Should().BeNull();
             node.GetFirstDescendant(firstAllowedChildPredicate).Should().BeNull();
@@ -514,6 +515,127 @@ namespace Fb2.Document.Tests.ModelsTests
             var genericSuccess = node.TryGetFirstDescendant<Fb2Node>(out var resultGenericNode);
             genericSuccess.Should().BeFalse();
             resultGenericNode.Should().BeNull();
+        }
+
+        // it's a bit complex to run tests for each model
+        // so in those lazy tests Paragraph is used as parent element
+        [Fact]
+        public void Paragraph_QueryContent()
+        {
+            // setup 
+            var paragraph = (Paragraph)Fb2NodeFactory.GetNodeByName(ElementNames.Paragraph);
+            paragraph.AddContent(new Strong().AddTextContent("strong text 1 "));
+            paragraph.AddContent(
+                new Emphasis()
+                    .WithTextContent("italic text 1 ")
+                    .AddContent(
+                        new Strong()
+                            .AddTextContent("strong italic text ")
+                            .AddContent(new Strikethrough().AddTextContent("bold strikethrough text "))),
+                new Strong().AddTextContent("strong text 2 "))
+                    .AddTextContent("plain text 1");
+
+            // verify setup
+            paragraph.Content.Should().HaveCount(4);
+
+            var firstStrong = paragraph.Content.First();
+            firstStrong.Should().BeOfType<Strong>();
+            (firstStrong as Strong).Content.Should().HaveCount(1);
+            (firstStrong as Strong).Content.First().Should().BeOfType<TextItem>();
+
+            var firstItalic = paragraph.Content[1];
+            firstItalic.Should().BeOfType<Emphasis>();
+            (firstItalic as Emphasis).Content.Should().HaveCount(2);
+            (firstItalic as Emphasis).Content.First().Should().BeOfType<TextItem>();
+            (firstItalic as Emphasis).Content[1].Should().BeOfType<Strong>();
+
+            var secondStrong = paragraph.Content[2];
+            secondStrong.Should().BeOfType<Strong>();
+            (secondStrong as Strong).Content.Should().HaveCount(1);
+            (secondStrong as Strong).Content.First().Should().BeOfType<TextItem>();
+
+            var plainText = paragraph.Content.Last();
+            plainText.Should().BeOfType<TextItem>();
+            (plainText as Fb2Element).Content.Should().Be("plain text 1");
+
+            // children query example
+
+            // looking for "Strong" childer - should be 2
+            var strongChildren = paragraph.GetChildren(ElementNames.Strong);
+            var strongPredicateChildren = paragraph.GetChildren(c => c is Strong);
+            var strongGenericChildren = paragraph.GetChildren<Strong>();
+
+            strongChildren.Should().HaveCount(2);
+            strongPredicateChildren.Should().HaveCount(2);
+            strongGenericChildren.Should().HaveCount(2);
+
+            strongChildren
+                .Should()
+                .BeEquivalentTo(strongPredicateChildren)
+                .And
+                .BeEquivalentTo(strongGenericChildren);
+
+            // looking for single child
+            var plainTextByName = paragraph.GetFirstChild(ElementNames.FictionText);
+            var plainPredicateText = paragraph.GetFirstChild(p => p is TextItem);
+            var plainGenericText = paragraph.GetFirstChild<TextItem>();
+
+            plainTextByName.Should().NotBeNull();
+            (plainTextByName as Fb2Element).Content.Should().Be("plain text 1");
+            plainTextByName.Should().Be(plainPredicateText).And.Be(plainGenericText);
+
+            // and to stress the obvios
+            paragraph.GetFirstChild(c => c is Strong)
+                .Should().BeOfType<Strong>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("strong text 1 ");
+
+            // okay, descendants queries
+            paragraph
+                .GetFirstDescendant(n => n is Strikethrough)
+                .Should().BeOfType<Strikethrough>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("bold strikethrough text ");
+
+            paragraph
+                .GetFirstDescendant(ElementNames.Strikethrough)
+                .Should().BeOfType<Strikethrough>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("bold strikethrough text ");
+
+            paragraph
+                .GetFirstDescendant<Strikethrough>()
+                .Should().BeOfType<Strikethrough>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("bold strikethrough text ");
+
+            var attemptToGetStrikethroughByName =
+                paragraph.TryGetFirstDescendant(ElementNames.Strikethrough, out var strikethrough);
+            attemptToGetStrikethroughByName.Should().BeTrue();
+            strikethrough
+                .Should().BeOfType<Strikethrough>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("bold strikethrough text ");
+
+            var attemptToGetStrikethroughByPredicate =
+                paragraph.TryGetFirstDescendant(n => n is Strikethrough, out var predicateStrikethrough);
+
+            predicateStrikethrough
+                .Should().BeOfType<Strikethrough>()
+                .Subject.Content.Should().HaveCount(1)
+                .And.Subject.First()
+                .Should().BeOfType<TextItem>()
+                .Subject.Content.Should().Be("bold strikethrough text ");
         }
 
         private static void ClearContainerContent(Fb2Container node)
