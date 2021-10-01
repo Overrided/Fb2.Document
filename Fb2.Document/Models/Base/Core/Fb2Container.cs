@@ -101,7 +101,7 @@ namespace Fb2.Document.Models.Base
             var builder = new StringBuilder();
 
             foreach (var child in content)
-                builder.Append(child.IsInline ? child.ToString() : $"{Environment.NewLine}{child}");
+                builder.Append(child.IsInline ? child : $"{Environment.NewLine}{child}");
 
             return builder.ToString();
         }

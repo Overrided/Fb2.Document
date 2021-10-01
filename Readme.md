@@ -23,6 +23,8 @@ Library can be used with any .Net application that supports .Net Standard 2.1
     * [Encoding safety](#Encoding-safety)
     * [Querying](#Querying)
         * [Querying Content API](#querying-content-api)
+            * [Query Fb2Container Content](#query-fb2Container-content)
+            * [Query Fb2Container sub-tree](#query-fb2Container-sub-tree)
         * [Querying Attributes API](#querying-attributes-api)
     * [Editing](#Editing)
         * [Editing Content API](#editing-content-api)
@@ -111,7 +113,7 @@ Fb2Document fb2Document = new Fb2Document();
 
 string fileContent = await dataService.GetFileContent(Fb2FilePath);
 
-await fb2Document.LoadAsync(stream);
+await fb2Document.LoadAsync(fileContent);
 ```
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
@@ -175,36 +177,80 @@ If method is encoding-safe - during loading process library will try to determin
 
 ## Querying
 
-All descendants of `Fb2Node` class has certain interface to access and query parsed data.
+All descendants of `Fb2Node` class has certain interface to access, query and manipulate parsed data.
 
-`Fb2Container`'s descendants provides node content querying interface.
+`Fb2Container`'s descendants provides node content managing APIs.
 
-Since `1.1.0` version of a library `Fb2Node` base class provides additional `Attributes` access methods, allowing more complex and precise querying.
+`Fb2Element`'s desendants APIs allows to work with plain text content, `leaves` of the `fb2 DOM` tree. 
+
+`Fb2Node` base class provides additional `Attributes` access and modifications methods.
 
 ### Querying Content API
 
-For instance, you want to find all `<stanza>` elements in whole book.
-There's more than one way to skin a cat:
-
-```
-var result = fb2Document.Book.GetDescendants("stanza");
-```
-
-or utilizing node name used by library:
-
-```
-var result = fb2Document.Book.GetDescendants(ElementNames.Stanza);
-```
-
-Also you can query by specifying exact type of descendant node you are looking for:
-
-```
-var result = fb2Document.Book.GetDescendants<Stanza>();
-```
+This section briefly describes few ways to build queries with corresponding examples.
 
 For full list of properties for accessing document structural parts see [Fb2Document.Properties](#Fb2Document-Properties).
 
 For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
+
+### Query Fb2Container `Content`    
+
+Some queries like `fb2Container.Content.Where(n => n is Fb2Paragraph)` are pre-baked into library to simplify data access.
+
+1) Finding all `Image` nodes in given `Paragraph` container node:
+
+```csharp
+var allImagesInParagraphByName = paragraph.GetChildren(ElementNames.Image);
+var allImagesInParagraphByPredicate = paragraph.GetChildren(n => n.Name == ElementNames.Image);
+var allImagesInParagraphByType = paragraph.GetChildren<Image>();
+```
+
+2) Looking for ***first*** `Image` node in given `Paragraph` container node:
+
+```csharp
+var firstImageInParagraphByName = paragraph.GetChildren(ElementNames.Image);
+var firstImageInParagraphByPredicate = paragraph.GetChildren(n => n.Name == ElementNames.Image);
+var firstImageInParagraphByType = paragraph.GetChildren<Image>();
+```
+
+### Query Fb2Container sub-tree
+
+`Descendant` node is contained either in `Content` propery of given element directly, or is contained further in `Fb2 DOM` sub-tree (indirect content).
+
+To go through whole sub-tree of content of given `Fb2Container` like `fb2Container.Content.SelectMany(n => ...)` or going recursive with custom traversal algoritms, 
+try some build-in node selecting methods:  
+
+1) Finding all `Image` nodes in given `BookSection` container node:
+
+```csharp
+IEnumerable<Fb2Node> allSectionImagesByName = bookSection.GetDescendants(ElementNames.Image); // by string Name
+IEnumerable<Fb2Node> allSectionImagesByPredicate = bookSection.GetDescendants(n => n.Name == ElementNames.Image); // with Func<Fb2Node, bool> predicate
+IEnumerable<Fb2Node> allSectionImagesByType = bookSection.GetDescendants<Image>(); // with type parameter, where T : Fb2Node
+```
+
+2) Finding ***first*** `Subscript` node in `BookBody`:
+
+```csharp
+Fb2Node? firstSubscriptInBookBodyByName = bookBody.GetFirstDescendant(ElementNames.Subscript);
+Fb2Node? firstSubscriptInBookBodyByPredicate = bookBody.GetFirstDescendant(node => node is Subscript);
+Subscript? firstSubscriptInBookBodyByType = bookBody.GetFirstDescendant<Subscript>();
+```
+
+3) Attempting to both check if any matching `node` exists and get ***first*** matching `Fb2Node instance` at the same time:
+
+```csharp
+bool hasCustomInfoByName = bookBody.TryGetFirstDescendant(ElementNames.CustomInfo, out Fb2Node? firstCustomInfoByName);
+if(hasCustomInfoByName)
+    Console.WriteLine(firstCustomInfoByName.ToString());
+
+bool hasCustomInfoByPredicate = bookBody.TryGetFirstDescendant(n => n.Name == ElementNames.CustomInfo, out Fb2Node? firstCustomInfoByPredicate);
+if(hasCustomInfoByPredicate)
+    Console.WriteLine(firstCustomInfoByPredicate.ToString());
+
+bool hasCustomInfoByType = bookBody.TryGetFirstDescendant<CustomInfo>(out CustomInfo? firstCustomInfoByType);
+if(hasCustomInfoByType)
+    Console.WriteLine(firstCustomInfoByType.ToString());
+```
 
 ### Querying Attributes API
 
