@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,15 +19,6 @@ namespace Fb2.Document
     public sealed class Fb2Document
     {
         private const string defaultXmlVersion = "1.0";
-
-        private BookDescription? description = null;
-        private TitleInfo? title = null;
-        private SrcTitleInfo? sourceTitle = null;
-        private DocumentInfo? documentInfo = null;
-        private PublishInfo? publishInfo = null;
-        private CustomInfo? customInfo = null;
-        private ImmutableList<BookBody> bodies = null;
-        private ImmutableList<BinaryImage> binaryImages = null;
 
         private static readonly XDeclaration DefaultDeclaration = new(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
         private static readonly XmlReaderSettings DefaultXmlReaderSettings = new()
@@ -54,83 +44,35 @@ namespace Fb2.Document
                 if (!IsLoaded || Book == null)
                     return null;
 
-                if (description == null)
-                    description = Book.GetFirstChild<BookDescription>();
-
-                return description;
+                return Book.GetFirstChild<BookDescription>();
             }
         }
 
         /// <summary>
         /// Shortcut property. Gets Title of Description from FictionBook
         /// </summary>
-        public TitleInfo? Title
-        {
-            get
-            {
-                if (title == null)
-                    title = BookDescription?.GetFirstChild<TitleInfo>();
-
-                return title;
-            }
-        }
+        public TitleInfo? Title => BookDescription?.GetFirstChild<TitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets SrcTitle of Description from FictionBook
         /// Mainly exists if book is translated - and contains Title in original language
         /// </summary>
-        public SrcTitleInfo? SourceTitle
-        {
-            get
-            {
-                if (sourceTitle == null)
-                    sourceTitle = BookDescription?.GetFirstChild<SrcTitleInfo>();
-
-                return sourceTitle;
-            }
-        }
+        public SrcTitleInfo? SourceTitle => BookDescription?.GetFirstChild<SrcTitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets DocumentInfo of Description from FictionBook
         /// </summary>
-        public DocumentInfo? DocumentInfo
-        {
-            get
-            {
-                if (documentInfo == null)
-                    documentInfo = BookDescription?.GetFirstChild<DocumentInfo>();
-
-                return documentInfo;
-            }
-        }
+        public DocumentInfo? DocumentInfo => BookDescription?.GetFirstChild<DocumentInfo>();
 
         /// <summary>
         /// Shortcut property. Gets PublishInfo of Description from FictionBook
         /// </summary>
-        public PublishInfo? PublishInfo
-        {
-            get
-            {
-                if (publishInfo == null)
-                    publishInfo = BookDescription?.GetFirstChild<PublishInfo>();
-
-                return publishInfo;
-            }
-        }
+        public PublishInfo? PublishInfo => BookDescription?.GetFirstChild<PublishInfo>();
 
         /// <summary>
         /// Shortcut property. Gets CustomInfo of Description from FictionBook
         /// </summary>
-        public CustomInfo? CustomInfo
-        {
-            get
-            {
-                if (customInfo == null)
-                    customInfo = BookDescription?.GetFirstChild<CustomInfo>();
-
-                return customInfo;
-            }
-        }
+        public CustomInfo? CustomInfo => BookDescription?.GetFirstChild<CustomInfo>();
 
         /// <summary>
         /// Shortcut property. Gets list of BookBody elements from FictionBook.
@@ -142,10 +84,7 @@ namespace Fb2.Document
                 if (!IsLoaded || Book == null)
                     return ImmutableList<BookBody>.Empty;
 
-                if (bodies == null || !bodies.Any())
-                    bodies = Book.GetChildren<BookBody>().ToImmutableList();
-
-                return bodies;
+                return Book.GetChildren<BookBody>().ToImmutableList();
             }
         }
 
@@ -159,10 +98,7 @@ namespace Fb2.Document
                 if (!IsLoaded || Book == null)
                     return ImmutableList<BinaryImage>.Empty;
 
-                if (binaryImages == null || !binaryImages.Any())
-                    binaryImages = Book.GetChildren<BinaryImage>().ToImmutableList();
-
-                return binaryImages;
+                return Book.GetChildren<BinaryImage>().ToImmutableList();
             }
         }
 
@@ -341,7 +277,6 @@ namespace Fb2.Document
             return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
         }
 
-        // wraps any exception with Fb2DocumentLoadingException
         private static void LoadHandled(Action loadingAction)
         {
             try
@@ -373,7 +308,6 @@ namespace Fb2.Document
 
             Book = new FictionBook();
             Book.Load(root, loadUnsafe: loadUnsafeElements);
-
             IsLoaded = true;
         }
 
