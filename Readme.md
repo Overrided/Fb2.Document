@@ -185,17 +185,19 @@ All descendants of `Fb2Node` class has certain interface to access, query and ma
 
 `Fb2Node` base class provides additional `Attributes` access and modifications methods.
 
-### Querying Content API
-
-This section briefly describes few ways to build queries with corresponding examples.
+Some queries like `fb2Container.Content.Where(n => n is Fb2Paragraph)` or `fb2Node.Attributes.ContainsKey(...)` are pre-baked into library to simplify data access.
 
 For full list of properties for accessing document structural parts see [Fb2Document.Properties](#Fb2Document-Properties).
 
 For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
 
-### Query Fb2Container `Content`    
+### Querying Content API
 
-Some queries like `fb2Container.Content.Where(n => n is Fb2Paragraph)` are pre-baked into library to simplify data access.
+This section briefly describes few ways to build queries to `Fb2Container`'s inner nodes.
+
+Examples below demonstrate few simple scenarios:
+
+### Query Fb2Container `Content`    
 
 1) Finding all `Image` nodes in given `Paragraph` container node:
 
@@ -254,7 +256,47 @@ if(hasCustomInfoByType)
 
 ### Querying Attributes API
 
-Let's say you need to check all `id` attributes in a book.
+Lots of operations with `Fb2Document` - like searching / rendering / querying are heavily dependant on `Attributes`.
+
+So there are few methods designed to simplify `Attributes` reading.
+
+For more details on methods for querying node attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
+
+1) Check if `Fb2Node` has `Attribute` with patricular `Name` (in this case `Id`):
+
+```csharp
+bool hasAttributeByKey = fb2Node.HasAttribute(AttributeNames.Id);
+bool hasAttributeByKeyCaseIgnore = fb2Node.HasAttribute("ID", true); // second parameter indicates case-insensitive comparison
+```
+
+2) Get `Attribute` of a node in `KeyValuePair<string, string>` form by `Name`:
+
+```csharp
+KeyValuePair<string, string> attribute = fb2Node.GetAttribute(AttributeNames.Name);
+KeyValuePair<string, string> attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, true);
+```
+
+> Attention!
+>
+> `GetAttribute(string key, bool ignoreCase = false)` method never returns null, instead `default(KeyValuePair<string, string>)` is returned if there's no attribute found by given name.
+
+3) Checking if attribute is there while retrieving it's value in `KeyValuePair<string, string>` form at a same time:
+
+```csharp
+bool hasAttribute = fb2Node.TryGetAttribute(AttributeNames.Name, out KeyValuePair<string, string> attributeResult);
+bool hasAttributeCaseIgnore = fb2Node.TryGetAttribute(AttributeNames.Name, true, out KeyValuePair<string, string> attributeResultCaseIgnore);
+``` 
+
+Need to parse attribute value into `Enum` or something?
+
+```csharp
+if (tableCellFb2Node.TryGetAttribute(AttributeNames.Align, true, out var alignAttribute) &&
+    Enum.TryParse<TextAlignment>(alignAttribute.Value, true, out var textAlignment))
+{
+    //...do work
+}
+```
+<!-- 
 
 ```
 var elementsWithIds = fb2Document.Book.GetDescendants<Fb2Node>()
@@ -299,25 +341,34 @@ if (cell.TryGetAttributeValue(AttributeNames.Align, true, out string align) &&
 ```
 As one might see, given call ignores case and checks if received value can be used as `TextAlignment`.
 
-For more details on methods for querying the model's attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
+For more details on methods for querying the model's attributes, see [Fb2Node.Methods](#Fb2Node-Methods). -->
 
 ## Editing
 
-All descendants of `Fb2Node` class has certain interface to perform basic CRUD operations on node's data.
-
-Since `2.1.0` version of a library all nodes provide content manipulation APIs along with `Attributes` modification methods.
+Since `2.1.0` version of a library all descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
 
 ### Editing Content API
 
-For any descendant of `Fb2Container` basic method of adding other nodes to actual content is `AddContent(Fb2Node node)`.
+For any descendant of `Fb2Container` basic method of adding nodes to actual content is `AddContent(Fb2Node node)`, with a bunch of similar methods on top for different cases.
 
-Let's say you want to add `Strong` node to `Paragraph`.
+1) Adding `Strong` node to `Paragraph`:
+
+```csharp
+var paragraph = new Paragraph();
+paragraph.Add
+```
+
+
+Let's say you want to add 
 
 Different methods based on above-mentioned `AddContent` are covering most of common use-cases.
 
 
 
 ### Editing Attributes API
+
+
+
 
 ## API
 
