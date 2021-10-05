@@ -520,20 +520,22 @@ namespace Fb2.Document.Tests.ModelsTests
         // it's a bit complex to run tests for each model
         // so in those lazy tests Paragraph is used as parent element
         [Fact]
-        public void Paragraph_QueryContent()
+        public void Paragraph_QueryContent_Works()
         {
             // setup 
             var paragraph = (Paragraph)Fb2NodeFactory.GetNodeByName(ElementNames.Paragraph);
-            paragraph.AddContent(new Strong().AddTextContent("strong text 1 "));
-            paragraph.AddContent(
-                new Emphasis()
-                    .WithTextContent("italic text 1 ")
-                    .AddContent(
-                        new Strong()
-                            .AddTextContent("strong italic text ")
-                            .AddContent(new Strikethrough().AddTextContent("bold strikethrough text "))),
-                new Strong().AddTextContent("strong text 2 "))
-                    .AddTextContent("plain text 1");
+            paragraph
+                .AddContent(new Strong().AddTextContent("strong text 1 "))
+                .AddContent(
+                    new Emphasis()
+                        .WithTextContent("italic text 1 ")
+                        .AddContent(
+                            new Strong()
+                                .AddTextContent("strong italic text ")
+                                .AddContent(
+                                    new Strikethrough().AddTextContent("bold strikethrough text "))),
+                    new Strong().AddTextContent("strong text 2 "))
+                .AddTextContent("plain text 1");
 
             // verify setup
             paragraph.Content.Should().HaveCount(4);

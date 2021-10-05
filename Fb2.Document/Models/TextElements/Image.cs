@@ -39,7 +39,7 @@ namespace Fb2.Document.Models
 
         public override string ToString()
         {
-            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, true, out var result) ? $" {result.Value}" : string.Empty;
+            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, out var result, true) ? $" {result.Value}" : string.Empty;
 
             return $"{Name}{formattedAttributeString}";
         }

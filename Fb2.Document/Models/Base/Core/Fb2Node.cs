@@ -37,7 +37,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// List of allowed attribures for particular element.
         /// </summary>
-        public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create<string>();
+        public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet<string>.Empty;
 
         /// <summary>
         /// Indicates if element sholud be inline or start from new line.
@@ -68,7 +68,7 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Any())
                 return;
 
-            if (!TryGetAttributesInternal(node, out Dictionary<string, string> actualAttributes))
+            if (!TryGetXNodeAttributes(node, out Dictionary<string, string> actualAttributes))
                 return;
 
             var filteredAttributes = actualAttributes
@@ -96,6 +96,24 @@ namespace Fb2.Document.Models.Base
 
         #region Node querying
 
+        public bool HasAttribute(string key, string value, bool ignoreCase = false)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentNullException(nameof(value));
+
+            if (!attributes.Any())
+                return false;
+
+            var hasAttribute = ignoreCase ?
+                attributes.Any(a => a.Key.EqualsInvariant(key) && a.Value.EqualsInvariant(value)) :
+                attributes.Any(a => a.Key.Equals(key, StringComparison.InvariantCulture) && a.Value.Equals(value, StringComparison.InvariantCulture));
+
+            return hasAttribute;
+        }
+
         /// <summary>
         /// Checks if node has attribute(s) with given key
         /// </summary>
@@ -110,7 +128,9 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return false;
 
-            return attributes.Any(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            return ignoreCase ?
+                attributes.Any(attr => attr.Key.EqualsInvariant(key)) :
+                attributes.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
         }
 
         /// <summary>
@@ -126,7 +146,9 @@ namespace Fb2.Document.Models.Base
             if (!HasAttribute(key, ignoreCase))
                 return default;
 
-            var attribute = attributes.FirstOrDefault(attr => ignoreCase ? attr.Key.EqualsInvariant(key) : attr.Key.Equals(key));
+            var attribute = ignoreCase ?
+                attributes.FirstOrDefault(attr => attr.Key.EqualsInvariant(key)) :
+                attributes.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
 
             return attribute;
         }
@@ -138,7 +160,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
         /// <param name="result">Attribute value if any found, otherwise default. </param>
         /// <returns>True if attribute found by given key, otherwise false</returns>
-        public bool TryGetAttribute(string key, bool ignoreCase, out KeyValuePair<string, string> result)
+        public bool TryGetAttribute(string key, out KeyValuePair<string, string> result, bool ignoreCase = false)
         {
             var attribute = GetAttribute(key, ignoreCase);
 
@@ -231,11 +253,12 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Any())
                 throw new NoAttributesAllowedException(Name);
 
-            if (trimWhitespace.IsMatch(attributeName) || string.IsNullOrWhiteSpace(attributeName))
-                throw new InvalidAttributeException(nameof(attributeName));
-
-            if (trimWhitespace.IsMatch(attributeValue) || string.IsNullOrWhiteSpace(attributeValue))
+            if (string.IsNullOrWhiteSpace(attributeValue))
                 throw new InvalidAttributeException(nameof(attributeValue));
+
+            if (string.IsNullOrWhiteSpace(attributeName) ||
+                trimWhitespace.IsMatch(attributeName))
+                throw new InvalidAttributeException(nameof(attributeName));
 
             var escapedAttrName = SecurityElement.Escape(attributeName);
 
@@ -244,7 +267,7 @@ namespace Fb2.Document.Models.Base
 
             var escapedAttrValue = SecurityElement.Escape(attributeValue);
 
-            attributes[attributeName] = escapedAttrValue;
+            attributes[escapedAttrName] = escapedAttrValue;
             return this;
         }
 
@@ -259,10 +282,17 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(attributeName))
                 throw new ArgumentNullException(nameof(attributeName));
 
-            if (!TryGetAttribute(attributeName, ignoreCase, out var result))
+            if (!attributes.Any())
                 return this;
 
-            attributes.Remove(result.Key);
+            var attributeKeysToDelete = attributes.Keys
+                .Where(key => ignoreCase ?
+                    key.EqualsInvariant(attributeName) :
+                    key.Equals(attributeName));
+
+            foreach (var attrKey in attributeKeysToDelete)
+                attributes.Remove(attrKey);
+
             return this;
         }
 
@@ -279,7 +309,7 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            var attrsToRemove = attributes.Where(a => attributePredicate(a));
+            var attrsToRemove = attributes.Where(attributePredicate);
 
             foreach (var attributeToRemove in attrsToRemove)
                 attributes.Remove(attributeToRemove.Key);
@@ -301,18 +331,22 @@ namespace Fb2.Document.Models.Base
 
         #endregion
 
-        private static bool TryGetAttributesInternal([In] XNode node, out Dictionary<string, string> result)
+        private static bool TryGetXNodeAttributes([In] XNode node, out Dictionary<string, string> result)
         {
-            var element = node as XElement;
-
-            if (element == null || !element.Attributes().Any())
+            if (node is not XElement element)
             {
-                result = null;
+                result = new(0);
                 return false;
             }
 
-            result = element.Attributes()
-                            .ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
+            var actualAttrs = element.Attributes();
+            if (!actualAttrs.Any())
+            {
+                result = new(0);
+                return false;
+            }
+
+            result = actualAttrs.ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
             return true;
         }
 
@@ -321,9 +355,7 @@ namespace Fb2.Document.Models.Base
             if (node.NodeType != XmlNodeType.Element)
                 return;
 
-            var element = node as XElement;
-
-            if (!element.Name.LocalName.EqualsInvariant(Name))
+            if (node is XElement element && !element.Name.LocalName.EqualsInvariant(Name))
                 throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
         }
 
@@ -354,7 +386,7 @@ namespace Fb2.Document.Models.Base
 
             var sameAttrs = attributes.Count == otherAttributes.Count &&
                 attributes.Keys.All(k => otherAttributes.ContainsKey(k) &&
-                string.Equals(attributes[k], otherAttributes[k], StringComparison.InvariantCultureIgnoreCase));
+                attributes[k].Equals(otherAttributes[k], StringComparison.InvariantCulture));
 
             return sameAttrs;
         }

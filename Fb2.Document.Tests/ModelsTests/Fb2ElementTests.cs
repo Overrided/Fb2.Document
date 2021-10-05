@@ -70,7 +70,7 @@ namespace Fb2.Document.Tests.ModelsTests
         [ClassData(typeof(Fb2ElementCollection))]
         public void Fb2Element_AddContent_Works(Fb2Element fb2Element)
         {
-            if (fb2Element is EmptyLine)
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
                 return;
 
             fb2Element.AddContent("test content 1", "   "); // 3 whitespaces
