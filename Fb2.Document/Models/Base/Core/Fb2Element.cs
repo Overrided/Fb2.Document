@@ -73,9 +73,13 @@ namespace Fb2.Document.Models.Base
         /// Appends new plain text to <see cref="Content"/>.
         /// </summary>
         /// <param name="newContent">Plain text to append.</param>
-        /// <param name="separator">Separator to split text from rest of the content.</param>
+        /// <param name="separator">Separator string used to join new text with existing text content.</param>
         /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
         /// <returns>Current element.</returns>
+        /// <remarks>
+        /// If <paramref name="separator"/> contains `Environment.NewLine` - it will be replaced with " " (whitespace).
+        /// To insert `new line` use `EmptyLine` Fb2Element
+        /// </remarks>
         public virtual Fb2Element AddContent(string newContent,
             string? separator = null,
             bool preserveWhitespace = false)
@@ -83,9 +87,12 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent));
 
+            // overkill ??, will prewent using multiple whitespaces in a row
+            //    SecurityElement.Escape(trimWhitespace.Replace(separator, Whitespace));
+
             separator = string.IsNullOrEmpty(separator) ?
                 string.Empty :
-                SecurityElement.Escape(trimWhitespace.Replace(separator, Whitespace));
+                SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
             if (!preserveWhitespace && trimWhitespace.IsMatch(newContent))
                 newContent = trimWhitespace.Replace(newContent, Whitespace);

@@ -336,6 +336,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
+            // shouldnt remove stuff, no matches
             sequenceInfo.RemoveAttribute("NamE");
             sequenceInfo.RemoveAttribute("NUmBeR");
             sequenceInfo.RemoveAttribute("lAnG");
@@ -397,7 +398,7 @@ namespace Fb2.Document.Tests.ModelsTests
             Func<KeyValuePair<string, string>, bool> nameWrongCasePredicate = (kvp) => kvp.Key.Equals("nAMe");
             Func<KeyValuePair<string, string>, bool> nameAttributePredicate = (kvp) => kvp.Key.Equals(AttributeNames.Name);
 
-            sequenceInfo.RemoveAttribute(nameWrongCasePredicate);
+            sequenceInfo.RemoveAttribute(nameWrongCasePredicate); // not removing anything, no matches
             sequenceInfo.Attributes.Should().HaveCount(3);
 
             sequenceInfo.RemoveAttribute(nameAttributePredicate);

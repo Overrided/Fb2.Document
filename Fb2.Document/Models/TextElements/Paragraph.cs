@@ -12,6 +12,5 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedAttributes =>
             ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
-
     }
 }

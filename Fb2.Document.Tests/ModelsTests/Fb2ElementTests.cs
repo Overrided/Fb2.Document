@@ -76,24 +76,29 @@ namespace Fb2.Document.Tests.ModelsTests
             fb2Element.AddContent("test content 1", "   "); // 3 whitespaces
             fb2Element.Content.Should().Be("test content 1");
 
+            fb2Element.ClearContent();
+
+            fb2Element.AddContent("test content 1"); // no separator
+            fb2Element.Content.Should().Be("test content 1");
+
             fb2Element.AddContent("test content 2", "   ");
-            fb2Element.Content.Should().Be("test content 1 test content 2");
+            fb2Element.Content.Should().Be("test content 1   test content 2");
 
             fb2Element.AddContent("test content 3"); // no separator
-            fb2Element.Content.Should().Be("test content 1 test content 2test content 3");
+            fb2Element.Content.Should().Be("test content 1   test content 2test content 3");
 
             fb2Element.AddContent(() => $"test {Environment.NewLine} content 4", " _blah_ "); // no preserving whitespace
             fb2Element
                 .Content
                 .Should()
-                .Be("test content 1 test content 2test content 3 _blah_ test content 4");
+                .Be("test content 1   test content 2test content 3 _blah_ test content 4");
 
             // preserving whitespace works for new content, but not for separator - it starts with 2 whitespaces
             fb2Element.AddContent(() => $"test {Environment.NewLine} content 5", "  _blah_ ", true);
             fb2Element
                 .Content
                 .Should() // separator always getting trimmed, even when preserving whitespaces
-                .Be($"test content 1 test content 2test content 3 _blah_ test content 4 _blah_ test {Environment.NewLine} content 5");
+                .Be($"test content 1   test content 2test content 3 _blah_ test content 4  _blah_ test {Environment.NewLine} content 5");
         }
 
         [Fact]
