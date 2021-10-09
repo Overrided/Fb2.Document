@@ -23,10 +23,7 @@ namespace Fb2.Document.Models
             Validate(element);
         }
 
-        public sealed override Fb2Element AddContent(
-            string newContent,
-            string separator = null,
-            bool preserveWhitespace = false) => this;
+        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
 
         public sealed override Fb2Element ClearContent() => this;
     }

@@ -16,10 +16,6 @@ namespace Fb2.Document.Models
                 AttributeNames.Number,
                 AttributeNames.Language);
 
-        // TODO: check if this node can contain text
-        public override Fb2Element AddContent(
-            string newContent,
-            string? separator = null,
-            bool preserveWhitespace = false) => this;
+        public override Fb2Element AddContent(string newContent, string? separator = null) => this;
     }
 }

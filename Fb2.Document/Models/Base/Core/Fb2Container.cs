@@ -203,6 +203,7 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        // TODO : add AddTextContentAsync method
         /// <summary>
         /// Appends plain text node to <see cref="Content"/>.
         /// </summary>
@@ -210,9 +211,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator to split text from rest of the content.</param>
         /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
         /// <returns>Current container.</returns>
-        public Fb2Container AddTextContent(string newContent,
-            string? separator = null,
-            bool preserveWhitespace = false)
+        public Fb2Container AddTextContent(string newContent, string? separator = null)
         {
             if (!CanContainText)
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
@@ -220,7 +219,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent), $"{nameof(newContent)} is null or empty string.");
 
-            var textItem = new TextItem().AddContent(newContent, separator, preserveWhitespace);
+            var textItem = new TextItem().AddContent(newContent, separator);
 
             return AddContent(textItem);
         }

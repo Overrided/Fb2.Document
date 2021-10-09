@@ -9,14 +9,10 @@ namespace Fb2.Document.Extensions
     {
         public static T WithContent<T>(this T fb2Element,
             string newContent,
-            string separator = null,
-            bool preserveWhitespace = false) where T : Fb2Element =>
-            (T)fb2Element.AddContent(newContent, separator, preserveWhitespace);
+            string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(newContent, separator);
 
         public static T WithContent<T>(this T fb2Element,
             Func<string> contentProvider,
-            string separator = null,
-            bool preserveWhitespace = false) where T : Fb2Element =>
-            (T)fb2Element.AddContent(contentProvider, separator, preserveWhitespace);
+            string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
     }
 }

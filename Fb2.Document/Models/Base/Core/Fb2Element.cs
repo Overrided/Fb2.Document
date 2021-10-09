@@ -57,16 +57,14 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator to split text from rest of the content.</param>
         /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
         /// <returns>Current element.</returns>
-        public Fb2Element AddContent(Func<string> contentProvider,
-            string? separator = null,
-            bool preserveWhitespace = false)
+        public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
         {
             if (contentProvider == null)
                 throw new ArgumentNullException(nameof(contentProvider));
 
             var content = contentProvider();
 
-            return AddContent(content, separator, preserveWhitespace);
+            return AddContent(content, separator);
         }
 
         /// <summary>
@@ -80,29 +78,19 @@ namespace Fb2.Document.Models.Base
         /// If <paramref name="separator"/> contains `Environment.NewLine` - it will be replaced with " " (whitespace).
         /// To insert `new line` use `EmptyLine` Fb2Element
         /// </remarks>
-        public virtual Fb2Element AddContent(string newContent,
-            string? separator = null,
-            bool preserveWhitespace = false)
+        public virtual Fb2Element AddContent(string newContent, string? separator = null)
         {
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent));
-
-            // overkill ??, will prewent using multiple whitespaces in a row
-            //    SecurityElement.Escape(trimWhitespace.Replace(separator, Whitespace));
 
             separator = string.IsNullOrEmpty(separator) ?
                 string.Empty :
                 SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
-            if (!preserveWhitespace && trimWhitespace.IsMatch(newContent))
-                newContent = trimWhitespace.Replace(newContent, Whitespace);
+            newContent = newContent.Replace(Environment.NewLine, Whitespace);
+            newContent = SecurityElement.Escape(newContent);
 
-            var escapedContent = SecurityElement.Escape(newContent);
-
-            if (string.IsNullOrEmpty(content)) // nothing to join new content to
-                content = escapedContent;
-            else
-                content = string.Join(separator, content, escapedContent);
+            content = string.Join(separator, content, newContent);
 
             return this;
         }

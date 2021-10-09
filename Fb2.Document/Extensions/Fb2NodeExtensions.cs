@@ -19,10 +19,13 @@ namespace Fb2.Document.Extensions
             IDictionary<string, string> attributes) where T : Fb2Node =>
             (T)fb2Node.AddAttributes(attributes);
 
-        public static Task<T> WithAttributeAsync<T>(
+        public static async Task<T> WithAttributeAsync<T>(
             this T fb2Node,
-            Func<Task<KeyValuePair<string, string>>> attributeProvider) where T : Fb2Node =>
-            fb2Node.AddAttributeAsync(attributeProvider) as Task<T>;
+            Func<Task<KeyValuePair<string, string>>> attributeProvider) where T : Fb2Node
+        {
+            var result = await fb2Node.AddAttributeAsync(attributeProvider);
+            return (T)result;
+        }
 
         public static T WithAttribute<T>(
             this T fb2Node,
