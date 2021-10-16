@@ -534,8 +534,11 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             // setup 
             var paragraph = new Paragraph();
+            paragraph.AddContent(new Strong().AddTextContent("strong text 1 "));
+
+            paragraph.IsEmpty.Should().BeFalse();
+
             paragraph
-                .AddContent(new Strong().AddTextContent("strong text 1 "))
                 .AddContent(
                     new Emphasis()
                         .AppendTextContent("italic text 1 ")

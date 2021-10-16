@@ -409,6 +409,8 @@ namespace Fb2.Document.Tests.ModelsTests
         [ClassData(typeof(Fb2NodeCollection))]
         public void EmptyNode_HasAttribute_ReturnsFalse(Fb2Node instance)
         {
+            instance.IsEmpty.Should().BeTrue();
+
             if (instance.AllowedAttributes.Count == 0)
                 return;
 
