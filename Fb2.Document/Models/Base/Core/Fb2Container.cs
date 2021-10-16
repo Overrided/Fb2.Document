@@ -45,6 +45,8 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
+        public override bool IsEmpty => content.Count == 0;
+
         /// <summary>
         /// Container node loading mechanism. Loads attributes and sequentially calls `Load` on all child nodes.
         /// </summary>
@@ -64,9 +66,9 @@ namespace Fb2.Document.Models.Base
                 return;
 
             var nodes = element.Nodes()
-                .Where(n => (n.NodeType == XmlNodeType.Text) ||
-                            ((n.NodeType == XmlNodeType.Element) &&
-                            Fb2NodeFactory.IsKnownNode((n as XElement).Name.LocalName.ToLowerInvariant())));
+                .Where(n => n.NodeType == XmlNodeType.Text ||
+                            (n.NodeType == XmlNodeType.Element &&
+                            Fb2NodeFactory.IsKnownNodeName((n as XElement).Name.LocalName)));
 
             if (!nodes.Any())
                 return;
@@ -95,7 +97,7 @@ namespace Fb2.Document.Models.Base
 
         public override string ToString()
         {
-            if (!content.Any()) // TODO test if .content > 0 is faster
+            if (IsEmpty)
                 return string.Empty;
 
             var builder = new StringBuilder();
@@ -115,7 +117,7 @@ namespace Fb2.Document.Models.Base
         {
             var element = base.ToXml();
 
-            if (!content.Any())
+            if (IsEmpty)
                 return element;
 
             var children = content.Select(ToXmlInternal);
@@ -184,7 +186,8 @@ namespace Fb2.Document.Models.Base
             if (nodeProvider == null)
                 throw new ArgumentNullException(nameof(nodeProvider));
 
-            return AddContent(nodeProvider());
+            var node = nodeProvider();
+            return AddContent(node);
         }
 
         /// <summary>
@@ -265,12 +268,12 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
+            if (!Fb2NodeFactory.IsKnownNode(node))
+                throw new UnknownNodeException(node);
+
             var nodeName = node.Name;
 
-            if (!Fb2NodeFactory.IsKnownNode(nodeName)) // just for lulz
-                throw new UnknownNodeException(nodeName);
-
-            if (node.Name.EqualsInvariant(ElementNames.FictionText) && !CanContainText)
+            if (nodeName.EqualsInvariant(ElementNames.FictionText) && !CanContainText)
                 throw new UnexpectedNodeException(Name, nodeName);
 
             if (!AllowedElements.Contains(nodeName) && !nodeName.Equals(ElementNames.FictionText))
@@ -307,10 +310,8 @@ namespace Fb2.Document.Models.Base
             if (nodePredicate == null)
                 throw new ArgumentNullException(nameof(nodePredicate));
 
-            if (!content.Any())
-                return this;
-
-            content.RemoveAll(n => nodePredicate(n));
+            if (!IsEmpty)
+                content.RemoveAll(n => nodePredicate(n));
 
             return this;
         }
@@ -325,7 +326,7 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            if (content.Any())
+            if (!IsEmpty)
                 content.Remove(node);
 
             return this;
@@ -337,7 +338,7 @@ namespace Fb2.Document.Models.Base
         /// <returns></returns>
         public Fb2Container ClearContent()
         {
-            if (content.Any())
+            if (!IsEmpty)
                 content.Clear();
 
             return this;
@@ -357,8 +358,8 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (!Fb2NodeFactory.IsKnownNode(name))
-                throw new UnknownNodeException(name);
+            if (!Fb2NodeFactory.IsKnownNodeName(name))
+                return Enumerable.Empty<Fb2Node>();
 
             return content.Where(elem => elem.Name.EqualsInvariant(name));
         }
@@ -383,11 +384,9 @@ namespace Fb2.Document.Models.Base
         /// <returns>First matched child node.</returns>
         public Fb2Node? GetFirstChild(string? name)
         {
-            if (!string.IsNullOrWhiteSpace(name) &&
-                !Fb2NodeFactory.IsKnownNode(name))
-                throw new UnknownNodeException(name);
-
-            if (!content.Any())
+            if (IsEmpty ||
+                !string.IsNullOrWhiteSpace(name) &&
+                !Fb2NodeFactory.IsKnownNodeName(name))
                 return null;
 
             return string.IsNullOrWhiteSpace(name) ?
@@ -418,12 +417,9 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (!Fb2NodeFactory.IsKnownNode(name))
-                throw new UnknownNodeException(name);
-
             var result = new List<Fb2Node>();
 
-            if (!content.Any())
+            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
                 return result;
 
             foreach (var element in content)
@@ -455,7 +451,7 @@ namespace Fb2.Document.Models.Base
 
             var result = new List<Fb2Node>();
 
-            if (!content.Any())
+            if (IsEmpty)
                 return result;
 
             foreach (var element in content)
@@ -485,10 +481,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (!Fb2NodeFactory.IsKnownNode(name))
-                throw new UnknownNodeException(name);
-
-            if (!content.Any())
+            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
                 return null;
 
             foreach (var element in content)
@@ -518,7 +511,7 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            if (!content.Any())
+            if (IsEmpty)
                 return null;
 
             foreach (var element in content)
@@ -571,13 +564,13 @@ namespace Fb2.Document.Models.Base
         /// <returns>List of found child elements, if any.</returns>
         public IEnumerable<T> GetChildren<T>() where T : Fb2Node
         {
-            if (!content.Any())
+            if (IsEmpty)
                 return Enumerable.Empty<T>();
 
             var predicate = PredicateResolver.GetPredicate<T>();
             var result = content.Where(predicate);
 
-            if (result == null || !result.Any())
+            if (result == null || !result.Any()) // TODO : check this
                 return Enumerable.Empty<T>();
 
             return result.Cast<T>();
@@ -590,7 +583,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>First matched child node</returns>
         public T? GetFirstChild<T>() where T : Fb2Node
         {
-            if (!content.Any())
+            if (IsEmpty)
                 return null;
 
             var predicate = PredicateResolver.GetPredicate<T>();
@@ -636,7 +629,7 @@ namespace Fb2.Document.Models.Base
         private IEnumerable<T> GetDescendantsInternal<T>(Func<Fb2Node, bool>? predicate = null)
             where T : Fb2Node
         {
-            if (!content.Any())
+            if (IsEmpty)
                 return Enumerable.Empty<T>();
 
             var result = new List<Fb2Node>();

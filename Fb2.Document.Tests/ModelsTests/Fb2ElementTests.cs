@@ -56,7 +56,7 @@ namespace Fb2.Document.Tests.ModelsTests
             emptyLine.Content.Should().Be(Environment.NewLine);
 
             emptyLine
-                .WithContent("new part 2", "blah1")
+                .AppendContent("new part 2", "blah1")
                 .AddContent("new part", "blah");
 
             emptyLine.Content.Should().Be(Environment.NewLine);

@@ -28,6 +28,8 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public override bool IsInline { get; protected set; } = true;
 
+        public override bool IsEmpty => string.IsNullOrEmpty(content);
+
         /// <summary>
         /// Text node loading mechanism - formatting text and removal of unwanted characters
         /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
@@ -101,7 +103,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current element.</returns>
         public virtual Fb2Element ClearContent()
         {
-            if (!string.IsNullOrEmpty(content))
+            if (!IsEmpty)
                 content = string.Empty;
 
             return this;
@@ -116,7 +118,7 @@ namespace Fb2.Document.Models.Base
         public override XElement ToXml()
         {
             var element = base.ToXml();
-            if (!string.IsNullOrEmpty(content))
+            if (!IsEmpty)
                 element.Value = content;
 
             return element;

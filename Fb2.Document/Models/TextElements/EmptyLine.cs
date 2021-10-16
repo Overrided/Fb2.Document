@@ -10,6 +10,8 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.EmptyLine;
 
+        public override bool IsEmpty => true;
+
         public EmptyLine() => content = Environment.NewLine;
 
         public sealed override void Load(

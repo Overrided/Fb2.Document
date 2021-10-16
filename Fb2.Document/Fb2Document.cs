@@ -191,7 +191,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public void Load([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
+        public void Load([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -221,7 +221,7 @@ namespace Fb2.Document
         /// This method is Encoding-safe 
         /// Encoding for reading content will be determined during load process 
         /// or Encoding.Default will be used
-        public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
+        public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -17,11 +18,10 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.TableRow);
 
+        // TODO : fix ToString with col-span and row-span
         public sealed override string ToString()
         {
-            var content = Content;
-
-            if (content == null || !content.Any())
+            if (IsEmpty)
                 return string.Empty;
 
             var table = GetTableCellContent();
@@ -29,7 +29,7 @@ namespace Fb2.Document.Models
             // assume that table is valid, all rows have same length, so max is same as min
             var rowLenght = table.Max(r => r.Length);
 
-            List<List<string>> processedColumns = new List<List<string>>();
+            List<List<string>> processedColumns = new();
 
             for (int c = 0; c < rowLenght; c++)
             {
@@ -61,18 +61,18 @@ namespace Fb2.Document.Models
                 else if (row is Fb2Element elementRow)
                     return new string[1] { elementRow.ToString() };
 
-                return new string[0];
+                return Array.Empty<string>();
             }).ToArray();
         }
 
-        private IEnumerable<string> ProcessColumn(IEnumerable<string> column)
+        private static IEnumerable<string> ProcessColumn(IEnumerable<string> column)
         {
             var desiredColumnWidth = column.Max(c => c.Length) + 1;
 
-            return column.Select(cell => cell.PadRight(desiredColumnWidth) + "|");
+            return column.Select(cell => $"{cell.PadRight(desiredColumnWidth)}|");
         }
 
-        private string ToStringInternal(List<List<string>> columns)
+        private static string ToStringInternal(List<List<string>> columns)
         {
             var tableConcatanator = new StringBuilder();
 

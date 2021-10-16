@@ -9,6 +9,7 @@ using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
+using Fb2.Document.Tests.Common;
 using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
 using Xunit;
@@ -81,8 +82,20 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(impostor)) // Fb2Node 
                .Should()
-               .Throw<UnknownNodeException>()
-               .WithMessage("'Impostor' is not valid Fb2 node.");
+               .ThrowExactly<UnknownNodeException>()
+               .WithMessage($"'Impostor' with type '{impostor.GetType().Name}' is not known Fb2 node.");
+
+            node.Invoking(n => n.AddContent(impostor.Name)) // name
+               .Should()
+               .ThrowExactly<UnknownNodeException>()
+               .WithMessage($"'Impostor' is not known Fb2 node name.");
+
+            var sneakyImpostor = new ImpostorNode(ElementNames.Paragraph);
+
+            node.Invoking(n => n.AddContent(sneakyImpostor)) // Fb2Node 
+               .Should()
+               .ThrowExactly<UnknownNodeException>()
+               .WithMessage($"'{ElementNames.Paragraph}' with type '{sneakyImpostor.GetType().Name}' is not known Fb2 node.");
         }
 
         [Theory]
@@ -92,7 +105,7 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(n => n.AddContent("impostorNodeName"))
                 .Should()
                 .ThrowExactly<UnknownNodeException>()
-                .WithMessage("'impostorNodeName' is not valid Fb2 node.");
+                .WithMessage("'impostorNodeName' is not known Fb2 node name.");
         }
 
         [Theory]
@@ -375,7 +388,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void GetChildren_InvalidParam_Throws(Fb2Container node)
+        public void GetChildren_NullParam_Throws(Fb2Container node)
         {
             node.Invoking(n => n.GetChildren((string)null))
                 .Should()
@@ -385,10 +398,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.GetChildren("balhNameInvalid"))
-                .Should()
-                .ThrowExactly<UnknownNodeException>();
-
             node.Invoking(n => n.GetChildren((Func<Fb2Node, bool>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
@@ -396,7 +405,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void GetDescendants_InvalidParam_Throws(Fb2Container node)
+        public void GetDescendants_NullParam_Throws(Fb2Container node)
         {
             node.Invoking(n => n.GetDescendants((string)null))
                 .Should()
@@ -406,10 +415,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.GetDescendants("balhNameInvalid"))
-                .Should()
-                .ThrowExactly<UnknownNodeException>();
-
             node.Invoking(n => n.GetDescendants((Func<Fb2Node, bool>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
@@ -417,12 +422,8 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void GetFirstChild_InvalidParam_Throws(Fb2Container node)
+        public void GetFirstChild_NullParam_Throws(Fb2Container node)
         {
-            node.Invoking(n => n.GetFirstChild("balhNameInvalid"))
-                .Should()
-                .ThrowExactly<UnknownNodeException>();
-
             node.Invoking(n => n.GetFirstChild((Func<Fb2Node, bool>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
@@ -430,7 +431,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void GetFirstDescendant_InvalidParam_Throws(Fb2Container node)
+        public void GetFirstDescendant_NullParam_Throws(Fb2Container node)
         {
             node.Invoking(n => n.GetFirstDescendant((string)null))
                 .Should()
@@ -440,10 +441,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.GetFirstDescendant("balhNameInvalid"))
-                .Should()
-                .ThrowExactly<UnknownNodeException>();
-
             node.Invoking(n => n.GetFirstDescendant((Func<Fb2Node, bool>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
@@ -451,7 +448,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void TryGetFirstDescendant_InvalidParam_Throws(Fb2Container node)
+        public void TryGetFirstDescendant_NullParam_Throws(Fb2Container node)
         {
             node.Invoking(n => n.TryGetFirstDescendant((string)null, out var result))
                 .Should()
@@ -461,10 +458,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.TryGetFirstDescendant("balhNameInvalid", out var result))
-                .Should()
-                .ThrowExactly<UnknownNodeException>();
-
             node.Invoking(n => n.TryGetFirstDescendant((Func<Fb2Node, bool>)null, out var result))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
@@ -472,10 +465,28 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
+        public void ContainerNode_InvalidQueryChildren_ReturnsNullOrEmpty(Fb2Container node)
+        {
+            var invalidNodeName = "blahNameInvalid";
+
+            node.GetDescendants(invalidNodeName).Should().BeEmpty();
+
+            node.GetFirstChild(invalidNodeName).Should().BeNull();
+
+            node.GetFirstDescendant(invalidNodeName).Should().BeNull();
+
+            node.TryGetFirstDescendant(invalidNodeName, out var result).Should().BeFalse();
+            result.Should().BeNull();
+
+            node.GetChildren(invalidNodeName).Should().BeEmpty();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
         public void EmpyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
         {
             var firstAllowedChildName = node.AllowedElements.First();
-            Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
+            bool firstAllowedChildPredicate(Fb2Node nodeToCompare) => nodeToCompare.Name.Equals(firstAllowedChildName);
 
             node.GetChildren(firstAllowedChildName).Should().BeEmpty();
             node.GetChildren(firstAllowedChildPredicate).Should().BeEmpty();
@@ -486,7 +497,6 @@ namespace Fb2.Document.Tests.ModelsTests
             node.GetFirstChild((string)null).Should().BeNull();
             node.GetFirstChild("").Should().BeNull();
             node.GetFirstChild<Fb2Node>().Should().BeNull();
-
         }
 
         [Theory]
@@ -523,12 +533,12 @@ namespace Fb2.Document.Tests.ModelsTests
         public void Paragraph_QueryContent_Works()
         {
             // setup 
-            var paragraph = (Paragraph)Fb2NodeFactory.GetNodeByName(ElementNames.Paragraph);
+            var paragraph = new Paragraph();
             paragraph
                 .AddContent(new Strong().AddTextContent("strong text 1 "))
                 .AddContent(
                     new Emphasis()
-                        .WithTextContent("italic text 1 ")
+                        .AppendTextContent("italic text 1 ")
                         .AddContent(
                             new Strong()
                                 .AddTextContent("strong italic text ")
@@ -644,18 +654,6 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             node.ClearContent();
             node.Content.Should().BeEmpty();
-        }
-    }
-
-    // just for what? ...you've got it, lulz!)
-    public class ImpostorNode : Fb2Node
-    {
-        public override string Name => "Impostor";
-
-        public override bool IsInline
-        {
-            get;
-            protected set;
         }
     }
 }

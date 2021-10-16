@@ -20,7 +20,7 @@ namespace Fb2.Document.Models
                 AttributeNames.XHref,
                 AttributeNames.Type);
 
-        private readonly HashSet<string> InlineParentNodes = new HashSet<string>
+        private readonly HashSet<string> InlineParentNodes = new()
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -30,7 +30,7 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>
+        private readonly HashSet<string> NotInlineParentNodes = new()
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,
@@ -54,7 +54,7 @@ namespace Fb2.Document.Models
             IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
         }
 
-        private bool GetInline(string parentNodeName, XmlNodeType parentNodeType)
+        private bool GetInline(string? parentNodeName, XmlNodeType parentNodeType)
         {
             if (string.IsNullOrEmpty(parentNodeName) || parentNodeType != XmlNodeType.Element)
                 return true;

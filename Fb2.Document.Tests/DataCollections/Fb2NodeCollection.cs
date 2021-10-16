@@ -11,7 +11,7 @@ namespace Fb2.Document.Tests.DataCollections
 {
     public class Fb2NodeCollection : IEnumerable<object[]>
     {
-        protected ElementNames names = new ElementNames();
+        protected ElementNames names = new();
 
         public List<string> AllElementsNames;
         public List<Type> AllModelTypes;

@@ -120,7 +120,7 @@ namespace Fb2.Document.Tests.ModelsTests
             instance
                 .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new KeyValuePair<string, string>("testKey", "testValue"))))
                 .Should()
-                .ThrowExactly<NoAttributesAllowedException>()
+                .ThrowExactlyAsync<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
         }
 

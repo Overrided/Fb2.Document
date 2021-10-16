@@ -14,6 +14,8 @@ using Fb2.Document.Factories;
 
 namespace Fb2.Document.Models.Base
 {
+    // TODO : add `Fb2Node Parent` get-only property to traverse tree better
+
     /// <summary>
     /// Base class - describes basic node of fb2 document.
     /// Has Name, list of valid attributes and actual attribute values
@@ -28,6 +30,8 @@ namespace Fb2.Document.Models.Base
         /// Node name, used during document parsing and validation.
         /// </summary>
         public abstract string Name { get; }
+
+        public abstract bool IsEmpty { get; }
 
         /// <summary>
         /// Gets actual element attributes in key - value (Dictionary) form.

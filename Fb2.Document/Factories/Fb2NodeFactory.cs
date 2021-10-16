@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
+using Fb2.Document.Extensions;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 
@@ -92,25 +95,34 @@ namespace Fb2.Document.Factories
             if (string.IsNullOrWhiteSpace(nodeName))
                 throw new ArgumentNullException(nameof(nodeName));
 
-            Type result = null;
-            Type resultLowerInv = null;
-
-            if (!KnownNodes.TryGetValue(nodeName, out result) &&
-                !KnownNodes.TryGetValue(nodeName.ToLowerInvariant(), out resultLowerInv))
+            if (!IsKnownNodeName(nodeName))
                 throw new UnknownNodeException(nodeName);
 
-            var modelType = result ?? resultLowerInv;
-            var model = Activator.CreateInstance(modelType) as Fb2Node;
+            var result = KnownNodes.First(kvp => kvp.Key.EqualsInvariant(nodeName));
+            var modelType = result.Value;
 
+            var model = Activator.CreateInstance(modelType) as Fb2Node;
             return model;
         }
 
-        public static bool IsKnownNode([In] string nodeName)
+        public static bool IsKnownNode([In] Fb2Node node)
+        {
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+
+            var hasKnownName = IsKnownNodeName(node.Name);
+            var hasKnownType = KnownNodes.ContainsValue(node.GetType());
+
+            return hasKnownName && hasKnownType;
+        }
+
+        public static bool IsKnownNodeName([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
                 throw new ArgumentNullException(nameof(nodeName));
 
-            return KnownNodes.ContainsKey(nodeName) || KnownNodes.ContainsKey(nodeName.ToLowerInvariant());
+            var isKnownName = KnownNodes.Keys.Contains(nodeName, StringComparer.Create(CultureInfo.InvariantCulture, true));
+            return isKnownName;
         }
     }
 }
