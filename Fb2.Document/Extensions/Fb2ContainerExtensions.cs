@@ -43,5 +43,8 @@ namespace Fb2.Document.Extensions
 
         public static T DeleteContent<T>(this T fb2Container, Fb2Node node) where T : Fb2Container =>
             (T)fb2Container.RemoveContent(node);
+
+        public static T EraseContent<T>(this T fb2Container) where T : Fb2Container =>
+            (T)fb2Container.ClearContent();
     }
 }

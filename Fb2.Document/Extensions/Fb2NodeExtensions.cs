@@ -40,5 +40,19 @@ namespace Fb2.Document.Extensions
             string attributeName,
             string attributeValue) where T : Fb2Node =>
             (T)fb2Node.AddAttribute(attributeName, attributeValue);
+
+        public static T DeleteAttribute<T>(
+            this T fb2Node,
+            string attributeName,
+            bool ignoreCase = false) where T : Fb2Node =>
+            (T)fb2Node.RemoveAttribute(attributeName, ignoreCase);
+
+        public static T DeleteAttribute<T>(
+            this T fb2Node,
+            Func<KeyValuePair<string, string>, bool> attributePredicate) where T : Fb2Node =>
+            (T)fb2Node.RemoveAttribute(attributePredicate);
+
+        public static T EraseAttributes<T>(this T fb2Node) where T : Fb2Node =>
+            (T)fb2Node.ClearAttributes();
     }
 }

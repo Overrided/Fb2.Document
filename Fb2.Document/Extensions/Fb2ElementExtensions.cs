@@ -14,5 +14,7 @@ namespace Fb2.Document.Extensions
         public static T AppendContent<T>(this T fb2Element,
             Func<string> contentProvider,
             string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
+
+        public static T EraseContent<T>(this T fb2Element) where T : Fb2Element => (T)fb2Element.ClearContent();
     }
 }
