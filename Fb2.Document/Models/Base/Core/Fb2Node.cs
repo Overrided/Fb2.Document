@@ -23,6 +23,7 @@ namespace Fb2.Document.Models.Base
     public abstract class Fb2Node : ICloneable
     {
         protected static readonly Regex trimWhitespace = new(@"\s+", RegexOptions.Multiline);
+        protected const string Whitespace = " ";
 
         private Dictionary<string, string> attributes = new();
 
@@ -31,6 +32,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public abstract string Name { get; }
 
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
         public abstract bool IsEmpty { get; }
 
         /// <summary>
@@ -100,6 +104,14 @@ namespace Fb2.Document.Models.Base
 
         #region Node querying
 
+        /// <summary>
+        /// Checks if node has attribute(s) with given key and value.
+        /// Exists mostly for lulz.
+        /// </summary>
+        /// <param name="key">Key to search attribute by.</param>
+        /// <param name="value">Value to search attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive comparison should be used.</param>
+        /// <returns>True if attribute found, otherwise false.</returns>
         public bool HasAttribute(string key, string value, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -119,11 +131,11 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Checks if node has attribute(s) with given key
+        /// Checks if node has attribute(s) with given key.
         /// </summary>
-        /// <param name="key">Key to search attribute by</param>
-        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
-        /// <returns>True if attribute found, otherwise false</returns>
+        /// <param name="key">Key to search attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
+        /// <returns>True if attribute found, otherwise false.</returns>
         public bool HasAttribute(string key, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(key))

@@ -197,7 +197,7 @@ namespace Fb2.Document
                 throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
             var options = loadingOptions ?? new Fb2StreamLoadingOptions();
             var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
@@ -227,7 +227,7 @@ namespace Fb2.Document
                 throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
             var options = loadingOptions ?? new Fb2StreamLoadingOptions();
             var xmlReaderSetting = DefaultXmlReaderSettings.Clone();

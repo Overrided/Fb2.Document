@@ -13,28 +13,26 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
-        private const string Whitespace = " ";
-
         protected string content = string.Empty;
 
         /// <summary>
-        /// Content (value) of element. Available after Load() method call
+        /// Content (value) of element. Available after Load() method call.
         /// </summary>
         public string Content => content;
 
         /// <summary>
-        /// For text nodes Inline is true by default, however, some classes override this property
-        /// Indicates if content of an element should be written from a new line
+        /// For text nodes Inline is true by default, however, some classes override this property.
+        /// Indicates if content of an element should be written from a new line.
         /// </summary>
         public override bool IsInline { get; protected set; } = true;
 
         public override bool IsEmpty => string.IsNullOrEmpty(content);
 
         /// <summary>
-        /// Text node loading mechanism - formatting text and removal of unwanted characters
+        /// Text node loading mechanism - formatting text and removal of unwanted characters.
         /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
         /// </summary>
-        /// <param name="node">Node to load as Fb2Element</param>
+        /// <param name="node">Node to load as Fb2Element.</param>
         /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
         /// <param name="loadUnsafe"> Is ignored by Fb2Element loading.</param>
         public override void Load(
@@ -44,7 +42,7 @@ namespace Fb2.Document.Models.Base
         {
             base.Load(node, preserveWhitespace);
 
-            var rawContent = GetNodeContent(node);
+            var rawContent = GetXNodeContent(node);
 
             if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
                 content = trimWhitespace.Replace(rawContent, Whitespace);
@@ -57,7 +55,6 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="contentProvider">Content provider function.</param>
         /// <param name="separator">Separator to split text from rest of the content.</param>
-        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
         /// <returns>Current element.</returns>
         public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
         {
@@ -73,8 +70,7 @@ namespace Fb2.Document.Models.Base
         /// Appends new plain text to <see cref="Content"/>.
         /// </summary>
         /// <param name="newContent">Plain text to append.</param>
-        /// <param name="separator">Separator string used to join new text with existing text content.</param>
-        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns>Current element.</returns>
         /// <remarks>
         /// If <paramref name="separator"/> contains `Environment.NewLine` - it will be replaced with " " (whitespace).
@@ -126,7 +122,8 @@ namespace Fb2.Document.Models.Base
 
         public override string ToString() => Content;
 
-        private static string GetNodeContent([In] XNode node)
+        // TODO: dont use this as separate method?
+        private static string GetXNodeContent([In] XNode node)
             => node.NodeType switch
             {
                 XmlNodeType.Element => ((XElement)node).Value,

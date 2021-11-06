@@ -25,7 +25,6 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Actual value is available after `Load()` method call.
         /// </summary>
-        /// <returns>`ImmutableList<Fb2Node>` which reflects content of given `XNode`.</returns>
         public ImmutableList<Fb2Node> Content => content.ToImmutableList();
 
         /// <summary>
@@ -52,7 +51,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Node to load as Fb2Container</param>
         /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
-        /// <param name="loadUnsafe"> Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
+        /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
         public override void Load(
             [In] XNode node,
             bool preserveWhitespace = false,
@@ -193,7 +192,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Adds `params Fb2Node[]` nodes to <see cref="Content"/>.
         /// </summary>
-        /// <param name="nodes">Nodes to add to <see cref="Content"/> property.</param>
+        /// <param name="nodes">Nodes to add to <see cref="Content"/>.</param>
         /// <returns>Current container.</returns>
         public Fb2Container AddContent(params Fb2Node[] nodes)
         {
@@ -211,8 +210,7 @@ namespace Fb2.Document.Models.Base
         /// Appends plain text node to <see cref="Content"/>.
         /// </summary>
         /// <param name="newContent">Plain text content to add.</param>
-        /// <param name="separator">Separator to split text from rest of the content.</param>
-        /// <param name="preserveWhitespace">Indicates if whitespaces and newlines should be preserved.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns>Current container.</returns>
         public Fb2Container AddTextContent(string newContent, string? separator = null)
         {
@@ -570,10 +568,7 @@ namespace Fb2.Document.Models.Base
             var predicate = PredicateResolver.GetPredicate<T>();
             var result = content.Where(predicate);
 
-            if (result == null || !result.Any()) // TODO : check this
-                return Enumerable.Empty<T>();
-
-            return result.Cast<T>();
+            return result.Any() ? result.Cast<T>() : Enumerable.Empty<T>();
         }
 
         /// <summary>
@@ -596,23 +591,23 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Recursively gets all descendants of element by given node type (Fb2Node-based nodes). 
+        /// Recursively gets all descendants of element by given <typeparamref name="T"/> where T : Fb2Node
         /// </summary>
-        /// <param name="name">Node type to select descendants by.</param>
+        /// <typeparam name="T">Node type to select descendants by.</typeparam>
         /// <returns>List of found descendants, if any.</returns>
         public IEnumerable<T> GetDescendants<T>() where T : Fb2Node => GetDescendantsInternal<T>();
 
         /// <summary>
         /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
         /// </summary>
-        /// <param name="name">Node type to select descendant by.</param>
+        /// <typeparam name="T">Node type to select descendant by.</typeparam>
         /// <returns>First matched descendant node.</returns>
         public T? GetFirstDescendant<T>() where T : Fb2Node => GetFirstDescendantInternal<T>();
 
         /// <summary>
         /// Recursively looks for first matching descendant of element by given node type (Fb2Node-based nodes).
         /// </summary>
-        /// <param name="name">Node type to select descendant by.</param>
+        /// <typeparam name="T">Node type to select descendant by.</typeparam>
         /// <param name="node">Out param, actual result of a search.</param>
         /// <returns>Boolean value indicating if any node was actually found. Node itself is returned as out parameter.</returns>
         public bool TryGetFirstDescendant<T>(out T? node) where T : Fb2Node
