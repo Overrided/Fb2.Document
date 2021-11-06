@@ -31,87 +31,139 @@ namespace Fb2.Document.Models
             if (rowsCount == 0)
                 return string.Empty;
 
-            var tableRowSpans = new Dictionary<int, List<TableCellModel>>();
+            var metaTable = BuildMetadataTable(rows);
+
+            var tableRowSpans = metaTable.MetaTable;
+            var columnsCount = metaTable.ColumnsCount;
+
+            // scanning cycle #2, 
+            // check width of content of each column in literal characters count, string length
+            // to make column uniform, we need to select max width
+            var columnCharWidths = GetCharacterColumnWidths(tableRowSpans, rowsCount, columnsCount);
+
+            // printing cycle
+            var result = StringnifyTableRows(tableRowSpans, columnCharWidths, rowsCount, columnsCount);
+            return result;
+        }
+
+        private static (List<TableCellModel> MetaTable, int ColumnsCount) BuildMetadataTable(List<TableRow> rows)
+        {
+            var rowsCount = rows.Count;
+
+            var tableRowSpans = new List<TableCellModel>();
             var columnCountsInRow = new int[rowsCount]; // total number of columns in a row, at row's index
 
             // scanning cycle(s) #1, collecting spans and creating meta-table
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
-                var collSpanDelta = 0;
-
                 var row = rows[rowIndex];
 
                 if (row == null)
                     continue;
 
-                var cellsInRow = row.GetChildren<TableCellBase>().ToList();
+                var collSpanDeltaInRow = 0;
 
-                var rowModel = new List<TableCellModel>();
+                var cellsInRow = row.GetChildren<TableCellBase>().ToList();
+                var cellsInRowCount = cellsInRow.Count;
+
+                if (cellsInRowCount == 0)
+                    continue; // skip empty rows
 
                 // array index position is not indicative of actual cell position in table
-                for (int columnIndex = 0; columnIndex < cellsInRow.Count; columnIndex++)
+                for (int arrayColumnIndex = 0; arrayColumnIndex < cellsInRowCount; arrayColumnIndex++)
                 {
-                    var renderColumnIndex = collSpanDelta != 0 ? columnIndex + collSpanDelta : columnIndex;
+                    var cellNode = cellsInRow[arrayColumnIndex];
 
-                    var cellNode = cellsInRow[columnIndex];
+                    var renderColumnIndex = collSpanDeltaInRow != 0 ? arrayColumnIndex + collSpanDeltaInRow : arrayColumnIndex;
+                    renderColumnIndex = UpdateRenderColumnIndex(tableRowSpans, rowIndex, renderColumnIndex);
 
-                    renderColumnIndex = ApplyColumnSpanDelta(tableRowSpans.Values.SelectMany(v => v).ToList(), rowIndex, renderColumnIndex);
-
-                    var collSpanNum = GetSpan(cellNode, AttributeNames.ColumnSpan);
+                    var collSpanNum = GetNodeSpan(cellNode, AttributeNames.ColumnSpan);
+                    columnCountsInRow[rowIndex] = Math.Max(columnCountsInRow[rowIndex], renderColumnIndex + 1); // absolute unit width of a cell
 
                     // to know how far to move next cell in table row - save "total span" number in row
                     // if no ColSpan -> collSpanNum - 1 = 0
-                    collSpanDelta += collSpanNum - 1; // -1 because of cell itself has width
+                    collSpanDeltaInRow += collSpanNum - 1; // -1 because of cell itself has width
 
-                    var rowSpanNum = GetSpan(cellNode, AttributeNames.RowSpan);
-
+                    var rowSpanNum = GetNodeSpan(cellNode, AttributeNames.RowSpan);
                     var cellContent = cellNode.ToString();
 
-                    rowModel.Add(
+                    tableRowSpans.Add(
                         new TableCellModel(
-                            columnIndex,
+                            arrayColumnIndex,
                             rowIndex,
                             renderColumnIndex,
                             cellContent,
                             collSpanNum,
                             rowSpanNum));
-
-                    // check how many actual columns are in row - take column spans into account, colSpan=2 means there's single cell for 2 columns
-                    var colCount = columnCountsInRow[rowIndex];
-                    var actualColCount = renderColumnIndex + collSpanNum; // no -1 due to 0 index column is one column already, count, not index!
-                    columnCountsInRow[rowIndex] = Math.Max(colCount, actualColCount); // if there's no collSpan then "collSpanNum - 1 = 0"
                 }
-
-                tableRowSpans.Add(rowIndex, rowModel);
             }
 
-            // preventive measure
-            var columnsCountInTable = columnCountsInRow.Max();
+            // prevention to some miscalculation we can fix, but with performance penalties
+            var columnsCount = columnCountsInRow.Max();
 
-            // check width of content of each column in literal characters count, string length
-            // to make column uniform, we need to select max width
-            var columnCharWidths = new int[columnsCountInTable];
+            return (MetaTable: tableRowSpans, ColumnsCount: columnsCount);
+        }
 
-            for (var actualColIndex = 0; actualColIndex < columnsCountInTable; actualColIndex++)
+        // if no span found return 1 as minimal cell unit width/height
+        private static int GetNodeSpan(Fb2Node cell, string spanAttrName)
+        {
+            if (cell == null || string.IsNullOrWhiteSpace(spanAttrName))
+                throw new ArgumentNullException();
+
+            if (cell.TryGetAttribute(spanAttrName, out var span, true) &&
+                int.TryParse(span.Value, out int spanNumber) && spanNumber > 1)
+                return spanNumber;
+
+            return 1;
+        }
+
+        private static int UpdateRenderColumnIndex(List<TableCellModel> tableRowSpans, int rowIndex, int resultingColumn)
+        {
+            if (!tableRowSpans.Any())
+                return resultingColumn;
+
+            var effectiveRowSpans = tableRowSpans
+                .Where(trs => trs.StartRowIndex < rowIndex && trs.EndRowIndex >= rowIndex);
+
+            if (effectiveRowSpans == null || !effectiveRowSpans.Any())
+                return resultingColumn;
+
+            var orderedActuals = effectiveRowSpans
+                .OrderBy(trs => trs.RenderColumnStartIndex)
+                .ThenBy(trs => trs.StartRowIndex);
+
+            foreach (var cellIndexDelta in orderedActuals)
+            {
+                if (cellIndexDelta.CellArrayIndex > resultingColumn || // check if position in array
+                    cellIndexDelta.RenderColumnStartIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
+                    break; // so actual cell in work is not affected anyways, and we can break due to list is ordered
+
+                if (cellIndexDelta.ColSpan > 1)
+                    resultingColumn += Math.Max(cellIndexDelta.ColSpan - 1, 0); // -1 because cell itself always will take at least 1 unit of width, whatewer "unit of width" is
+
+                resultingColumn++;
+            }
+
+            return resultingColumn;
+        }
+
+        private static bool TableCellPredicate(TableCellModel cellModel, int rowIndex, int colunmIndex) =>
+            cellModel.RenderColumnStartIndex <= colunmIndex &&
+            cellModel.RenderColumnEndIndex >= colunmIndex &&
+            cellModel.StartRowIndex <= rowIndex &&
+            cellModel.EndRowIndex >= rowIndex;
+
+        private static int[] GetCharacterColumnWidths(List<TableCellModel> tableRowSpans, int rowsCount, int columnsCount)
+        {
+            var columnCharWidths = new int[columnsCount];
+
+            for (var actualColIndex = 0; actualColIndex < columnsCount; actualColIndex++)
             {
                 for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
                 {
-                    var row = tableRowSpans[rowIndex];
-                    var columnCell = row.FirstOrDefault(cm =>
-                        cm.RenderColumnStartIndex <= actualColIndex && cm.RenderColumnEndIndex >= actualColIndex);
-
+                    var columnCell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
                     if (columnCell == null)
-                    {
-                        var affectiveRowsCells = tableRowSpans
-                               .Values
-                               .SelectMany(l => l)
-                               .Where(trs => trs.StartRowIndex < rowIndex && trs.EndRowIndex >= rowIndex);
-
-                        columnCell = affectiveRowsCells.FirstOrDefault(cm => cm.RenderColumnStartIndex <= actualColIndex && cm.RenderColumnEndIndex >= actualColIndex);
-
-                        if (columnCell == null)
-                            continue;
-                    }
+                        continue;
 
                     var colCharWidth = columnCell.RenderColumnStartIndex == actualColIndex ?
                                         columnCell.Content.Length : 0;
@@ -121,108 +173,69 @@ namespace Fb2.Document.Models
                 }
             }
 
-            var rowStrings = new List<string>(rowsCount);
+            return columnCharWidths;
+        }
+
+        private static string StringnifyTableRows(
+            List<TableCellModel> tableRowSpans,
+            int[] columnCharWidths,
+            int rowsCount,
+            int columnsCount)
+        {
+            var rowStrings = new StringBuilder();
 
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
-                var row = tableRowSpans[rowIndex];
                 var rowString = new StringBuilder();
 
-                for (var actualColIndex = 0; actualColIndex < columnsCountInTable; actualColIndex++)
+                for (var actualColIndex = 0; actualColIndex < columnsCount; actualColIndex++)
                 {
+                    var cell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
+
+                    if (cell == null)
+                        continue;
+
                     if (actualColIndex == 0)
                         rowString.Append('|');
 
-                    var columnCell = row.FirstOrDefault(cm => cm.RenderColumnStartIndex <= actualColIndex && cm.RenderColumnEndIndex >= actualColIndex);
-                    if (columnCell == null)
-                    {
-                        var affectiveRowsCells = tableRowSpans
-                            .Values
-                            .SelectMany(l => l)
-                            .Where(trs => trs.StartRowIndex < rowIndex && trs.EndRowIndex >= rowIndex);
-
-                        columnCell = affectiveRowsCells.FirstOrDefault(cm => cm.RenderColumnStartIndex <= actualColIndex && cm.RenderColumnEndIndex >= actualColIndex);
-
-                        if (columnCell == null)
-                            continue;
-                    }
-
                     var colWidth = columnCharWidths[actualColIndex];
 
-                    var hasCollSpan = columnCell.ColSpan > 1;
-                    var hasRowSpan = columnCell.RowSpan > 1;
-                    var shouldPrintColSpanSpace = columnCell.RenderColumnStartIndex < actualColIndex && hasCollSpan;
-                    var shouldPrintRowSpanSpace = columnCell.StartRowIndex < rowIndex && hasRowSpan;
-
-                    if (shouldPrintColSpanSpace || shouldPrintRowSpanSpace)
-                    {
-                        var shouldPrintVerticalBorder = columnCell.RenderColumnEndIndex == actualColIndex;
-
-                        var paddingCount = shouldPrintVerticalBorder ? colWidth : colWidth + 1; // 
-                        var paddedCellContent = string.Empty.PadRight(paddingCount, ' ');
-
-                        var cellString = shouldPrintVerticalBorder ? $"{paddedCellContent}|" : paddedCellContent;
-                        rowString.Append(cellString);
-                    }
-                    else
-                    {
-                        var content = columnCell.Content;
-                        var shouldPrintVerticalBorder = columnCell.ColSpan == 1;
-                        var paddingCount = shouldPrintVerticalBorder ? colWidth : colWidth + 1;
-                        var paddedCellContent = content.PadRight(paddingCount, ' ');
-                        var cellString = shouldPrintVerticalBorder ? $"{paddedCellContent}|" : paddedCellContent;
-                        rowString.Append(cellString);
-                    }
+                    var cellString = StringnifyTableCell(cell, rowIndex, actualColIndex, colWidth);
+                    rowString.Append(cellString);
                 }
 
-                rowStrings.Add(rowString.ToString());
+                rowStrings.AppendLine(rowString.ToString());
             }
 
-            var result = string.Join(Environment.NewLine, rowStrings);
-            return result;
+            return rowStrings.ToString();
         }
 
-        // retun int always instead of bool, if no span found return 1 as minimal cell unit width/height
-        private int GetSpan(Fb2Node cell, string spanAttrName)
+        private static string StringnifyTableCell(TableCellModel cell, int rowIndex, int colIndex, int columnCharWidth)
         {
-            if (cell == null || string.IsNullOrWhiteSpace(spanAttrName))
-                throw new ArgumentNullException();
+            var hasCollSpan = cell.ColSpan > 1;
+            var hasRowSpan = cell.RowSpan > 1;
+            var shouldPrintColSpanSpace = cell.RenderColumnStartIndex < colIndex && hasCollSpan;
+            var shouldPrintRowSpanSpace = cell.StartRowIndex < rowIndex && hasRowSpan;
 
-            if (cell.TryGetAttribute(spanAttrName, out var span, true) &&
-                int.TryParse(span.Value, out int spanNumber) &&
-                spanNumber > 1)
+            bool shouldPrintVerticalBorder;
+            string contentToPrint;
+
+            if (shouldPrintColSpanSpace || shouldPrintRowSpanSpace)
             {
-                return spanNumber;
+                shouldPrintVerticalBorder = cell.RenderColumnEndIndex == colIndex;
+                contentToPrint = string.Empty;
+            }
+            else
+            {
+                shouldPrintVerticalBorder = cell.ColSpan == 1;
+                contentToPrint = cell.Content;
             }
 
-            return 1;
-        }
+            var paddingCount = shouldPrintVerticalBorder ? columnCharWidth : columnCharWidth + 1;
+            var paddedCellContent = contentToPrint.PadRight(paddingCount, ' ');
+            var cellString = shouldPrintVerticalBorder ? $"{paddedCellContent}|" : paddedCellContent;
 
-        private int ApplyColumnSpanDelta(List<TableCellModel> tableRowSpans, int rowIndex, int resultingColumn)
-        {
-            if (!tableRowSpans.Any())
-                return resultingColumn;
-
-            var effectiveRowSpans = tableRowSpans.Where(trs => trs.StartRowIndex < rowIndex && trs.EndRowIndex >= rowIndex);
-
-            if (effectiveRowSpans == null || !effectiveRowSpans.Any())
-                return resultingColumn;
-
-            var orderedActuals = effectiveRowSpans.OrderBy(trs => trs.RenderColumnStartIndex).ThenBy(trs => trs.StartRowIndex);
-
-            foreach (var cellIndexDelta in orderedActuals)
-            {
-                if (cellIndexDelta.CellArrayIndex > resultingColumn || // check if position in array
-                    cellIndexDelta.RenderColumnStartIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
-                    break; // so actual cell in work is not affected anyways, and we can break due to list is ordered
-
-                if (cellIndexDelta.ColSpan != 0)
-                    resultingColumn += Math.Max(cellIndexDelta.ColSpan - 1, 0); // -1 because cell itself always will take at least 1 unit of width, whatewer "unit of width" is
-
-                resultingColumn++;
-            }
-
-            return resultingColumn;
+            return cellString;
         }
 
         private class TableCellModel
