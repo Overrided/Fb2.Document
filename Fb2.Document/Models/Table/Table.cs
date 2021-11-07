@@ -25,7 +25,6 @@ namespace Fb2.Document.Models
 
             // ommiting unsafe stuff etc
             var rows = GetChildren<TableRow>().ToList();
-
             var rowsCount = rows.Count;
 
             if (rowsCount == 0)
@@ -33,7 +32,6 @@ namespace Fb2.Document.Models
 
             // scanning cycle(s) #1, collecting spans and creating meta-table
             var tableMetaData = BuildMetadataTable(rows);
-
             var tableRowSpans = tableMetaData.MetaTable;
             var columnsCount = tableMetaData.ColumnsCount;
 
@@ -46,6 +44,8 @@ namespace Fb2.Document.Models
             var result = StringifyTableRows(tableRowSpans, columnCharWidths, rowsCount, columnsCount);
             return result;
         }
+
+        #region ToString implementation - black magic fuckery ahead
 
         private static (List<TableCellModel> MetaTable, int ColumnsCount) BuildMetadataTable(List<TableRow> rows)
         {
@@ -72,6 +72,7 @@ namespace Fb2.Document.Models
                     var cellNode = cellsInRow[arrayColumnIndex];
 
                     var renderColumnIndex = collSpanDeltaInRow != 0 ? arrayColumnIndex + collSpanDeltaInRow : arrayColumnIndex;
+                    // check prev rows and check if any cell are impacting current cell
                     renderColumnIndex = UpdateRenderColumnIndex(tableRowSpans, rowIndex, renderColumnIndex);
 
                     var collSpanNum = GetNodeSpan(cellNode, AttributeNames.ColumnSpan);
@@ -119,7 +120,7 @@ namespace Fb2.Document.Models
             if (!tableRowSpans.Any())
                 return resultingColumn;
 
-            var effectiveRowSpans = tableRowSpans
+            var effectiveRowSpans = tableRowSpans // all row spans that are "higher" than actual row
                 .Where(trs => trs.RenderStartRowIndex < rowIndex && trs.RenderEndRowIndex >= rowIndex);
 
             if (effectiveRowSpans == null || !effectiveRowSpans.Any())
@@ -135,10 +136,7 @@ namespace Fb2.Document.Models
                     cellIndexDelta.RenderStartColumnIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
                     break; // so actual cell in work is not affected anyways, and we can break due to list is ordered
 
-                if (cellIndexDelta.ColSpan > 1)
-                    resultingColumn += Math.Max(cellIndexDelta.ColSpan - 1, 0); // -1 because cell itself always will take at least 1 unit of width, whatewer "unit of width" is
-
-                resultingColumn++;
+                resultingColumn += cellIndexDelta.ColSpan;
             }
 
             return resultingColumn;
@@ -190,20 +188,14 @@ namespace Fb2.Document.Models
 
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
-                var rowString = new StringBuilder();
-                var horizontalBorder = new StringBuilder();
+                var rowString = new StringBuilder("|");
+                var horizontalBorder = new StringBuilder("-");
 
                 for (var actualColIndex = 0; actualColIndex < columnsCount; actualColIndex++)
                 {
                     var cell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
                     if (cell == null)
                         continue; // shouldnt be the case, but what do I know
-
-                    if (actualColIndex == 0)
-                    {
-                        rowString.Append('|');
-                        horizontalBorder.Append('-');
-                    }
 
                     var colWidth = columnCharWidths[actualColIndex];
                     var cellString = StringifyTableCell(cell, rowIndex, actualColIndex, colWidth);
@@ -218,7 +210,11 @@ namespace Fb2.Document.Models
             return rowStrings.ToString();
         }
 
-        private static (string CellContent, string HorizontalBorder) StringifyTableCell(TableCellModel cell, int rowIndex, int colIndex, int columnCharWidth)
+        private static (string CellContent, string HorizontalBorder) StringifyTableCell(
+            TableCellModel cell,
+            int rowIndex,
+            int colIndex,
+            int columnCharWidth)
         {
             var hasCollSpan = cell.ColSpan > 1;
             var hasRowSpan = cell.RowSpan > 1;
@@ -249,7 +245,7 @@ namespace Fb2.Document.Models
             return (CellContent: cellString, HorizontalBorder: horizontalBorderContent);
         }
 
-        private class TableCellModel
+        private record TableCellModel
         {
             public int CellRowIndex { get; } // index of cell in row.Content
             public int RenderStartRowIndex { get; }
@@ -272,17 +268,20 @@ namespace Fb2.Document.Models
                 int rowSpan)
             {
                 CellRowIndex = cellArrayIndex;
+
                 RenderStartRowIndex = rowIndex;
                 RenderEndRowIndex = rowIndex + (rowSpan - 1);
+
                 RenderStartColumnIndex = actualColumnIndex;
+                RenderEndColumnIndex = RenderStartColumnIndex + (colSpan - 1);
 
                 ColSpan = colSpan;
                 RowSpan = rowSpan;
 
-                RenderEndColumnIndex = RenderStartColumnIndex + (colSpan - 1);
-
                 Content = content;
             }
         }
+
+        #endregion
     }
 }
