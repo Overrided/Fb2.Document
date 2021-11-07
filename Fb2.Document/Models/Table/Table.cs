@@ -31,10 +31,11 @@ namespace Fb2.Document.Models
             if (rowsCount == 0)
                 return string.Empty;
 
-            var metaTable = BuildMetadataTable(rows);
+            // scanning cycle(s) #1, collecting spans and creating meta-table
+            var tableMetaData = BuildMetadataTable(rows);
 
-            var tableRowSpans = metaTable.MetaTable;
-            var columnsCount = metaTable.ColumnsCount;
+            var tableRowSpans = tableMetaData.MetaTable;
+            var columnsCount = tableMetaData.ColumnsCount;
 
             // scanning cycle #2, 
             // check width of content of each column in literal characters count, string length
@@ -42,7 +43,7 @@ namespace Fb2.Document.Models
             var columnCharWidths = GetCharacterColumnWidths(tableRowSpans, rowsCount, columnsCount);
 
             // printing cycle
-            var result = StringnifyTableRows(tableRowSpans, columnCharWidths, rowsCount, columnsCount);
+            var result = StringifyTableRows(tableRowSpans, columnCharWidths, rowsCount, columnsCount);
             return result;
         }
 
@@ -53,13 +54,9 @@ namespace Fb2.Document.Models
             var tableRowSpans = new List<TableCellModel>();
             var columnCountsInRow = new int[rowsCount]; // total number of columns in a row, at row's index
 
-            // scanning cycle(s) #1, collecting spans and creating meta-table
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
                 var row = rows[rowIndex];
-
-                if (row == null)
-                    continue;
 
                 var collSpanDeltaInRow = 0;
 
@@ -123,19 +120,19 @@ namespace Fb2.Document.Models
                 return resultingColumn;
 
             var effectiveRowSpans = tableRowSpans
-                .Where(trs => trs.StartRowIndex < rowIndex && trs.EndRowIndex >= rowIndex);
+                .Where(trs => trs.RenderStartRowIndex < rowIndex && trs.RenderEndRowIndex >= rowIndex);
 
             if (effectiveRowSpans == null || !effectiveRowSpans.Any())
                 return resultingColumn;
 
             var orderedActuals = effectiveRowSpans
-                .OrderBy(trs => trs.RenderColumnStartIndex)
-                .ThenBy(trs => trs.StartRowIndex);
+                .OrderBy(trs => trs.RenderStartColumnIndex)
+                .ThenBy(trs => trs.RenderStartRowIndex);
 
             foreach (var cellIndexDelta in orderedActuals)
             {
-                if (cellIndexDelta.CellArrayIndex > resultingColumn || // check if position in array
-                    cellIndexDelta.RenderColumnStartIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
+                if (cellIndexDelta.CellRowIndex > resultingColumn || // check if position in array
+                    cellIndexDelta.RenderStartColumnIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
                     break; // so actual cell in work is not affected anyways, and we can break due to list is ordered
 
                 if (cellIndexDelta.ColSpan > 1)
@@ -147,12 +144,14 @@ namespace Fb2.Document.Models
             return resultingColumn;
         }
 
+        // find cell by "coordinates" col*row in table model
         private static bool TableCellPredicate(TableCellModel cellModel, int rowIndex, int colunmIndex) =>
-            cellModel.RenderColumnStartIndex <= colunmIndex &&
-            cellModel.RenderColumnEndIndex >= colunmIndex &&
-            cellModel.StartRowIndex <= rowIndex &&
-            cellModel.EndRowIndex >= rowIndex;
+            cellModel.RenderStartColumnIndex <= colunmIndex &&
+            cellModel.RenderEndColumnIndex >= colunmIndex &&
+            cellModel.RenderStartRowIndex <= rowIndex &&
+            cellModel.RenderEndRowIndex >= rowIndex;
 
+        // get maximal allowed width in characters of each column
         private static int[] GetCharacterColumnWidths(List<TableCellModel> tableRowSpans, int rowsCount, int columnsCount)
         {
             var columnCharWidths = new int[columnsCount];
@@ -163,9 +162,9 @@ namespace Fb2.Document.Models
                 {
                     var columnCell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
                     if (columnCell == null)
-                        continue;
+                        continue; // shouldnt be the case, but what do I know
 
-                    var colCharWidth = columnCell.RenderColumnStartIndex == actualColIndex ?
+                    var colCharWidth = columnCell.RenderStartColumnIndex == actualColIndex ?
                                         columnCell.Content.Length : 0;
 
                     var prev = columnCharWidths[actualColIndex];
@@ -176,7 +175,7 @@ namespace Fb2.Document.Models
             return columnCharWidths;
         }
 
-        private static string StringnifyTableRows(
+        private static string StringifyTableRows(
             List<TableCellModel> tableRowSpans,
             int[] columnCharWidths,
             int rowsCount,
@@ -184,48 +183,55 @@ namespace Fb2.Document.Models
         {
             var rowStrings = new StringBuilder();
 
+            var sumCount = columnCharWidths.Sum(n => n + 1);
+            var horLine = new string('-', sumCount + 1); // + 1 because it looks better this way
+
+            rowStrings.AppendLine(horLine);
+
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
                 var rowString = new StringBuilder();
+                var horizontalBorder = new StringBuilder();
 
                 for (var actualColIndex = 0; actualColIndex < columnsCount; actualColIndex++)
                 {
                     var cell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
-
                     if (cell == null)
-                        continue;
+                        continue; // shouldnt be the case, but what do I know
 
                     if (actualColIndex == 0)
+                    {
                         rowString.Append('|');
+                        horizontalBorder.Append('-');
+                    }
 
                     var colWidth = columnCharWidths[actualColIndex];
-
-                    var cellString = StringnifyTableCell(cell, rowIndex, actualColIndex, colWidth);
-                    rowString.Append(cellString);
+                    var cellString = StringifyTableCell(cell, rowIndex, actualColIndex, colWidth);
+                    rowString.Append(cellString.CellContent);
+                    horizontalBorder.Append(cellString.HorizontalBorder);
                 }
 
                 rowStrings.AppendLine(rowString.ToString());
+                rowStrings.AppendLine(horizontalBorder.ToString());
             }
 
             return rowStrings.ToString();
         }
 
-        private static string StringnifyTableCell(TableCellModel cell, int rowIndex, int colIndex, int columnCharWidth)
+        private static (string CellContent, string HorizontalBorder) StringifyTableCell(TableCellModel cell, int rowIndex, int colIndex, int columnCharWidth)
         {
             var hasCollSpan = cell.ColSpan > 1;
             var hasRowSpan = cell.RowSpan > 1;
-            var shouldPrintColSpanSpace = cell.RenderColumnStartIndex < colIndex && hasCollSpan;
-            var shouldPrintRowSpanSpace = cell.StartRowIndex < rowIndex && hasRowSpan;
+            var shouldPrintColSpanSpace = cell.RenderStartColumnIndex < colIndex && hasCollSpan;
+            var shouldPrintRowSpanSpace = cell.RenderStartRowIndex < rowIndex && hasRowSpan;
 
-            bool shouldPrintVerticalBorder;
-            string contentToPrint;
+            bool shouldPrintVerticalBorder = true;
+            string contentToPrint = string.Empty;
 
             if (shouldPrintColSpanSpace || shouldPrintRowSpanSpace)
-            {
-                shouldPrintVerticalBorder = cell.RenderColumnEndIndex == colIndex;
-                contentToPrint = string.Empty;
-            }
-            else
+                shouldPrintVerticalBorder = cell.RenderEndColumnIndex == colIndex;
+
+            if (!shouldPrintColSpanSpace && !shouldPrintRowSpanSpace)
             {
                 shouldPrintVerticalBorder = cell.ColSpan == 1;
                 contentToPrint = cell.Content;
@@ -235,18 +241,24 @@ namespace Fb2.Document.Models
             var paddedCellContent = contentToPrint.PadRight(paddingCount, ' ');
             var cellString = shouldPrintVerticalBorder ? $"{paddedCellContent}|" : paddedCellContent;
 
-            return cellString;
+            var horBorderChar = cell.RenderEndRowIndex > rowIndex ? ' ' : '-';
+            var horizontalBorderContent = new string(horBorderChar, paddedCellContent.Length);
+            if (shouldPrintVerticalBorder)
+                horizontalBorderContent = $"{horizontalBorderContent}-";
+
+            return (CellContent: cellString, HorizontalBorder: horizontalBorderContent);
         }
 
         private class TableCellModel
         {
-            public int StartRowIndex { get; }
-            public int EndRowIndex { get; }
-            public int RowSpan { get; }
+            public int CellRowIndex { get; } // index of cell in row.Content
+            public int RenderStartRowIndex { get; }
+            public int RenderEndRowIndex { get; }
 
-            public int CellArrayIndex { get; } // index of cell in row.Content
-            public int RenderColumnStartIndex { get; } // render column start position
-            public int RenderColumnEndIndex { get; }
+            public int RenderStartColumnIndex { get; } // render column start position
+            public int RenderEndColumnIndex { get; }
+
+            public int RowSpan { get; }
             public int ColSpan { get; }
 
             public string Content { get; } // stringnified cell content
@@ -259,15 +271,15 @@ namespace Fb2.Document.Models
                 int colSpan,
                 int rowSpan)
             {
-                CellArrayIndex = cellArrayIndex;
-                StartRowIndex = rowIndex;
-                EndRowIndex = rowIndex + (rowSpan - 1);
-                RenderColumnStartIndex = actualColumnIndex;
+                CellRowIndex = cellArrayIndex;
+                RenderStartRowIndex = rowIndex;
+                RenderEndRowIndex = rowIndex + (rowSpan - 1);
+                RenderStartColumnIndex = actualColumnIndex;
 
                 ColSpan = colSpan;
                 RowSpan = rowSpan;
 
-                RenderColumnEndIndex = RenderColumnStartIndex + (colSpan - 1);
+                RenderEndColumnIndex = RenderStartColumnIndex + (colSpan - 1);
 
                 Content = content;
             }
