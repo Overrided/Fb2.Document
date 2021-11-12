@@ -1,12 +1,12 @@
 name: Fb2.Document CI
 
 on:
-  pull_request:
   push:
+  pull_request:
     paths-ignore:
       - "**/**.md"
 
-# side by side build
+# side-by-side build
 jobs:
   build:
 
@@ -35,7 +35,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Build library
-        run: dotnet build -c release -v q
+        run: dotnet build -c release
 
       - name: Run tests
         run: dotnet test
