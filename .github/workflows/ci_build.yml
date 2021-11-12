@@ -58,9 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet: [ '3.0', '3.1.x', '5.0.x' ]
+        dotnet: [ '5.0.x', '6.0.x' ]
 
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v2
       - name: Setup dotnet ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v1
