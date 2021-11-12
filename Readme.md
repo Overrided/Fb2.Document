@@ -1,10 +1,8 @@
 # Fb2 Document Library
 
-Fb2.Document is lightweight, fast .Net Standard lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 5 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
-
-Library can be used with any .Net application that supports .Net 5
 
 ## Table of contents
 
@@ -16,8 +14,8 @@ Library can be used with any .Net application that supports .Net 5
 * [Loading](#Loading)
     * [Fb2Document](#fb2document)
     * [particular node](#particular-node)
-* [Encoding safety](#Encoding-safety)
-* [Querying](#Querying)
+* [Encoding](#encoding)
+* [Querying](#querying)
     * [Query Fb2Element](#query-fb2element-content)
     * [Query Fb2Container](#query-fb2Container)
     * [Querying Attributes](#querying-attributes)
@@ -28,11 +26,11 @@ Library can be used with any .Net application that supports .Net 5
     * [Method chaining](#method-chaining)
 * [Extensions](#extensions)
 
-* [API](#API)
+<!-- * [API](#API)
     * [Fb2Document Class API](#Fb2Document-Class-API)
     * [Fb2Node Class API](#Fb2Node-Class-API)
     * [Fb2Element Class API](#Fb2Element-Class-API)
-    * [Fb2Container Class API](#Fb2Container-Class-API)
+    * [Fb2Container Class API](#Fb2Container-Class-API) -->
 
 * [Constants](#Constants)
 
@@ -84,14 +82,6 @@ All comments are ignored by default.
 For full list of allowed elements and attribute names see [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs).
 
 For more details on implementation and supported scenarios see [API](#API) and [Usage](#Usage) sections.
-
-<!-- <br/> -->
-
-<!-- ## Usage
-
-Although file content is `xml`, validation of given file against appropriate `xsd` scheme is not an option as there are LOTS of semi-valid `fb2` files in the wild.
-
-As far as file can be read in different ways, `Fb2Document` class provides support for most common scenarios of loading, reading, querying and manipulating `fb2 book` contents and attributes. -->
 
 <br/>
 
@@ -180,7 +170,7 @@ paragraph.Load(node);
 
 <br/>
 
-### Encoding safety
+### Encoding
 
 If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
 
@@ -338,8 +328,6 @@ if (tableCellFb2Node.TryGetAttribute(AttributeNames.Align, true, out var alignAt
 
 Since `2.1.0` version of a library all descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
 
-<!-- ### Editing Content API -->
-
 All content of `Fb2Document` is represented by two core classes:
 
  - `Fb2Element` - represents `plain text` node of some kind.
@@ -351,9 +339,8 @@ Naturally, both types provide different APIs for editing respective `Content` pr
 
 ### Editing `Fb2Element` content
 
-As far as `Fb2Element` is purely-text representation entity, working with it looks like working with a `string`.
-
-This is not exactly the case - whole `fb2` format relies on `xml`. All content - nodes, text, `Attributes` - should comply with `xml` format, which brings some restrictions.
+As far as `Fb2Element` is purely-text representation entity, working with it looks like working with a `string`.  
+While this is true for `reading` string `Content`, this is not exactly the case for `changing` it as whole `fb2` format relies on `xml`. All content - nodes, text, `Attributes` - should comply with `xml` format, which brings some restrictions.
 
 1) Adding new text content in simplest manner is using `TextItem`, which directly represents plain text.
 
@@ -396,7 +383,7 @@ var strikethrough = new Strikethrough();
 strikethrough.AddTextContent("some Strikethrough text"); // adding text directly
 ```
 
-For any descendant of `Fb2Container` basic method of adding nodes to actual content is `AddContent(Fb2Node node)`, with a bunch of 'sugar' methods on top for different use-cases.
+For any descendant of `Fb2Container` basic method of adding nodes to actual content is `AddContent(Fb2Node node)`, with a bunch of overloads on top for different use-cases.
 
 2) Adding `empty Strong` node to `Paragraph`:
 
@@ -412,13 +399,16 @@ var paragraph = new Paragraph();
 paragraph.AddContent(new Strong().AddTextContent("strong content")); // adding child instance with text
 ```
 
-4) Adding `empty Strong` node to `Paragraph` using override 'sugar' methods, using `LINQ`-style method chaining:
+4) Adding `empty Strong` node to `Paragraph` using 'sugar' methods, using `LINQ`-style method chaining:
 
 ```csharp
 var paragraph = new Paragraph();
 paragraph.AddContent(ElementNames.Strong) // by node name
+// or:
          .AddContent(new List<Fb2Node> { new Strong(), new Emphasis() }) // add multiple items at once as `IEnumerable<Fb2Node>`
+// or:
          .AddContent(new Strong(), new Emphasis()) // add multiple items at once as `params Fb2Node[]`
+// or:
          .AddContent(() =>                          // with node function provider - Func<Fb2Node>
          {
              // do stuff, load, query content, etc
@@ -540,33 +530,30 @@ paragraph
 But, there are few limitations due to `fb2-tree` implementation & `c#` not supporting covariant retun types.  
 As eagle-eyed readers might have noticed that:
 
-1) Part of `Editing API` implemented in `Fb2Container` class - node related - like `AddContent(Fb2Node node)`, `AddContent(IEnumerable<Fb2Node> nodes)`, `RemoveContent(Fb2Node node)` etc - all have return type of `Fb2Container`. So, this will work:  
+1) Part of `Editing API` implemented in `Fb2Container` class - node related - like `AddContent(Fb2Node node)`, `AddContent(IEnumerable<Fb2Node> nodes)`, `RemoveContent(Fb2Node node)` etc - all have return type of `Fb2Container`.  
 
 ```csharp
-var paragraph = new Paragraph().AddContent(() => new Strong().AddTextContent("strong text 1 ")); // or use any other overload of `AddContent`
-```
-  - This ***will not***: 
-```csharp
+// So, this will work:
+Fb2Container paragraph = new Paragraph().AddContent(() => new Strong().AddTextContent("strong text 1 ")); // or use any other overload of `AddContent`
+// This WILL NOT:
 Paragraph paragraph = new Paragraph().AddContent(new Strong().AddTextContent("strong text 1 ")); // returns `Fb2Container`, not `Paragraph`
 ```
 
-2) Part of `Editing API` implemented in `Fb2Element` class - text related - like `AddContent(string newContent, string? separator = null)` or `ClearContent()` etc - all have return type of `Fb2Element`. So, this will work:  
+2) Part of `Editing API` implemented in `Fb2Element` class - text related - like `AddContent(string newContent, string? separator = null)` or `ClearContent()` etc - all have return type of `Fb2Element`.  
 
 ```csharp
-var plainTextItem = new TextItem().AddContent(() => "text 1 "); // or use any other overload of `AddContent`
-```
-  - This ***will not***: 
-```csharp
+// So, this will work:  
+Fb2Element plainTextItem = new TextItem().AddContent(() => "text 1 "); // or use any other overload of `AddContent`
+// This WILL NOT:
 TextItem plainTextItem = new TextItem().AddContent(() => "text 1 "); // returns `Fb2Element`, not `TextItem` 
 ```
 
-3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(KeyValuePair<string, string> attribute)`, `AddAttributes(IDictionary<string, string> attributes)` or `RemoveAttribute(string attributeName, bool ignoreCase = false)` etc - all have return type of `Fb2Node`. So, this will work:  
+3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(KeyValuePair<string, string> attribute)`, `AddAttributes(IDictionary<string, string> attributes)` or `RemoveAttribute(string attributeName, bool ignoreCase = false)` etc - all have return type of `Fb2Node`.  
 
 ```csharp
-var paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "testValue"); // but `paragraph` variable has `Fb2Node` type now
-```
-  - This ***will not***: 
-```csharp
+//So, this will work:
+Fb2Node paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "testValue"); // but `paragraph` variable has `Fb2Node` type now
+// This WILL NOT:
 Paragraph paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "testValue"); // cant assign Fb2Node to Paragraph
 ```
 > Attention!
@@ -586,132 +573,9 @@ Those extensions are generic wrappers around Editing APIs of respective classes 
 Paragraph paragraph = new Paragraph().AppendAttribute(firstAlowedAttributeName, "testValue");
 ```
 
+Extensions methods naming is slightly differs from naming of appropriate classes, e.g. `AppendContent` extension corresponds to `AddContent`, `DeleteContent` to `RemoveContent` and `EraseContent` to `ClearContent`.
 
-## API
-
-## Fb2Document Class API
-
-### Fb2Document Methods
-
-| Method name | Arguments |  Returns  |                              Description                             |
-|:-----------:|:---------:|:---------:|----------------------------------------------------------------------|
-|     Load    | XDocument |    void   | Loads `Fb2Document` from a `XDocument` synchronously. Not encoding safe! |
-|     Load    |   string  |    void   | Loads `Fb2Document` from a string synchronously. Not encoding safe!    |
-|     Load    |   Stream  |    void   | Loads `Fb2Document` from a stream synchronously. Encoding safe.        |
-|  LoadAsync  |   Stream  |    Task   | Loads `Fb2Document` from a stream asynchronously. Encoding safe.       |
-|    ToXml    |           | XDocument | Serializes loaded book back to `XDocument`.                            |
-| ToXmlString |           |   string  | Serializes loaded book to `xml` string.                                |
-| CreateDocument |        |  Fb2Document | Static method. Returns new instance of `Fb2Document` with empty `Fb2Book`, `IsLoaded` property is set to `true`.|
-
-### Fb2Document Properties
-
-| Property name |&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;|                                                                    Description                                                                    |
-|:-------------:|:------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
-|      Book     |        FictionBook       | Represents the whole Fb2 file root node - `<FictionBook>`.                                                                                           |
-|     Title     |         TitleInfo        | Represents part of `<description>` section, `<title-info>`.                                                                                            |
-|  SourceTitle  |       SrcTitleInfo       | Represents part of `<description>` section, `<src-title-info>`. Has same content as Title, but in original language.  Not populated in original book. |
-|  DocumentInfo |       DocumentInfo       | Represents part of `<description>` section, `<document-info>`. Contains info about particular fb2 file.                                              |
-|  PublishInfo  |        PublishInfo       | Represents part of `<description>` section, `<publish-info>`. Contains info about published (paper) origin of a book.                                |
-|   CustomInfo  |        CustomInfo        | Represents part of `<description>` section, `<custom-info>`. Contains any additional info about book.                                                |
-|     Bodies    |     List\<BookBody>      | Lists all `<body>` elements found in book.                                                                                                          |
-|  BinaryImages |   List\<BinaryImage>     | Lists all `<binary>` elements found in book.                                                                                                        |
-|    IsLoaded   |           bool           | Indicates whether book was loaded                                                                                                                 |
-
->Attention!
->
->If `Load()` or `LoadAsync()` methods were not called or had not completed yet, any property of listed above will yield null.
-
-## Fb2Node Class API
-
-`Fb2Node` is base class for all given models in `Fb2Document.Models.*` namespace.
-
-It defines basic interface of a node. Some of descendant classes may override given properties and methods.
-
-### Fb2Node Methods
-
-|   Method name   |                    Arguments                   |            Returns            | Description                                                                                                                                                                                                                                                                                                                                             |
-|:---------------:|:----------------------------------------------:|:-----------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|       Load      |                      XNode                     |              void             | Performs basic steps - validation of given `XNode` instance and reading attributes of element, if any.                                                                                                                                                                                                                                                  |
-|      ToXml      |                                                |            XElement           | Performs basic serialization of node into `fb2`/`xml` format. Creates `XElement` and writes attributes into, if any.                                                                                                                                                                                                                                    |
-|   HasAttribute  |                  string,&nbsp;bool                  |              bool             | Checks if node has attribute(s) with given key. <br>`bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search. <br> If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                                        |
-|   GetAttribute  |                  string,&nbsp;bool                  | KeyValuePair\<string,&nbsp;string> | Returns the first element of `Attributes` list that matches given key or a `default` value if no such element is found. <br> `bool ignoreCase` param is optional, set to `false` by default. Set it to `true` to ignore casing during key search.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown. |
-| TryGetAttribute | string,&nbsp;bool |              bool,&nbsp;out&nbsp;KeyValuePair<string,&nbsp;string>             | Returns true if attribute found by given key, otherwise `false`. <br>If none attribute found, result contains `default` value of `KeyValuePair<string, string>` instead of actual attribute.<br>If `key` argument is null or empty string, `ArgumentNullException` is thrown.                                                     |
-
-### Fb2Node Properties
-
-|   Property name   |&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;|                                                                                                Description                                                                                                |
-|:-----------------:|:--------------------------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        Name       |           string           | Name of element. Abstract property, each element must implement it.                                                                                                                                       |
-|     Attributes    | Dictionary\<string,&nbsp;string> | Actual attributes of `XNode` are mapped into this property (if any).                                                                                                                                        |
-| AllowedAttributes |       HashSet\<string>      | List of names of allowed attributes. Any attribute,  not belonging to element, will be skipped.                                                                                                           |
-|      IsInline     |            bool            | Indicates whether element should go in same line or after new line.                                                                                                                                       |
-|       Unsafe      |            bool            | Indicates if element is placed correctly in document structure. For instance, `<p>` element is not expected directly in `<FictionBook>` element. So paragraph will not be skipped, but marked as Unsafe. |
-
-## Fb2Element Class API
-
-Derived from `Fb2Node`. `Fb2Element` is basic abstract class for any text-only container element.
-
-`IsInline` property is set to `true` by default for any descendant of `Fb2Element`.
-
-### Fb2Element Methods
-
-| Method name | Arguments |  Returns |                                     Description                                      |
-|:-----------:|:---------:|:--------:|--------------------------------------------------------------------------------------|
-|     Load    |   XNode   |   void   | Override. Copies given `XNode`s string content, providing validation & formatting.    |
-|    ToXml    |           | XElement | Override. Populates element with string content.                                     |
-|   ToString  |           |  string  | Override. Returns element's `Content` property.                                        |
-
-### Fb2Element Properties
-
-| Property name |  Type  |                                        Description                                        |
-|:-------------:|:------:|-------------------------------------------------------------------------------------------|
-|    Content    | string | Content (value) of mapped `XElement` element. Available after `Load()` method call completes. |
-|    IsInline   | bool   | Override of base `IsInline` property from `Fb2Node` class. `true` by default.     |
-
-## Fb2Container Class API
-
-Derived from `Fb2Node`. `Fb2Container` is basic abstract class for any element, capable of containing elements.
-
-### Fb2Container Methods
-
-Base (inherited) methods
-
-| Method name |&nbsp;&nbsp;&nbsp;Arguments&nbsp;&nbsp;&nbsp;|  Returns | Description                                                                                                                  |
-|:-----------:|:----------:|:--------:|------------------------------------------------------------------------------------------------------------------------------|
-|     Load    | XNode |   void   | Override. Copies given `XNode`s content, and calls `Load` method recursively on each child element, propagating tree loading. |
-|   ToString  |       |  string  | Override. Calls `ToString` method recursively on each child element and  combines it based on `IsInline` property.           |
-|    ToXml    |       | XElement | Override. Populates `XElement` with content recursively, by calling `ToXml` on each child.                                     |
-
-Node querying methods
-
-|       Method name      |Arguments|        Returns        | Description                                                                                                                                                                                                                                                             |
-|:----------------------:|:-----------:|:---------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|       GetChildren      | string | List\<Fb2Node> | Gets children of element by given name.  Wrapper for `Content.Where(e => e.Name.EqualsInvariant(name))` query. `name` parameter is case insensitive.  If `name` is null or empty string, `ArgumentNullException` is thrown.                                                                             |
-|      GetFirstChild     | string |        Fb2Node        | Gets first child of element by given name.  Wrapper for `string.IsNullOrWhiteSpace(name) ? Content.FirstOrDefault() : Content.FirstOrDefault(e => e.Name.EqualsInvariant(name));` query. `name` parameter is case insensitive.                                                                          |
-|     GetDescendants     | string |     List\<Fb2Node>    | Gets all descendants of an element by given name. Recursively iterates through sub-tree, filtering elements by name. `name` parameter is case insensitive.  If `name` is null or empty string, *all* descendant elements are  returned in flat list format.                                             |
-|   GetFirstDescendant   | string |        Fb2Node        | Gets first descendant of an element by given name. Recursively iterates through sub-tree, filtering elements by name. `name` parameter is case insensitive. If `name` is null or empty string, `ArgumentNullException` is thrown.                                                                       |
-| TryGetFirstDescendant  | string |     bool,&nbsp;out&nbsp;Fb2Node       | Looks for first descendant of an element by given name. Recursively iterates through sub-tree, filtering element by name. `name` parameter is case insensitive. Result node is returned as `out` parameter. <br> Returns `true` if child element found, otherwise `false`. <br>If `name` argument is null or empty string, `ArgumentNullException` is thrown.                                                                       |
-|     GetChildren\<T>    |        |    List\<T>    | Gets children of element by given type `T`, `where T : Fb2Node`. For example, `fb2Document.Book.GetChildren<BookDescription>()`  query returns all `BookDescription` elements from `fb2Document.Book.Content`                                                                                           |
-|    GetFirstChild\<T>   |        |           T           | Gets first child of element by given type `T`, `where T : Fb2Node`. For example, `fb2Document.Book.GetFirstChild<BookDescription>()`  query returns first `BookDescription` element from `fb2Document.Book.Content`                                                                                     |
-|   GetDescendants\<T>   |        |        List\<T>       | Gets all descendants of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering elements by type. For example, `fb2Document.Book.GetDescendants<Paragraph>()`  query returns all `Paragraph` element from whole book (as fb2Document.Book is root element). |
-| GetFirstDescendant\<T> |        |           T           | Gets first descendant of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering element by type. For example, `fb2Document.Book.GetFirstDescendant<Paragraph>()`  query returns first `Paragraph` element it meets in whole book.                          |
-| TryGetFirstDescendant\<T>  |  |     bool,&nbsp;out&nbsp;T       | Looks for first descendant of an element by given type `T`, `where T : Fb2Node`. Recursively iterates through sub-tree, filtering element by type.<br> Returns `true` if child element found, otherwise `false`.                                                                      |
-
-At some point you may want to list whole node`s content in list (flat) form.
-
-To achieve this, use `GetDescendants` method(s).
-
-For `GetDescendants(string name)` implementation:
-
-```
-var wholeBookContent = fb2Document.Book.GetDescendants(null);
-```
-
-For `GetDescendants<T>()` implementation:
-
-```
-var wholeBookContent = fb2Document.Book.GetDescendants<Fb2Node>();
-```
+<br/>
 
 ## Constants
 
@@ -719,6 +583,8 @@ Most used constants are [ElementNames](https://github.com/Overrided/Fb2.Document
 respectively, element and attribute names that are allowed to be loaded from file.
 
 All nodes / attributes, which names are not on list, will be omitted during document loading.
+
+<br/>
 
 ## Error handling
 
@@ -736,6 +602,8 @@ To simplify error-handling for different validation, loading and editing errors 
 
 <!-- In most cases, handling `XmlException` is enough to be safe from under-the-hood `xml` content flaws. -->
 
+<br/>
+
 ## Tests
 
 Solution contains test project, which covers all models configurations & main element loading, validation and generation logic.
@@ -744,5 +612,4 @@ As far as project contains 63 different models, which are, in fact, configs for 
 it would be incredibly boring to write tests for each of it. Reflection comes as best solution to get all model types, create corresponding instances and try to load
 each of them with different sets of data.
 
-Also, there are separate tests for [Fb2ElementFactory](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Factories/Fb2ElementFactory.cs) and  
-`IntegrationTests` test, which creates `Fb2Document`, saves it as a file, reads it into second model, saves again and checks if both saved files are equal.
+Also, there are separate tests for [Fb2ElementFactory](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Factories/Fb2ElementFactory.cs) and `IntegrationTests` test, which creates `Fb2Document`, saves it as a file, reads it into second model, saves again and checks if both saved files are equal.
