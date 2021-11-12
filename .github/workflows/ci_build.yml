@@ -6,28 +6,7 @@ on:
     paths-ignore:
       - "**/**.md"
 
-#jobs:
-#  build:
-
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest]
-#        dotnet: ['5.0','6.0' ]
-
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Install .NET ${{ matrix.dotnet }}
-#        uses: actions/setup-dotnet@v1
-#        with:
-#          dotnet-version: ${{ matrix.dotnet }}
-#          include-prerelease: true
-#      - name: Build library on ${{ matrix.os }}
-#        run: dotnet build -c release -f ${{ matrix.dotnet }}
-#      - name: Run tests
-#        run: dotnet test
-
-# works - side by side build
+# side by side build
 jobs:
   build:
 
@@ -40,6 +19,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install .NET Core 3.1
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
       - name: Install .NET 5.0
         uses: actions/setup-dotnet@v1
         with:
@@ -49,7 +33,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-          #include-prerelease: true
 
       - name: Build library
         run: dotnet build -c release

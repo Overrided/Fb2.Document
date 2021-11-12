@@ -20,8 +20,8 @@ namespace Fb2.Document
     {
         private const string defaultXmlVersion = "1.0";
 
-        private static readonly XDeclaration DefaultDeclaration = new(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
-        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new()
+        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
+        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings()
         {
             Async = true,
             CheckCharacters = true,

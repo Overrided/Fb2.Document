@@ -136,7 +136,7 @@ namespace Fb2.Document.Models.Base
             if (other == null)
                 return false;
 
-            if (other is not Fb2Element otherElement)
+            if (!(other is Fb2Element otherElement))
                 return false;
 
             if (!base.Equals(otherElement))

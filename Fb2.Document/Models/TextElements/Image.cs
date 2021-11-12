@@ -20,7 +20,7 @@ namespace Fb2.Document.Models
                 AttributeNames.XHref,
                 AttributeNames.Type);
 
-        private readonly HashSet<string> InlineParentNodes = new()
+        private readonly HashSet<string> InlineParentNodes = new HashSet<string>()
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -30,7 +30,7 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private readonly HashSet<string> NotInlineParentNodes = new()
+        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,

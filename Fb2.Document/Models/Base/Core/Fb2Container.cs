@@ -20,7 +20,7 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
-        private List<Fb2Node> content = new();
+        private List<Fb2Node> content = new List<Fb2Node>();
 
         /// <summary>
         /// Actual value is available after `Load()` method call.
@@ -102,7 +102,7 @@ namespace Fb2.Document.Models.Base
             var builder = new StringBuilder();
 
             foreach (var child in content)
-                builder.Append(child.IsInline ? child : $"{Environment.NewLine}{child}");
+                builder.Append(child.IsInline ? child.ToString() : $"{Environment.NewLine}{child}");
 
             return builder.ToString();
         }
@@ -130,7 +130,7 @@ namespace Fb2.Document.Models.Base
             if (other == null)
                 return false;
 
-            if (other is not Fb2Container otherContainer)
+            if (!(other is Fb2Container otherContainer))
                 return false;
 
             if (!base.Equals(otherContainer))
@@ -674,7 +674,7 @@ namespace Fb2.Document.Models.Base
         }
 
         private XNode ToXmlInternal(Fb2Node element) =>
-            element is TextItem textItem ? new XText(textItem.Content) : element.ToXml();
+            element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml();
 
         #endregion
     }

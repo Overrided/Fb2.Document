@@ -245,7 +245,7 @@ namespace Fb2.Document.Models
             return (CellContent: cellString, HorizontalBorder: horizontalBorderContent);
         }
 
-        private record TableCellModel
+        private class TableCellModel
         {
             public int CellRowIndex { get; } // index of cell in row.Content
             public int RenderStartRowIndex { get; }

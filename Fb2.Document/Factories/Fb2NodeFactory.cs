@@ -13,7 +13,7 @@ namespace Fb2.Document.Factories
 {
     public static class Fb2NodeFactory
     {
-        private static readonly Dictionary<string, Type> KnownNodes = new()
+        private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>()
         {
             { ElementNames.FictionBook, typeof(FictionBook) },
             { ElementNames.BinaryImage, typeof(BinaryImage) },

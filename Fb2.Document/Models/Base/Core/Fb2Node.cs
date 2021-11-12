@@ -22,10 +22,10 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        protected static readonly Regex trimWhitespace = new(@"\s+", RegexOptions.Multiline);
+        protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
         protected const string Whitespace = " ";
 
-        private Dictionary<string, string> attributes = new();
+        private Dictionary<string, string> attributes = new Dictionary<string, string>();
 
         /// <summary>
         /// Node name, used during document parsing and validation.
@@ -349,16 +349,16 @@ namespace Fb2.Document.Models.Base
 
         private static bool TryGetXNodeAttributes([In] XNode node, out Dictionary<string, string> result)
         {
-            if (node is not XElement element)
+            if (!(node is XElement element))
             {
-                result = new(0);
+                result = new Dictionary<string, string>(0);
                 return false;
             }
 
             var actualAttrs = element.Attributes();
             if (!actualAttrs.Any())
             {
-                result = new(0);
+                result = new Dictionary<string, string>(0);
                 return false;
             }
 
@@ -380,7 +380,7 @@ namespace Fb2.Document.Models.Base
             if (other == null)
                 return false;
 
-            if (other is not Fb2Node otherNode)
+            if (!(other is Fb2Node otherNode))
                 return false;
 
             if (ReferenceEquals(this, otherNode))
