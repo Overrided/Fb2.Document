@@ -35,7 +35,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Build library
-        run: dotnet build -c release
+        run: dotnet build -c release -v q
 
       - name: Run tests
         run: dotnet test
