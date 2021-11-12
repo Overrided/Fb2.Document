@@ -22,6 +22,6 @@ jobs:
           dotnet-version: ${{ matrix.dotnet }}
           include-prerelease: true
       - name: Build library on ${{ matrix.os }}
-        run: dotnet build --configuration release
+        run: dotnet build -c release -f ${{ matrix.dotnet }}
       - name: Run tests
         run: dotnet test
