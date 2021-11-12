@@ -189,9 +189,9 @@ namespace Fb2.Document.Models.Base
         #region Node editing
 
         /// <summary>
-        /// Adds multiple attributes in `params KeyValuePair<string, string>[]` form to <see cref="Attributes"/>.
+        /// Adds set of attributes to node using params <seealso cref="KeyValuePair{string,string}"/>
         /// </summary>
-        /// <param name="attributes">Attributes to add.</param>
+        /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
@@ -205,9 +205,9 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds multiple attributes in `IDictionary<string, string>` form to <see cref="Attributes"/>.
+        /// Adds multiple attributes using <seealso cref="IDictionary{string, string}" />.
         /// </summary>
-        /// <param name="attributes">Attributes to add.</param>
+        /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
         {
@@ -259,7 +259,7 @@ namespace Fb2.Document.Models.Base
             AddAttribute(attribute.Key, attribute.Value);
 
         /// <summary>
-        /// Adds single attribute to <see cref="Attributes"/> using separate key & value.
+        /// Adds single attribute using separate key and value.
         /// </summary>
         /// <param name="attributeName">Attribute key.</param>
         /// <param name="attributeValue">Attribute value.</param>
