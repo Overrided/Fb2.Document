@@ -101,8 +101,8 @@ namespace Fb2.Document.Tests.ModelsTests
 
             instance
                 .Invoking(i => i.AddAttributes(
-                    new("testKey", "testValue"),
-                    new("testKey2", "testValue2")))
+                    new KeyValuePair<string, string>("testKey", "testValue"),
+                    new KeyValuePair<string, string>("testKey2", "testValue2")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
@@ -204,7 +204,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<InvalidAttributeException>();
 
             instance
-                .Invoking(i => i.AddAttributes(new("", ""), new("", "")))
+                .Invoking(i => i.AddAttributes(new KeyValuePair<string, string>("", ""), new KeyValuePair<string, string>("", "")))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
