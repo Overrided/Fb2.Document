@@ -220,9 +220,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent), $"{nameof(newContent)} is null or empty string.");
 
-            var textItem = new TextItem().AddContent(newContent, separator);
-
-            return AddContent(textItem);
+            return TryMergeTextContent(newContent, separator);
         }
 
         /// <summary>
@@ -256,6 +254,8 @@ namespace Fb2.Document.Models.Base
             return AddContent(node);
         }
 
+        // TODO : add tests, to show that number of "textItems" doesnt increase
+
         /// <summary>
         /// Adds given node to <see cref="Content"/>.
         /// </summary>
@@ -270,15 +270,18 @@ namespace Fb2.Document.Models.Base
                 throw new UnknownNodeException(node);
 
             var nodeName = node.Name;
+            var isTextNode = node is TextItem;
 
-            if (nodeName.EqualsInvariant(ElementNames.FictionText) && !CanContainText)
+            if (isTextNode && !CanContainText)
                 throw new UnexpectedNodeException(Name, nodeName);
 
-            if (!AllowedElements.Contains(nodeName) && !nodeName.Equals(ElementNames.FictionText))
+            if (!AllowedElements.Contains(nodeName) && !isTextNode)
                 throw new UnexpectedNodeException(Name, nodeName);
+
+            if (isTextNode)
+                return TryMergeTextContent((node as TextItem).Content);
 
             content.Add(node);
-
             return this;
         }
 
@@ -671,6 +674,20 @@ namespace Fb2.Document.Models.Base
             }
 
             return null;
+        }
+
+        private Fb2Container TryMergeTextContent(string newContent, string? separator = null)
+        {
+            var lastChildNode = IsEmpty ? null : Content.LastOrDefault();
+
+            // empty or has other containers
+            if (lastChildNode == null ||
+                !(lastChildNode is TextItem lastTextItem))
+                content.Add(new TextItem().AddContent(newContent, separator));
+            else
+                lastTextItem.AddContent(newContent, separator);
+
+            return this;
         }
 
         private XNode ToXmlInternal(Fb2Node element) =>

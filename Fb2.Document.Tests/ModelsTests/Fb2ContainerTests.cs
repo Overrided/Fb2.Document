@@ -158,6 +158,140 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CanContainText_AddMultipleTextNodes_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.AddContent(new TextItem().AddContent("test text"));
+
+            node.Content.Count.Should().Be(1);
+            var first = node.GetFirstChild<TextItem>();
+            first.Should().NotBeNull();
+            first.Content.Should().Be("test text");
+
+            node.AddContent(new TextItem().AddContent(" test text 2 "));
+
+            node.Content.Count.Should().Be(1);
+            var second = node.GetFirstChild<TextItem>();
+            second.Should().NotBeNull();
+            second.Content.Should().Be("test text test text 2 ");
+            first.Content.Should().Be("test text test text 2 ");
+
+            node.AddContent(new TextItem().AddContent("test text 3 "));
+
+            node.Content.Count.Should().Be(1);
+            second.Content.Should().Be("test text test text 2 test text 3 ");
+            first.Content.Should().Be("test text test text 2 test text 3 ");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CanContainText_AddMultipleTextNodes_WithContainers_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.AddContent(new TextItem().AddContent("test text"));
+
+            node.Content.Count.Should().Be(1);
+            var first = node.GetFirstChild<TextItem>();
+            first.Should().NotBeNull();
+            first.Content.Should().Be("test text");
+
+            node.AddContent(new TextItem().AddContent(" test text 2 "));
+
+            node.Content.Count.Should().Be(1);
+            var second = node.GetFirstChild<TextItem>();
+            second.Should().NotBeNull();
+            second.Content.Should().Be("test text test text 2 ");
+            first.Content.Should().Be("test text test text 2 ");
+
+            node.AddContent(node.AllowedElements.First());
+
+            node.Content.Count.Should().Be(2);
+
+            node.AddContent(new TextItem().AddContent("test text 3 "));
+
+            node.Content.Count.Should().Be(3);
+            var textItems = node.GetChildren<TextItem>().ToList();
+            textItems.Count.Should().Be(2);
+            textItems.First().Content.Should().Be("test text test text 2 ");
+            textItems.Last().Content.Should().Be("test text 3 ");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CanContainText_AddMultipleTextContent_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.AddTextContent("test text");
+
+            node.Content.Count.Should().Be(1);
+            var first = node.GetFirstChild<TextItem>();
+            first.Should().NotBeNull();
+            first.Content.Should().Be("test text");
+
+            node.AddTextContent("test text 2", " ");
+
+            node.Content.Count.Should().Be(1);
+            var second = node.GetFirstChild<TextItem>();
+            second.Should().NotBeNull();
+            second.Content.Should().Be("test text test text 2");
+            first.Content.Should().Be("test text test text 2");
+
+            node.AddTextContent("test text 3", " ");
+
+            node.Content.Count.Should().Be(1);
+            second.Content.Should().Be("test text test text 2 test text 3");
+            first.Content.Should().Be("test text test text 2 test text 3");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_CanContainText_AddMultipleTextContent_WithContainers_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.AddTextContent("test text");
+
+            node.Content.Count.Should().Be(1);
+            var first = node.GetFirstChild<TextItem>();
+            first.Should().NotBeNull();
+            first.Content.Should().Be("test text");
+
+            node.AddTextContent("test text 2", "  ");
+
+            node.Content.Count.Should().Be(1);
+            var second = node.GetFirstChild<TextItem>();
+            second.Should().NotBeNull();
+            second.Content.Should().Be("test text  test text 2");
+            first.Content.Should().Be("test text  test text 2");
+
+            node.AddContent(node.AllowedElements.First());
+            node.Content.Count.Should().Be(2);
+
+            node.AddTextContent("test text 3", " ");
+            node.Content.Count.Should().Be(3);
+            var textItems = node.GetChildren<TextItem>().ToList();
+            textItems.Count.Should().Be(2);
+            textItems.First().Content.Should().Be("test text  test text 2");
+            textItems.Last().Content.Should().Be(" test text 3");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
         public void Container_AddContent_NotAllowedElement_Throws(Fb2Container node)
         {
             node.Should().NotBeNull();
