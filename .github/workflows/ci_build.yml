@@ -46,4 +46,4 @@ jobs:
           targetdir: "coveragereport" # REQUIRED # The directory where the generated report should be saved.
           reporttypes: "HtmlInline;Cobertura" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
           verbosity: "Info" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
-          toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.
+          toolpath: "../../reportgeneratortool" # Default directory for installing the dotnet tool.
