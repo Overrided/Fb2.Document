@@ -8,29 +8,26 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 
 * [Installation](#Installation)
 
-* [Document infrastructure and loading](#Document-infrastructure-and-loading)
+* [Document infrastructure](#Document-infrastructure)
 
-<!-- * [Usage](#Usage) -->
 * [Loading](#Loading)
     * [Fb2Document](#fb2document)
     * [particular node](#particular-node)
+
 * [Encoding](#encoding)
+
 * [Querying](#querying)
     * [Query Fb2Element](#query-fb2element-content)
     * [Query Fb2Container](#query-fb2Container)
     * [Querying Attributes](#querying-attributes)
+
 * [Editing](#Editing)
     * [Editing Fb2Element content](#editing-fb2element-content)
     * [Editing Fb2Container content](#editing-fb2container-content)
     * [Editing Attributes](#editing-attributes)
     * [Method chaining](#method-chaining)
-* [Extensions](#extensions)
 
-<!-- * [API](#API)
-    * [Fb2Document Class API](#Fb2Document-Class-API)
-    * [Fb2Node Class API](#Fb2Node-Class-API)
-    * [Fb2Element Class API](#Fb2Element-Class-API)
-    * [Fb2Container Class API](#Fb2Container-Class-API) -->
+* [Extensions](#extensions)
 
 * [Constants](#Constants)
 
@@ -52,7 +49,7 @@ You can download and use Fb2Document package in your app via
 
 <br/>
 
-## Document infrastructure and loading
+## Document infrastructure
 
 In fact, `fb2` file is just an `XML` with a set of custom nodes, attributes and data relations. However, validation of given `fb2` file against appropriate `xsd` scheme is not an option as there are LOTS of semi-valid `fb2` files in the wild.
 
@@ -71,7 +68,7 @@ Base abstract classes are `Fb2Node` and it's descendants - `Fb2Container` and `F
 `Fb2Document` class, in turn, is not derived from `Fb2Node`, but still plays major role in file processing.
 That class serves as a topmost container, which is capable of loading and representing `fb2` file structure, providing access to `Fb2Container`/`Fb2Element` basic API's.
 
-`Book` property of an `Fb2Document` is populated after call to `Load` (or `LoadAsync`) method ended and represents actual `<FictionBook>` element of `fb2` file.
+`Book` property of an `Fb2Document` is populated after call to `Load` (or `LoadAsync`) method ended and represents actual `<FictionBook>` element of `fb2` file - root of a `Fb2 DOM` tree.
 
 >Attention!
 >
@@ -80,8 +77,6 @@ Misplaced elements, like a plain text in root of a book, are not ignored, but ma
 All comments are ignored by default.
 
 For full list of allowed elements and attribute names see [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs).
-
-For more details on implementation and supported scenarios see [API](#API) and [Usage](#Usage) sections.
 
 <br/>
 
@@ -93,7 +88,7 @@ There are API's that enable loading `fb2 DOM` in different scenarios, for both `
 
 1) ...from string
 
-```
+```csharp
 string fileContent = await dataService.GetFileContent(Fb2FilePath);
 
 Fb2Document fb2Document = new Fb2Document();
@@ -105,7 +100,7 @@ fb2Document.Load(fileContent);
 
 2) ...from string asynchronously
 
-```
+```csharp
 Fb2Document fb2Document = new Fb2Document();
 
 string fileContent = await dataService.GetFileContent(Fb2FilePath);
@@ -117,24 +112,26 @@ await fb2Document.LoadAsync(fileContent);
 
 3) ...from XDocument
 
-```
-XDocument document = dataService.GetFileAsXDoc(Fb2FilePath);
+```csharp
+XDocument xDocument = dataService.GetFileAsXDoc(Fb2FilePath);
 
 Fb2Document fb2Document = new Fb2Document();
 
-fb2Document.Load(document);
+fb2Document.Load(xDocument);
 ```
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
 4) ...from stream
 
-```
+```csharp
 Fb2Document fb2Document = new Fb2Document();
 
 using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 {
     fb2Document.Load(stream);
+    // or:
+    fb2Document.Load(stream, new Fb2StreamLoadingOptions(false)); // some options
 }
 ```
 
@@ -142,12 +139,14 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 5) ...from stream asynchronously
 
-```
+```csharp
 Fb2Document fb2Document = new Fb2Document();
 
 using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 {
     await fb2Document.LoadAsync(stream);
+    // or:
+    await fb2Document.LoadAsync(stream, new Fb2StreamLoadingOptions(false)); // options
 }
 ```
 
@@ -161,7 +160,7 @@ In corner-case scenario you might need to load some part of a document into the 
 
 It can be achieved by directly calling `Load(XNode node)` method on corresponding Fb2Node implementation instance.
 
-```
+```csharp
 Paragraph paragraph = new Paragraph();
 // assuming node is instance of XNode which contains paragraph - otherwise
 // exception will be thrown on validation phase of loading process
@@ -180,11 +179,7 @@ If method is encoding-safe - during loading process library will try to determin
 
 ## Querying
 
-All descendants of `Fb2Node` (itself included) class has certain interface to access, query and manipulate parsed data.
-
-For full list of properties for accessing document structural parts see [Fb2Document.Properties](#Fb2Document-Properties).
-
-For full list of methods for querying the model's content, see [Fb2Container.Methods](#Fb2Container-Methods).
+All descendants of `Fb2Node` (itself included) class provide build-in methods to query and manipulate parsed data in multiple ways.
 
 <br/>
 
@@ -600,7 +595,7 @@ To simplify error-handling for different validation, loading and editing errors 
 `UnknownNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
 `UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.  
 
-<!-- In most cases, handling `XmlException` is enough to be safe from under-the-hood `xml` content flaws. -->
+For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/7b95c74a6f2f65e383b6a8daa8597d6315a60275/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).
 
 <br/>
 
