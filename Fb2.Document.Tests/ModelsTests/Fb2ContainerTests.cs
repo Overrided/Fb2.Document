@@ -66,11 +66,11 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(async n => await n.AddContentAsync(
                 async () => await Task.FromResult<Fb2Node>(null))) // async node provider
                 .Should()
-                .Throw<ArgumentNullException>();
+                .ThrowExactlyAsync<ArgumentNullException>();
 
             node.Invoking(async n => await n.AddContentAsync(null))
                 .Should()
-                .Throw<ArgumentNullException>();
+                .ThrowExactlyAsync<ArgumentNullException>();
         }
 
         // just for lulz
@@ -330,7 +330,7 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(async n =>
                 await n.AddContentAsync(async () => await Task.FromResult(notAllowedNode))) // async node provider
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactlyAsync<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
         }
 

@@ -141,7 +141,7 @@ namespace Fb2.Document.Tests.ModelsTests
             instance
                 .Invoking(i => i.AddAttributeAsync(null))
                 .Should()
-                .ThrowExactly<ArgumentNullException>();
+                .ThrowExactlyAsync<ArgumentNullException>();
 
             instance
                 .Invoking(i => i.AddAttributes())
