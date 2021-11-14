@@ -67,14 +67,18 @@ namespace Fb2.Document.Models.Base
             var nodes = element.Nodes()
                 .Where(n => n.NodeType == XmlNodeType.Text ||
                             (n.NodeType == XmlNodeType.Element &&
-                            Fb2NodeFactory.IsKnownNodeName((n as XElement).Name.LocalName)));
+                            Fb2NodeFactory.IsKnownNodeName((n as XElement).Name.LocalName)))
+                .ToList();
 
-            if (!nodes.Any())
+            var nodesCount = nodes.Count;
+
+            if (nodesCount == 0)
                 return;
 
-            // TODO : implement `for` as micro-optimization?)
-            foreach (var validNode in nodes)
+            for (int i = 0; i < nodesCount; i++)
             {
+                var validNode = nodes[i];
+
                 string localName = validNode.NodeType == XmlNodeType.Element ?
                     ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
                     ElementNames.FictionText;
@@ -101,8 +105,11 @@ namespace Fb2.Document.Models.Base
 
             var builder = new StringBuilder();
 
-            foreach (var child in content)
-                builder.Append(child.IsInline ? child.ToString() : $"{Environment.NewLine}{child}");
+            for (int i = 0; i < content.Count; i++)
+            {
+                var child = content[i];
+                builder.Append(child.IsInline ? $"{child}" : $"{Environment.NewLine}{child}");
+            }
 
             return builder.ToString();
         }
@@ -253,8 +260,6 @@ namespace Fb2.Document.Models.Base
 
             return AddContent(node);
         }
-
-        // TODO : add tests, to show that number of "textItems" doesnt increase
 
         /// <summary>
         /// Adds given node to <see cref="Content"/>.
@@ -423,8 +428,10 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
                 return result;
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (element.Name.EqualsInvariant(name))
                     result.Add(element);
 
@@ -455,8 +462,10 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return result;
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (predicate(element))
                     result.Add(element);
 
@@ -485,8 +494,10 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
                 return null;
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (element.Name.EqualsInvariant(name))
                     return element;
 
@@ -515,8 +526,10 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return null;
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (predicate(element))
                     return element;
 
@@ -635,8 +648,10 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (predicate(element))
                     result.Add(element);
 
@@ -660,8 +675,10 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 predicate = PredicateResolver.GetPredicate<T>();
 
-            foreach (var element in content)
+            for (int i = 0; i < content.Count; i++)
             {
+                var element = content[i];
+
                 if (predicate(element))
                     return (T)element;
 

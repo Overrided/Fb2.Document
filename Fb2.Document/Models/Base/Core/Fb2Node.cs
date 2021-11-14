@@ -413,8 +413,6 @@ namespace Fb2.Document.Models.Base
         {
             var node = Fb2NodeFactory.GetNodeByName(Name);
 
-            // TODO : chech if it saves references to keyValuePair's strings
-            // if it does, it's bad ))
             if (attributes.Any())
                 node.attributes = new Dictionary<string, string>(attributes);
 

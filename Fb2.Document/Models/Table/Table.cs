@@ -128,10 +128,13 @@ namespace Fb2.Document.Models
 
             var orderedActuals = effectiveRowSpans
                 .OrderBy(trs => trs.RenderStartColumnIndex)
-                .ThenBy(trs => trs.RenderStartRowIndex);
+                .ThenBy(trs => trs.RenderStartRowIndex)
+                .ToList();
 
-            foreach (var cellIndexDelta in orderedActuals)
+            for (int i = 0; i < orderedActuals.Count; i++)
             {
+                var cellIndexDelta = orderedActuals[i];
+
                 if (cellIndexDelta.CellRowIndex > resultingColumn || // check if position in array
                     cellIndexDelta.RenderStartColumnIndex > resultingColumn) // or rendering position is further in table (if position in array is further it's definitely more to the end of a table)
                     break; // so actual cell in work is not affected anyways, and we can break due to list is ordered

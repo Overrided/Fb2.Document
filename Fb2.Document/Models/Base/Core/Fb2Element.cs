@@ -42,7 +42,12 @@ namespace Fb2.Document.Models.Base
         {
             base.Load(node, preserveWhitespace);
 
-            var rawContent = GetXNodeContent(node);
+            var rawContent = node.NodeType switch
+            {
+                XmlNodeType.Element => ((XElement)node).Value,
+                XmlNodeType.Text => ((XText)node).Value,
+                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+            };
 
             if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
                 content = trimWhitespace.Replace(rawContent, Whitespace);
@@ -121,15 +126,6 @@ namespace Fb2.Document.Models.Base
         }
 
         public override string ToString() => Content;
-
-        // TODO: dont use this as separate method?
-        private static string GetXNodeContent([In] XNode node)
-            => node.NodeType switch
-            {
-                XmlNodeType.Element => ((XElement)node).Value,
-                XmlNodeType.Text => ((XText)node).Value,
-                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-            };
 
         public override bool Equals(object? other)
         {
