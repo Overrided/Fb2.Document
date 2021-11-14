@@ -9,7 +9,6 @@ on:
 # side-by-side build
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -22,20 +21,29 @@ jobs:
       - name: Install .NET Core 3.1.x
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: "3.1.x"
 
       - name: Install .NET 5.0.x
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: "5.0.x"
 
       - name: Install .NET 6.0.x
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: "6.0.x"
 
       - name: Build library
         run: dotnet build -c release
 
       - name: Run tests
-        run: dotnet test
+        run: dotnet test --collect:"XPlat Code Coverage"
+
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
+        with:
+          reports: "**/coverage.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+          targetdir: "coveragereport" # REQUIRED # The directory where the generated report should be saved.
+          reporttypes: "HtmlInline;Cobertura" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
+          verbosity: "Info" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.
