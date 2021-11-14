@@ -51,5 +51,5 @@ jobs:
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: CoverageReport # Artifact name        
+          name: ${{ matrix.os }}-coverageReport # Artifact name
           path: coveragereport # Directory containing files to upload
