@@ -65,9 +65,20 @@ namespace Fb2.Document.Models.Base
                 return;
 
             var nodes = element.Nodes()
-                .Where(n => n.NodeType == XmlNodeType.Text ||
-                            (n.NodeType == XmlNodeType.Element &&
-                            Fb2NodeFactory.IsKnownNodeName((n as XElement).Name.LocalName)))
+                .Where(n =>
+                    {
+                        if (n.NodeType == XmlNodeType.Text)
+                            return true;
+
+                        var isElement = n.NodeType == XmlNodeType.Element;
+                        if (!isElement)
+                            return false;
+
+                        var elementNode = n as XElement;
+                        var nodeLocalName = elementNode.Name.LocalName;
+                        return !nodeLocalName.EqualsInvariant(ElementNames.FictionText) &&
+                               Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+                    })
                 .ToList();
 
             var nodesCount = nodes.Count;

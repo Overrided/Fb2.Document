@@ -394,16 +394,13 @@ var paragraph = new Paragraph();
 paragraph.AddContent(new Strong().AddTextContent("strong content")); // adding child instance with text
 ```
 
-4) Adding `empty Strong` node to `Paragraph` using 'sugar' methods, using `LINQ`-style method chaining:
+4) Adding `empty Strong` node to `Paragraph` using `LINQ`-style method chaining:
 
 ```csharp
 var paragraph = new Paragraph();
 paragraph.AddContent(ElementNames.Strong) // by node name
-// or:
          .AddContent(new List<Fb2Node> { new Strong(), new Emphasis() }) // add multiple items at once as `IEnumerable<Fb2Node>`
-// or:
          .AddContent(new Strong(), new Emphasis()) // add multiple items at once as `params Fb2Node[]`
-// or:
          .AddContent(() =>                          // with node function provider - Func<Fb2Node>
          {
              // do stuff, load, query content, etc
@@ -547,9 +544,9 @@ TextItem plainTextItem = new TextItem().AddContent(() => "text 1 "); // returns 
 
 ```csharp
 //So, this will work:
-Fb2Node paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "testValue"); // but `paragraph` variable has `Fb2Node` type now
+Fb2Node paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue"); // but `paragraph` variable has `Fb2Node` type now
 // This WILL NOT:
-Paragraph paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "testValue"); // cant assign Fb2Node to Paragraph
+Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue"); // cant assign Fb2Node to Paragraph
 ```
 > Attention!
 >
@@ -561,15 +558,25 @@ Paragraph paragraph = new Paragraph().AddAttribute(firstAlowedAttributeName, "te
 
 If you care about what exact type is being returned while editing node, you can use `Fb2ContainerExtensions`, `Fb2ElementExtensions`, `Fb2NodeExtensions` classes from `Fb2.Document.Extensions` namespace.  
 
-Those extensions are generic wrappers around Editing APIs of respective classes - `Fb2Container`, `Fb2Element` and `Fb2Node`, returning same type of node that was used, without cutting type down to base classes, i.e.:
+Extensions methods naming is slightly differs from naming of appropriate classes, e.g. `AppendContent` extension corresponds to `AddContent`, `DeleteContent` to `RemoveContent` and `EraseContent` to `ClearContent`.
+
+Extensions are generic wrappers around Editing APIs of respective classes - `Fb2Container`, `Fb2Element` and `Fb2Node` - implementations, returning same type of node that was used, without cutting type down to base classes, i.e.:
 
  This ***will work***: 
 ```csharp
-Paragraph paragraph = new Paragraph().AppendAttribute(firstAlowedAttributeName, "testValue");
+Paragraph paragraph = new Paragraph().AppendAttribute(AttributeNames.Id, "testValue");
 ```
 
-Extensions methods naming is slightly differs from naming of appropriate classes, e.g. `AppendContent` extension corresponds to `AddContent`, `DeleteContent` to `RemoveContent` and `EraseContent` to `ClearContent`.
+Method chaining is also supported:
 
+```csharp
+Paragraph paragraph = new Paragraph()
+                        .AppendContent(() => Fb2NodeFactory.GetNodeByName(ElementNames.Strong))
+                        .AppendContent(ElementNames.Emphasis)
+                        .AppendAttribute(AttributeNames.Id, $"{Guid.NewGuid()}")
+                        .AppendContent(new Strikethrough().AppendTextContent("Strikethrough", " "))
+                        .AppendTextContent("plain text", " ");
+```
 <br/>
 
 ## Constants
