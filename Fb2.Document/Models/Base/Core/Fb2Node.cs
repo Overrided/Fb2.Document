@@ -63,6 +63,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="node">XNode to load as Fb2Node</param>
         /// <param name="preserveWhitespace"> Is ignored by Fb2Node loading.</param>
         /// <param name="loadUnsafe"> Is ignored by Fb2Node loading.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Load(
             [In] XNode node,
             bool preserveWhitespace = false,
@@ -106,12 +107,12 @@ namespace Fb2.Document.Models.Base
 
         /// <summary>
         /// Checks if node has attribute(s) with given key and value.
-        /// Exists mostly for lulz.
         /// </summary>
         /// <param name="key">Key to search attribute by.</param>
         /// <param name="value">Value to search attribute by.</param>
         /// <param name="ignoreCase">Indicates if case-sensitive comparison should be used.</param>
-        /// <returns>True if attribute found, otherwise false.</returns>
+        /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> and <paramref name="value"/> found, otherwise <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public bool HasAttribute(string key, string value, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -131,11 +132,12 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Checks if node has attribute(s) with given key.
+        /// Checks if node has attribute(s) with given <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Key to search attribute by.</param>
         /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
-        /// <returns>True if attribute found, otherwise false.</returns>
+        /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public bool HasAttribute(string key, bool ignoreCase = false)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -150,13 +152,14 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Returns the first element of Attributes list that matches given key or a default value if no such element is found.
+        /// Gets first matching <c>attribute</c> by given <paramref name="key"/>.
         /// </summary>
-        /// <param name="key">Key to search attribute by</param>
-        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
+        /// <param name="key">Key to search attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
         /// <returns>
-        /// Returns the first element of Attributes list that matches given key or a default value if no such element is found.
+        /// Returns first matching attribute by given <paramref name="key"/> or <c>default(KeyValuePair&lt;string, string&gt;)</c> if no such element is found.
         /// </returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public KeyValuePair<string, string> GetAttribute(string key, bool ignoreCase = false)
         {
             if (!HasAttribute(key, ignoreCase))
@@ -170,12 +173,13 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Looks for attribute by given `attributeName`
+        /// Attempts to get first matching <c>attribute</c> by given <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Key to search attribute by</param>
         /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
-        /// <param name="result">Attribute value if any found, otherwise default. </param>
-        /// <returns>True if attribute found by given key, otherwise false</returns>
+        /// <param name="result">Attribute value if any found, otherwise <c>default(KeyValuePair&lt;string, string&gt;)</c>.</param>
+        /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public bool TryGetAttribute(string key, out KeyValuePair<string, string> result, bool ignoreCase = false)
         {
             var attribute = GetAttribute(key, ignoreCase);
@@ -193,6 +197,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
         {
             if (attributes == null || !attributes.Any())
@@ -209,6 +214,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node AddAttributes(IDictionary<string, string> attributes)
         {
             if (attributes == null || !attributes.Any())
@@ -225,6 +231,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
         /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task<Fb2Node> AddAttributeAsync(Func<Task<KeyValuePair<string, string>>> attributeProvider)
         {
             if (attributeProvider == null)
@@ -240,6 +247,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="attributeProvider">Attribute provider function.</param>
         /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
         {
             if (attributeProvider == null)
@@ -259,29 +267,32 @@ namespace Fb2.Document.Models.Base
             AddAttribute(attribute.Key, attribute.Value);
 
         /// <summary>
-        /// Adds single attribute using separate key and value.
+        /// Adds single attribute using <paramref name="key"/> and <paramref name="value"/>.
         /// </summary>
-        /// <param name="attributeName">Attribute key.</param>
-        /// <param name="attributeValue">Attribute value.</param>
+        /// <param name="key">Attribute key to add.</param>
+        /// <param name="value">Attribute value to add.</param>
         /// <returns>Current node.</returns>
-        public Fb2Node AddAttribute(string attributeName, string attributeValue)
+        /// <exception cref="NoAttributesAllowedException"></exception>
+        /// <exception cref="InvalidAttributeException"></exception>
+        /// <exception cref="UnexpectedAtrributeException"></exception>
+        public Fb2Node AddAttribute(string key, string value)
         {
             if (!AllowedAttributes.Any())
                 throw new NoAttributesAllowedException(Name);
 
-            if (string.IsNullOrWhiteSpace(attributeValue))
-                throw new InvalidAttributeException(nameof(attributeValue));
+            if (string.IsNullOrWhiteSpace(value))
+                throw new InvalidAttributeException(nameof(value));
 
-            if (string.IsNullOrWhiteSpace(attributeName) ||
-                trimWhitespace.IsMatch(attributeName))
-                throw new InvalidAttributeException(nameof(attributeName));
+            if (string.IsNullOrWhiteSpace(key) ||
+                trimWhitespace.IsMatch(key))
+                throw new InvalidAttributeException(nameof(key));
 
-            var escapedAttrName = SecurityElement.Escape(attributeName);
+            var escapedAttrName = SecurityElement.Escape(key);
 
             if (!AllowedAttributes.Contains(escapedAttrName))
                 throw new UnexpectedAtrributeException(Name, escapedAttrName);
 
-            var escapedAttrValue = SecurityElement.Escape(attributeValue);
+            var escapedAttrValue = SecurityElement.Escape(value);
 
             attributes[escapedAttrName] = escapedAttrValue;
             return this;
@@ -290,21 +301,22 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Removes attribute from <see cref="Attributes"/> by given attribute key.
         /// </summary>
-        /// <param name="attributeName">Name to remove attribute by.</param>
-        /// <param name="ignoreCase">Indicates if matching attributes against <paramref name="attributeName"/> should be case-sensitive.</param>
+        /// <param name="key">Name to remove attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
         /// <returns>Current node.</returns>
-        public Fb2Node RemoveAttribute(string attributeName, bool ignoreCase = false)
+        /// <exception cref="ArgumentNullException"></exception>
+        public Fb2Node RemoveAttribute(string key, bool ignoreCase = false)
         {
-            if (string.IsNullOrWhiteSpace(attributeName))
-                throw new ArgumentNullException(nameof(attributeName));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (!attributes.Any())
                 return this;
 
             var attributeKeysToDelete = attributes.Keys
                 .Where(key => ignoreCase ?
-                    key.EqualsInvariant(attributeName) :
-                    key.Equals(attributeName));
+                    key.EqualsInvariant(key) :
+                    key.Equals(key));
 
             foreach (var attrKey in attributeKeysToDelete)
                 attributes.Remove(attrKey);
@@ -313,10 +325,11 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Removes attributes matching given predicate.
+        /// Removes attributes matching given <paramref name="attributePredicate"/>.
         /// </summary>
         /// <param name="attributePredicate">Predicate function to match attributes against.</param>
         /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
         {
             if (attributePredicate == null)

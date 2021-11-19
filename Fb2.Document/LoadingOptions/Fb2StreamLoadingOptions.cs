@@ -15,6 +15,11 @@
         /// </summary>
         public bool CloseInputStream { get; set; }
 
+        /// <summary>
+        /// Creates new instance of <see cref="Fb2StreamLoadingOptions"/>.
+        /// </summary>
+        /// <param name="loadUnsafeElements">Indicates if Unsafe elements should be loaded. Optional, <see langword="true"/> by default.</param>
+        /// <param name="closeInputStream">Indicates if input stream should be closed after loading fb2 document. Optional, <see langword="false"/> by default.</param>
         public Fb2StreamLoadingOptions(bool loadUnsafeElements = true, bool closeInputStream = false)
         {
             LoadUnsafeElements = loadUnsafeElements;

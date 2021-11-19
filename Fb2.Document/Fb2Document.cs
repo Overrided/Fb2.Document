@@ -130,6 +130,7 @@ namespace Fb2.Document
         /// </summary>
         /// <param name="document">Content of a file read as xml</param>
         /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of XDocument received.
         public void Load([In] XDocument document, bool loadUnsafeElements = true)
@@ -145,6 +146,7 @@ namespace Fb2.Document
         /// </summary>
         /// <param name="fileContent">Content of a file read as string</param>
         /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of string received.
         public void Load([In] string fileContent, bool loadUnsafeElements = true)
@@ -164,7 +166,8 @@ namespace Fb2.Document
         /// </summary>
         /// <param name="fileContent">Content of a file read as string</param>
         /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
-        /// this method exists mostly for lulz
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <remarks>This method exists mostly for lulz :)</remarks>
         public async Task LoadAsync([In] string fileContent, bool loadUnsafeElements = true)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
@@ -187,10 +190,10 @@ namespace Fb2.Document
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
-        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
-        /// This method is Encoding-safe 
-        /// Encoding for reading content will be determined during load process 
-        /// or Encoding.Default will be used
+        /// <param name="loadingOptions">Settings for loading Fb2Document from stream. This value can be null.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <remarks> Actual encoding of content will be determined automatically or Encoding.Default will be used. </remarks>
         public void Load([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
@@ -217,10 +220,10 @@ namespace Fb2.Document
         /// Loads fb2 file's content into Fb2Document model from stream asynchronously.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
-        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
-        /// This method is Encoding-safe 
-        /// Encoding for reading content will be determined during load process 
-        /// or Encoding.Default will be used
+        /// <param name="loadingOptions">Settings for loading Fb2Document from stream. This value can be null.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception> 
+        /// <remarks> Actual encoding of content will be determined automatically or Encoding.Default will be used. </remarks>
         public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
@@ -249,9 +252,7 @@ namespace Fb2.Document
         /// <summary>
         /// Generates XDocument using previously loaded FictionBook
         /// </summary>
-        /// <returns>
-        /// XDocument instance formatted accordingly to fb2 rules. 
-        /// Returns null if <see cref="Book"/> is null or <see cref="IsLoaded"/> is <see langword="false"/>
+        /// <returns>XDocument instance formatted accordingly to fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
         /// </returns>
         public XDocument? ToXml()
         {
@@ -264,7 +265,7 @@ namespace Fb2.Document
         }
 
         /// <summary>
-        /// Renders content of FictionBook as formatted xml string
+        /// Renders content of FictionBook as formatted xml string.
         /// </summary>
         /// <returns>String content of a XDocument</returns>
         public string? ToXmlString()

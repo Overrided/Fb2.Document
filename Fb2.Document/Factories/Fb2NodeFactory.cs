@@ -90,6 +90,13 @@ namespace Fb2.Document.Factories
             { ElementNames.Stylesheet, typeof(Stylesheet) }
         };
 
+        /// <summary>
+        /// Creates new Fb2Node by given name.
+        /// </summary>
+        /// <param name="nodeName">Name to create node by.</param>
+        /// <returns>New instance of node created by given <paramref name="nodeName"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnknownNodeException"></exception>
         public static Fb2Node GetNodeByName([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
@@ -105,6 +112,12 @@ namespace Fb2.Document.Factories
             return model;
         }
 
+        /// <summary>
+        /// Determines whether given <paramref name="node"/> is valid.
+        /// </summary>
+        /// <param name="node">Node to perform check on.</param>
+        /// <returns><see langword="true"/> if node is valid; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static bool IsKnownNode([In] Fb2Node node)
         {
             if (node == null)
@@ -116,6 +129,12 @@ namespace Fb2.Document.Factories
             return hasKnownName && hasKnownType;
         }
 
+        /// <summary>
+        /// Determines whether given <paramref name="nodeName"/> is valid.
+        /// </summary>
+        /// <param name="nodeName">Node name to perform check on.</param>
+        /// <returns><see langword="true"/> if node name is valid; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static bool IsKnownNodeName([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))

@@ -184,6 +184,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodeProvider">Asynchronous node provider function.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
         {
             if (nodeProvider == null)
@@ -198,6 +199,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodeProvider">Provider function for a child node.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
         {
             if (nodeProvider == null)
@@ -212,6 +214,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodes">Nodes to add to <see cref="Content"/>.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(params Fb2Node[] nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -230,6 +233,8 @@ namespace Fb2.Document.Models.Base
         /// <param name="newContent">Plain text content to add.</param>
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="UnexpectedNodeException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddTextContent(string newContent, string? separator = null)
         {
             if (!CanContainText)
@@ -242,10 +247,11 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Set of Fb2Nodes to add to <see cref="Content"/>.
+        /// Adds set of Fb2Nodes to <see cref="Content"/>.
         /// </summary>
         /// <param name="nodes">Set of nodes to add to <see cref="Content"/>.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -262,6 +268,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodeName">Name to instantiate node by.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
@@ -277,6 +284,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Child node to add to Content.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="UnexpectedNodeException"></exception>
         public Fb2Container AddContent(Fb2Node node)
         {
             if (node == null)
@@ -306,6 +316,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodes">Set of nodes to remove.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
             if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
@@ -322,6 +333,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="nodePredicate">Predicate to match node against.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
         {
             if (nodePredicate == null)
@@ -338,6 +350,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="node">Node to remove.</param>
         /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(Fb2Node node)
         {
             if (node == null)
@@ -352,7 +365,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Clears all <see cref="Content"/> of given container.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Current container.</returns>
         public Fb2Container ClearContent()
         {
             if (!IsEmpty)
@@ -370,6 +383,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
         /// <returns>List of found child elements, if any.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -386,6 +400,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="predicate">Predicate to match child node against.</param>
         /// <returns>List of found child elements, if any.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public IEnumerable<Fb2Node> GetChildren(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)
@@ -416,6 +431,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="predicate">Predicate to match child node against.</param>
         /// <returns>First matched child node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node? GetFirstChild(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)
@@ -429,6 +445,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -463,6 +480,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="predicate">Predicate to match descendant node against.</param>
         /// <returns>List of found descendants, if any.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public IEnumerable<Fb2Node> GetDescendants(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)
@@ -496,7 +514,8 @@ namespace Fb2.Document.Models.Base
         /// Recursively looks for first matching descendant of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
-        /// <returns>First matched descendant node.</returns>
+        /// <returns>First matching descendant node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node? GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -528,7 +547,8 @@ namespace Fb2.Document.Models.Base
         /// Recursively looks for first descendant of element that matches given predicate.
         /// </summary>
         /// <param name="predicate">Predicate to match descendant node against.</param>
-        /// <returns></returns>
+        /// <returns>First matching descendant node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node? GetFirstDescendant(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)

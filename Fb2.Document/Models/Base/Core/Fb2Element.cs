@@ -30,11 +30,12 @@ namespace Fb2.Document.Models.Base
 
         /// <summary>
         /// Text node loading mechanism - formatting text and removal of unwanted characters.
-        /// Note: original content of XNode is NOT preserved by default except for <seealso cref="Code" />
         /// </summary>
         /// <param name="node">Node to load as Fb2Element.</param>
-        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
         /// <param name="loadUnsafe"> Is ignored by Fb2Element loading.</param>
+        /// <exception cref="Fb2NodeLoadingException"></exception>
+        /// <remarks>Original content of XNode is NOT preserved by default except for <seealso cref="Code" />.</remarks>
         public override void Load(
             [In] XNode node,
             bool preserveWhitespace = false,
@@ -61,6 +62,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="contentProvider">Content provider function.</param>
         /// <param name="separator">Separator to split text from rest of the content.</param>
         /// <returns>Current element.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
         {
             if (contentProvider == null)
@@ -78,9 +80,10 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns>Current element.</returns>
         /// <remarks>
-        /// If <paramref name="separator"/> contains `Environment.NewLine` - it will be replaced with " " (whitespace).
-        /// To insert `new line` use `EmptyLine` Fb2Element
+        /// <para>If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).</para>
+        /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
         /// </remarks>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual Fb2Element AddContent(string newContent, string? separator = null)
         {
             if (string.IsNullOrEmpty(newContent))
@@ -111,11 +114,13 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Converts Fb2Element to XElement with regards to all attributes
-        /// Note: only formatted content is serialized. 
-        /// Original symbols from string value of XNode passed to Load method can be replaced and/or removed
+        /// Converts Fb2Element to XElement with regards to all attributes.
         /// </summary>
-        /// <returns>XElement reflected from given Fb2Element</returns>
+        /// <returns>XElement reflected from given Fb2Element.</returns>
+        /// <remarks>
+        /// <para>Only formatted content is serialized.</para>
+        /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/></para>
+        /// </remarks>
         public override XElement ToXml()
         {
             var element = base.ToXml();
