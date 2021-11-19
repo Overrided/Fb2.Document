@@ -314,9 +314,9 @@ namespace Fb2.Document.Models.Base
                 return this;
 
             var attributeKeysToDelete = attributes.Keys
-                .Where(key => ignoreCase ?
-                    key.EqualsInvariant(key) :
-                    key.Equals(key));
+                .Where(existingKey => ignoreCase ?
+                    existingKey.EqualsInvariant(key) :
+                    existingKey.Equals(key));
 
             foreach (var attrKey in attributeKeysToDelete)
                 attributes.Remove(attrKey);
