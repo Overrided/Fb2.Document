@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Exceptions;
+using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
 
 namespace Fb2.Document
@@ -19,137 +20,85 @@ namespace Fb2.Document
     {
         private const string defaultXmlVersion = "1.0";
 
-        private BookDescription description = null;
-        private TitleInfo title = null;
-        private SrcTitleInfo sourceTitle = null;
-        private DocumentInfo documentInfo = null;
-        private PublishInfo publishInfo = null;
-        private CustomInfo customInfo = null;
-        private List<BookBody> bodies = null;
-        private List<BinaryImage> binaryImages = null;
-
         private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
         private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
         {
             Async = true,
             CheckCharacters = true,
             IgnoreWhitespace = true,
-            ConformanceLevel = ConformanceLevel.Document,
-            CloseInput = true
+            ConformanceLevel = ConformanceLevel.Document
         };
 
         /// <summary>
         /// Represents <FictionBook> - root element of a file.
         /// </summary>
-        public FictionBook Book { get; private set; }
+        public FictionBook? Book { get; private set; }
 
-        private BookDescription FictionBookDescription
+        /// <summary>
+        /// Represents Description element of a FictionBook
+        /// </summary>
+        public BookDescription? BookDescription
         {
             get
             {
-                if (description == null)
-                    description = Book?.GetFirstChild<BookDescription>();
+                if (!IsLoaded || Book == null)
+                    return null;
 
-                return description;
+                return Book.GetFirstChild<BookDescription>();
             }
         }
 
         /// <summary>
         /// Shortcut property. Gets Title of Description from FictionBook
         /// </summary>
-        public TitleInfo Title
-        {
-            get
-            {
-                if (title == null)
-                    title = FictionBookDescription?.GetFirstChild<TitleInfo>();
-
-                return title;
-            }
-        }
+        public TitleInfo? Title => BookDescription?.GetFirstChild<TitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets SrcTitle of Description from FictionBook
         /// Mainly exists if book is translated - and contains Title in original language
         /// </summary>
-        public SrcTitleInfo SourceTitle
-        {
-            get
-            {
-                if (sourceTitle == null)
-                    sourceTitle = FictionBookDescription?.GetFirstChild<SrcTitleInfo>();
-
-                return sourceTitle;
-            }
-        }
+        public SrcTitleInfo? SourceTitle => BookDescription?.GetFirstChild<SrcTitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets DocumentInfo of Description from FictionBook
         /// </summary>
-        public DocumentInfo DocumentInfo
-        {
-            get
-            {
-                if (documentInfo == null)
-                    documentInfo = FictionBookDescription?.GetFirstChild<DocumentInfo>();
-
-                return documentInfo;
-            }
-        }
+        public DocumentInfo? DocumentInfo => BookDescription?.GetFirstChild<DocumentInfo>();
 
         /// <summary>
         /// Shortcut property. Gets PublishInfo of Description from FictionBook
         /// </summary>
-        public PublishInfo PublishInfo
-        {
-            get
-            {
-                if (publishInfo == null)
-                    publishInfo = FictionBookDescription?.GetFirstChild<PublishInfo>();
-
-                return publishInfo;
-            }
-        }
+        public PublishInfo? PublishInfo => BookDescription?.GetFirstChild<PublishInfo>();
 
         /// <summary>
         /// Shortcut property. Gets CustomInfo of Description from FictionBook
         /// </summary>
-        public CustomInfo CustomInfo
-        {
-            get
-            {
-                if (customInfo == null)
-                    customInfo = FictionBookDescription?.GetFirstChild<CustomInfo>();
-
-                return customInfo;
-            }
-        }
+        public CustomInfo? CustomInfo => BookDescription?.GetFirstChild<CustomInfo>();
 
         /// <summary>
         /// Shortcut property. Gets list of BookBody elements from FictionBook.
         /// </summary>
-        public List<BookBody> Bodies
+        public ImmutableList<BookBody> Bodies
         {
             get
             {
-                if (bodies == null || !bodies.Any())
-                    bodies = Book?.GetChildren<BookBody>();
+                if (!IsLoaded || Book == null)
+                    return ImmutableList<BookBody>.Empty;
 
-                return bodies;
+                return Book.GetChildren<BookBody>().ToImmutableList();
             }
         }
 
         /// <summary>
         /// Shortcut property. Gets list of BinaryImages elements from FictionBook.
         /// </summary>
-        public List<BinaryImage> BinaryImages
+        public ImmutableList<BinaryImage> BinaryImages
         {
             get
             {
-                if (binaryImages == null || !binaryImages.Any())
-                    binaryImages = Book?.GetChildren<BinaryImage>();
+                if (!IsLoaded || Book == null)
+                    return ImmutableList<BinaryImage>.Empty;
 
-                return binaryImages;
+                return Book.GetChildren<BinaryImage>().ToImmutableList();
             }
         }
 
@@ -159,14 +108,19 @@ namespace Fb2.Document
         public bool IsLoaded { get; private set; } = false;
 
         /// <summary>
-        /// Creates Fb2Document with empty FictionBook, with `IsLoaded` set to `true`.
+        /// Creates new, empty instance of Fb2Document with `IsLoaded` set to `true`.
         /// </summary>
-        /// <returns>New instance of Fb2Document with empty FictionBook. </returns>
-        public static Fb2Document CreateDocument()
+        /// <param name="fictionBook">
+        /// Optional parameter. Book to use with Fb2Document. If ommited, `Book` property of created document returns `null`.
+        /// </param>
+        /// <returns>New instance of Fb2Document.</returns>
+        public static Fb2Document CreateDocument(FictionBook? fictionBook = null)
         {
-            var document = new Fb2Document();
-            document.Book = new FictionBook();
-            document.IsLoaded = true;
+            var document = new Fb2Document
+            {
+                Book = fictionBook,
+                IsLoaded = fictionBook != null
+            };
 
             return document;
         }
@@ -175,83 +129,132 @@ namespace Fb2.Document
         /// Loads fb2 file's content into Fb2Document model from XDocument insance
         /// </summary>
         /// <param name="document">Content of a file read as xml</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of XDocument received.
-        public void Load([In] XDocument document)
+        public void Load([In] XDocument document, bool loadUnsafeElements = true)
         {
             if (document == null)
-                throw new ArgumentNullException($"{nameof(document)} is null");
+                throw new ArgumentNullException(nameof(document));
 
-            Load(document.Root);
+            LoadHandled(() => Load(document.Root, loadUnsafeElements));
         }
 
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from string
         /// </summary>
-        /// <param name="document">Content of a file read as string</param>
+        /// <param name="fileContent">Content of a file read as string</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         /// This method is not Encoding-safe 
         /// Loading will proceed with Encoding of string received.
-        public void Load([In] string fileContent)
+        public void Load([In] string fileContent, bool loadUnsafeElements = true)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
-                throw new ArgumentNullException($"{nameof(fileContent)} is null");
+                throw new ArgumentNullException(nameof(fileContent));
 
-            var document = XDocument.Parse(fileContent);
-            Load(document.Root);
+            LoadHandled(() =>
+            {
+                var document = XDocument.Parse(fileContent);
+                Load(document.Root, loadUnsafeElements);
+            });
+        }
+
+        /// <summary>
+        /// Loads fb2 file's content into Fb2Document model from string asynchronously
+        /// </summary>
+        /// <param name="fileContent">Content of a file read as string</param>
+        /// <param name="loadUnsafeElements">Idicates if "unsafe" elements should be loaded. `true` by default.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <remarks>This method exists mostly for lulz :)</remarks>
+        public async Task LoadAsync([In] string fileContent, bool loadUnsafeElements = true)
+        {
+            if (string.IsNullOrWhiteSpace(fileContent))
+                throw new ArgumentNullException(nameof(fileContent));
+
+            await LoadHandledAsync(async () =>
+            {
+                using (var reader = new StringReader(fileContent))
+                {
+                    var document = await XDocument
+                        .LoadAsync(reader, LoadOptions.None, default)
+                        .ConfigureAwait(false);
+
+                    Load(document.Root, loadUnsafeElements);
+                }
+            });
         }
 
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
-        /// This method is Encoding-safe 
-        /// Encoding for reading content will be determined during load process 
-        /// or Encoding.Default will be used
-        public void Load([In] Stream fileContent)
+        /// <param name="loadingOptions">Settings for loading Fb2Document from stream. This value can be null.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <remarks> Actual encoding of content will be determined automatically or Encoding.Default will be used. </remarks>
+        public void Load([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
-                throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
+                throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
+            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+            xmlReaderSetting.CloseInput = options.CloseInputStream;
+
+            LoadHandled(() =>
             {
-                var document = XDocument.Load(reader);
-                Load(document.Root);
-            }
+                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
+                {
+                    var document = XDocument.Load(reader);
+                    Load(document.Root, options.LoadUnsafeElements);
+                }
+            });
         }
 
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream asynchronously.
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
-        /// This method is Encoding-safe 
-        /// Encoding for reading content will be determined during load process 
-        /// or Encoding.Default will be used
-        public async Task LoadAsync([In] Stream fileContent)
+        /// <param name="loadingOptions">Settings for loading Fb2Document from stream. This value can be null.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception> 
+        /// <remarks> Actual encoding of content will be determined automatically or Encoding.Default will be used. </remarks>
+        public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
         {
             if (fileContent == null)
-                throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
+                throw new ArgumentNullException(nameof(fileContent));
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is {false}");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-            using (var reader = XmlReader.Create(fileContent, DefaultXmlReaderSettings))
+            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
+            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+            xmlReaderSetting.CloseInput = options.CloseInputStream;
+
+            await LoadHandledAsync(async () =>
             {
-                var document = await XDocument.LoadAsync(reader, LoadOptions.None, default);
-                Load(document.Root);
-            }
+                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
+                {
+                    var document = await XDocument
+                        .LoadAsync(reader, LoadOptions.None, default)
+                        .ConfigureAwait(false);
+
+                    Load(document.Root, options.LoadUnsafeElements);
+                }
+            });
         }
 
         /// <summary>
         /// Generates XDocument using previously loaded FictionBook
         /// </summary>
-        /// <returns>
-        /// XDocument instance formatted accordingly to fb2 rules. 
-        /// Returns null if <see cref="Book"/> is null or <see cref="IsLoaded"/> is <see langword="false"/>
+        /// <returns>XDocument instance formatted accordingly to fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
         /// </returns>
-        public XDocument ToXml()
+        public XDocument? ToXml()
         {
             if (Book == null || !IsLoaded)
                 return null;
@@ -262,10 +265,10 @@ namespace Fb2.Document
         }
 
         /// <summary>
-        /// Renders content of FictionBook as formatted xml string
+        /// Renders content of FictionBook as formatted xml string.
         /// </summary>
         /// <returns>String content of a XDocument</returns>
-        public string ToXmlString()
+        public string? ToXmlString()
         {
             var document = ToXml();
 
@@ -275,15 +278,46 @@ namespace Fb2.Document
             return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
         }
 
-        private void Load([In] XElement root)
+        private static void LoadHandled(Action loadingAction)
+        {
+            try
+            {
+                loadingAction();
+            }
+            catch (Exception ex)
+            {
+                throw new Fb2DocumentLoadingException("Document loading failed.", ex);
+            }
+        }
+
+        private static async Task LoadHandledAsync(Func<Task> loadingAsync)
+        {
+            try
+            {
+                await loadingAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Fb2DocumentLoadingException("Document asynchronous loading failed.", ex);
+            }
+        }
+
+        private void Load([In] XElement root, bool loadUnsafeElements)
         {
             if (root == null)
-                throw new ArgumentNullException($"{nameof(root)} element is null");
+                throw new ArgumentNullException(nameof(root));
 
             Book = new FictionBook();
-            Book.Load(root);
-
+            Book.Load(root, loadUnsafe: loadUnsafeElements);
             IsLoaded = true;
         }
+
+        public override bool Equals(object? obj) =>
+            obj != null &&
+            obj is Fb2Document other && // if `Book` is `null` and `other.Book` is also null - those are equal
+            IsLoaded == other.IsLoaded &&
+            (Book?.Equals(other.Book) ?? other.Book == null);
+
+        public override int GetHashCode() => HashCode.Combine(Book?.GetHashCode() ?? 0, IsLoaded);
     }
 }

@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
-using Fb2.Document.Extensions;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
@@ -11,10 +10,23 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.EmptyLine;
 
-        public override void Load([In] XNode element, bool preserveWhitespace = false)
+        public override bool IsEmpty => true;
+
+        public EmptyLine() => content = Environment.NewLine;
+
+        public sealed override void Load(
+            [In] XNode element,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
-            element.Validate(Name);
-            Content = Environment.NewLine;
+            if (element == null)
+                throw new ArgumentNullException(nameof(element));
+
+            Validate(element);
         }
+
+        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
+
+        public sealed override Fb2Element ClearContent() => this;
     }
 }

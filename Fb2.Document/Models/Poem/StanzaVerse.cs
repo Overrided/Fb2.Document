@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    public class StanzaVerse : TextContainer
+    public class StanzaVerse : TextContainerBase
     {
         public override string Name => ElementNames.StanzaV;
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string> { AttributeNames.Id };
-
         public override bool IsInline => false;
+
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
     }
 }

@@ -1,70 +1,158 @@
 ﻿using System;
-using System.Linq;
+using System.Xml.Linq;
 using Fb2.Document.Constants;
-using Fb2.Document.Factories;
+using Fb2.Document.Exceptions;
+using Fb2.Document.Extensions;
+using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
-using Fb2.Document.Tests.Base;
-using Fb2.Document.Tests.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Fb2.Document.Tests.DataCollections;
+using FluentAssertions;
+using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests
 {
-    [TestClass]
-    public class Fb2ElementTests : TestBase
+    public class Fb2ElementTests
     {
-        [TestMethod]
-        public void Fb2Element_Tests()
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public void Fb2Element_Load_NullNode_Throws(Fb2Element fb2Element)
         {
-            var assembly = Fb2ElementFactory.Instance.GetType().Assembly;
+            fb2Element.Should().NotBeNull();
 
-            var modelTypes = assembly.GetExportedTypes()
-                .Where(type => type.FullName.StartsWith("Fb2.Document.Models.") &&
-                       !type.IsAbstract && type.IsClass).ToList();
-
-            var elementTypes = modelTypes.Where(et => et.IsSubclassOf(typeof(Fb2Element))).ToList();
-
-            foreach (var modelType in elementTypes)
-            {
-                Fb2Element_Load_Content_Test(modelType);
-                Fb2Element_Load_LinearizeMultilineContent_Test(modelType);
-            }
+            fb2Element.Invoking(f => f.Load(null))
+                .Should()
+                .Throw<ArgumentNullException>();
         }
 
-        public void Fb2Element_Load_Content_Test(Type modelType)
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public void Fb2Element_Load_InvalidNode_Throws(Fb2Element fb2Element)
         {
-            var container = Utils.Instantiate<Fb2Element>(modelType);
+            fb2Element.Should().NotBeNull();
 
-            var containerElement = GetXElementWithSimpleStringContent(container.Name);
+            var invalidXmlNode = new XElement("invalidName", "test content");
 
-            container.Load(containerElement);
-
-            if (container.Name == ElementNames.Image)
-                Assert.AreEqual("image", container.ToString());
-            else if (container.Name == ElementNames.EmptyLine)
-                Assert.AreEqual(Environment.NewLine, container.Content);
-            else
-                Assert.AreEqual("simple test text", container.Content);
-
-            var serialized = container.ToXml().ToString();
-
-            if (container.Name == ElementNames.EmptyLine) // empty line should have not content
-                Assert.AreEqual("<empty-line />", serialized);
-            else
-                Assert.AreEqual(containerElement.ToString(), serialized);
+            fb2Element.Invoking(f => f.Load(invalidXmlNode))
+                .Should()
+                .Throw<Fb2NodeLoadingException>();
         }
 
-        public void Fb2Element_Load_LinearizeMultilineContent_Test(Type modelType)
+        [Fact]
+        public void Fb2Element_Load_ValidNode_Works()
         {
-            var container = Utils.Instantiate<Fb2Element>(modelType);
+            var fb2Element = new TextItem(); // fb2 counterpart of XText, plain text node
 
-            var containerElement = GetXElementWithMultilineStringContent(container.Name);
+            var validNode = new XText("test content");
 
-            container.Load(containerElement);
+            fb2Element.Load(validNode);
 
-            if (container.Name == ElementNames.EmptyLine) // empty line should have no content
-                Assert.AreEqual(Environment.NewLine, container.Content);
-            else
-                Assert.AreEqual(" row 1 row 2 row 3 ", container.Content);
+            fb2Element.Content.Should().Be("test content");
+        }
+
+        [Fact]
+        public void EmptyLine_ContentChange_IsIgnored()
+        {
+            var emptyLine = new EmptyLine();
+            emptyLine.Content.Should().Be(Environment.NewLine);
+
+            emptyLine
+                .AppendContent("new part 2", "blah1")
+                .AddContent("new part", "blah");
+
+            emptyLine.Content.Should().Be(Environment.NewLine);
+
+            emptyLine.ClearContent();
+
+            emptyLine.Content.Should().Be(Environment.NewLine);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public void Fb2Element_AddContent_Works(Fb2Element fb2Element)
+        {
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
+                return;
+
+            fb2Element = fb2Element.AddContent("test content 1", "   "); // 3 whitespaces
+            fb2Element.Content.Should().Be("   test content 1");
+
+            fb2Element.ClearContent();
+
+            fb2Element.AddContent("test content 1"); // no separator
+            fb2Element.Content.Should().Be("test content 1");
+
+            fb2Element.AddContent("test content 2", "   ");
+            fb2Element.Content.Should().Be("test content 1   test content 2");
+
+            fb2Element.AddContent("test content 3"); // no separator
+            fb2Element.Content.Should().Be("test content 1   test content 2test content 3");
+
+            fb2Element.AddContent(() => $"test {Environment.NewLine} content 4", " _blah_ ");
+            fb2Element
+                .Content
+                .Should()
+                .Be("test content 1   test content 2test content 3 _blah_ test   content 4");
+
+            fb2Element.AddContent(() => $"test {Environment.NewLine} content 5", "  _blah_ ");
+            fb2Element
+                .Content
+                .Should()
+                .Be("test content 1   test content 2test content 3 _blah_ test   content 4  _blah_ test   content 5");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public void Fb2Element_AddContent_EscapesValue(Fb2Element fb2Element)
+        {
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
+                return;
+
+            fb2Element.AddContent("<test Value content 1");
+            fb2Element.Content.Should().Be("&lt;test Value content 1");
+
+            fb2Element.ClearContent();
+            fb2Element.Content.Should().BeEmpty();
+
+            fb2Element.AddContent(@"<""testValue&tv'2"">");
+            fb2Element.Content.Should().Be("&lt;&quot;testValue&amp;tv&apos;2&quot;&gt;");
+
+            fb2Element.ClearContent();
+            fb2Element.Content.Should().BeEmpty();
+
+            fb2Element.AddContent($"<test Value{Environment.NewLine}content 1");
+            fb2Element.Content.Should().Be("&lt;test Value content 1");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public void Fb2Element_AddContent_EscapesSeparator(Fb2Element fb2Element)
+        {
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
+                return;
+
+            fb2Element.AddContent("test Value content 1", "<sep/> ");
+            fb2Element.Content.Should().Be("&lt;sep/&gt; test Value content 1");
+
+            fb2Element.ClearContent();
+            fb2Element.Content.Should().BeEmpty();
+
+            fb2Element.AddContent("testContent", @"<""sep&tv'2""> ");
+            fb2Element.Content.Should().Be("&lt;&quot;sep&amp;tv&apos;2&quot;&gt; testContent");
+
+            fb2Element.ClearContent();
+            fb2Element.Content.Should().BeEmpty();
+
+            fb2Element.AddContent("test content", $"<test Value{Environment.NewLine}content 1 ");
+            fb2Element.Content.Should().Be("&lt;test Value content 1 test content");
+        }
+
+        [Fact]
+        public void BinaryImage_Load_TrimsAllWhitespaces()
+        {
+            var binaryImageNode = new XElement(ElementNames.BinaryImage, "some text with spaces");
+            var binaryImage = new BinaryImage();
+            binaryImage.Load(binaryImageNode);
+            binaryImage.Content.Should().Be("sometextwithspaces");
         }
     }
 }

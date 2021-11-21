@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
@@ -12,18 +12,15 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.Image;
 
-        public override bool IsInline { get; protected set; } = true;
+        public override ImmutableHashSet<string> AllowedAttributes =>
+            ImmutableHashSet.Create(
+                AttributeNames.Id,
+                AttributeNames.Alt,
+                AttributeNames.Title,
+                AttributeNames.XHref,
+                AttributeNames.Type);
 
-        public override HashSet<string> AllowedAttributes => new HashSet<string>
-        {
-            AttributeNames.Id,
-            AttributeNames.Alt,
-            AttributeNames.Title,
-            AttributeNames.XHref,
-            AttributeNames.Type
-        };
-
-        private HashSet<string> InlineParentNodes => new HashSet<string>
+        private readonly HashSet<string> InlineParentNodes = new HashSet<string>()
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -33,7 +30,7 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private HashSet<string> NotInlineParentNodes => new HashSet<string>
+        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,
@@ -42,24 +39,22 @@ namespace Fb2.Document.Models
 
         public override string ToString()
         {
-            var attributeOrDefault =
-                Attributes != null &&
-                Attributes.Any() &&
-                Attributes.ContainsKey(AttributeNames.XHref) ? Attributes[AttributeNames.XHref] : string.Empty;
-
-            var formattedAttributeString = string.IsNullOrWhiteSpace(attributeOrDefault) ? string.Empty : " " + attributeOrDefault;
+            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, out var result, true) ? $" {result.Value}" : string.Empty;
 
             return $"{Name}{formattedAttributeString}";
         }
 
-        public override void Load([In] XNode node, bool preserveWhitespace = false)
+        public override void Load(
+            [In] XNode node,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true)
         {
-            IsInline = GetInline(node?.Parent?.Name?.LocalName, node.NodeType);
+            base.Load(node, preserveWhitespace, loadUnsafe);
 
-            base.Load(node, preserveWhitespace);
+            IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
         }
 
-        private bool GetInline(string parentNodeName, XmlNodeType parentNodeType)
+        private bool GetInline(string? parentNodeName, XmlNodeType parentNodeType)
         {
             if (string.IsNullOrEmpty(parentNodeName) || parentNodeType != XmlNodeType.Element)
                 return true;

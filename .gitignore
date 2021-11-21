@@ -9,3 +9,5 @@ bin/
 /packages
 /Fb2.Document.Tests/Generated
 /Fb2.Document.Tests/Fb2.Document.Tests.csproj.user
+/Fb2.Documents.TestsV2/Fb2.Documents.TestsV2.csproj.user
+/Fb2.Document.Tests/TestResults

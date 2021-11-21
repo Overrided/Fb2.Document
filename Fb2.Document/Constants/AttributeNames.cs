@@ -11,7 +11,7 @@
         public const string Title = "title";
         public const string Number = "number";
         public const string Match = "match";
-        public const string InfoType = "into-type";
+        public const string InfoType = "info-type";
         public const string ColumnSpan = "colspan";
         public const string RowSpan = "rowspan";
         public const string Align = "align";
