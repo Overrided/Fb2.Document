@@ -375,7 +375,7 @@ If given `Fb2Container` node can contain `text` nodes along with other nodes (in
 
 ```csharp
 var strikethrough = new Strikethrough();
-strikethrough.AddTextContent("some Strikethrough text"); // adding text directly
+strikethrough.AddTextContent("hello world"); // adding text directly
 ```
 
 For any descendant of `Fb2Container` basic method of adding nodes to actual content is `AddContent(Fb2Node node)`, with a bunch of overloads on top for different use-cases.
@@ -384,7 +384,7 @@ For any descendant of `Fb2Container` basic method of adding nodes to actual cont
 
 ```csharp
 var paragraph = new Paragraph();
-paragraph.AddContent(new Strong()); // adding child instance
+paragraph.AddContent(new Strong()); // adding empty child node
 ```
 
 3) Adding `Strong` node `with text` to `Paragraph` :
@@ -415,7 +415,7 @@ await paragraph.AddContentAsync(async () =>          // with async node function
 });
 ```
 
-5) To remove particular node / set of nodes, use `RemoveContent` method:
+5) To remove particular node / set of nodes, use `RemoveContent` method or one of it overloads:
 
 ```csharp
 // set up
