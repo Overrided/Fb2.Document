@@ -577,6 +577,9 @@ Paragraph paragraph = new Paragraph()
                         .AppendContent(new Strikethrough().AppendTextContent("Strikethrough", " "))
                         .AppendTextContent("plain text", " ");
 ```
+
+For more details, check out [Fb2ContainerExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2ContainerExtensions.cs), [Fb2ElementExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2ElementExtensions.cs) and [Fb2NodeExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2NodeExtensions.cs).
+
 <br/>
 
 ## Constants
