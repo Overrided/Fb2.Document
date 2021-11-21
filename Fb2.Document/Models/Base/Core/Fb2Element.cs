@@ -80,7 +80,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns>Current element.</returns>
         /// <remarks>
-        /// <para>If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).</para>
+        /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
         /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"></exception>
@@ -118,8 +118,8 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <returns>XElement reflected from given Fb2Element.</returns>
         /// <remarks>
-        /// <para>Only formatted content is serialized.</para>
-        /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/></para>
+        /// Only formatted content is serialized.
+        /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/>.</para>
         /// </remarks>
         public override XElement ToXml()
         {
