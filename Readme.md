@@ -1,6 +1,6 @@
 # Fb2 Document Library
 
-Fb2.Document is lightweight, fast .Net 5 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 3.1/5/6 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
@@ -12,7 +12,7 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 
 * [Loading](#Loading)
     * [Fb2Document](#fb2document)
-    * [particular node](#particular-node)
+    * [...particular node](#particular-node)
 
 * [Encoding](#encoding)
 
@@ -154,7 +154,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 <br/>
 
-### particular node
+### ...particular node
 
 In corner-case scenario you might need to load some part of a document into the model, instead of loading whole thing.
 
