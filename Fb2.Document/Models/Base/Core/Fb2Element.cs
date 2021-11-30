@@ -38,10 +38,11 @@ namespace Fb2.Document.Models.Base
         /// <remarks>Original content of XNode is NOT preserved by default except for <seealso cref="Code" />.</remarks>
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            base.Load(node, preserveWhitespace);
+            base.Load(node, parentNode, preserveWhitespace);
 
             var rawContent = node.NodeType switch
             {

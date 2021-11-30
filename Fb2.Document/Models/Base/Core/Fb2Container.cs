@@ -54,10 +54,11 @@ namespace Fb2.Document.Models.Base
         /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            base.Load(node, preserveWhitespace, loadUnsafe);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
 
             var element = node as XElement;
 
@@ -102,7 +103,7 @@ namespace Fb2.Document.Models.Base
                     continue;
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
-                elem.Load(validNode, preserveWhitespace, loadUnsafe);
+                elem.Load(validNode, this, preserveWhitespace, loadUnsafe);
                 elem.IsUnsafe = isUnsafe;
 
                 content.Add(elem);
@@ -307,6 +308,7 @@ namespace Fb2.Document.Models.Base
             if (isTextNode)
                 return TryMergeTextContent((node as TextItem).Content);
 
+            node.Parent = this;
             content.Add(node);
             return this;
         }
@@ -355,6 +357,8 @@ namespace Fb2.Document.Models.Base
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
+
+            // TODO : remove parent from removed node?
 
             if (!IsEmpty)
                 content.Remove(node);
@@ -728,10 +732,13 @@ namespace Fb2.Document.Models.Base
         {
             var lastChildNode = IsEmpty ? null : Content.LastOrDefault();
 
-            // empty or has other containers
+            // empty or last item is not text, so cant append actual content nowhere
             if (lastChildNode == null ||
                 !(lastChildNode is TextItem lastTextItem))
-                content.Add(new TextItem().AddContent(newContent, separator));
+            {
+                var textNode = new TextItem { Parent = this }.AddContent(newContent, separator);
+                content.Add(textNode);
+            }
             else
                 lastTextItem.AddContent(newContent, separator);
 

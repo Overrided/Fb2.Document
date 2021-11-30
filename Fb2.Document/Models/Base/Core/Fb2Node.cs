@@ -57,6 +57,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public bool IsUnsafe { get; internal set; }
 
+        // logically only container can be parent as only container can have sub-nodes
+        public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
+
         /// <summary>
         /// Basic Load of element - validation and populating Attributes.
         /// </summary>
@@ -66,6 +69,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public virtual void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
@@ -73,6 +77,8 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(node));
 
             Validate(node);
+
+            Parent = parentNode;
 
             if (!AllowedAttributes.Any())
                 return;

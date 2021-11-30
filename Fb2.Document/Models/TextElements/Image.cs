@@ -46,10 +46,11 @@ namespace Fb2.Document.Models
 
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            base.Load(node, preserveWhitespace, loadUnsafe);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
 
             IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
         }

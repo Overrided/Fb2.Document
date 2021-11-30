@@ -16,6 +16,7 @@ namespace Fb2.Document.Models
 
         public sealed override void Load(
             [In] XNode element,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {

@@ -15,9 +15,13 @@ namespace Fb2.Document.Models
         public override ImmutableHashSet<string> AllowedAttributes =>
             ImmutableHashSet.Create(AttributeNames.ContentType, AttributeNames.Id);
 
-        public override void Load([In] XNode node, bool preserveWhitespace = false, bool loadUnsafe = true)
+        public override void Load(
+            [In] XNode node,
+            [In] Fb2Container? parentNode = null,
+            bool preserveWhitespace = false, // ignored because of reasons lol
+            bool loadUnsafe = true)
         {
-            base.Load(node, false, loadUnsafe);
+            base.Load(node, parentNode, false, loadUnsafe);
 
             if (trimWhitespace.IsMatch(content))
                 content = trimWhitespace.Replace(content, string.Empty);

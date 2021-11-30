@@ -199,19 +199,25 @@ namespace Fb2.Document.Tests.ModelsTests
             node.AddContent(new TextItem().AddContent("test text"));
 
             node.Content.Count.Should().Be(1);
-            var first = node.GetFirstChild<TextItem>();
+            node.Parent.Should().BeNull();
+            var first = node.GetFirstChild<TextItem>()!;
             first.Should().NotBeNull();
             first.Content.Should().Be("test text");
+            first.Parent.Should().NotBeNull().And.Be(node);
 
             node.AddContent(new TextItem().AddContent(" test text 2 "));
 
             node.Content.Count.Should().Be(1);
-            var second = node.GetFirstChild<TextItem>();
+            var second = node.GetFirstChild<TextItem>()!;
             second.Should().NotBeNull();
             second.Content.Should().Be("test text test text 2 ");
+            //second.Parent.Should().NotBeNull();
             first.Content.Should().Be("test text test text 2 ");
 
             node.AddContent(node.AllowedElements.First());
+            var firstAllowedElement = node.GetFirstChild(node.AllowedElements.First())!;
+            firstAllowedElement.Should().NotBeNull();
+            firstAllowedElement.Parent.Should().NotBeNull().And.Be(node);
 
             node.Content.Count.Should().Be(2);
 
@@ -221,6 +227,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var textItems = node.GetChildren<TextItem>().ToList();
             textItems.Count.Should().Be(2);
             textItems.First().Content.Should().Be("test text test text 2 ");
+            textItems.Last().Parent.Should().NotBeNull().And.Be(node);
             textItems.Last().Content.Should().Be("test text 3 ");
         }
 
@@ -679,33 +686,28 @@ namespace Fb2.Document.Tests.ModelsTests
                         .AddContent(
                             new Strong()
                                 .AddTextContent("strong italic text ")
-                                .AddContent(
-                                    new Strikethrough().AddTextContent("bold strikethrough text "))),
+                                .AddContent(new Strikethrough().AddTextContent("bold strikethrough text "))),
                     new Strong().AddTextContent("strong text 2 "))
                 .AddTextContent("plain text 1");
 
             // verify setup
             paragraph.Content.Should().HaveCount(4);
 
-            var firstStrong = paragraph.Content.First();
-            firstStrong.Should().BeOfType<Strong>();
-            (firstStrong as Strong).Content.Should().HaveCount(1);
-            (firstStrong as Strong).Content.First().Should().BeOfType<TextItem>();
+            var firstStrong = paragraph.Content.First() as Strong;
+            firstStrong.Content.Should().HaveCount(1);
+            firstStrong.Content.First().Should().BeOfType<TextItem>();
 
-            var firstItalic = paragraph.Content[1];
-            firstItalic.Should().BeOfType<Emphasis>();
-            (firstItalic as Emphasis).Content.Should().HaveCount(2);
-            (firstItalic as Emphasis).Content.First().Should().BeOfType<TextItem>();
-            (firstItalic as Emphasis).Content[1].Should().BeOfType<Strong>();
+            var firstItalic = paragraph.Content[1] as Emphasis;
+            firstItalic.Content.Should().HaveCount(2);
+            firstItalic.Content.First().Should().BeOfType<TextItem>();
+            firstItalic.Content[1].Should().BeOfType<Strong>();
 
-            var secondStrong = paragraph.Content[2];
-            secondStrong.Should().BeOfType<Strong>();
-            (secondStrong as Strong).Content.Should().HaveCount(1);
-            (secondStrong as Strong).Content.First().Should().BeOfType<TextItem>();
+            var secondStrong = paragraph.Content[2] as Strong;
+            secondStrong.Content.Should().HaveCount(1);
+            secondStrong.Content.First().Should().BeOfType<TextItem>();
 
-            var plainText = paragraph.Content.Last();
-            plainText.Should().BeOfType<TextItem>();
-            (plainText as Fb2Element).Content.Should().Be("plain text 1");
+            var plainText = paragraph.Content.Last() as TextItem;
+            plainText.Content.Should().Be("plain text 1");
 
             // children query example
 

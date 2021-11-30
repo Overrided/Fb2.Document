@@ -17,8 +17,9 @@ namespace Fb2.Document.Models
         // `preserveWhitespace` ignored due to "Custom Info" part is text-only, so could be `\t` and `\r\n` formatted??
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true) =>
-            base.Load(node, true, loadUnsafe);
+            base.Load(node, parentNode, true, loadUnsafe);
     }
 }
