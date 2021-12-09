@@ -389,9 +389,29 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
+        public void EmptyContainer_RemoveContent_NullNode_Throws(Fb2Container node)
+        {
+            node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
+               .Should()
+               .Throw<ArgumentNullException>();
+
+            node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
+               .Should()
+               .Throw<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
         public void Container_RemoveContent_NullNode_Throws(Fb2Container node)
         {
             var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
+            node.AddContent(firstAllowedNode);
+
+            node.Content.Should().HaveCount(1);
 
             node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
                .Should()
@@ -401,15 +421,15 @@ namespace Fb2.Document.Tests.ModelsTests
                .Should()
                .Throw<ArgumentNullException>();
 
+            node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
+               .Should()
+               .Throw<ArgumentNullException>();
+
             node.Invoking(n => n.RemoveContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
                .Should()
                .Throw<ArgumentNullException>();
 
             node.Invoking(n => n.RemoveContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
-               .Should()
-               .Throw<ArgumentNullException>();
-
-            node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
                .Should()
                .Throw<ArgumentNullException>();
         }
@@ -428,7 +448,14 @@ namespace Fb2.Document.Tests.ModelsTests
             node.AddContent(firstAllowedNode, lastAllowedNode);
             node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
 
+            firstAllowedNode.Parent.Should().NotBeNull();
+            firstAllowedNode.Parent.Should().Be(node);
+
+            lastAllowedNode.Parent.Should().NotBeNull();
+            lastAllowedNode.Parent.Should().Be(node);
+
             node.RemoveContent(firstAllowedNode); // Fb2Node
+            firstAllowedNode.Parent.Should().BeNull();
 
             node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
             node.Content.Should().Contain(lastAllowedNode);
@@ -441,8 +468,16 @@ namespace Fb2.Document.Tests.ModelsTests
 
             ClearContainerContent(node);
 
+            lastAllowedNode.Parent.Should().BeNull();
+
             node.AddContent(firstAllowedNode, lastAllowedNode);
             node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(2);
+
+            firstAllowedNode.Parent.Should().NotBeNull();
+            firstAllowedNode.Parent.Should().Be(node);
+
+            lastAllowedNode.Parent.Should().NotBeNull();
+            lastAllowedNode.Parent.Should().Be(node);
 
             node.RemoveContent(new List<Fb2Node> { firstAllowedNode, lastAllowedNode }); // IEnumerable<Fb2Node>
 

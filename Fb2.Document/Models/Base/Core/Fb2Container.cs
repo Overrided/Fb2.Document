@@ -321,11 +321,12 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
-            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
-                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
+            if (nodes == null || !nodes.Any())
+                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array.");
 
-            foreach (var node in nodes)
-                RemoveContent(node);
+            if (!IsEmpty)
+                foreach (var node in nodes)
+                    RemoveContent(node);
 
             return this;
         }
@@ -336,13 +337,17 @@ namespace Fb2.Document.Models.Base
         /// <param name="nodePredicate">Predicate to match node against.</param>
         /// <returns>Current container.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
+        public Fb2Container RemoveContent([In] Func<Fb2Node, bool> nodePredicate)
         {
             if (nodePredicate == null)
                 throw new ArgumentNullException(nameof(nodePredicate));
 
             if (!IsEmpty)
-                content.RemoveAll(n => nodePredicate(n));
+            {
+                var nodesToRemove = content.Where(n => nodePredicate(n)).ToList();
+                foreach (var node in nodesToRemove)
+                    RemoveContent(node);
+            }
 
             return this;
         }
@@ -358,10 +363,11 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            // TODO : remove parent from removed node?
-
-            if (!IsEmpty)
+            if (!IsEmpty && content.Contains(node))
+            {
                 content.Remove(node);
+                node.Parent = null;
+            }
 
             return this;
         }
@@ -373,7 +379,8 @@ namespace Fb2.Document.Models.Base
         public Fb2Container ClearContent()
         {
             if (!IsEmpty)
-                content.Clear();
+                for (int i = content.Count - 1; i >= 0; i--)
+                    RemoveContent(content[i]);
 
             return this;
         }
