@@ -112,6 +112,25 @@ namespace Fb2.Document.Models.Base
         #region Node querying
 
         /// <summary>
+        /// Returns a collection of the ancestor elements of this Fb2Node.
+        /// </summary>
+        /// <returns><c>IEnumerable&lt;Fb2Container&gt;</c> of the ancestor elements of this Fb2Node.</returns>
+        public IEnumerable<Fb2Container> GetAncestors()
+        {
+            var parent = this.Parent;
+            if (parent == null)
+                return Enumerable.Empty<Fb2Container>();
+
+            var result = new List<Fb2Container> { parent };
+
+            var parents = parent.GetAncestors();
+            if (parents.Any())
+                result.AddRange(parents);
+
+            return result;
+        }
+
+        /// <summary>
         /// Checks if node has attribute(s) with given key and value.
         /// </summary>
         /// <param name="key">Key to search attribute by.</param>

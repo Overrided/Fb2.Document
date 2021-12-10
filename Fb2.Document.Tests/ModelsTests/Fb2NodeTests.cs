@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
+using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -612,6 +613,31 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .BeTrue();
             langResultIvalidCasingIgnore.Should().Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+        }
+
+        [Fact]
+        public void Ancestors_Works()
+        {
+            var parent1 = new Strong().AppendTextContent("leaf node text");
+            parent1.Content.Should().HaveCount(1);
+
+            var leafText = parent1.Content.First();
+            leafText.Should().NotBeNull();
+            leafText.Should().BeOfType<TextItem>();
+            (leafText as TextItem)!.Content.Should().Be("leaf node text");
+
+            parent1.Parent.Should().BeNull();
+            parent1.GetAncestors().Should().NotBeNull().And.BeEmpty();
+            leafText.Parent.Should().Be(parent1);
+            var initialAncestors = leafText.GetAncestors();
+            initialAncestors.Should().HaveCount(1);
+            initialAncestors.Should().Contain(parent1);
+
+            var parent2 = new Emphasis().AppendContent(parent1);
+            var updatedAncestors = leafText.GetAncestors();
+            updatedAncestors.Should().HaveCount(2);
+            updatedAncestors.Should().Contain(parent1);
+            updatedAncestors.Should().Contain(parent2);
         }
 
         private static void CheckAttributes(
