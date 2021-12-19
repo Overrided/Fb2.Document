@@ -20,10 +20,9 @@ namespace Fb2.Document.Models
             bool preserveWhitespace = false,
             bool loadUnsafe = true)
         {
-            if (element == null)
-                throw new ArgumentNullException(nameof(element));
+            base.Load(element, parentNode, preserveWhitespace, loadUnsafe);
 
-            Validate(element);
+            content = Environment.NewLine; // double-check, just in case
         }
 
         public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;

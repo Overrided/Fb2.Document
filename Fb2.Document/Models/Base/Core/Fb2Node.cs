@@ -14,18 +14,21 @@ using Fb2.Document.Factories;
 
 namespace Fb2.Document.Models.Base
 {
-    // TODO : add `Fb2Node Parent` get-only property to traverse tree better
-
     /// <summary>
     /// Base class - describes basic node of fb2 document.
     /// Has Name, list of valid attributes and actual attribute values
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
+        // default node namespace
+        private XNamespace? defaultNodeNamespace = null;
+        // attributes to preserve namespaces
+        private List<XAttribute>? nodeNamespaceDeclarations = null;
+        // backing field for `Attributes` property
+        private Dictionary<string, string> attributes = new Dictionary<string, string>();
+
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
         protected const string Whitespace = " ";
-
-        private Dictionary<string, string> attributes = new Dictionary<string, string>();
 
         /// <summary>
         /// Node name, used during document parsing and validation.
@@ -79,6 +82,7 @@ namespace Fb2.Document.Models.Base
             Validate(node);
 
             Parent = parentNode;
+            LoadNamespaces(node);
 
             if (!AllowedAttributes.Any())
                 return;
@@ -102,9 +106,11 @@ namespace Fb2.Document.Models.Base
         /// <returns>XElement instance with attributes reflecting Attributes property </returns>
         public virtual XElement ToXml()
         {
-            var element = attributes.Any() ?
-                new XElement(Name, attributes.Select(attr => new XAttribute(attr.Key, attr.Value))) :
-                new XElement(Name);
+            XName xNodeName = defaultNodeNamespace != null ? defaultNodeNamespace + Name : Name;
+
+            var attributesToAdd = CollectSerializableAttributes();
+
+            var element = attributesToAdd.Any() ? new XElement(xNodeName, attributesToAdd) : new XElement(xNodeName);
 
             return element;
         }
@@ -402,6 +408,38 @@ namespace Fb2.Document.Models.Base
 
             result = actualAttrs.ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
             return true;
+        }
+
+        private void LoadNamespaces([In] XNode node)
+        {
+            if (!(node is XElement element))
+                return;
+
+            var namespacesAttrs = element
+                .Attributes()
+                .Where(a => a.IsNamespaceDeclaration).ToList();
+            if (namespacesAttrs.Count > 0)
+            {
+                if (nodeNamespaceDeclarations == null)
+                    nodeNamespaceDeclarations = new List<XAttribute>();
+
+                nodeNamespaceDeclarations.AddRange(namespacesAttrs);
+            }
+
+            defaultNodeNamespace = element.GetDefaultNamespace();
+        }
+
+        private List<XAttribute> CollectSerializableAttributes()
+        {
+            var allAttributes = new List<XAttribute>();
+
+            if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
+                allAttributes.AddRange(nodeNamespaceDeclarations);
+
+            if (attributes.Any()) // regular attributes
+                allAttributes.AddRange(attributes.Select(attr => new XAttribute(attr.Key, attr.Value)));
+
+            return allAttributes;
         }
 
         protected void Validate(XNode node)

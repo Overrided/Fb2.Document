@@ -14,7 +14,10 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.InfoType);
 
-        // `preserveWhitespace` ignored due to "Custom Info" part is text-only, so could be `\t` and `\r\n` formatted??
+        /// <summary>
+        /// Specific override to preserve original string content 
+        /// with '\t', ' ', '\r\n' etc. formatting.
+        /// </summary>
         public override void Load(
             [In] XNode node,
             [In] Fb2Container? parentNode = null,

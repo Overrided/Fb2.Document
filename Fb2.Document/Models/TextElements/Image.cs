@@ -52,6 +52,7 @@ namespace Fb2.Document.Models
         {
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
 
+            // TODO : use GetAncestors() or this.Parent
             IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
         }
 

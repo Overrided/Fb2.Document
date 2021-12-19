@@ -11,6 +11,10 @@ namespace Fb2.Document.Models
 
         public override bool IsInline => false;
 
+        /// <summary>
+        /// Specific override to preserve original string content 
+        /// with '\t', ' ', '\r\n' etc. formatting.
+        /// </summary>
         public override void Load(
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
