@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Attributes;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
+
+// TODO : FIX COMMENTS in regards of Fb2Attribute
 
 namespace Fb2.Document.Models.Base
 {
@@ -25,7 +27,7 @@ namespace Fb2.Document.Models.Base
         // attributes to preserve namespaces
         private List<XAttribute>? nodeNamespaceDeclarations = null;
         // backing field for `Attributes` property
-        private Dictionary<string, string> attributes = new Dictionary<string, string>();
+        private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
 
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
         protected const string Whitespace = " ";
@@ -43,7 +45,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Gets actual element attributes in key - value (Dictionary) form.
         /// </summary>
-        public ImmutableDictionary<string, string> Attributes => attributes.ToImmutableDictionary();
+        public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
 
         /// <summary>
         /// List of allowed attribures for particular element.
@@ -87,7 +89,7 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Any())
                 return;
 
-            if (!TryGetXNodeAttributes(node, out Dictionary<string, string> actualAttributes))
+            if (!TryParseXAttributes(node, out var actualAttributes))
                 return;
 
             var filteredAttributes = actualAttributes
@@ -96,8 +98,7 @@ namespace Fb2.Document.Models.Base
             if (!filteredAttributes.Any())
                 return;
 
-            foreach (var kvp in filteredAttributes)
-                attributes.Add(kvp.Key, kvp.Value);
+            attributes.AddRange(filteredAttributes);
         }
 
         /// <summary>
@@ -136,29 +137,23 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
-        /// <summary>
-        /// Checks if node has attribute(s) with given key and value.
-        /// </summary>
-        /// <param name="key">Key to search attribute by.</param>
-        /// <param name="value">Value to search attribute by.</param>
-        /// <param name="ignoreCase">Indicates if case-sensitive comparison should be used.</param>
-        /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> and <paramref name="value"/> found, otherwise <see langword="false"/>.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public bool HasAttribute(string key, string value, bool ignoreCase = false)
+        ///// <summary>
+        ///// Checks if node has attribute(s) with given key and value.
+        ///// </summary>
+        ///// <param name="key">Key to search attribute by.</param>
+        ///// <param name="value">Value to search attribute by.</param>
+        ///// <param name="ignoreCase">Indicates if case-sensitive comparison should be used.</param>
+        ///// <returns><see langword="true"/> if attribute with given <paramref name="key"/> and <paramref name="value"/> found, otherwise <see langword="false"/>.</returns>
+        ///// <exception cref="ArgumentNullException"></exception>
+        public bool HasAttribute(Fb2Attribute fb2Attribute)
         {
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
-
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentNullException(nameof(value));
+            if (fb2Attribute == null)
+                throw new ArgumentNullException(nameof(fb2Attribute));
 
             if (!attributes.Any())
                 return false;
 
-            var hasAttribute = ignoreCase ?
-                attributes.Any(a => a.Key.EqualsInvariant(key) && a.Value.EqualsInvariant(value)) :
-                attributes.Any(a => a.Key.Equals(key, StringComparison.InvariantCulture) && a.Value.Equals(value, StringComparison.InvariantCulture));
-
+            var hasAttribute = attributes.Contains(fb2Attribute);
             return hasAttribute;
         }
 
@@ -191,7 +186,7 @@ namespace Fb2.Document.Models.Base
         /// Returns first matching attribute by given <paramref name="key"/> or <c>default(KeyValuePair&lt;string, string&gt;)</c> if no such element is found.
         /// </returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public KeyValuePair<string, string> GetAttribute(string key, bool ignoreCase = false)
+        public Fb2Attribute? GetAttribute(string key, bool ignoreCase = false)
         {
             if (!HasAttribute(key, ignoreCase))
                 return default;
@@ -211,12 +206,12 @@ namespace Fb2.Document.Models.Base
         /// <param name="result">Attribute value if any found, otherwise <c>default(KeyValuePair&lt;string, string&gt;)</c>.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public bool TryGetAttribute(string key, out KeyValuePair<string, string> result, bool ignoreCase = false)
+        public bool TryGetAttribute(string key, out Fb2Attribute? result, bool ignoreCase = false)
         {
             var attribute = GetAttribute(key, ignoreCase);
 
             result = attribute;
-            return !string.IsNullOrWhiteSpace(attribute.Key) && !string.IsNullOrWhiteSpace(attribute.Value);
+            return attribute != null;
         }
 
         #endregion
@@ -229,13 +224,13 @@ namespace Fb2.Document.Models.Base
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Node AddAttributes(params KeyValuePair<string, string>[] attributes)
+        public Fb2Node AddAttributes(params Fb2Attribute[] attributes)
         {
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException(nameof(attributes));
 
             foreach (var attribute in attributes)
-                AddAttribute(attribute.Key, attribute.Value);
+                AddAttribute(attribute);
 
             return this;
         }
@@ -246,13 +241,13 @@ namespace Fb2.Document.Models.Base
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Node AddAttributes(IDictionary<string, string> attributes)
+        public Fb2Node AddAttributes(IEnumerable<Fb2Attribute> attributes)
         {
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
             foreach (var attribute in attributes)
-                AddAttribute(attribute.Key, attribute.Value);
+                AddAttribute(attribute);
 
             return this;
         }
@@ -263,14 +258,14 @@ namespace Fb2.Document.Models.Base
         /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<Fb2Node> AddAttributeAsync(Func<Task<KeyValuePair<string, string>>> attributeProvider)
+        public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
         {
             if (attributeProvider == null)
                 throw new ArgumentNullException(nameof(attributeProvider));
 
             var attribute = await attributeProvider();
 
-            return AddAttribute(attribute.Key, attribute.Value);
+            return AddAttribute(attribute);
         }
 
         /// <summary>
@@ -279,53 +274,53 @@ namespace Fb2.Document.Models.Base
         /// <param name="attributeProvider">Attribute provider function.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Node AddAttribute(Func<KeyValuePair<string, string>> attributeProvider)
+        public Fb2Node AddAttribute(Func<Fb2Attribute> attributeProvider)
         {
             if (attributeProvider == null)
                 throw new ArgumentNullException(nameof(attributeProvider));
 
             var attribute = attributeProvider();
 
-            return AddAttribute(attribute.Key, attribute.Value);
+            return AddAttribute(attribute);
         }
 
-        /// <summary>
-        /// Adds single attribute to <see cref="Attributes"/>.
-        /// </summary>
-        /// <param name="attribute">Attribute to add to <see cref="Attribute"/>.</param>
-        /// <returns>Current node.</returns>
-        public Fb2Node AddAttribute(KeyValuePair<string, string> attribute) =>
-            AddAttribute(attribute.Key, attribute.Value);
-
-        /// <summary>
-        /// Adds single attribute using <paramref name="key"/> and <paramref name="value"/>.
-        /// </summary>
-        /// <param name="key">Attribute key to add.</param>
-        /// <param name="value">Attribute value to add.</param>
-        /// <returns>Current node.</returns>
-        /// <exception cref="NoAttributesAllowedException"></exception>
-        /// <exception cref="InvalidAttributeException"></exception>
-        /// <exception cref="UnexpectedAtrributeException"></exception>
-        public Fb2Node AddAttribute(string key, string value)
+        public Fb2Node AddAttribute(string key, string value, string? namespaceName = null)
         {
+            var fb2Attribute = new Fb2Attribute(key, value, namespaceName);
+            return AddAttribute(fb2Attribute);
+        }
+
+        ///// <summary>
+        ///// Adds single attribute using <paramref name="key"/> and <paramref name="value"/>.
+        ///// </summary>
+        ///// <param name="key">Attribute key to add.</param>
+        ///// <param name="value">Attribute value to add.</param>
+        ///// <returns>Current node.</returns>
+        ///// <exception cref="NoAttributesAllowedException"></exception>
+        ///// <exception cref="InvalidAttributeException"></exception>
+        ///// <exception cref="UnexpectedAtrributeException"></exception>
+        public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
+        {
+            if (fb2Attribute == null)
+                throw new ArgumentNullException(nameof(fb2Attribute));
+
             if (!AllowedAttributes.Any())
                 throw new NoAttributesAllowedException(Name);
 
-            if (string.IsNullOrWhiteSpace(value))
-                throw new InvalidAttributeException(nameof(value));
+            var key = fb2Attribute.Key;
 
-            if (string.IsNullOrWhiteSpace(key) ||
-                trimWhitespace.IsMatch(key))
-                throw new InvalidAttributeException(nameof(key));
+            if (!AllowedAttributes.Contains(key))
+                throw new UnexpectedAtrributeException(Name, key);
 
-            var escapedAttrName = SecurityElement.Escape(key);
+            // update or insert
+            if (TryGetAttribute(key, out var existingAttribute, true))
+            {
+                var existingAttributeIndex = attributes.IndexOf(existingAttribute!);
+                attributes[existingAttributeIndex] = fb2Attribute; // replace existing, should not be -1
+            }
+            else
+                attributes.Add(fb2Attribute);
 
-            if (!AllowedAttributes.Contains(escapedAttrName))
-                throw new UnexpectedAtrributeException(Name, escapedAttrName);
-
-            var escapedAttrValue = SecurityElement.Escape(value);
-
-            attributes[escapedAttrName] = escapedAttrValue;
             return this;
         }
 
@@ -344,13 +339,14 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            var attributeKeysToDelete = attributes.Keys
-                .Where(existingKey => ignoreCase ?
-                    existingKey.EqualsInvariant(key) :
-                    existingKey.Equals(key));
+            var attributesToDelete = attributes.Where(existingAttr =>
+                ignoreCase ?
+                    existingAttr.Key.EqualsInvariant(key) :
+                    existingAttr.Key.Equals(key))
+                .ToList();
 
-            foreach (var attrKey in attributeKeysToDelete)
-                attributes.Remove(attrKey);
+            foreach (var attributeToRemove in attributesToDelete)
+                RemoveAttribute(attributeToRemove);
 
             return this;
         }
@@ -361,7 +357,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="attributePredicate">Predicate function to match attributes against.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Node RemoveAttribute(Func<KeyValuePair<string, string>, bool> attributePredicate)
+        public Fb2Node RemoveAttribute(Func<Fb2Attribute, bool> attributePredicate)
         {
             if (attributePredicate == null)
                 throw new ArgumentNullException(nameof(attributePredicate));
@@ -369,10 +365,21 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            var attrsToRemove = attributes.Where(attributePredicate);
+            var attrsToRemove = attributes.Where(attributePredicate).ToList();
 
             foreach (var attributeToRemove in attrsToRemove)
-                attributes.Remove(attributeToRemove.Key);
+                RemoveAttribute(attributeToRemove);
+
+            return this;
+        }
+
+        public Fb2Node RemoveAttribute(Fb2Attribute fb2Attribute)
+        {
+            if (fb2Attribute == null)
+                throw new ArgumentNullException(nameof(fb2Attribute));
+
+            if (attributes.Contains(fb2Attribute))
+                attributes.Remove(fb2Attribute);
 
             return this;
         }
@@ -390,25 +397,6 @@ namespace Fb2.Document.Models.Base
         }
 
         #endregion
-
-        private static bool TryGetXNodeAttributes([In] XNode node, out Dictionary<string, string> result)
-        {
-            if (!(node is XElement element))
-            {
-                result = new Dictionary<string, string>(0);
-                return false;
-            }
-
-            var actualAttrs = element.Attributes();
-            if (!actualAttrs.Any())
-            {
-                result = new Dictionary<string, string>(0);
-                return false;
-            }
-
-            result = actualAttrs.ToDictionary(attr => attr.Name.LocalName, attr => attr.Value);
-            return true;
-        }
 
         private void LoadNamespaces([In] XNode node)
         {
@@ -429,6 +417,30 @@ namespace Fb2.Document.Models.Base
             defaultNodeNamespace = element.GetDefaultNamespace();
         }
 
+        private static bool TryParseXAttributes([In] XNode node, out IEnumerable<Fb2Attribute> result)
+        {
+            if (!(node is XElement element))
+            {
+                result = Enumerable.Empty<Fb2Attribute>();
+                return false;
+            }
+
+            var actualAttrs = element.Attributes();
+            if (!actualAttrs.Any())
+            {
+                result = Enumerable.Empty<Fb2Attribute>();
+                return false;
+            }
+
+            result = actualAttrs.Select(attr =>
+            {
+                var fb2Atrr = new Fb2Attribute(attr.Name.LocalName, attr.Value, attr.Name.Namespace?.NamespaceName);
+                return fb2Atrr;
+            });
+
+            return true;
+        }
+
         private List<XAttribute> CollectSerializableAttributes()
         {
             var allAttributes = new List<XAttribute>();
@@ -437,7 +449,22 @@ namespace Fb2.Document.Models.Base
                 allAttributes.AddRange(nodeNamespaceDeclarations);
 
             if (attributes.Any()) // regular attributes
-                allAttributes.AddRange(attributes.Select(attr => new XAttribute(attr.Key, attr.Value)));
+            {
+                var convertedAttributes = attributes.Select(attr =>
+                {
+                    if (string.IsNullOrWhiteSpace(attr.NamespaceName))
+                        return new XAttribute(attr.Key, attr.Value); // no prefix - id attribute for example
+                    else
+                    {
+                        XNamespace attrNamespace = attr.NamespaceName;
+                        XName attributeName = attrNamespace + attr.Key;
+
+                        return new XAttribute(attributeName, attr.Value); // attribute with namespace prefix - like l:href
+                    }
+                });
+
+                allAttributes.AddRange(convertedAttributes);
+            }
 
             return allAttributes;
         }
@@ -471,14 +498,13 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
-        private bool AreAttributesEqual(Dictionary<string, string> otherAttributes)
+        private bool AreAttributesEqual(List<Fb2Attribute> otherAttributes)
         {
             if (ReferenceEquals(attributes, otherAttributes))
                 return true;
 
             var sameAttrs = attributes.Count == otherAttributes.Count &&
-                attributes.Keys.All(k => otherAttributes.ContainsKey(k) &&
-                attributes[k].Equals(otherAttributes[k], StringComparison.InvariantCulture));
+                                attributes.All(k => otherAttributes.Contains(k));
 
             return sameAttrs;
         }
@@ -490,7 +516,7 @@ namespace Fb2.Document.Models.Base
             var node = Fb2NodeFactory.GetNodeByName(Name);
 
             if (attributes.Any())
-                node.attributes = new Dictionary<string, string>(attributes);
+                node.attributes = new List<Fb2Attribute>(attributes);
 
             node.IsInline = IsInline;
             node.IsUnsafe = IsUnsafe;

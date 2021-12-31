@@ -154,7 +154,7 @@ namespace Fb2.Document.Models.Base
         public override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element.content = Content;
+            element!.content = Content;
 
             return element;
         }

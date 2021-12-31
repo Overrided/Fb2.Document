@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Fb2.Document.Attributes;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Extensions
@@ -20,8 +21,7 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T AppendAttributes<T>(
             this T fb2Node,
-            params KeyValuePair<string, string>[] attributes) where T : Fb2Node =>
-            (T)fb2Node.AddAttributes(attributes);
+            params Fb2Attribute[] attributes) where T : Fb2Node => (T)fb2Node.AddAttributes(attributes);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(IDictionary{string, string})"/> method.
@@ -33,8 +33,7 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T AppendAttributes<T>(
             this T fb2Node,
-            IDictionary<string, string> attributes) where T : Fb2Node =>
-            (T)fb2Node.AddAttributes(attributes);
+            IEnumerable<Fb2Attribute> attributes) where T : Fb2Node => (T)fb2Node.AddAttributes(attributes);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributeAsync(Func{Task{KeyValuePair{string, string}}})"/> method.
@@ -46,7 +45,7 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static async Task<T> AppendAttributeAsync<T>(
             this T fb2Node,
-            Func<Task<KeyValuePair<string, string>>> attributeProvider) where T : Fb2Node
+            Func<Task<Fb2Attribute>> attributeProvider) where T : Fb2Node
         {
             var result = await fb2Node.AddAttributeAsync(attributeProvider);
             return (T)result;
@@ -62,8 +61,7 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T AppendAttribute<T>(
             this T fb2Node,
-            Func<KeyValuePair<string, string>> attributeProvider) where T : Fb2Node =>
-            (T)fb2Node.AddAttribute(attributeProvider);
+            Func<Fb2Attribute> attributeProvider) where T : Fb2Node => (T)fb2Node.AddAttribute(attributeProvider);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(KeyValuePair{string, string})"/> method.
@@ -73,23 +71,9 @@ namespace Fb2.Document.Extensions
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <param name="attribute">Attribute to add to <paramref name="fb2Node"/>.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttribute<T>(this T fb2Node, KeyValuePair<string, string> attribute) where T : Fb2Node =>
-            (T)fb2Node.AddAttribute(attribute);
-
-        /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(string, string)"/> method.
-        /// <para> Adds single attribute using separate key and value.</para>
-        /// </summary>
-        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-        /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
-        /// <param name="attributeName">Attribute name.</param>
-        /// <param name="attributeValue">Attribute value.</param>
-        /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T AppendAttribute<T>(
             this T fb2Node,
-            string attributeName,
-            string attributeValue) where T : Fb2Node =>
-            (T)fb2Node.AddAttribute(attributeName, attributeValue);
+            Fb2Attribute attribute) where T : Fb2Node => (T)fb2Node.AddAttribute(attribute);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(string, bool)"/> method.
@@ -116,7 +100,7 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T DeleteAttribute<T>(
             this T fb2Node,
-            Func<KeyValuePair<string, string>, bool> attributePredicate) where T : Fb2Node =>
+            Func<Fb2Attribute, bool> attributePredicate) where T : Fb2Node =>
             (T)fb2Node.RemoveAttribute(attributePredicate);
 
         /// <summary>

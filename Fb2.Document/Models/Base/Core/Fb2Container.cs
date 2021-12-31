@@ -737,7 +737,7 @@ namespace Fb2.Document.Models.Base
 
         private Fb2Container TryMergeTextContent(string newContent, string? separator = null)
         {
-            var lastChildNode = IsEmpty ? null : Content.LastOrDefault();
+            var lastChildNode = IsEmpty ? null : content.LastOrDefault();
 
             // empty or last item is not text, so cant append actual content nowhere
             if (lastChildNode == null ||
