@@ -43,12 +43,12 @@ namespace Fb2.Document.Models.Base
         public abstract bool IsEmpty { get; }
 
         /// <summary>
-        /// Gets actual element attributes in key - value (Dictionary) form.
+        /// Gets actual element attributes in ImmutableList<Fb2Attribute> form.
         /// </summary>
         public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
 
         /// <summary>
-        /// List of allowed attribures for particular element.
+        /// List of allowed attribure names for particular element.
         /// </summary>
         public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet<string>.Empty;
 
@@ -66,11 +66,12 @@ namespace Fb2.Document.Models.Base
         public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
 
         /// <summary>
-        /// Basic Load of element - validation and populating Attributes.
+        /// Basic Load of node - validation and populating Attributes.
         /// </summary>
-        /// <param name="node">XNode to load as Fb2Node</param>
-        /// <param name="preserveWhitespace"> Is ignored by Fb2Node loading.</param>
-        /// <param name="loadUnsafe"> Is ignored by Fb2Node loading.</param>
+        /// <param name="node">XNode to load as <c>Fb2Node</c>.</param>
+        /// <param name="parentNode">Parent node of node being loaded, can be <see langword="null"/>.</param>
+        /// <param name="preserveWhitespace">Is ignored during <c>Fb2Node</c> loading.</param>
+        /// <param name="loadUnsafe">Is ignored during <c>Fb2Node</c> loading.</param>
         /// <exception cref="ArgumentNullException"></exception>
         public virtual void Load(
             [In] XNode node,
@@ -102,9 +103,9 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Basic method to serialize Fb2Node back to XElement
+        /// Basic method to serialize Fb2Node back to XElement.
         /// </summary>
-        /// <returns>XElement instance with attributes reflecting Attributes property </returns>
+        /// <returns>XElement instance with attributes reflecting Attributes property.</returns>
         public virtual XElement ToXml()
         {
             XName xNodeName = defaultNodeNamespace != null ? defaultNodeNamespace + Name : Name;
@@ -119,9 +120,9 @@ namespace Fb2.Document.Models.Base
         #region Node querying
 
         /// <summary>
-        /// Returns a collection of the ancestor elements of this Fb2Node.
+        /// Returns a collection of the ancestor elements of this <c>Fb2Node</c>.
         /// </summary>
-        /// <returns><c>IEnumerable&lt;Fb2Container&gt;</c> of the ancestor elements of this Fb2Node.</returns>
+        /// <returns><c>IEnumerable&lt;Fb2Container&gt;</c> of the ancestor elements of this <c>Fb2Node</c>.</returns>
         public IEnumerable<Fb2Container> GetAncestors()
         {
             var parent = this.Parent;
@@ -137,14 +138,12 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
-        ///// <summary>
-        ///// Checks if node has attribute(s) with given key and value.
-        ///// </summary>
-        ///// <param name="key">Key to search attribute by.</param>
-        ///// <param name="value">Value to search attribute by.</param>
-        ///// <param name="ignoreCase">Indicates if case-sensitive comparison should be used.</param>
-        ///// <returns><see langword="true"/> if attribute with given <paramref name="key"/> and <paramref name="value"/> found, otherwise <see langword="false"/>.</returns>
-        ///// <exception cref="ArgumentNullException"></exception>
+        /// <summary>
+        /// Checks if given node has particular <paramref name="fb2Attribute"/>.
+        /// </summary>
+        /// <param name="fb2Attribute"><c>Fb2Attribute</c> to look for.</param>
+        /// <returns><see langword="true"/> if <c>Fb2Node</c> has given <paramref name="fb2Attribute"/>, otherwise <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public bool HasAttribute(Fb2Attribute fb2Attribute)
         {
             if (fb2Attribute == null)
@@ -181,9 +180,9 @@ namespace Fb2.Document.Models.Base
         /// Gets first matching <c>attribute</c> by given <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Key to search attribute by.</param>
-        /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
         /// <returns>
-        /// Returns first matching attribute by given <paramref name="key"/> or <c>default(KeyValuePair&lt;string, string&gt;)</c> if no such element is found.
+        /// Returns first matching attribute by given <paramref name="key"/> or <c>default(Fb2Attribute)</c> if no such element is found.
         /// </returns>
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Attribute? GetAttribute(string key, bool ignoreCase = false)
@@ -199,13 +198,12 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Attempts to get first matching <c>attribute</c> by given <paramref name="key"/>.
+        /// Attempts to get first matching <c>Fb2Attribute</c> by given <paramref name="key"/>.
         /// </summary>
-        /// <param name="key">Key to search attribute by</param>
-        /// <param name="ignoreCase">true to ignore case; false to consider case in key comparison</param>
-        /// <param name="result">Attribute value if any found, otherwise <c>default(KeyValuePair&lt;string, string&gt;)</c>.</param>
+        /// <param name="key">Key to match attribute by.</param>
+        /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
         public bool TryGetAttribute(string key, out Fb2Attribute? result, bool ignoreCase = false)
         {
             var attribute = GetAttribute(key, ignoreCase);
@@ -219,7 +217,7 @@ namespace Fb2.Document.Models.Base
         #region Node editing
 
         /// <summary>
-        /// Adds set of attributes to node using params <seealso cref="KeyValuePair{string,string}"/>
+        /// Adds set of attributes to node using <seealso cref="params Fb2Attribute[]"/>
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
@@ -236,7 +234,7 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds multiple attributes using <seealso cref="IDictionary{string, string}" />.
+        /// Adds multiple attributes using <seealso cref="IEnumerable{Fb2Attribute}." />
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
@@ -284,21 +282,29 @@ namespace Fb2.Document.Models.Base
             return AddAttribute(attribute);
         }
 
+        /// <summary>
+        /// Adds single attribute using <paramref name="key"/>, <paramref name="value"/> and <paramref name="namespaceName"/>.
+        /// </summary>
+        /// <param name="key">Attribute key to add.</param>
+        /// <param name="value">Attribute value to add.</param>
+        /// <param name="namespaceName">
+        /// <para>Optional, can be <see langword="null"/>.</para>
+        /// <para>NamespaceName for attribute, used by <see cref="ToXml"/> serialization.</para></param>
+        /// <returns>Current node.</returns>
         public Fb2Node AddAttribute(string key, string value, string? namespaceName = null)
         {
             var fb2Attribute = new Fb2Attribute(key, value, namespaceName);
             return AddAttribute(fb2Attribute);
         }
 
-        ///// <summary>
-        ///// Adds single attribute using <paramref name="key"/> and <paramref name="value"/>.
-        ///// </summary>
-        ///// <param name="key">Attribute key to add.</param>
-        ///// <param name="value">Attribute value to add.</param>
-        ///// <returns>Current node.</returns>
-        ///// <exception cref="NoAttributesAllowedException"></exception>
-        ///// <exception cref="InvalidAttributeException"></exception>
-        ///// <exception cref="UnexpectedAtrributeException"></exception>
+        /// <summary>
+        /// Adds single attribute to given node.
+        /// </summary>
+        /// <param name="fb2Attribute">Attribute to add to given node.</param>
+        /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="NoAttributesAllowedException"></exception>
+        /// <exception cref="UnexpectedAtrributeException"></exception>
         public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
         {
             if (fb2Attribute == null)
@@ -327,8 +333,8 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Removes attribute from <see cref="Attributes"/> by given attribute key.
         /// </summary>
-        /// <param name="key">Name to remove attribute by.</param>
-        /// <param name="ignoreCase">Indicates if case-sensitive key comparison should be used.</param>
+        /// <param name="key">Key to remove attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node RemoveAttribute(string key, bool ignoreCase = false)
@@ -373,6 +379,12 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
+        /// <summary>
+        /// Removes <paramref name="fb2Attribute"/> from given node.
+        /// </summary>
+        /// <param name="fb2Attribute">Attribute to remove.</param>
+        /// <returns>Current node.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node RemoveAttribute(Fb2Attribute fb2Attribute)
         {
             if (fb2Attribute == null)
