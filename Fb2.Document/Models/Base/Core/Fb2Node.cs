@@ -43,7 +43,7 @@ namespace Fb2.Document.Models.Base
         public abstract bool IsEmpty { get; }
 
         /// <summary>
-        /// Gets actual element attributes in ImmutableList<Fb2Attribute> form.
+        /// Gets actual element attributes in <c>ImmutableList&lt;Fb2Attribute&gt;</c> form.
         /// </summary>
         public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
 
@@ -63,6 +63,9 @@ namespace Fb2.Document.Models.Base
         public bool IsUnsafe { get; internal set; }
 
         // logically only container can be parent as only container can have sub-nodes
+        /// <summary>
+        /// Returns Parent node for current node.
+        /// </summary>
         public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
 
         /// <summary>
@@ -217,7 +220,7 @@ namespace Fb2.Document.Models.Base
         #region Node editing
 
         /// <summary>
-        /// Adds set of attributes to node using <seealso cref="params Fb2Attribute[]"/>
+        /// Adds multiple attributes to node using <seealso cref="params Fb2Attribute[]"/>.
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
@@ -251,7 +254,7 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds single attribute to <see cref="Attributes"/> using asynchronous provider function.
+        /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
         /// </summary>
         /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
         /// <returns>Current node.</returns>
@@ -267,7 +270,7 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds single attribute to <see cref="Attributes"/> using provider function.
+        /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using <paramref name="attributeProvider"/> function.
         /// </summary>
         /// <param name="attributeProvider">Attribute provider function.</param>
         /// <returns>Current node.</returns>
@@ -345,10 +348,8 @@ namespace Fb2.Document.Models.Base
             if (!attributes.Any())
                 return this;
 
-            var attributesToDelete = attributes.Where(existingAttr =>
-                ignoreCase ?
-                    existingAttr.Key.EqualsInvariant(key) :
-                    existingAttr.Key.Equals(key))
+            var attributesToDelete = attributes
+                .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsInvariant(key) : existingAttr.Key.Equals(key))
                 .ToList();
 
             foreach (var attributeToRemove in attributesToDelete)

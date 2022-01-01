@@ -16,16 +16,19 @@ namespace Fb2.Document.Models.Base
         protected string content = string.Empty;
 
         /// <summary>
-        /// Content (value) of element. Available after Load() method call.
+        /// Content (value) of element. Available after Load(...) method call.
         /// </summary>
         public string Content => content;
 
         /// <summary>
-        /// For text nodes Inline is true by default, however, some classes override this property.
-        /// Indicates if content of an element should be written from a new line.
+        /// <para>Indicates if content of an element should be written from a new line.</para>
+        /// <para>For text nodes Inline is true by default, however, some classes override this property.</para>
         /// </summary>
         public override bool IsInline { get; protected set; } = true;
 
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
         public override bool IsEmpty => string.IsNullOrEmpty(content);
 
         /// <summary>

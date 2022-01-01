@@ -12,32 +12,30 @@ namespace Fb2.Document.Extensions
     public static class Fb2NodeExtensions
     {
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(KeyValuePair{string, string}[])"/> method.
-        /// <para>Adds set of attributes to node using params <seealso cref="KeyValuePair{string,string}"/></para>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(Fb2Attribute[])"/> method.
+        /// <para> Adds multiple attributes to node using <seealso cref="params Fb2Attribute[]"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <param name="attributes">Set of attributes to add to given <paramref name="fb2Node"/>.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttributes<T>(
-            this T fb2Node,
-            params Fb2Attribute[] attributes) where T : Fb2Node => (T)fb2Node.AddAttributes(attributes);
+        public static T AppendAttributes<T>(this T fb2Node, params Fb2Attribute[] attributes) where T : Fb2Node =>
+            (T)fb2Node.AddAttributes(attributes);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(IDictionary{string, string})"/> method.
-        /// <para> Adds multiple attributes using <seealso cref="IDictionary{string, string}" />.</para>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(IEnumerable{Fb2Attribute})"/> method.
+        /// <para> Adds multiple attributes using <seealso cref="IEnumerable{Fb2Attribute}."/></para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <param name="attributes">Set of attributes to add to given <paramref name="fb2Node"/>.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttributes<T>(
-            this T fb2Node,
-            IEnumerable<Fb2Attribute> attributes) where T : Fb2Node => (T)fb2Node.AddAttributes(attributes);
+        public static T AppendAttributes<T>(this T fb2Node, IEnumerable<Fb2Attribute> attributes) where T : Fb2Node =>
+            (T)fb2Node.AddAttributes(attributes);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributeAsync(Func{Task{KeyValuePair{string, string}}})"/> method.
-        /// <para> Adds single attribute to <see cref="Attributes"/> using asynchronous provider function.</para>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributeAsync(Func{Task{Fb2Attribute}})"/> method.
+        /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -52,28 +50,26 @@ namespace Fb2.Document.Extensions
         }
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(Func{KeyValuePair{string, string}})"/> method.
-        /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using provider function.</para>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(Func{Fb2Attribute})"/> method.
+        /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using <paramref name="attributeProvider"/> function.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <param name="attributeProvider">Attribute provider function.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttribute<T>(
-            this T fb2Node,
-            Func<Fb2Attribute> attributeProvider) where T : Fb2Node => (T)fb2Node.AddAttribute(attributeProvider);
+        public static T AppendAttribute<T>(this T fb2Node, Func<Fb2Attribute> attributeProvider) where T : Fb2Node =>
+            (T)fb2Node.AddAttribute(attributeProvider);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(KeyValuePair{string, string})"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(Fb2Attribute)"/> method.
         /// <para> Adds single attribute to <see cref="Attributes"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <param name="attribute">Attribute to add to <paramref name="fb2Node"/>.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttribute<T>(
-            this T fb2Node,
-            Fb2Attribute attribute) where T : Fb2Node => (T)fb2Node.AddAttribute(attribute);
+        public static T AppendAttribute<T>(this T fb2Node, Fb2Attribute attribute) where T : Fb2Node =>
+            (T)fb2Node.AddAttribute(attribute);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(string, bool)"/> method.
@@ -81,17 +77,16 @@ namespace Fb2.Document.Extensions
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
-        /// <param name="attributeName">Attribute name.</param>
-        /// <param name="ignoreCase">Indicates if matching attributes against <paramref name="attributeName"/> should be case-sensitive.</param>
+        /// <param name="key">Attribute name.</param>
+        /// <param name="ignoreCase">Indicates if matching attributes against <paramref name="key"/> should be case-sensitive.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T DeleteAttribute<T>(
             this T fb2Node,
-            string attributeName,
-            bool ignoreCase = false) where T : Fb2Node =>
-            (T)fb2Node.RemoveAttribute(attributeName, ignoreCase);
+            string key,
+            bool ignoreCase = false) where T : Fb2Node => (T)fb2Node.RemoveAttribute(key, ignoreCase);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(Func{KeyValuePair{string, string}, bool})"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(Func{Fb2Attribute, bool})"/> method.
         /// <para> Removes attributes matching given predicate.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
@@ -100,8 +95,19 @@ namespace Fb2.Document.Extensions
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
         public static T DeleteAttribute<T>(
             this T fb2Node,
-            Func<Fb2Attribute, bool> attributePredicate) where T : Fb2Node =>
-            (T)fb2Node.RemoveAttribute(attributePredicate);
+            Func<Fb2Attribute, bool> attributePredicate) where T : Fb2Node => (T)fb2Node.RemoveAttribute(attributePredicate);
+
+        /// <summary>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(Fb2Attribute)"/> method.
+        /// <para> Removes <paramref name="attribute"/> from given node.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+        /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+        /// <param name="attribute">Attribute to remove.</param>
+        /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+        public static T DeleteAttribute<T>(
+            this T fb2Node,
+            Fb2Attribute attribute) where T : Fb2Node => (T)fb2Node.RemoveAttribute(attribute);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.ClearAttributes()"/> method.
@@ -110,7 +116,6 @@ namespace Fb2.Document.Extensions
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T EraseAttributes<T>(this T fb2Node) where T : Fb2Node =>
-            (T)fb2Node.ClearAttributes();
+        public static T EraseAttributes<T>(this T fb2Node) where T : Fb2Node => (T)fb2Node.ClearAttributes();
     }
 }

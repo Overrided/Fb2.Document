@@ -40,10 +40,12 @@ namespace Fb2.Document.Models.Base
 
         /// <summary>
         /// Indicates whether element should start with a new line or be inline.
-        /// `true` if element is inline, otherwise - `false`.
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
         public override bool IsEmpty => content.Count == 0;
 
         /// <summary>
@@ -306,7 +308,7 @@ namespace Fb2.Document.Models.Base
                 throw new UnexpectedNodeException(Name, nodeName);
 
             if (isTextNode)
-                return TryMergeTextContent((node as TextItem).Content);
+                return TryMergeTextContent((node as TextItem)!.Content);
 
             node.Parent = this;
             content.Add(node);

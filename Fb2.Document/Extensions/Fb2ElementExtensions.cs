@@ -17,7 +17,8 @@ namespace Fb2.Document.Extensions
         /// <param name="newContent">Plain text to append to given <paramref name="fb2Element"/>.</param>
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
-        public static T AppendContent<T>(this T fb2Element,
+        public static T AppendContent<T>(
+            this T fb2Element,
             string newContent,
             string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(newContent, separator);
 
@@ -30,7 +31,8 @@ namespace Fb2.Document.Extensions
         /// <param name="contentProvider">Content provider function.</param>
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
-        public static T AppendContent<T>(this T fb2Element,
+        public static T AppendContent<T>(
+            this T fb2Element,
             Func<string> contentProvider,
             string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
 

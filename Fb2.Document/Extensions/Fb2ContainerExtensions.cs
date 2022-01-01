@@ -55,10 +55,10 @@ namespace Fb2.Document.Extensions
         /// <param name="content">String content to add to given <paramref name="fb2Container"/>.</param>
         /// <param name="separator">Separator string used to join new text with existing content.</param>
         /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
-        public static T AppendTextContent<T>(this T fb2Container,
+        public static T AppendTextContent<T>(
+            this T fb2Container,
             string content,
-            string? separator = null) where T : Fb2Container =>
-            (T)fb2Container.AddTextContent(content, separator);
+            string? separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContent(IEnumerable{Fb2Node})"/> method.
