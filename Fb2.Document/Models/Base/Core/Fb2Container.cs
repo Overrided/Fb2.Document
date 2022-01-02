@@ -326,9 +326,8 @@ namespace Fb2.Document.Models.Base
             if (nodes == null || !nodes.Any())
                 throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array.");
 
-            if (!IsEmpty)
-                foreach (var node in nodes)
-                    RemoveContent(node);
+            foreach (var node in nodes)
+                RemoveContent(node);
 
             return this;
         }

@@ -389,49 +389,29 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void EmptyContainer_RemoveContent_NullNode_Throws(Fb2Container node)
-        {
-            node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
-               .Should()
-               .Throw<ArgumentNullException>();
-
-            node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
-               .Should()
-               .Throw<ArgumentNullException>();
-
-            node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
-               .Should()
-               .Throw<ArgumentNullException>();
-        }
-
-        [Theory]
-        [ClassData(typeof(Fb2ContainerCollection))]
         public void Container_RemoveContent_NullNode_Throws(Fb2Container node)
         {
             var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
-            node.AddContent(firstAllowedNode);
-
-            node.Content.Should().HaveCount(1);
 
             node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
                .Should()
-               .Throw<ArgumentNullException>();
+               .ThrowExactly<ArgumentNullException>();
 
             node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
                .Should()
-               .Throw<ArgumentNullException>();
+               .ThrowExactly<ArgumentNullException>();
 
             node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
                .Should()
-               .Throw<ArgumentNullException>();
+               .ThrowExactly<ArgumentNullException>();
 
             node.Invoking(n => n.RemoveContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
                .Should()
-               .Throw<ArgumentNullException>();
+               .ThrowExactly<ArgumentNullException>();
 
             node.Invoking(n => n.RemoveContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
                .Should()
-               .Throw<ArgumentNullException>();
+               .ThrowExactly<ArgumentNullException>();
         }
 
         [Theory]
