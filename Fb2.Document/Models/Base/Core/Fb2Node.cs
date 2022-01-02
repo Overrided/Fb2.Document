@@ -533,6 +533,10 @@ namespace Fb2.Document.Models.Base
 
             node.IsInline = IsInline;
             node.IsUnsafe = IsUnsafe;
+            node.Parent = Parent;
+
+            node.defaultNodeNamespace = defaultNodeNamespace;
+            node.nodeNamespaceDeclarations = nodeNamespaceDeclarations;
 
             return node;
         }
