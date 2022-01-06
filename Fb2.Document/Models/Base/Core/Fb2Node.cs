@@ -64,7 +64,11 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
 
-        // Default namespace + namespace declarations
+        /// <summary>
+        /// <para>Includes XML info: Default Namespace and namespace declarations attributes.</para>
+        /// <para>Is applied during loading/serialization of Fb2Node.</para>
+        /// <para>Is not used in Equals and GetHashCode overrides.</para>
+        /// </summary>
         public Fb2NodeMetadata? NodeMetadata { get; set; } = null;
 
         /// <summary>
