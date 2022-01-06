@@ -12,7 +12,7 @@ using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 
-// TODO : FIX COMMENTS in regards of Fb2Attribute
+// TODO : FIX COMMENTS
 
 namespace Fb2.Document.Models.Base
 {
@@ -22,10 +22,6 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        // default node namespace
-        private XNamespace? defaultNodeNamespace = null;
-        // attributes to preserve namespaces
-        private List<XAttribute>? nodeNamespaceDeclarations = null;
         // backing field for `Attributes` property
         private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
 
@@ -68,6 +64,9 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
 
+        // Default namespace + namespace declarations
+        public Fb2NodeMetadata? NodeMetadata { get; set; } = null;
+
         /// <summary>
         /// Basic Load of node - validation and populating Attributes.
         /// </summary>
@@ -88,7 +87,7 @@ namespace Fb2.Document.Models.Base
             Validate(node);
 
             Parent = parentNode;
-            LoadNamespaces(node);
+            LoadMetadata(node);
 
             if (!AllowedAttributes.Any())
                 return;
@@ -111,11 +110,14 @@ namespace Fb2.Document.Models.Base
         /// <returns>XElement instance with attributes reflecting Attributes property.</returns>
         public virtual XElement ToXml()
         {
-            XName xNodeName = defaultNodeNamespace != null ? defaultNodeNamespace + Name : Name;
+            var defaultNamespace = NodeMetadata?.DefaultNamespace;
+            XName xNodeName = defaultNamespace != null ? defaultNamespace + Name : Name;
 
-            var attributesToAdd = CollectSerializableAttributes();
+            var attributesToAdd = SerializeAttributes();
 
-            var element = attributesToAdd.Any() ? new XElement(xNodeName, attributesToAdd) : new XElement(xNodeName);
+            var element = attributesToAdd.Count > 0 ?
+                new XElement(xNodeName, attributesToAdd) :
+                new XElement(xNodeName);
 
             return element;
         }
@@ -191,7 +193,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Attribute? GetAttribute(string key, bool ignoreCase = false)
         {
             if (!HasAttribute(key, ignoreCase))
-                return default;
+                return null;
 
             var attribute = ignoreCase ?
                 attributes.FirstOrDefault(attr => attr.Key.EqualsInvariant(key)) :
@@ -411,23 +413,19 @@ namespace Fb2.Document.Models.Base
 
         #endregion
 
-        private void LoadNamespaces([In] XNode node)
+        private void LoadMetadata([In] XNode node)
         {
             if (!(node is XElement element))
                 return;
 
+            var defaultNodeNamespace = element.GetDefaultNamespace();
+
             var namespacesAttrs = element
                 .Attributes()
-                .Where(a => a.IsNamespaceDeclaration).ToList();
-            if (namespacesAttrs.Count > 0)
-            {
-                if (nodeNamespaceDeclarations == null)
-                    nodeNamespaceDeclarations = new List<XAttribute>();
+                .Where(a => a.IsNamespaceDeclaration)
+                .ToList();
 
-                nodeNamespaceDeclarations.AddRange(namespacesAttrs);
-            }
-
-            defaultNodeNamespace = element.GetDefaultNamespace();
+            NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespacesAttrs);
         }
 
         private static bool TryParseXAttributes([In] XNode node, out IEnumerable<Fb2Attribute> result)
@@ -454,12 +452,13 @@ namespace Fb2.Document.Models.Base
             return true;
         }
 
-        private List<XAttribute> CollectSerializableAttributes()
+        private List<XAttribute> SerializeAttributes()
         {
-            var allAttributes = new List<XAttribute>();
+            var result = new List<XAttribute>();
 
+            var nodeNamespaceDeclarations = NodeMetadata?.NamespaceDeclarations;
             if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
-                allAttributes.AddRange(nodeNamespaceDeclarations);
+                result.AddRange(nodeNamespaceDeclarations);
 
             if (attributes.Any()) // regular attributes
             {
@@ -476,10 +475,10 @@ namespace Fb2.Document.Models.Base
                     }
                 });
 
-                allAttributes.AddRange(convertedAttributes);
+                result.AddRange(convertedAttributes);
             }
 
-            return allAttributes;
+            return result;
         }
 
         protected void Validate(XNode node)
@@ -503,10 +502,10 @@ namespace Fb2.Document.Models.Base
                 return true;
 
             var result = Name == otherNode.Name &&
-                        AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
-                        AreAttributesEqual(otherNode.attributes) &&
-                        IsInline == otherNode.IsInline &&
-                        IsUnsafe == otherNode.IsUnsafe;
+                AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
+                AreAttributesEqual(otherNode.attributes) &&
+                IsInline == otherNode.IsInline &&
+                IsUnsafe == otherNode.IsUnsafe;
 
             return result;
         }
@@ -516,10 +515,8 @@ namespace Fb2.Document.Models.Base
             if (ReferenceEquals(attributes, otherAttributes))
                 return true;
 
-            var sameAttrs = attributes.Count == otherAttributes.Count &&
-                                attributes.All(k => otherAttributes.Contains(k));
-
-            return sameAttrs;
+            return attributes.Count == otherAttributes.Count &&
+                   attributes.All(k => otherAttributes.Contains(k));
         }
 
         public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
@@ -534,9 +531,7 @@ namespace Fb2.Document.Models.Base
             node.IsInline = IsInline;
             node.IsUnsafe = IsUnsafe;
             node.Parent = Parent;
-
-            node.defaultNodeNamespace = defaultNodeNamespace;
-            node.nodeNamespaceDeclarations = nodeNamespaceDeclarations;
+            node.NodeMetadata = NodeMetadata;
 
             return node;
         }
