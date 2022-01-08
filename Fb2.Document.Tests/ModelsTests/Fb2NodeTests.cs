@@ -166,6 +166,8 @@ namespace Fb2.Document.Tests.ModelsTests
             //    .ThrowExactly<ArgumentNullException>();
         }
 
+        // TODO : add tests for Fb2Attribute + add attributes with empty value to sho it's "valid"
+
         [Theory]
         [ClassData(typeof(Fb2NodeCollection))]
         public void AddAttribute_InvalidAttribute_Throws(Fb2Node instance)
@@ -175,30 +177,30 @@ namespace Fb2.Document.Tests.ModelsTests
             if (!instance.AllowedAttributes.Any())
                 return;
 
-            instance
-                .Invoking(i => i.AddAttribute(() => new Fb2Attribute("testK", "")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
+            //instance
+            //    .Invoking(i => i.AddAttribute(() => new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(() => new Fb2Attribute("", "testV")))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance
-                .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
+            //instance
+            //    .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("", "testV")))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
-            instance
-                .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
+            //instance
+            //    .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("", "testV")))

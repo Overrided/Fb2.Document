@@ -447,12 +447,7 @@ namespace Fb2.Document.Models.Base
                 return false;
             }
 
-            result = actualAttrs.Select(attr =>
-            {
-                var fb2Atrr = new Fb2Attribute(attr.Name.LocalName, attr.Value, attr.Name.Namespace?.NamespaceName);
-                return fb2Atrr;
-            });
-
+            result = actualAttrs.Select(attr => new Fb2Attribute(attr.Name.LocalName, attr.Value, attr.Name.Namespace?.NamespaceName));
             return true;
         }
 

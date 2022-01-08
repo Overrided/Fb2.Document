@@ -8,7 +8,7 @@ namespace Fb2.Document.Attributes
     public class Fb2Attribute
     {
         public string Key { get; }
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
         public string? NamespaceName { get; } = null;
 
         public Fb2Attribute(string key, string value, string? namespaceName = null)
@@ -17,9 +17,8 @@ namespace Fb2.Document.Attributes
             if (string.IsNullOrWhiteSpace(escapedKey))
                 throw new InvalidAttributeException(nameof(key));
 
-            var escapedValue = SecurityElement.Escape(value);
-            if (string.IsNullOrWhiteSpace(escapedValue))
-                throw new InvalidAttributeException(nameof(value));
+            // because value can actually be empty string ))
+            var escapedValue = SecurityElement.Escape(value) ?? string.Empty;
 
             Key = escapedKey;
             Value = escapedValue;
