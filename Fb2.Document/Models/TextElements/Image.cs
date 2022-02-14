@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
-using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
@@ -20,7 +19,7 @@ namespace Fb2.Document.Models
                 AttributeNames.XHref,
                 AttributeNames.Type);
 
-        private readonly HashSet<string> InlineParentNodes = new HashSet<string>()
+        private static readonly HashSet<string> InlineParentNodes = new HashSet<string>()
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -30,7 +29,7 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
+        private static readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,
@@ -51,14 +50,12 @@ namespace Fb2.Document.Models
             bool loadUnsafe = true)
         {
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
-
-            // TODO : use GetAncestors() or this.Parent
-            IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
+            IsInline = GetInline(Parent?.Name);
         }
 
-        private bool GetInline(string? parentNodeName, XmlNodeType parentNodeType)
+        private bool GetInline(string? parentNodeName)
         {
-            if (string.IsNullOrEmpty(parentNodeName) || parentNodeType != XmlNodeType.Element)
+            if (string.IsNullOrEmpty(parentNodeName))
                 return true;
 
             if (InlineParentNodes.Contains(parentNodeName))

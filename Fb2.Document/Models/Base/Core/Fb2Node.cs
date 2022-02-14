@@ -426,8 +426,7 @@ namespace Fb2.Document.Models.Base
 
             var namespacesAttrs = element
                 .Attributes()
-                .Where(a => a.IsNamespaceDeclaration)
-                .ToList();
+                .Where(a => a.IsNamespaceDeclaration);
 
             NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespacesAttrs);
         }
