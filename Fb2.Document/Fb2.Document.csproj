@@ -18,6 +18,10 @@
 		<FileVersion>2.2.0.0</FileVersion>
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>PackageReadme.md</PackageReadmeFile>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
