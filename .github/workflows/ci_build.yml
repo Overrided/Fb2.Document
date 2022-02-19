@@ -39,6 +39,15 @@ jobs:
       - name: Run tests
         run: dotnet test --collect:"XPlat Code Coverage"
 
+      - name: NuGet pack
+        run: dotnet pack '**/Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --out dist
+
+      - name: Upload NuGet package artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: ${{ matrix.os }}-nuget
+          path: dist
+
       - name: ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
         with:

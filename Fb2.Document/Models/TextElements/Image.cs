@@ -53,7 +53,7 @@ namespace Fb2.Document.Models
             IsInline = GetInline(Parent?.Name);
         }
 
-        private bool GetInline(string? parentNodeName)
+        private static bool GetInline(string? parentNodeName)
         {
             if (string.IsNullOrEmpty(parentNodeName))
                 return true;
