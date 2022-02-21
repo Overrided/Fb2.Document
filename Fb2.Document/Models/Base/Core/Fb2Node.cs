@@ -7,12 +7,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Fb2.Document.Attributes;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
-
-// TODO : FIX COMMENTS
+using Fb2.Document.Models.Attributes;
 
 namespace Fb2.Document.Models.Base
 {

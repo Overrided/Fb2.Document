@@ -4,6 +4,8 @@ Fb2.Document is lightweight, fast .Net 3.1/5/6 lib with bunch of APIs to operate
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
+[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
+
 ## Table of contents
 
 * [Updates](#updates)
@@ -18,9 +20,7 @@ Latest version brings few changes to make serializing and document tree traversa
 
 * Added `Parent` property to `Fb2Node` - now each node points back to it's parent, making tree navigation easier.
 
-* Added `NodeMetadata` - preserves `DefaultNamespace` and `Namespace Declarations` attributes of original `XNode` during `Load`, used in serializing bact to `xml` format.
-
-* 
+* Added `NodeMetadata` - preserves `DefaultNamespace` and `Namespace Declarations` attributes of original `XNode` during `Load`, used in serializing back to `xml` format.
 
 ## Usage examples
 

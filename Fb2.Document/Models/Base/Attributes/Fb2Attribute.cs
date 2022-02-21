@@ -3,7 +3,7 @@ using System.Security;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 
-namespace Fb2.Document.Attributes
+namespace Fb2.Document.Models.Attributes
 {
     public class Fb2Attribute
     {
