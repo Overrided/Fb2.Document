@@ -58,9 +58,10 @@ namespace Fb2.Document.Models.Base
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
             var element = node as XElement;
 
@@ -105,7 +106,7 @@ namespace Fb2.Document.Models.Base
                     continue;
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
-                elem.Load(validNode, this, preserveWhitespace, loadUnsafe);
+                elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
                 elem.IsUnsafe = isUnsafe;
 
                 content.Add(elem);
@@ -311,7 +312,7 @@ namespace Fb2.Document.Models.Base
                 return TryMergeTextContent((node as TextItem)!.Content);
 
             node.Parent = this;
-            if (node.NodeMetadata == null) // copy parent default namespace to prevent serialization issues
+            if (node.NodeMetadata == null && NodeMetadata?.DefaultNamespace != null) // copy parent default namespace to prevent serialization issues
                 node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata?.DefaultNamespace);
 
             content.Add(node);

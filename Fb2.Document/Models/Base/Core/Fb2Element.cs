@@ -43,9 +43,10 @@ namespace Fb2.Document.Models.Base
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, parentNode, preserveWhitespace);
+            base.Load(node, parentNode, preserveWhitespace, loadNamespaceMetadata: loadNamespaceMetadata);
 
             var rawContent = node.NodeType switch
             {

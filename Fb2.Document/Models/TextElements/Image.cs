@@ -47,9 +47,10 @@ namespace Fb2.Document.Models
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, parentNode, preserveWhitespace, loadUnsafe);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
             IsInline = GetInline(Parent?.Name);
         }
 

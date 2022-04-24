@@ -81,15 +81,15 @@ namespace Fb2.Document.Models.Base
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            if (node == null)
-                throw new ArgumentNullException(nameof(node));
-
             Validate(node);
 
             Parent = parentNode;
-            LoadMetadata(node);
+
+            if (loadNamespaceMetadata)
+                LoadMetadata(node);
 
             if (!AllowedAttributes.Any())
                 return;
@@ -479,6 +479,9 @@ namespace Fb2.Document.Models.Base
 
         protected void Validate(XNode node)
         {
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+
             if (node.NodeType != XmlNodeType.Element)
                 return;
 

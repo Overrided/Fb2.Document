@@ -19,6 +19,7 @@ namespace Fb2.Document.Models
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true) => base.Load(node, parentNode, true, loadUnsafe);
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true) => base.Load(node, parentNode, true, loadUnsafe, loadNamespaceMetadata);
     }
 }

@@ -18,10 +18,11 @@ namespace Fb2.Document.Models
         public override void Load(
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
-            bool preserveWhitespace = false, // ignored because of reasons lol
-            bool loadUnsafe = true)
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, parentNode, false, loadUnsafe);
+            base.Load(node, parentNode, false, loadUnsafe, loadNamespaceMetadata);
 
             if (trimWhitespace.IsMatch(content))
                 content = trimWhitespace.Replace(content, string.Empty);
