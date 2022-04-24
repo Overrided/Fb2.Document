@@ -18,9 +18,9 @@ namespace Fb2.Document
     /// </summary>
     public sealed class Fb2Document
     {
-        private const string defaultXmlVersion = "1.0";
+        private const string DefaultXmlVersion = "1.0";
 
-        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(defaultXmlVersion, Encoding.UTF8.HeaderName, null);
+        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
         private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
         {
             Async = true,

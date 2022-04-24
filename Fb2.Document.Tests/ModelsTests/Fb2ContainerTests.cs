@@ -83,7 +83,7 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(n => n.AddContent(impostor)) // Fb2Node 
                .Should()
                .ThrowExactly<UnknownNodeException>()
-               .WithMessage($"'Impostor' with type '{impostor.GetType().Name}' is not known Fb2 node.");
+               .WithMessage($"'Impostor' is not known Fb2 node name.");
 
             node.Invoking(n => n.AddContent(impostor.Name)) // name
                .Should()
@@ -95,7 +95,7 @@ namespace Fb2.Document.Tests.ModelsTests
             node.Invoking(n => n.AddContent(sneakyImpostor)) // Fb2Node 
                .Should()
                .ThrowExactly<UnknownNodeException>()
-               .WithMessage($"'{ElementNames.Paragraph}' with type '{sneakyImpostor.GetType().Name}' is not known Fb2 node.");
+               .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.");
         }
 
         [Theory]

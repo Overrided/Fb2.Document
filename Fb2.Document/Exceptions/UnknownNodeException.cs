@@ -5,10 +5,13 @@ namespace Fb2.Document.Exceptions
 {
     public class UnknownNodeException : Exception
     {
-        public UnknownNodeException(string nodeName) : base($"'{nodeName}' is not known Fb2 node name.") { }
+        public string NodeName { get; }
 
-        public UnknownNodeException(Fb2Node node) :
-            base($"'{node.Name}' with type '{node.GetType().Name}' is not known Fb2 node.")
-        { }
+        public UnknownNodeException(string nodeName) : base($"'{nodeName}' is not known Fb2 node name.")
+        {
+            NodeName = nodeName;
+        }
+
+        public UnknownNodeException(Fb2Node node) : this(node.Name) { }
     }
 }

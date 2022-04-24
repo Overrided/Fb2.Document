@@ -15,7 +15,7 @@ namespace Fb2.Document.Models.Attributes
         {
             var escapedKey = SecurityElement.Escape(key);
             if (string.IsNullOrWhiteSpace(escapedKey))
-                throw new InvalidAttributeException(nameof(key));
+                throw new InvalidAttributeException(key);
 
             // because value can actually be empty string ))
             var escapedValue = SecurityElement.Escape(value) ?? string.Empty;

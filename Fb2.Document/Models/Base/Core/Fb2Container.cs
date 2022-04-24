@@ -536,6 +536,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
+            // TODO : maybe throw an ArgumentException/UnknownNodeException for not known names?
             if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
                 return null;
 
