@@ -14,13 +14,17 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 
 ## Updates
 
-Latest version brings few changes to make serializing and document tree traversal more convinient.
+Latest version brings few improvements to Fb2 document serializing and tree traversal.
 
 * `Attributes` where **reworked** - now attributes preserve `NamespaceName` of original `XNode` attribute, using `Fb2Attribute` class. Thus, most of **attributes-related methods** where **updates/reworked**, posing **breaking change**. 
 
 * Added `Parent` property to `Fb2Node` - now each node points back to it's parent, making tree navigation easier.
 
 * Added `NodeMetadata` - preserves `DefaultNamespace` and `Namespace Declarations` attributes of original `XNode` during `Load`, used in serializing back to `xml` format.
+
+* Updated `Load` and `LoadAsync` methods of `Fb2Document` - now using `Fb2LoadingOptions`.
+
+* Updated `Fb2Node.Load` method and corresponding overrides in `Fb2Container`, `Fb2Element` and rest of models.
 
 ## Usage examples
 
