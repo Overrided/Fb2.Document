@@ -187,8 +187,8 @@ namespace Fb2.Document.Tests.IntegrationTests
                 var secondDocument = new Fb2Document();
                 await secondDocument.LoadAsync(fileReadStream, new Fb2StreamLoadingOptions(loadNamespaceMetadata: false));
 
-                firstDocument.Book.NodeMetadata.Should().NotBeNull();
-                secondDocument.Book.NodeMetadata.Should().BeNull();
+                firstDocument.Book!.NodeMetadata.Should().NotBeNull();
+                secondDocument.Book!.NodeMetadata.Should().BeNull();
 
                 firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
                 secondDocument.Bodies.First().NodeMetadata.Should().BeNull();

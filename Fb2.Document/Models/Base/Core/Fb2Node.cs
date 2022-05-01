@@ -88,17 +88,28 @@ namespace Fb2.Document.Models.Base
 
             Parent = parentNode;
 
+            if (!(node is XElement element))
+                return;
+
+            var allAttributes = element.Attributes();
+
             if (loadNamespaceMetadata)
-                LoadMetadata(node);
+            {
+                var defaultNodeNamespace = element.GetDefaultNamespace();
+                var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
+                NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
+            }
 
             if (!AllowedAttributes.Any())
                 return;
 
-            if (!TryParseXAttributes(node, out var actualAttributes))
-                return;
-
-            var filteredAttributes = actualAttributes
-                .Where(kvp => AllowedAttributes.Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase));
+            var filteredAttributes = allAttributes
+                .Where(attr => AllowedAttributes.Contains(attr.Name.LocalName, StringComparer.InvariantCultureIgnoreCase))
+                .Select(attr =>
+                {
+                    var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+                    return new Fb2Attribute(attr.Name.LocalName, attr.Value, attributeNamespace);
+                });
 
             if (!filteredAttributes.Any())
                 return;
@@ -414,39 +425,6 @@ namespace Fb2.Document.Models.Base
         }
 
         #endregion
-
-        private void LoadMetadata([In] XNode node)
-        {
-            if (!(node is XElement element))
-                return;
-
-            var defaultNodeNamespace = element.GetDefaultNamespace();
-
-            var namespacesAttrs = element
-                .Attributes()
-                .Where(a => a.IsNamespaceDeclaration);
-
-            NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespacesAttrs);
-        }
-
-        private static bool TryParseXAttributes([In] XNode node, out IEnumerable<Fb2Attribute> result)
-        {
-            if (!(node is XElement element))
-            {
-                result = Enumerable.Empty<Fb2Attribute>();
-                return false;
-            }
-
-            var actualAttrs = element.Attributes();
-            if (!actualAttrs.Any())
-            {
-                result = Enumerable.Empty<Fb2Attribute>();
-                return false;
-            }
-
-            result = actualAttrs.Select(attr => new Fb2Attribute(attr.Name.LocalName, attr.Value, attr.Name.Namespace?.NamespaceName));
-            return true;
-        }
 
         private List<XAttribute> SerializeAttributes()
         {
