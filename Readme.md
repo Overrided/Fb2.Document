@@ -35,7 +35,6 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 
 * [Tests](#Tests)
 
-<br/>
 
 ## Installation
 
@@ -47,7 +46,6 @@ You can download and use Fb2Document package in your app via
 
 * dotnet cli: `dotnet add package Fb2.Document`
 
-<br/>
 
 ## Document infrastructure
 
@@ -78,7 +76,6 @@ All comments are ignored by default.
 
 For full list of allowed elements and attribute names see [ElementNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/ElementNames.cs) and [AttributeNames](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document/Constants/AttributeNames.cs).
 
-<br/>
 
 ## Loading
 
@@ -152,7 +149,6 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-<br/>
 
 ### ...particular node
 
@@ -167,7 +163,6 @@ Paragraph paragraph = new Paragraph();
 paragraph.Load(node);
 ```
 
-<br/>
 
 ### Encoding
 
@@ -175,13 +170,11 @@ If method is marked as "not encoding safe" - means content's original encoding i
 
 If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
 
-<br/>
 
 ## Querying
 
 All descendants of `Fb2Node` (itself included) class provide build-in methods to query and manipulate parsed data in multiple ways.
 
-<br/>
 
 ### Query Fb2Element
 
@@ -197,7 +190,6 @@ Check if particular `fb2Element` has substring:
 var hasSubstring = fb2Element.Content.Contains(...);
 ```
 
-<br/>
 
 ### Query Fb2Container
 
@@ -223,7 +215,6 @@ var firstImageInParagraphByPredicate = paragraph.GetFirstChild(n => n.Name == El
 var firstImageInParagraphByType = paragraph.GetFirstChild<Image>();
 ```
 
-<br/>
 
 ### Query Fb2Container sub-tree
 
@@ -270,7 +261,6 @@ if(hasCustomInfoByType)
 >
 > Methods `GetChildren` and `GetDescendants` never returns null. Instead, empty `IEnumerable` is always returned. 
 
-<br/>
 
 ### Querying Attributes
 
@@ -317,20 +307,18 @@ if (tableCellFb2Node.TryGetAttribute(AttributeNames.Align, true, out var alignAt
 }
 ```
 
-<br/>
 
 ## Editing
 
 Since `2.1.0` version of a library all descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
 
-All content of `Fb2Document` is represented by two core classes:
+All content of `Fb2Document` is represented by instances of two core classes:
 
  - `Fb2Element` - represents `plain text` node of some kind.
  - `Fb2Container` - represents node capable of containing other nodes along with text.
 
 Naturally, both types provide different APIs for editing respective `Content` property - `string` for `Fb2Element` and `ImmutableList<Fb2Node>` for `Fb2Container`.
 
-<br/>
 
 ### Editing `Fb2Element` content
 
@@ -365,7 +353,6 @@ Debug.WriteLine(updatedContent);
 fb2Element.ClearContent();
 ```
 
-<br/>
 
 ### Editing `Fb2Container` content
 
@@ -438,7 +425,6 @@ paragraph.RemoveContent(strong); // drop particular node
 paragraph.ClearContent();
 ```
 
-<br/>
 
 ### Editing Attributes
 
@@ -497,7 +483,6 @@ paragraph.RemoveAttribute(attr => attr.Key.Equals(attributeName)); // // removin
 paragraph.ClearAttributes();
 ```
 
-<br/>
 
 ### Method chaining
 
@@ -552,7 +537,6 @@ Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue
 >
 > Once `AddAttribute` method (or any overload) is used on `Fb2Element` or `Fb2Container`, returned value is converted to `Fb2Node` type, allowing access for `Attributes` only. This can break method chaining, so it is recommended to use `Attributes`-related methods in last turn in call chain, or to use [Extensions](#extensions).
 
-<br/>
 
 ## Extensions
 
@@ -580,7 +564,6 @@ Paragraph paragraph = new Paragraph()
 
 For more details, check out [Fb2ContainerExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2ContainerExtensions.cs), [Fb2ElementExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2ElementExtensions.cs) and [Fb2NodeExtensions](https://github.com/Overrided/Fb2.Document/blob/features/editing_api/Fb2.Document/Extensions/Fb2NodeExtensions.cs).
 
-<br/>
 
 ## Constants
 
@@ -589,7 +572,6 @@ respectively, element and attribute names that are allowed to be loaded from fil
 
 All nodes / attributes, which names are not on list, will be omitted during document loading.
 
-<br/>
 
 ## Error handling
 
@@ -605,9 +587,8 @@ To simplify error-handling for different validation, loading and editing errors 
 `UnknownNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
 `UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.  
 
-For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/7b95c74a6f2f65e383b6a8daa8597d6315a60275/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).
+For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).
 
-<br/>
 
 ## Tests
 
