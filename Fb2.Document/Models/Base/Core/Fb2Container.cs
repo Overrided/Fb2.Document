@@ -406,6 +406,9 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(name));
 
             if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new UnknownNodeException(name);
+
+            if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
 
             return content.Where(elem => elem.Name.EqualsInvariant(name));
@@ -422,19 +425,24 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
+            if (IsEmpty)
+                return Enumerable.Empty<Fb2Node>();
+
             return content.Where(c => predicate(c));
         }
 
         /// <summary>
         /// Gets first matching child of element by given name.
         /// </summary>
-        /// <param name="name">Name to select child element by.</param>
+        /// <param name="name">Name to select child element by. Optional.</param>
         /// <returns>First matched child node.</returns>
         public Fb2Node? GetFirstChild(string? name)
         {
-            if (IsEmpty ||
-                !string.IsNullOrWhiteSpace(name) &&
+            if (!string.IsNullOrEmpty(name) &&
                 !Fb2NodeFactory.IsKnownNodeName(name))
+                throw new UnknownNodeException(name);
+
+            if (IsEmpty)
                 return null;
 
             return string.IsNullOrWhiteSpace(name) ?
@@ -453,6 +461,9 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
+            if (IsEmpty)
+                return null;
+
             return content.FirstOrDefault(predicate);
         }
 
@@ -467,9 +478,12 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
+            if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new UnknownNodeException(name);
+
             var result = new List<Fb2Node>();
 
-            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
+            if (IsEmpty)
                 return result;
 
             for (int i = 0; i < content.Count; i++)
@@ -537,8 +551,10 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            // TODO : maybe throw an ArgumentException/UnknownNodeException for not known names?
-            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
+            if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new UnknownNodeException(name);
+
+            if (IsEmpty)
                 return null;
 
             for (int i = 0; i < content.Count; i++)
