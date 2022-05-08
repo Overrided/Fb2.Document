@@ -621,20 +621,36 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void ContainerNode_InvalidQueryChildren_ReturnsNullOrEmpty(Fb2Container node)
+        public void ContainerNode_InvalidQueryChildren_Throws(Fb2Container node)
         {
             var invalidNodeName = "blahNameInvalid";
 
-            node.GetDescendants(invalidNodeName).Should().BeEmpty();
+            node.Invoking(n => n.GetDescendants(invalidNodeName))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            node.GetFirstChild(invalidNodeName).Should().BeNull();
+            node.Invoking(n => n.GetFirstChild(invalidNodeName))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            node.GetFirstDescendant(invalidNodeName).Should().BeNull();
+            node.Invoking(n => n.GetFirstDescendant(invalidNodeName))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            node.TryGetFirstDescendant(invalidNodeName, out var result).Should().BeFalse();
-            result.Should().BeNull();
+            node.Invoking(n => n.TryGetFirstDescendant(invalidNodeName, out var result))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            node.GetChildren(invalidNodeName).Should().BeEmpty();
+            //result.Should().BeNull();
+
+            node.Invoking(n => n.GetChildren(invalidNodeName))
+                .Should()
+                .ThrowExactly<UnknownNodeException>()
+                .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
         }
 
         [Theory]

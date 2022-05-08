@@ -733,7 +733,7 @@ namespace Fb2.Document.Models.Base
         private T? GetFirstDescendantInternal<T>(Func<Fb2Node, bool>? predicate = null)
             where T : Fb2Node
         {
-            if (!content.Any())
+            if (IsEmpty)
                 return null;
 
             if (predicate == null)
