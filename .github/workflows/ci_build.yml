@@ -34,7 +34,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run tests
-        run: dotnet test --collect:"XPlat Code Coverage" --no-build
+        run: dotnet --no-build test --collect:"XPlat Code Coverage"
 
       - name: NuGet pack
         run: dotnet pack 'Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --output dist
