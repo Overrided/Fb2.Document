@@ -582,7 +582,7 @@ To simplify error-handling for different validation, loading and editing errors 
 `NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.  
 `InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.  
 `UnexpectedAtrributeException`  - thrown on attemt to add attribute not listed in `AllowedAttributes`.  
-`UnknownNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
+`InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
 `UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.  
 
 For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).

@@ -82,19 +82,19 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(impostor)) // Fb2Node 
                .Should()
-               .ThrowExactly<UnknownNodeException>()
+               .ThrowExactly<InvalidNodeException>()
                .WithMessage($"'Impostor' is not known Fb2 node name.");
 
             node.Invoking(n => n.AddContent(impostor.Name)) // name
                .Should()
-               .ThrowExactly<UnknownNodeException>()
+               .ThrowExactly<InvalidNodeException>()
                .WithMessage($"'Impostor' is not known Fb2 node name.");
 
             var sneakyImpostor = new ImpostorNode(ElementNames.Paragraph);
 
             node.Invoking(n => n.AddContent(sneakyImpostor)) // Fb2Node 
                .Should()
-               .ThrowExactly<UnknownNodeException>()
+               .ThrowExactly<InvalidNodeException>()
                .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.");
         }
 
@@ -104,7 +104,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             node.Invoking(n => n.AddContent("impostorNodeName"))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .WithMessage("'impostorNodeName' is not known Fb2 node name.");
         }
 
@@ -627,29 +627,29 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.GetDescendants(invalidNodeName))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
             node.Invoking(n => n.GetFirstChild(invalidNodeName))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
             node.Invoking(n => n.GetFirstDescendant(invalidNodeName))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
             node.Invoking(n => n.TryGetFirstDescendant(invalidNodeName, out var result))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
             //result.Should().BeNull();
 
             node.Invoking(n => n.GetChildren(invalidNodeName))
                 .Should()
-                .ThrowExactly<UnknownNodeException>()
+                .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
         }
 

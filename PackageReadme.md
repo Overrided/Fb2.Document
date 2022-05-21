@@ -21,6 +21,8 @@ For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 
 * Updated `Load` and `LoadAsync` methods of `Fb2Document` class - now using `Fb2LoadingOptions` instead of primitives.
 
-* Updated `Fb2Container` methods: `GetChildren(string name)`, `GetFirstChild(string name)`, `GetDescendants(string name)`, `GetFirstDescendant(string name)` - if `name` is not standard Fb2 node name `UnknownNodeException` is thrown.
-
 * Updated `Fb2Node.Load` method and corresponding overrides to enable `NodeMetadata` preservation. 
+
+* Renamed `UnknownNodeException` into `InvalidNodeException`.
+
+* Updated `Fb2Container` methods: `GetChildren(string name)`, `GetFirstChild(string name)`, `GetDescendants(string name)`, `GetFirstDescendant(string name)` - if `name` is not standard Fb2 node name `InvalidNodeException` is thrown.

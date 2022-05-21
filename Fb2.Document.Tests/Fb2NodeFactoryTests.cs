@@ -50,7 +50,7 @@ namespace Fb2.Document.Tests
 
             Action act = () => { var node = Fb2NodeFactory.GetNodeByName(invalidNodeName); };
 
-            act.Should().Throw<UnknownNodeException>()
+            act.Should().Throw<InvalidNodeException>()
                 .WithMessage($"'{invalidNodeName}' is not known Fb2 node name.");
         }
 

@@ -290,7 +290,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="node">Child node to add to Content.</param>
         /// <returns>Current container.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         /// <exception cref="UnexpectedNodeException"></exception>
         public Fb2Container AddContent(Fb2Node node)
         {
@@ -298,7 +298,7 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(node));
 
             if (!Fb2NodeFactory.IsKnownNode(node))
-                throw new UnknownNodeException(node);
+                throw new InvalidNodeException(node);
 
             var nodeName = node.Name;
             var isTextNode = node is TextItem;
@@ -401,14 +401,14 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
         /// <returns>List of found child elements, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             if (!Fb2NodeFactory.IsKnownNodeName(name))
-                throw new UnknownNodeException(name);
+                throw new InvalidNodeException(name);
 
             if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
@@ -438,12 +438,12 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="name">Name to select child element by. Optional.</param>
         /// <returns>First matched child node or <see langword="null"/>.</returns>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public Fb2Node? GetFirstChild(string? name)
         {
             if (!string.IsNullOrEmpty(name) &&
                 !Fb2NodeFactory.IsKnownNodeName(name))
-                throw new UnknownNodeException(name);
+                throw new InvalidNodeException(name);
 
             if (IsEmpty)
                 return null;
@@ -476,14 +476,14 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             if (!Fb2NodeFactory.IsKnownNodeName(name))
-                throw new UnknownNodeException(name);
+                throw new InvalidNodeException(name);
 
             var result = new List<Fb2Node>();
 
@@ -550,14 +550,14 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select descendant by.</param>
         /// <returns>First matching descendant node or <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public Fb2Node? GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             if (!Fb2NodeFactory.IsKnownNodeName(name))
-                throw new UnknownNodeException(name);
+                throw new InvalidNodeException(name);
 
             if (IsEmpty)
                 return null;
