@@ -79,9 +79,11 @@ For full list of allowed elements and attribute names see [ElementNames](https:/
 
 ## Loading
 
-There are API's that enable loading `fb2 DOM` in different scenarios, for both `Fb2Document` and any particular node.
+There are API's that enable loading `Fb2 DOM` in different scenarios, for both `Fb2Document` and any particular node.
 
 ### Fb2Document
+
+All `Load` or `LoadAsync` methods of `Fb2Document` class accept either `Fb2LoadingOptions` or `Fb2StreamLoadingOptions` optional parameter to configure content loading. For more info see [LoadingOptions](https://github.com/Overrided/Fb2.Document/tree/master/Fb2.Document/LoadingOptions).
 
 1) ...from string
 
@@ -149,7 +151,6 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-
 ### ...particular node
 
 In corner-case scenario you might need to load some part of a document into the model, instead of loading whole thing.
@@ -164,7 +165,7 @@ paragraph.Load(node);
 ```
 
 
-### Encoding
+## Encoding
 
 If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
 
@@ -218,12 +219,9 @@ var firstImageInParagraphByType = paragraph.GetFirstChild<Image>();
 
 ### Query Fb2Container sub-tree
 
-`Fb2Container` class descendants provides node content managing APIs.
-
 `Descendant` node is contained either in `Content` propery of given element directly, or is contained further in `Fb2 DOM` sub-tree (indirect content).
 
-To go through whole sub-tree of content of given `Fb2Container` like `fb2Container.Content.SelectMany(n => ...)` or going recursive with custom traversal algoritms, 
-try some build-in node selecting methods:  
+`Fb2Container` built-in APIs allow to search for descendants nodes:
 
 1) Finding all `Image` nodes in given `BookSection` container node:
 

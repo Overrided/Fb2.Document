@@ -663,12 +663,14 @@ namespace Fb2.Document.Tests.ModelsTests
             node.GetChildren(firstAllowedChildName).Should().BeEmpty();
             node.GetChildren(firstAllowedChildPredicate).Should().BeEmpty();
             node.GetChildren<Fb2Node>().Should().BeEmpty();
+            node.GetChildren<BodySection>().Should().BeEmpty();
 
             node.GetFirstChild(firstAllowedChildName).Should().BeNull();
             node.GetFirstChild(firstAllowedChildPredicate).Should().BeNull();
             node.GetFirstChild((string)null).Should().BeNull();
             node.GetFirstChild("").Should().BeNull();
             node.GetFirstChild<Fb2Node>().Should().BeNull();
+            node.GetFirstChild<BodySection>().Should().BeNull();
         }
 
         [Theory]
@@ -681,10 +683,12 @@ namespace Fb2.Document.Tests.ModelsTests
             node.GetDescendants(firstAllowedChildName).Should().BeEmpty();
             node.GetDescendants(firstAllowedChildPredicate).Should().BeEmpty();
             node.GetDescendants<Fb2Node>().Should().BeEmpty();
+            node.GetDescendants<BodySection>().Should().BeEmpty();
 
             node.GetFirstDescendant(firstAllowedChildName).Should().BeNull();
             node.GetFirstDescendant(firstAllowedChildPredicate).Should().BeNull();
             node.GetFirstDescendant<Fb2Node>().Should().BeNull();
+            node.GetFirstDescendant<BodySection>().Should().BeNull();
 
             var success = node.TryGetFirstDescendant(firstAllowedChildName, out var resultNode);
             success.Should().BeFalse();
@@ -697,6 +701,10 @@ namespace Fb2.Document.Tests.ModelsTests
             var genericSuccess = node.TryGetFirstDescendant<Fb2Node>(out var resultGenericNode);
             genericSuccess.Should().BeFalse();
             resultGenericNode.Should().BeNull();
+
+            var bookBodySuccess = node.TryGetFirstDescendant<BookBody>(out var resultBookBody);
+            bookBodySuccess.Should().BeFalse();
+            resultBookBody.Should().BeNull();
         }
 
         // it's a bit complex to run tests for each model

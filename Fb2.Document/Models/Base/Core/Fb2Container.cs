@@ -23,13 +23,13 @@ namespace Fb2.Document.Models.Base
         private List<Fb2Node> content = new List<Fb2Node>();
 
         /// <summary>
-        /// Actual value is available after `Load()` method call.
+        /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
         /// </summary>
         public ImmutableList<Fb2Node> Content => content.ToImmutableList();
 
         /// <summary>
-        /// Indicates if instance of type Fb2Container can contain text.
-        /// `true` if element can contain text, otherwise - `false`.
+        /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
+        /// <see langword="true"/> if element can contain text, otherwise - <see langword="false"/>.
         /// </summary>
         public virtual bool CanContainText { get; private set; }
 
@@ -39,7 +39,8 @@ namespace Fb2.Document.Models.Base
         public abstract ImmutableHashSet<string> AllowedElements { get; }
 
         /// <summary>
-        /// Indicates whether element should start with a new line or be inline.
+        /// <para>Indicates if content of an element should be written from a new line.</para>
+        /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
@@ -133,7 +134,7 @@ namespace Fb2.Document.Models.Base
         /// Converts Fb2Container to XElement with regards to all attributes, 
         /// by calling `ToXml()` on every node in `Content`.
         /// </summary>
-        /// <returns>XElement reflected from given Fb2Element</returns>
+        /// <returns><see cref="XElement"/> reflected from given Fb2Node.</returns>
         public override XElement ToXml()
         {
             var element = base.ToXml();
@@ -400,6 +401,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
         /// <returns>List of found child elements, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnknownNodeException"></exception>
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -435,7 +437,8 @@ namespace Fb2.Document.Models.Base
         /// Gets first matching child of element by given name.
         /// </summary>
         /// <param name="name">Name to select child element by. Optional.</param>
-        /// <returns>First matched child node.</returns>
+        /// <returns>First matched child node or <see langword="null"/>.</returns>
+        /// <exception cref="UnknownNodeException"></exception>
         public Fb2Node? GetFirstChild(string? name)
         {
             if (!string.IsNullOrEmpty(name) &&
@@ -454,7 +457,7 @@ namespace Fb2.Document.Models.Base
         /// Gets first child of element that matches given predicate.
         /// </summary>
         /// <param name="predicate">Predicate to match child node against.</param>
-        /// <returns>First matched child node.</returns>
+        /// <returns>First matched child node or <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node? GetFirstChild(Func<Fb2Node, bool> predicate)
         {
@@ -473,6 +476,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnknownNodeException"></exception>
         public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -544,8 +548,9 @@ namespace Fb2.Document.Models.Base
         /// Recursively looks for first matching descendant of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
-        /// <returns>First matching descendant node.</returns>
+        /// <returns>First matching descendant node or <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnknownNodeException"></exception>
         public Fb2Node? GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

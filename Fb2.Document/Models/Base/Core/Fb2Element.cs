@@ -22,7 +22,8 @@ namespace Fb2.Document.Models.Base
 
         /// <summary>
         /// <para>Indicates if content of an element should be written from a new line.</para>
-        /// <para>For text nodes Inline is true by default, however, some classes override this property.</para>
+        /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
+        /// <remarks>For most <see cref="Fb2Element"/> <see cref="Fb2Element.IsInline"/> is <see langword="true"/> by default, however, some models override this property.</remarks>
         /// </summary>
         public override bool IsInline { get; protected set; } = true;
 
