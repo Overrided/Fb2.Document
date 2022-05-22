@@ -7,7 +7,6 @@ using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
-using Fb2.Document.Models.Attributes;
 using Fb2.Document.Models.Base;
 using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;

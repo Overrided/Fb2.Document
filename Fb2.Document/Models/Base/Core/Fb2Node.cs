@@ -10,7 +10,6 @@ using System.Xml.Linq;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
-using Fb2.Document.Models.Attributes;
 
 namespace Fb2.Document.Models.Base
 {
@@ -37,7 +36,7 @@ namespace Fb2.Document.Models.Base
         public abstract bool IsEmpty { get; }
 
         /// <summary>
-        /// Gets actual element attributes in <c>ImmutableList&lt;Fb2Attribute&gt;</c> form.
+        /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
         /// </summary>
         public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
 
@@ -60,7 +59,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Returns Parent node for current node.
         /// </summary>
-        public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
+        public Fb2Container? Parent { get; internal set; } = null; // as far as we can go to prevent public access to setter of Parent
 
         /// <summary>
         /// <para>Includes XML info: Default Namespace and namespace declarations attributes.</para>
@@ -498,17 +497,26 @@ namespace Fb2.Document.Models.Base
 
         public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
 
+        /// <summary>
+        /// Clones given <see cref="Fb2Node"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <remarks>Attention. This method also clones node's <see cref="Fb2Node.Parent"/> and can be resource-demanding.</remarks>
+        /// <returns>New instance of given <see cref="Fb2Node"/>.</returns>
         public virtual object Clone()
         {
             var node = Fb2NodeFactory.GetNodeByName(Name);
 
+            node.IsInline = IsInline;
+            node.IsUnsafe = IsUnsafe;
+
             if (attributes.Any())
                 node.attributes = new List<Fb2Attribute>(attributes);
 
-            node.IsInline = IsInline;
-            node.IsUnsafe = IsUnsafe;
-            node.Parent = Parent;
-            node.NodeMetadata = NodeMetadata;
+            if (Parent != null)
+                node.Parent = (Fb2Container)Parent.Clone();
+
+            if (NodeMetadata != null)
+                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata.DefaultNamespace, NodeMetadata.NamespaceDeclarations);
 
             return node;
         }

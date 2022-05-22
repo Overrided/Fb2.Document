@@ -173,11 +173,22 @@ namespace Fb2.Document.Models.Base
 
         public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
 
+        /// <summary>
+        /// Clones given <see cref="Fb2Container"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <remarks>
+        /// Attention. 
+        /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Container.Content"/> and can be resource-demanding.
+        /// </remarks>
+        /// <returns>New instance of given <see cref="Fb2Container"/>.</returns>
         public sealed override object Clone()
         {
             var container = base.Clone() as Fb2Container;
-            container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
-            container.CanContainText = CanContainText;
+
+            if (!IsEmpty)
+                container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+
+            container!.CanContainText = CanContainText;
 
             return container;
         }

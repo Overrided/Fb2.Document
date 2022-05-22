@@ -100,7 +100,7 @@ namespace Fb2.Document.Models.Base
                 SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
             newContent = newContent.Replace(Environment.NewLine, Whitespace);
-            newContent = SecurityElement.Escape(newContent);
+            newContent = SecurityElement.Escape(newContent)!;
 
             content = string.Join(separator, content, newContent);
 
@@ -156,10 +156,18 @@ namespace Fb2.Document.Models.Base
 
         public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);
 
-        public override object Clone()
+        /// <summary>
+        /// Clones given <see cref="Fb2Element"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <remarks>
+        /// Attention. 
+        /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Element.Content"/> and can be resource-demanding.
+        /// </remarks>
+        /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
+        public sealed override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element!.content = Content;
+            element!.content = new string(Content);
 
             return element;
         }
