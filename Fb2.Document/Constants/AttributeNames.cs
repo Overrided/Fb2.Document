@@ -14,8 +14,8 @@
         public const string InfoType = "info-type";
         public const string ColumnSpan = "colspan";
         public const string RowSpan = "rowspan";
-        public const string Align = "align";
-        public const string VerticalAlign = "valign";
+        public const string Align = "align"; // "left"/"right"/"center"
+        public const string VerticalAlign = "valign"; // "top"/"middle"/"bottom"
         public const string Language = "lang";
     }
 }

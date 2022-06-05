@@ -36,10 +36,9 @@ namespace Fb2.Document.Models
             ElementNames.Coverpage
         };
 
-        public override string ToString()
+        public sealed override string ToString()
         {
             var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, out var result, true) ? $" {result!.Value}" : string.Empty;
-
             return $"{Name}{formattedAttributeString}";
         }
 
