@@ -1137,14 +1137,78 @@
         </tr>
       </TABLE>
 
+
+      <table>
+        <tr>
+          <th>r1.1</th>
+          <th>r1.2</th>
+          <th>r1.3</th>
+          <th>r1.4</th>
+          <th>r1.5</th>
+        </tr>
+        <tr>
+          <td>r2.1</td>
+          <td colspan="3" rowspan="4">r2.2</td>
+          <td>r2.3</td>
+        </tr>
+        <tr>
+          <td>r3.1</td>
+          <td>r3.3</td>
+        </tr>
+        <tr>
+          <td>r4.1</td>
+          <td>r4.3</td>
+        </tr>
+        <tr>
+          <td>r5.1</td>
+          <td>r5.3</td>
+        </tr>
+        <tr>
+          <td>r6.1</td>
+          <td>r6.2</td>
+          <td>r6.3</td>
+          <td>r6.4</td>
+          <td>r6.5</td>
+        </tr>
+      </table>
+
+      <table>
+        <tr>
+          <th>r1.1</th>
+          <th>r1.2</th>
+          <th>r1.3</th>
+          <th>r1.4</th>
+          <th>r1.5</th>
+        </tr>
+        <tr>
+          <td>r2.1</td>
+          <td colspan="3" rowspan="5">r2.2</td>
+          <td>r2.3</td>
+        </tr>
+        <tr>
+          <td>r3.1</td>
+          <td>r3.3</td>
+        </tr>
+        <tr>
+          <td>r4.1</td>
+          <td>r4.3</td>
+        </tr>
+        <tr>
+          <td>r5.1</td>
+          <td>r5.5</td>
+        </tr>
+        <tr>
+          <td>r6.1</td>
+          <td>r6.5</td>
+        </tr>
+      </table>
+
       <empty-line/>
 
       <table>
         <tr>
           <th rowspan="3">№№</th>
-          <th rowspan="3">
-            Column 1<a l:href="#n_12" type="note">[12]</a>
-          </th>
+          <th rowspan="3">Column 1<a l:href="#n_12" type="note">[12]</a></th>
           <th rowspan="5">Column 2</th>
           <th>Column 3</th>
           <th>Column 4</th>
@@ -1216,7 +1280,7 @@
         </tr>
         <tr>
           <th>Row 6</th>
-          <td colspan="3">
+          <td colspan="3" align="left">
             <strong>
               <emphasis>Bold italics 6.2</emphasis>
             </strong>
@@ -1226,7 +1290,7 @@
               <emphasis>Bold italics 6.5</emphasis>
             </strong>
           </td>
-          <td colspan="3" rowspan="3">
+          <td colspan="3" rowspan="3" align="left">
             <strong>
               <emphasis>Bold italics 6.6</emphasis>
             </strong>
@@ -1282,9 +1346,7 @@
       <table>
         <tr>
           <th rowspan="3">№№</th>
-          <th rowspan="3">
-            Column 1<a l:href="#n_12" type="note">[12]</a>
-          </th>
+          <th rowspan="3">Column 1<a l:href="#n_12" type="note">[12]</a></th>
           <th rowspan="5">Column 2</th>
           <th>Column 3</th>
           <th>Column 4</th>
@@ -1317,7 +1379,7 @@
         </tr>
         <tr>
           <th>Row 3</th>
-          <td rowspan="6">Value 3.1</td>
+          <td rowspan="6" valign="top">Value 3.1</td>
           <td>Value 3.3</td>
           <td>Value 3.4</td>
           <td>Value 3.5</td>
@@ -1449,7 +1511,7 @@
           <td colspan="5">e1</td>
           <td>e6</td>
           <td>e7</td>
-          <td colspan="2" rowspan="2">e8</td>
+          <td colspan="2" rowspan="2" valign="bottom">e8</td>
         </tr>
         <tr>
           <td colspan="6">f1</td>
@@ -1512,6 +1574,27 @@
           <td>f7</td>
           <td>f8</td>
           <td>f9</td>
+        </tr>
+      </table>
+
+      <table>
+        <tr>
+            <td colspan="2" rowspan="2">cs 2 rs 2 c 1</td>
+            <td colspan="2" rowspan="2">cs 2 rs 2 c 2</td>
+        </tr>
+        <tr>
+        </tr>
+      </table>
+
+      <table>
+        <tr>
+          <th colspan="2">a</th>
+          <th colspan="2">b</th>
+          <th colspan="2">c</th>
+        </tr>
+        <tr>
+          <td colspan="3">d</td>
+          <td colspan="3">f</td>
         </tr>
       </table>
 

@@ -75,15 +75,21 @@ namespace Fb2.Document.Models
                     // check prev rows and check if any cell are impacting current cell
                     renderColumnIndex = UpdateRenderColumnIndex(tableRowSpans, rowIndex, renderColumnIndex);
 
-                    var collSpanNum = GetNodeSpan(cellNode, AttributeNames.ColumnSpan);
+                    var collSpanNum = GetCellSpan(cellNode, AttributeNames.ColumnSpan);
                     columnCountsInRow[rowIndex] = Math.Max(columnCountsInRow[rowIndex], renderColumnIndex + 1); // absolute unit width of a cell
 
                     // to know how far to move next cell in table row - save "total span" number in row
                     // if no ColSpan -> collSpanNum - 1 = 0
                     collSpanDeltaInRow += collSpanNum - 1; // -1 because of cell itself has width
 
-                    var rowSpanNum = GetNodeSpan(cellNode, AttributeNames.RowSpan);
+                    var rowSpanNum = GetCellSpan(cellNode, AttributeNames.RowSpan);
                     var cellContent = cellNode.ToString();
+
+                    var verticalAlignRaw = GetCellAlignment(cellNode, AttributeNames.VerticalAlign);
+                    var horizontalAlignRaw = GetCellAlignment(cellNode, AttributeNames.Align);
+
+                    var verticalAlign = ParseVerticalCellAlignment(verticalAlignRaw);
+                    var horizontalCellAlign = ParseHorizontalCellAlignment(horizontalAlignRaw);
 
                     tableRowSpans.Add(
                         new TableCellModel(
@@ -92,7 +98,9 @@ namespace Fb2.Document.Models
                             renderColumnIndex,
                             cellContent,
                             collSpanNum,
-                            rowSpanNum));
+                            rowSpanNum,
+                            verticalAlign,
+                            horizontalCellAlign));
                 }
             }
 
@@ -102,8 +110,28 @@ namespace Fb2.Document.Models
             return (MetaTable: tableRowSpans, ColumnsCount: columnsCount);
         }
 
+        private static HorizontalCellAlign ParseHorizontalCellAlignment(string horizontalAlignRaw) =>
+            Enum.TryParse<HorizontalCellAlign>(horizontalAlignRaw, true, out var result) ?
+                result : HorizontalCellAlign.Center;
+
+
+        private static VerticalCellAlign ParseVerticalCellAlignment(string verticalAlignRaw) =>
+            Enum.TryParse<VerticalCellAlign>(verticalAlignRaw, true, out var result) ?
+                result : VerticalCellAlign.Middle;
+
+        private static string GetCellAlignment(Fb2Node cell, string alignAttributeName)
+        {
+            if (cell == null || string.IsNullOrWhiteSpace(alignAttributeName))
+                throw new ArgumentNullException();
+
+            if (cell.TryGetAttribute(alignAttributeName, out var align, true))
+                return align!.Value;
+
+            return string.Empty;
+        }
+
         // if no span found return 1 as minimal cell unit width/height
-        private static int GetNodeSpan(Fb2Node cell, string spanAttrName)
+        private static int GetCellSpan(Fb2Node cell, string spanAttrName)
         {
             if (cell == null || string.IsNullOrWhiteSpace(spanAttrName))
                 throw new ArgumentNullException();
@@ -192,7 +220,7 @@ namespace Fb2.Document.Models
             for (var rowIndex = 0; rowIndex < rowsCount; rowIndex++)
             {
                 var rowString = new StringBuilder("|");
-                var horizontalBorder = new StringBuilder("-");
+                var horizontalBorder = new StringBuilder(rowIndex == rowsCount - 1 ? "-" : "|");
 
                 for (var actualColIndex = 0; actualColIndex < columnsCount; actualColIndex++)
                 {
@@ -200,8 +228,22 @@ namespace Fb2.Document.Models
                     if (cell == null)
                         continue; // shouldnt be the case, but what do I know
 
-                    var colWidth = columnCharWidths[actualColIndex];
-                    var cellString = StringifyTableCell(cell, rowIndex, actualColIndex, colWidth);
+                    int colWidth;
+
+                    if (cell.ColSpan > 1)
+                    {
+                        var allColumnCharWidths = columnCharWidths
+                            .Skip(cell.RenderStartColumnIndex).Take(cell.ColSpan).ToList();
+
+                        colWidth = allColumnCharWidths
+                            .Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
+
+                        actualColIndex = actualColIndex + (cell.ColSpan - 1); // move to next cell
+                    }
+                    else
+                        colWidth = columnCharWidths[actualColIndex];
+
+                    var cellString = StringifyTableCell(tableRowSpans, cell, rowIndex, actualColIndex, colWidth);
                     rowString.Append(cellString.CellContent);
                     horizontalBorder.Append(cellString.HorizontalBorder);
                 }
@@ -214,36 +256,47 @@ namespace Fb2.Document.Models
         }
 
         private static (string CellContent, string HorizontalBorder) StringifyTableCell(
+            List<TableCellModel> allCells,
             TableCellModel cell,
             int rowIndex,
             int colIndex,
-            int columnCharWidth)
+            int cellCharWidth)
         {
-            var hasCollSpan = cell.ColSpan > 1;
             var hasRowSpan = cell.RowSpan > 1;
-            var shouldPrintColSpanSpace = cell.RenderStartColumnIndex < colIndex && hasCollSpan;
-            var shouldPrintRowSpanSpace = cell.RenderStartRowIndex < rowIndex && hasRowSpan;
+            var shouldPrintRowSpanSpace = cell.RenderContentRowIndex != rowIndex && hasRowSpan;
+            var contentToPrint = shouldPrintRowSpanSpace ? string.Empty : cell.Content;
 
-            bool shouldPrintVerticalBorder = true;
-            string contentToPrint = string.Empty;
+            string paddedCellContent;
 
-            if (shouldPrintColSpanSpace || shouldPrintRowSpanSpace)
-                shouldPrintVerticalBorder = cell.RenderEndColumnIndex == colIndex;
-
-            if (!shouldPrintColSpanSpace && !shouldPrintRowSpanSpace)
+            if (cell.HorizontalAlign == HorizontalCellAlign.Left)
+                paddedCellContent = contentToPrint.PadRight(cellCharWidth, ' ');
+            else if (cell.HorizontalAlign == HorizontalCellAlign.Right)
+                paddedCellContent = contentToPrint.PadLeft(cellCharWidth, ' ');
+            else
             {
-                shouldPrintVerticalBorder = cell.ColSpan == 1;
-                contentToPrint = cell.Content;
+                var availablePadding = cellCharWidth - contentToPrint.Length;
+                if (availablePadding > 0)
+                {
+                    var leftPadding = availablePadding / 2;
+                    var leftPaddingString = new string(' ', leftPadding);
+                    var rightPaddingString = new string(' ', availablePadding - leftPadding);
+                    paddedCellContent = $"{leftPaddingString}{contentToPrint}{rightPaddingString}";
+                }
+                else
+                    paddedCellContent = contentToPrint;
             }
 
-            var paddingCount = shouldPrintVerticalBorder ? columnCharWidth : columnCharWidth + 1;
-            var paddedCellContent = contentToPrint.PadRight(paddingCount, ' ');
-            var cellString = shouldPrintVerticalBorder ? $"{paddedCellContent}|" : paddedCellContent;
+            var cellString = $"{paddedCellContent}|";
 
             var horBorderChar = cell.RenderEndRowIndex > rowIndex ? ' ' : '-';
             var horizontalBorderContent = new string(horBorderChar, paddedCellContent.Length);
-            if (shouldPrintVerticalBorder)
-                horizontalBorderContent = $"{horizontalBorderContent}-";
+
+            var rowBelowIndex = rowIndex + 1;
+            var cellBelow = allCells.FirstOrDefault(cm => TableCellPredicate(cm, rowBelowIndex, colIndex));
+            var flatVerticalDelimiter = cellBelow == null || cellBelow.RowSpan > 0 && cellBelow.RenderEndColumnIndex > colIndex;
+
+            var verticalDelimiterChar = flatVerticalDelimiter ? '-' : '|';
+            horizontalBorderContent = $"{horizontalBorderContent}{verticalDelimiterChar}";
 
             return (CellContent: cellString, HorizontalBorder: horizontalBorderContent);
         }
@@ -253,6 +306,7 @@ namespace Fb2.Document.Models
             public int CellRowIndex { get; } // index of cell in row.Content
             public int RenderStartRowIndex { get; }
             public int RenderEndRowIndex { get; }
+            public int RenderContentRowIndex { get; }
 
             public int RenderStartColumnIndex { get; } // render column start position
             public int RenderEndColumnIndex { get; }
@@ -262,13 +316,18 @@ namespace Fb2.Document.Models
 
             public string Content { get; } // stringnified cell content
 
+            public VerticalCellAlign VerticalAlign { get; }
+            public HorizontalCellAlign HorizontalAlign { get; }
+
             public TableCellModel(
                 int cellArrayIndex,
                 int rowIndex,
                 int actualColumnIndex,
                 string content,
                 int colSpan,
-                int rowSpan)
+                int rowSpan,
+                VerticalCellAlign verticalAlign,
+                HorizontalCellAlign horizontalCellAlign)
             {
                 CellRowIndex = cellArrayIndex;
 
@@ -282,7 +341,39 @@ namespace Fb2.Document.Models
                 RowSpan = rowSpan;
 
                 Content = content;
+
+                VerticalAlign = verticalAlign;
+                HorizontalAlign = horizontalCellAlign;
+
+                if (VerticalAlign == VerticalCellAlign.Top)
+                    RenderContentRowIndex = RenderStartRowIndex;
+                else if (VerticalAlign == VerticalCellAlign.Bottom)
+                    RenderContentRowIndex = RenderEndRowIndex;
+                else if (VerticalAlign == VerticalCellAlign.Middle)
+                {
+                    if (RenderStartRowIndex == RenderEndRowIndex || RowSpan < 3)
+                        RenderContentRowIndex = RenderStartRowIndex;
+                    else
+                    {
+                        var halfSize = RowSpan / 2;
+                        RenderContentRowIndex = RenderStartRowIndex + halfSize;
+                    }
+                }
             }
+        }
+
+        private enum VerticalCellAlign
+        {
+            Top,
+            Middle,
+            Bottom
+        }
+
+        private enum HorizontalCellAlign
+        {
+            Left,
+            Center,
+            Right
         }
 
         #endregion
