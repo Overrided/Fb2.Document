@@ -474,7 +474,7 @@ namespace Fb2.Document.Tests.ModelsTests
             result.Should().BeNull();
             //result.Value.Should().BeNullOrEmpty();
 
-            instance.TryGetAttribute(instance.AllowedAttributes.First(), out var resultIgnoreCase, true)
+            instance.TryGetAttribute(instance.AllowedAttributes.First(), true, out var resultIgnoreCase)
                 .Should()
                 .BeFalse();
 
@@ -652,17 +652,17 @@ namespace Fb2.Document.Tests.ModelsTests
             langResultIvalidCasing.Should().Be(null);
 
             // case in-sensitive, wrong key casing
-            sequenceInfo.TryGetAttribute("NaMe", out var nameResultInvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("NaMe", true, out var nameResultInvalidCasingIgnore)
                 .Should()
                 .BeTrue();
             nameResultInvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
 
-            sequenceInfo.TryGetAttribute("NuMbEr", out var numberResultInvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("NuMbEr", true, out var numberResultInvalidCasingIgnore)
                 .Should()
                 .BeTrue();
             numberResultInvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Number, "1"));
 
-            sequenceInfo.TryGetAttribute("LaNg", out var langResultIvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("LaNg", true, out var langResultIvalidCasingIgnore)
                 .Should()
                 .BeTrue();
             langResultIvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Language, "eng"));

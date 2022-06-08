@@ -124,7 +124,7 @@ namespace Fb2.Document.Models
             if (cell == null || string.IsNullOrWhiteSpace(alignAttributeName))
                 throw new ArgumentNullException();
 
-            if (cell.TryGetAttribute(alignAttributeName, out var align, true))
+            if (cell.TryGetAttribute(alignAttributeName, true, out var align))
                 return align!.Value;
 
             return string.Empty;
@@ -136,8 +136,8 @@ namespace Fb2.Document.Models
             if (cell == null || string.IsNullOrWhiteSpace(spanAttrName))
                 throw new ArgumentNullException();
 
-            if (cell.TryGetAttribute(spanAttrName, out var span, true) &&
-                int.TryParse(span.Value, out int spanNumber) && spanNumber > 1)
+            if (cell.TryGetAttribute(spanAttrName, true, out var span) &&
+                int.TryParse(span!.Value, out int spanNumber) && spanNumber > 1)
                 return spanNumber;
 
             return 1;

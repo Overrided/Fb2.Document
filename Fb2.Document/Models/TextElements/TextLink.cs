@@ -16,7 +16,7 @@ namespace Fb2.Document.Models
         {
             var builder = new StringBuilder(base.ToString());
 
-            if (TryGetAttribute(AttributeNames.XHref, out var hrefAttr, true))
+            if (TryGetAttribute(AttributeNames.XHref, true, out var hrefAttr))
                 builder.Append($" ({hrefAttr!.Value})");
 
             return builder.ToString();

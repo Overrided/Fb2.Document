@@ -30,7 +30,7 @@ namespace Fb2.Document.Models.Base
         public override bool Equals(object? obj) =>
             obj != null &&
             obj is Fb2Attribute attribute &&
-            Key.EqualsInvariant(attribute.Key) &&
+            Key.EqualsIgnoreCase(attribute.Key) &&
             Value.Equals(attribute.Value, StringComparison.InvariantCulture) &&
             NamespaceName == attribute.NamespaceName;
 

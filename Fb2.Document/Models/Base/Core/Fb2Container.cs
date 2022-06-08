@@ -81,7 +81,7 @@ namespace Fb2.Document.Models.Base
 
                         var elementNode = n as XElement;
                         var nodeLocalName = elementNode.Name.LocalName;
-                        return !nodeLocalName.EqualsInvariant(ElementNames.FictionText) &&
+                        return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
                                Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
                     })
                 .ToList();
@@ -424,7 +424,7 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
 
-            return content.Where(elem => elem.Name.EqualsInvariant(name));
+            return content.Where(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
@@ -461,7 +461,7 @@ namespace Fb2.Document.Models.Base
 
             return string.IsNullOrWhiteSpace(name) ?
                 content.FirstOrDefault() :
-                content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
+                content.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
@@ -505,7 +505,7 @@ namespace Fb2.Document.Models.Base
             {
                 var element = content[i];
 
-                if (element.Name.EqualsInvariant(name))
+                if (element.Name.EqualsIgnoreCase(name))
                     result.Add(element);
 
                 if (element is Fb2Container containerElement)
@@ -577,7 +577,7 @@ namespace Fb2.Document.Models.Base
             {
                 var element = content[i];
 
-                if (element.Name.EqualsInvariant(name))
+                if (element.Name.EqualsIgnoreCase(name))
                     return element;
 
                 if (element is Fb2Container containerElement)

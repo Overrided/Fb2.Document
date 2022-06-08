@@ -189,7 +189,7 @@ namespace Fb2.Document.Models.Base
                 return false;
 
             return ignoreCase ?
-                attributes.Any(attr => attr.Key.EqualsInvariant(key)) :
+                attributes.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
                 attributes.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
         }
 
@@ -208,7 +208,7 @@ namespace Fb2.Document.Models.Base
                 return null;
 
             var attribute = ignoreCase ?
-                attributes.FirstOrDefault(attr => attr.Key.EqualsInvariant(key)) :
+                attributes.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
                 attributes.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
 
             return attribute;
@@ -219,9 +219,23 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="key">Key to match attribute by.</param>
         /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
-        /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
-        public bool TryGetAttribute(string key, out Fb2Attribute? result, bool ignoreCase = false)
+        public bool TryGetAttribute(string key, out Fb2Attribute? result)
+        {
+            var attribute = GetAttribute(key, false);
+
+            result = attribute;
+            return attribute != null;
+        }
+
+        /// <summary>
+        /// Attempts to get first matching <c>Fb2Attribute</c> by given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key to match attribute by.</param>
+        /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
+        /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+        /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
+        public bool TryGetAttribute(string key, bool ignoreCase, out Fb2Attribute? result)
         {
             var attribute = GetAttribute(key, ignoreCase);
 
@@ -336,7 +350,7 @@ namespace Fb2.Document.Models.Base
                 throw new UnexpectedAtrributeException(Name, key);
 
             // update or insert
-            if (TryGetAttribute(key, out var existingAttribute, true))
+            if (TryGetAttribute(key, true, out var existingAttribute))
             {
                 var existingAttributeIndex = attributes.IndexOf(existingAttribute!);
                 attributes[existingAttributeIndex] = fb2Attribute; // replace existing, should not be -1
@@ -363,7 +377,7 @@ namespace Fb2.Document.Models.Base
                 return this;
 
             var attributesToDelete = attributes
-                .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsInvariant(key) : existingAttr.Key.Equals(key))
+                .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsIgnoreCase(key) : existingAttr.Key.Equals(key))
                 .ToList();
 
             foreach (var attributeToRemove in attributesToDelete)
@@ -462,7 +476,7 @@ namespace Fb2.Document.Models.Base
             if (node.NodeType != XmlNodeType.Element)
                 return;
 
-            if (node is XElement element && !element.Name.LocalName.EqualsInvariant(Name))
+            if (node is XElement element && !element.Name.LocalName.EqualsIgnoreCase(Name))
                 throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
         }
 

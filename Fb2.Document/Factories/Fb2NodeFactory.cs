@@ -105,7 +105,7 @@ namespace Fb2.Document.Factories
             if (!IsKnownNodeName(nodeName))
                 throw new InvalidNodeException(nodeName);
 
-            var result = KnownNodes.First(kvp => kvp.Key.EqualsInvariant(nodeName));
+            var result = KnownNodes.First(kvp => kvp.Key.EqualsIgnoreCase(nodeName));
             var modelType = result.Value;
 
             var model = Activator.CreateInstance(modelType) as Fb2Node;
