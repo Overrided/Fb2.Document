@@ -15,7 +15,7 @@ namespace Fb2.Document.Models
         /// Specific override to preserve original string content 
         /// with '\t', ' ', '\r\n' etc. formatting.
         /// </summary>
-        public override void Load(
+        public sealed override void Load(
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,

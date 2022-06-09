@@ -1619,7 +1619,7 @@
           </emphasis>
         </p>
         <empty-line/>
-        <subtitle>Annotation в теле book.</subtitle>
+        <subtitle>Annotation in book body.</subtitle>
         <empty-line/>
         <p>
           Text of a Fb2 book is being split into <a l:href="#n_17" type="note">[17]</a> sections.

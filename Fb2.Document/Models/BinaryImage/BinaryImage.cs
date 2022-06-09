@@ -15,7 +15,7 @@ namespace Fb2.Document.Models
         public override ImmutableHashSet<string> AllowedAttributes =>
             ImmutableHashSet.Create(AttributeNames.ContentType, AttributeNames.Id);
 
-        public override void Load(
+        public sealed override void Load(
             [In] XNode node,
             [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
