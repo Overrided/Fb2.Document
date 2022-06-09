@@ -280,19 +280,19 @@ bool hasAttributeByKeyCaseIgnore = fb2Node.HasAttribute("ID", true); // second p
 2) Get `Attribute` of a node in `Fb2Attribute` form by `Name`:
 
 ```csharp
-KeyValuePair<string, string> attribute = fb2Node.GetAttribute(AttributeNames.Name);
-KeyValuePair<string, string> attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, true);
+Fb2Attribute attribute = fb2Node.GetAttribute(AttributeNames.Name);
+Fb2Attribute attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, true);
 ```
 
 > Attention!
 >
-> `GetAttribute(string key, bool ignoreCase = false)` method never returns null, instead `default(KeyValuePair<string, string>)` is returned if there's no attribute found by given name.
+> `GetAttribute(string key, bool ignoreCase = false)` method never returns null, instead `default(Fb2Attribute)` is returned if there's no attribute found by given name.
 
-3) Checking if attribute is there while retrieving it's value in `KeyValuePair<string, string>` form at a same time:
+3) Checking if attribute is there while retrieving it's value in `Fb2Attribute` form at a same time:
 
 ```csharp
-bool hasAttribute = fb2Node.TryGetAttribute(AttributeNames.Name, out KeyValuePair<string, string> attributeResult);
-bool hasAttributeCaseIgnore = fb2Node.TryGetAttribute(AttributeNames.Name, true, out KeyValuePair<string, string> attributeResultCaseIgnore);
+bool hasAttribute = fb2Node.TryGetAttribute(AttributeNames.Name, out Fb2Attribute attributeResult);
+bool hasAttributeCaseIgnore = fb2Node.TryGetAttribute(AttributeNames.Name, true, out Fb2Attribute attributeResultCaseIgnore);
 ``` 
 
 4) Need to parse attribute value into `Enum` or something?
@@ -435,9 +435,9 @@ var paragraph = new Paragraph();
 
 paragraph.AddAttribute(AttributeNames.Id, "paragraph_id"); // adding single attribute by key & value
 // or:
-paragraph.AddAttribute(new KeyValuePair<string, string>("id", "paragraph_id")); // adding single attribute as KeyValuePair
+paragraph.AddAttribute(new Fb2Attribute("id", "paragraph_id")); // adding single attribute
 // or:
-paragraph.AddAttribute(() => new KeyValuePair<string, string>("id", "paragraph_id")); // adding single attribute via provider function
+paragraph.AddAttribute(() => new Fb2Attribute("id", "paragraph_id")); // adding single attribute via provider function
 // or:
 await paragraph.AddAttributeAsync(async () => { // adding single attribute via async provider function
     var kvp = await attributeService.GetAttributeAsync();
@@ -451,19 +451,15 @@ await paragraph.AddAttributeAsync(async () => { // adding single attribute via a
 var paragraph = new Paragraph();
 
 paragraph.AddAttributes(
-        new KeyValuePair<string, string>(AttributeNames.Id, "testId"), 
-        new KeyValuePair<string, string>(AttributeNames.Language, "eng")); // params KeyValuePair<string, string>[] attributes
+        new Fb2Attribute(AttributeNames.Id, "testId"), 
+        new Fb2Attribute(AttributeNames.Language, "eng")); // params Fb2Attribute[] attributes
 // or:
-paragraph.AddAttributes(new Dictionary<string, string>{ { AttributeNames.Id, "testId" }, { AttributeNames.Language, "eng" } });
+paragraph.AddAttributes(new List<Fb2Attribute>{ new Fb2Attribute(AttributeNames.Id, "testId"), new Fb2Attribute(AttributeNames.Language, "eng") });
 ```
 
 3) To remove particular attribute / set of attributes, use overloaded `RemoveAttribute` method:
 
 ```csharp
-
-// set up
-var paragraph = new Paragraph();
-paragraph.AddAttributes(new Dictionary<string, string>{ { AttributeNames.Id, "testId" }, { AttributeNames.Language, "eng" } });
 
 // remove attributes
 string attributeName = ....;
@@ -523,13 +519,13 @@ Fb2Element plainTextItem = new TextItem().AddContent(() => "text 1 "); // or use
 TextItem plainTextItem = new TextItem().AddContent(() => "text 1 "); // returns `Fb2Element`, not `TextItem` 
 ```
 
-3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(KeyValuePair<string, string> attribute)`, `AddAttributes(IDictionary<string, string> attributes)` or `RemoveAttribute(string attributeName, bool ignoreCase = false)` etc - all have return type of `Fb2Node`.  
+3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(Fb2Attribute attribute)`, `AddAttributes(params Fb2Attribute[] attributes)` or `RemoveAttribute(Fb2Attribute fb2Attribute)` etc - all have return type of `Fb2Node`.  
 
 ```csharp
 //So, this will work:
 Fb2Node paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue"); // but `paragraph` variable has `Fb2Node` type now
 // This WILL NOT:
-Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue"); // cant assign Fb2Node to Paragraph
+Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue"); // can't assign Fb2Node to Paragraph
 ```
 > Attention!
 >
