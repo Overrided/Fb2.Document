@@ -114,7 +114,6 @@ namespace Fb2.Document.Models
             Enum.TryParse<HorizontalCellAlign>(horizontalAlignRaw, true, out var result) ?
                 result : HorizontalCellAlign.Center;
 
-
         private static VerticalCellAlign ParseVerticalCellAlignment(string verticalAlignRaw) =>
             Enum.TryParse<VerticalCellAlign>(verticalAlignRaw, true, out var result) ?
                 result : VerticalCellAlign.Middle;

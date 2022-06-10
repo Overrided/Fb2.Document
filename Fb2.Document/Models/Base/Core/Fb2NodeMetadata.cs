@@ -7,9 +7,9 @@ namespace Fb2.Document.Models.Base
 {
     public class Fb2NodeMetadata
     {
-        public XNamespace? DefaultNamespace { get; } = null;
+        public XNamespace? DefaultNamespace { get; }
 
-        public IEnumerable<XAttribute>? NamespaceDeclarations { get; } = null;
+        public IEnumerable<XAttribute>? NamespaceDeclarations { get; }
 
         public Fb2NodeMetadata(
             XNamespace? defaultNamespace = null,

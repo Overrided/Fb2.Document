@@ -8,8 +8,8 @@ namespace Fb2.Document.Models.Base
     public class Fb2Attribute
     {
         public string Key { get; }
-        public string Value { get; set; } = string.Empty;
-        public string? NamespaceName { get; } = null;
+        public string Value { get; set; }
+        public string? NamespaceName { get; }
 
         public Fb2Attribute(string key, string value, string? namespaceName = null)
         {

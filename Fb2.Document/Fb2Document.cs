@@ -336,5 +336,7 @@ namespace Fb2.Document
             (Book?.Equals(other.Book) ?? other.Book == null);
 
         public override int GetHashCode() => HashCode.Combine(Book?.GetHashCode() ?? 0, IsLoaded);
+
+        public override string ToString() => IsLoaded && Book != null ? Book.ToString() : string.Empty;
     }
 }
