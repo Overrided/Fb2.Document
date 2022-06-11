@@ -227,22 +227,13 @@ namespace Fb2.Document.Models
                     if (cell == null)
                         continue; // shouldnt be the case, but what do I know
 
-                    int colWidth;
+                    int colWidth = CalculateCellCharWidth(columnCharWidths, actualColIndex, cell);
 
                     if (cell.ColSpan > 1)
-                    {
-                        var allColumnCharWidths = columnCharWidths
-                            .Skip(cell.RenderStartColumnIndex).Take(cell.ColSpan).ToList();
-
-                        colWidth = allColumnCharWidths
-                            .Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
-
                         actualColIndex = actualColIndex + (cell.ColSpan - 1); // move to next cell
-                    }
-                    else
-                        colWidth = columnCharWidths[actualColIndex];
 
                     var cellString = StringifyTableCell(tableRowSpans, cell, rowIndex, actualColIndex, colWidth);
+
                     rowString.Append(cellString.CellContent);
                     horizontalBorder.Append(cellString.HorizontalBorder);
                 }
@@ -252,6 +243,20 @@ namespace Fb2.Document.Models
             }
 
             return rowStrings.ToString();
+        }
+
+        private static int CalculateCellCharWidth(int[] columnCharWidths, int colIndex, TableCellModel cell)
+        {
+            if (cell.ColSpan > 1)
+            {
+                var allColumnCharWidths = columnCharWidths
+                    .Skip(cell.RenderStartColumnIndex)
+                    .Take(cell.ColSpan).ToList();
+
+                return allColumnCharWidths.Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
+            }
+
+            return columnCharWidths[colIndex];
         }
 
         private static (string CellContent, string HorizontalBorder) StringifyTableCell(
@@ -265,26 +270,7 @@ namespace Fb2.Document.Models
             var shouldPrintRowSpanSpace = cell.RenderContentRowIndex != rowIndex && hasRowSpan;
             var contentToPrint = shouldPrintRowSpanSpace ? string.Empty : cell.Content;
 
-            string paddedCellContent;
-
-            if (cell.HorizontalAlign == HorizontalCellAlign.Left)
-                paddedCellContent = contentToPrint.PadRight(cellCharWidth, ' ');
-            else if (cell.HorizontalAlign == HorizontalCellAlign.Right)
-                paddedCellContent = contentToPrint.PadLeft(cellCharWidth, ' ');
-            else
-            {
-                var availablePadding = cellCharWidth - contentToPrint.Length;
-                if (availablePadding > 0)
-                {
-                    var leftPadding = availablePadding / 2;
-                    var leftPaddingString = new string(' ', leftPadding);
-                    var rightPaddingString = new string(' ', availablePadding - leftPadding);
-                    paddedCellContent = $"{leftPaddingString}{contentToPrint}{rightPaddingString}";
-                }
-                else
-                    paddedCellContent = contentToPrint;
-            }
-
+            var paddedCellContent = PadCellContent(contentToPrint, cellCharWidth, cell.HorizontalAlign);
             var cellString = $"{paddedCellContent}|";
 
             var horBorderChar = cell.RenderEndRowIndex > rowIndex ? ' ' : '-';
@@ -298,6 +284,26 @@ namespace Fb2.Document.Models
             horizontalBorderContent = $"{horizontalBorderContent}{verticalDelimiterChar}";
 
             return (CellContent: cellString, HorizontalBorder: horizontalBorderContent);
+        }
+
+        private static string PadCellContent(string contentToPrint, int cellCharWidth, HorizontalCellAlign horizontalCellAlign)
+        {
+            if (horizontalCellAlign == HorizontalCellAlign.Left)
+                return contentToPrint.PadRight(cellCharWidth, ' ');
+
+            if (horizontalCellAlign == HorizontalCellAlign.Right)
+                return contentToPrint.PadLeft(cellCharWidth, ' ');
+
+            var availablePadding = cellCharWidth - contentToPrint.Length;
+            if (availablePadding > 0)
+            {
+                var leftPadding = availablePadding / 2;
+                var leftPaddingString = new string(' ', leftPadding);
+                var rightPaddingString = new string(' ', availablePadding - leftPadding);
+                return $"{leftPaddingString}{contentToPrint}{rightPaddingString}";
+            }
+
+            return contentToPrint;
         }
 
         private class TableCellModel
