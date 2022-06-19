@@ -669,6 +669,39 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Fact]
+        public void SequenceInfoNode_AppendAttribute_Works()
+        {
+            // setup
+            var sequenceInfo = new SequenceInfo();
+            sequenceInfo.AllowedAttributes.Should().HaveCount(3);
+            sequenceInfo.Attributes.Should().BeEmpty();
+
+            sequenceInfo
+                .AddAttributes(
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AppendAttribute(AttributeNames.Language, "eng");
+
+            sequenceInfo.Attributes.Should().HaveCount(3);
+
+            // query
+            sequenceInfo.TryGetAttribute(AttributeNames.Name, out var nameResult)
+                .Should()
+                .BeTrue();
+            nameResult.Should().Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
+
+            sequenceInfo.TryGetAttribute(AttributeNames.Number, out var numberResult)
+                .Should()
+                .BeTrue();
+            numberResult.Should().Be(new Fb2Attribute(AttributeNames.Number, "1"));
+
+            sequenceInfo.TryGetAttribute(AttributeNames.Language, out var langResult)
+                .Should()
+                .BeTrue();
+            langResult.Should().Be(new Fb2Attribute(AttributeNames.Language, "eng"));
+        }
+
+        [Fact]
         public void Ancestors_Works()
         {
             var parent1 = new Strong().AppendTextContent("leaf node text");

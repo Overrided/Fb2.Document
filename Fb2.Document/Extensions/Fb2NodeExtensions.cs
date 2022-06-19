@@ -13,7 +13,7 @@ namespace Fb2.Document.Extensions
     {
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(Fb2Attribute[])"/> method.
-        /// <para> Adds multiple attributes to node using <seealso cref="params Fb2Attribute[]"/>.</para>
+        /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <seealso cref="params Fb2Attribute[]"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -24,7 +24,7 @@ namespace Fb2.Document.Extensions
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(IEnumerable{Fb2Attribute})"/> method.
-        /// <para> Adds multiple attributes using <seealso cref="IEnumerable{Fb2Attribute}."/></para>
+        /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <seealso cref="IEnumerable{Fb2Attribute}."/></para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -62,7 +62,7 @@ namespace Fb2.Document.Extensions
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(Fb2Attribute)"/> method.
-        /// <para> Adds single attribute to <see cref="Attributes"/>.</para>
+        /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -72,8 +72,24 @@ namespace Fb2.Document.Extensions
             (T)fb2Node.AddAttribute(attribute);
 
         /// <summary>
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(string, string, string?)"/> method.
+        /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/>.</para> 
+        /// </summary>
+        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+        /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+        /// <param name="key">Attribute key to add.</param>
+        /// <param name="value">Attribute value to add.</param>
+        /// <param name="namespaceName">
+        /// <para>Optional, can be <see langword="null"/>.</para>
+        /// <para>NamespaceName for attribute, used by <see cref="ToXml"/> serialization.</para>
+        /// </param>
+        /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+        public static T AppendAttribute<T>(this T fb2Node, string key, string value, string? namespaceName = null) where T : Fb2Node =>
+            (T)fb2Node.AddAttribute(key, value, namespaceName);
+
+        /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(string, bool)"/> method.
-        /// <para> Removes attribute from <see cref="Attributes"/> by given attribute key.</para>
+        /// <para> Removes attribute from <see cref="Fb2Node.Attributes"/> by given attribute key.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -87,7 +103,7 @@ namespace Fb2.Document.Extensions
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(Func{Fb2Attribute, bool})"/> method.
-        /// <para> Removes attributes matching given predicate.</para>
+        /// <para> Removes attributes matching given predicate from <see cref="Fb2Node.Attributes"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -99,7 +115,7 @@ namespace Fb2.Document.Extensions
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Node.RemoveAttribute(Fb2Attribute)"/> method.
-        /// <para> Removes <paramref name="attribute"/> from given node.</para>
+        /// <para> Removes given <paramref name="attribute"/> from <see cref="Fb2Node.Attributes"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
         /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
