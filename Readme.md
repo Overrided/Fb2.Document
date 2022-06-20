@@ -280,13 +280,13 @@ bool hasAttributeByKeyCaseIgnore = fb2Node.HasAttribute("ID", true); // second p
 2) Get `Attribute` of a node in `Fb2Attribute` form by `Name`:
 
 ```csharp
-Fb2Attribute attribute = fb2Node.GetAttribute(AttributeNames.Name);
-Fb2Attribute attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, true);
+Fb2Attribute? attribute = fb2Node.GetAttribute(AttributeNames.Name);
+Fb2Attribute? attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, true);
 ```
 
 > Attention!
 >
-> `GetAttribute(string key, bool ignoreCase = false)` method never returns null, instead `default(Fb2Attribute)` is returned if there's no attribute found by given name.
+> `GetAttribute(string key, bool ignoreCase = false)` method returns `null` if there's no attribute found by given name.
 
 3) Checking if attribute is there while retrieving it's value in `Fb2Attribute` form at a same time:
 
