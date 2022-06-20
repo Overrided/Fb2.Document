@@ -308,8 +308,7 @@ if (tableCellFb2Node.TryGetAttribute(AttributeNames.Align, true, out var alignAt
 
 ## Editing
 
-Since `2.1.0` version of a library all descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
-
+All descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
 All content of `Fb2Document` is represented by instances of two core classes:
 
  - `Fb2Element` - represents `plain text` node of some kind.
@@ -354,7 +353,7 @@ fb2Element.ClearContent();
 
 ### Editing `Fb2Container` content
 
-If given `Fb2Container` node can contain `text` nodes along with other nodes (indicated by `CanContainText` property), text can be inserted via special method:
+If given `Fb2Container` node can contain `text` nodes (indicated by `CanContainText` property) along with other nodes. Text can be inserted via special method:
 
 1) Adding 'hello world' `text` to `Strikethrough` container:
 
@@ -467,7 +466,7 @@ paragraph.RemoveAttribute(attributeName); // removing attribute by Key, case sen
 // or:
 paragraph.RemoveAttribute(attributeName, true); // removing attribute by Key, case insensitive!
 // or:
-paragraph.RemoveAttribute(attr => attr.Key.Equals(attributeName)); // // removing attribute by predicate
+paragraph.RemoveAttribute(attr => attr.Key.Equals(attributeName)); // removing attribute by predicate
 
 ```
 
@@ -571,7 +570,7 @@ All nodes / attributes, which names are not on list, will be omitted during docu
 
 As in fact library operates on top of `XDocument` ([Linq to XML](https://docs.microsoft.com/en-us/dotnet/standard/linq/linq-xml-overview)) requirements on `fb2` content validity from `xml` viewpoint (correctly closed tags etc.) are more than relevant while not forgetting of `fb2 standard` requierements.
 
-To simplify error-handling for different validation, loading and editing errors library adds custom exceptions in version `2.1.0`.
+To simplify error-handling for different validation, loading and editing errors library provides custom exceptions:
 
 `Fb2DocumentLoadingException`  - thrown if `Fb2Document.Load(...)` or `Fb2Document.LoadAsync(...)` fails.  
 `Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.  

@@ -11,18 +11,20 @@ For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 
 ## New features
 
-* Added `Parent` property to `Fb2Node` - now each node points back to it's parent - `Fb2Container` - making tree navigation easier.
+* Added `Parent` property to `Fb2Node` - now each node points back to it's container - `Fb2Container` - making tree traversal easier.
 
 * Added `NodeMetadata` property to `Fb2Node` - preserves namespace info of original `XNode` during `Load` method execution.
 
 ## Updates
 
-* `Attributes` where **reworked** - now attributes can preserve `NamespaceName` of original `XNode` attribute, using `Fb2Attribute` class. Thus, most of **attributes-related methods** where **updates/reworked**, posing **breaking change**. 
+* **Reworked** `Attributes` - now attributes can preserve `NamespaceName` of original `XAttribute`, using `Fb2Attribute` class. Thus, most of **attributes-related methods** where **updates/reworked**, posing **breaking change**. 
 
 * Updated `Load` and `LoadAsync` methods of `Fb2Document` class - now using `Fb2LoadingOptions` instead of primitives.
 
 * Updated `Fb2Node.Load` method and corresponding overrides to enable `NodeMetadata` usage. 
 
-* Renamed `UnknownNodeException` into `InvalidNodeException`.
-
 * Updated `Fb2Container` methods: `GetChildren(string name)`, `GetFirstChild(string name)`, `GetDescendants(string name)`, `GetFirstDescendant(string name)` - if `name` parameter is not standard Fb2 node name - `InvalidNodeException` is thrown.
+
+* Added `AppendAttribute<T>(this T fb2Node, string key, string value, string? namespaceName = null)` to `Fb2NodeExtensions`.
+
+* Renamed `UnknownNodeException` into `InvalidNodeException`.

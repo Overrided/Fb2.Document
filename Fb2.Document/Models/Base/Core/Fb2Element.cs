@@ -47,7 +47,7 @@ namespace Fb2.Document.Models.Base
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
         {
-            base.Load(node, parentNode, preserveWhitespace, loadNamespaceMetadata: loadNamespaceMetadata);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
             var rawContent = node.NodeType switch
             {
