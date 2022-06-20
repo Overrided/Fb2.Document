@@ -16,7 +16,7 @@ using Fb2.Document.Resolver;
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
-    /// Represents container node, which can contain both text and other Fb2Node(s)
+    /// Represents container node, which can contain both text and other Fb2Node(s).
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {

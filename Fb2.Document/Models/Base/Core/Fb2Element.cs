@@ -8,8 +8,8 @@ using Fb2.Document.Exceptions;
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
-    /// Represents text Node of Fb2Document
-    /// Any class derived from Fb2Element can contain text only
+    /// Represents text Node of Fb2Document.
+    /// Any class derived from Fb2Element can contain text only.
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {

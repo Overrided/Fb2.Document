@@ -15,7 +15,7 @@ namespace Fb2.Document.Models.Base
 {
     /// <summary>
     /// Base class - describes basic node of fb2 document.
-    /// Has Name, list of valid attributes and actual attribute values
+    /// Has Name, list of valid attributes and actual attribute values.
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
@@ -137,9 +137,9 @@ namespace Fb2.Document.Models.Base
         #region Node querying
 
         /// <summary>
-        /// Returns a collection of the ancestor elements of this <c>Fb2Node</c>.
+        /// Returns a collection of the ancestor elements of this <see cref="Fb2Node"/>.
         /// </summary>
-        /// <returns><c>IEnumerable&lt;Fb2Container&gt;</c> of the ancestor elements of this <c>Fb2Node</c>.</returns>
+        /// <returns><see cref="IEnumerable{Fb2Container}"/> of the ancestor elements of this <see cref="Fb2Node"/>.</returns>
         public IEnumerable<Fb2Container> GetAncestors()
         {
             var parent = this.Parent;
