@@ -85,6 +85,8 @@ There are API's that enable loading `Fb2 DOM` in different scenarios, for both `
 
 All `Load` or `LoadAsync` methods of `Fb2Document` class accept either `Fb2LoadingOptions` or `Fb2StreamLoadingOptions` optional parameter to configure content loading. For more info see [LoadingOptions](https://github.com/Overrided/Fb2.Document/tree/master/Fb2.Document/LoadingOptions).
 
+Examples of loading `Fb2Document`...
+
 1) ...from string
 
 ```csharp
