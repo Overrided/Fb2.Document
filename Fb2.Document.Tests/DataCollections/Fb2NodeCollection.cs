@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Factories;
+using Fb2.Document.Models.Base;
 using Fb2.Document.Tests.Common;
 using FluentAssertions;
 
@@ -23,7 +24,10 @@ namespace Fb2.Document.Tests.DataCollections
 
             var assembly = names.GetType().Assembly;
             AllModelTypes = assembly.GetExportedTypes()
-                .Where(type => type.FullName.StartsWith("Fb2.Document.Models.") && !type.IsAbstract && type.IsClass)
+                .Where(type => type.FullName.StartsWith("Fb2.Document.Models.") &&
+                                   !type.IsAbstract &&
+                                   type.IsClass &&
+                                   type.IsSubclassOf(typeof(Fb2Node)))
                 .ToList();
 
             AllElementsNames.Count.Should().Be(AllModelTypes.Count);

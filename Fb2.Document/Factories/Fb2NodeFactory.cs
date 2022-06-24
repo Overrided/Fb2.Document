@@ -96,20 +96,20 @@ namespace Fb2.Document.Factories
         /// <param name="nodeName">Name to create node by.</param>
         /// <returns>New instance of node created by given <paramref name="nodeName"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public static Fb2Node GetNodeByName([In] string nodeName)
         {
             if (string.IsNullOrWhiteSpace(nodeName))
                 throw new ArgumentNullException(nameof(nodeName));
 
             if (!IsKnownNodeName(nodeName))
-                throw new UnknownNodeException(nodeName);
+                throw new InvalidNodeException(nodeName);
 
-            var result = KnownNodes.First(kvp => kvp.Key.EqualsInvariant(nodeName));
+            var result = KnownNodes.First(kvp => kvp.Key.EqualsIgnoreCase(nodeName));
             var modelType = result.Value;
 
             var model = Activator.CreateInstance(modelType) as Fb2Node;
-            return model;
+            return model!;
         }
 
         /// <summary>

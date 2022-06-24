@@ -8,24 +8,28 @@ using Fb2.Document.Exceptions;
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
-    /// Represents text Node of Fb2Document
-    /// Any class derived from Fb2Element can contain text only
+    /// Represents text Node of Fb2Document.
+    /// Any class derived from Fb2Element can contain text only.
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
         protected string content = string.Empty;
 
         /// <summary>
-        /// Content (value) of element. Available after Load() method call.
+        /// Content (value) of element. Available after Load(...) method call.
         /// </summary>
         public string Content => content;
 
         /// <summary>
-        /// For text nodes Inline is true by default, however, some classes override this property.
-        /// Indicates if content of an element should be written from a new line.
+        /// <para>Indicates if content of an element should be written from a new line.</para>
+        /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
+        /// <remarks>For most <see cref="Fb2Element"/> <see cref="Fb2Element.IsInline"/> is <see langword="true"/> by default, however, some models override this property.</remarks>
         /// </summary>
         public override bool IsInline { get; protected set; } = true;
 
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
         public override bool IsEmpty => string.IsNullOrEmpty(content);
 
         /// <summary>
@@ -38,10 +42,12 @@ namespace Fb2.Document.Models.Base
         /// <remarks>Original content of XNode is NOT preserved by default except for <seealso cref="Code" />.</remarks>
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, preserveWhitespace);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
             var rawContent = node.NodeType switch
             {
@@ -94,7 +100,7 @@ namespace Fb2.Document.Models.Base
                 SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
             newContent = newContent.Replace(Environment.NewLine, Whitespace);
-            newContent = SecurityElement.Escape(newContent);
+            newContent = SecurityElement.Escape(newContent)!;
 
             content = string.Join(separator, content, newContent);
 
@@ -150,10 +156,18 @@ namespace Fb2.Document.Models.Base
 
         public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);
 
-        public override object Clone()
+        /// <summary>
+        /// Clones given <see cref="Fb2Element"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <remarks>
+        /// Attention. 
+        /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Element.Content"/> and can be resource-demanding.
+        /// </remarks>
+        /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
+        public sealed override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element.content = Content;
+            element!.content = new string(Content);
 
             return element;
         }

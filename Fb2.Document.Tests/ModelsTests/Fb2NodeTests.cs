@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
+using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
@@ -43,7 +44,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             var instanceTwo = instance.Clone() as Fb2Node;
-            instanceTwo.AddAttribute(instance.AllowedAttributes.First(), "testValue");
+            instanceTwo.AddAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "testValue"));
 
             instance.Should().NotBe(instanceTwo);
 
@@ -65,10 +66,10 @@ namespace Fb2.Document.Tests.ModelsTests
             paragTwo.AddContent(new Emphasis().AddTextContent("test text content"));
             paragOne.Should().Be(paragTwo);
 
-            paragOne.AddAttribute(AttributeNames.Id, "testId");
+            paragOne.AddAttribute(new Fb2Attribute(AttributeNames.Id, "testId"));
             paragOne.Should().NotBe(paragTwo);
 
-            paragTwo.AddAttribute(AttributeNames.Id, "testId");
+            paragTwo.AddAttribute(new Fb2Attribute(AttributeNames.Id, "testId"));
             paragOne.Should().Be(paragTwo);
         }
 
@@ -82,43 +83,43 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.AddAttribute("testKey", "testValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
-                .Invoking(i => i.AddAttribute(() => new KeyValuePair<string, string>("testKey", "testValue")))
+                .Invoking(i => i.AddAttribute(() => new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
-                .Invoking(i => i.AddAttribute(new KeyValuePair<string, string>("testKey", "testValue")))
-                .Should()
-                .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
-
-            instance
-                .Invoking(i => i.AddAttributes(
-                    new KeyValuePair<string, string>("testKey", "testValue"),
-                    new KeyValuePair<string, string>("testKey2", "testValue2")))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
                 .Invoking(i => i.AddAttributes(
-                    new Dictionary<string, string> {
-                        { "testKey", "testValue" },
-                        { "testKey2", "testValue2" }
+                    new Fb2Attribute("testKey", "testValue"),
+                    new Fb2Attribute("testKey2", "testValue2")))
+                .Should()
+                .ThrowExactly<NoAttributesAllowedException>()
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+
+            instance
+                .Invoking(i => i.AddAttributes(
+                    new List<Fb2Attribute> {
+                        new Fb2Attribute("testKey", "testValue"),
+                        new Fb2Attribute("testKey2", "testValue2")
                     }))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
 
             instance
-                .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new KeyValuePair<string, string>("testKey", "testValue"))))
+                .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new Fb2Attribute("testKey", "testValue"))))
                 .Should()
                 .ThrowExactlyAsync<NoAttributesAllowedException>()
                 .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
@@ -134,7 +135,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.AddAttribute(null))
+                .Invoking(i => i.AddAttribute((Fb2Attribute)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
@@ -149,20 +150,22 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.AddAttributes(Array.Empty<KeyValuePair<string, string>>()))
+                .Invoking(i => i.AddAttributes(Array.Empty<Fb2Attribute>()))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.AddAttributes((Dictionary<string, string>)null))
+                .Invoking(i => i.AddAttributes((List<Fb2Attribute>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            instance
-                .Invoking(i => i.AddAttributes(new Dictionary<string, string>()))
-                .Should()
-                .ThrowExactly<ArgumentNullException>();
+            //instance
+            //    .Invoking(i => i.AddAttributes(new Dictionary<string, string>()))
+            //    .Should()
+            //    .ThrowExactly<ArgumentNullException>();
         }
+
+        // TODO : add tests for Fb2Attribute + add attributes with empty value to sho it's "valid"
 
         [Theory]
         [ClassData(typeof(Fb2NodeCollection))]
@@ -173,43 +176,47 @@ namespace Fb2.Document.Tests.ModelsTests
             if (!instance.AllowedAttributes.Any())
                 return;
 
+            //instance
+            //    .Invoking(i => i.AddAttribute(() => new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
+
             instance
-                .Invoking(i => i.AddAttribute(() => new KeyValuePair<string, string>("testK", "")))
+                .Invoking(i => i.AddAttribute(() => new Fb2Attribute("", "testV")))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            //instance
+            //    .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
+
+            instance
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("", "testV")))
+                .Should()
+                .ThrowExactly<InvalidAttributeException>();
+
+            //instance
+            //    .Invoking(i => i.AddAttribute(new Fb2Attribute("testK", "")))
+            //    .Should()
+            //    .ThrowExactly<InvalidAttributeException>();
+
+            instance
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("", "testV")))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute(() => new KeyValuePair<string, string>("", "testV")))
+                .Invoking(i => i.AddAttributes(new Fb2Attribute("", ""), new Fb2Attribute("", "")))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute(new KeyValuePair<string, string>("testK", "")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
-
-            instance
-                .Invoking(i => i.AddAttribute(new KeyValuePair<string, string>("", "testV")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
-
-            instance
-                .Invoking(i => i.AddAttribute("testK", ""))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
-
-            instance
-                .Invoking(i => i.AddAttribute("", "testV"))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
-
-            instance
-                .Invoking(i => i.AddAttributes(new KeyValuePair<string, string>("", ""), new KeyValuePair<string, string>("", "")))
-                .Should()
-                .ThrowExactly<InvalidAttributeException>();
-
-            instance
-                .Invoking(i => i.AddAttributes(new Dictionary<string, string> { { "testKey", "" }, { "", "testValue" } }))
+                .Invoking(i => i.AddAttributes(
+                    new List<Fb2Attribute> {
+                        new Fb2Attribute("testKey", ""),
+                        new Fb2Attribute( "", "testValue" ) }
+                    ))
                 .Should()
                 .ThrowExactly<InvalidAttributeException>();
         }
@@ -224,34 +231,34 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance // whitespace
-                .Invoking(i => i.AddAttribute("  NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("  NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
 
             instance // whitespace
-                .Invoking(i => i.AddAttribute(" NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute(" NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute('\t' + "NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute('\t' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute(Environment.NewLine + "NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute(Environment.NewLine + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute('\n' + "NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute('\n' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
 
             instance
-                .Invoking(i => i.AddAttribute('\r' + "NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute('\r' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<UnexpectedAtrributeException>();
         }
 
         [Theory]
@@ -264,7 +271,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.AddAttribute("NotExistingKey", "NotExistingValue"))
+                .Invoking(i => i.AddAttribute(new Fb2Attribute("NotExistingKey", "NotExistingValue")))
                 .Should()
                 .ThrowExactly<UnexpectedAtrributeException>();
         }
@@ -280,11 +287,13 @@ namespace Fb2.Document.Tests.ModelsTests
 
             var firstAlowedAttributeName = instance.AllowedAttributes.First();
 
-            instance.AddAttribute(firstAlowedAttributeName, "testValue");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "testValue"));
 
             var attributes = instance.Attributes;
-            attributes.Should().HaveCount(1).And.ContainKey(firstAlowedAttributeName);
-            attributes[firstAlowedAttributeName].Should().Be("testValue");
+            //attributes.Should().HaveCount(1).And.ContainKey(firstAlowedAttributeName);
+            //attributes[firstAlowedAttributeName].Should().Be("testValue");
+            attributes.Should().HaveCount(1).And.Contain((attr) => attr.Key == firstAlowedAttributeName);
+            attributes[0].Value.Should().Be("testValue");
         }
 
         [Theory]
@@ -298,25 +307,25 @@ namespace Fb2.Document.Tests.ModelsTests
 
             var firstAlowedAttributeName = instance.AllowedAttributes.First();
 
-            instance.AddAttribute(firstAlowedAttributeName, "<testValue");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "<testValue"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;testValue");
 
-            instance.AddAttribute(firstAlowedAttributeName, "testValue>");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "testValue>"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&gt;");
 
-            instance.AddAttribute(firstAlowedAttributeName, @"""testValue");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, @"""testValue"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "&quot;testValue");
 
-            instance.AddAttribute(firstAlowedAttributeName, "testValue'tv");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "testValue'tv"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&apos;tv");
 
-            instance.AddAttribute(firstAlowedAttributeName, "testValue&tv");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "testValue&tv"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "testValue&amp;tv");
 
-            instance.AddAttribute(firstAlowedAttributeName, @"<""testValue&tv'2"">");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, @"<""testValue&tv'2"">"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;&quot;testValue&amp;tv&apos;2&quot;&gt;");
 
-            instance.AddAttribute(firstAlowedAttributeName, " test value with whitespace ");
+            instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, " test value with whitespace "));
             CheckAttributes(instance, 1, firstAlowedAttributeName, " test value with whitespace ");
         }
 
@@ -330,9 +339,9 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
@@ -344,10 +353,13 @@ namespace Fb2.Document.Tests.ModelsTests
             sequenceInfo.Attributes.Should().HaveCount(3);
 
             sequenceInfo.RemoveAttribute(AttributeNames.Name);
-            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContainKey(AttributeNames.Name);
+            //sequenceInfo.Attributes.Should().HaveCount(2).And.NotContainKey(AttributeNames.Name);
+            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContain((attr) => attr.Key == AttributeNames.Name);
 
             sequenceInfo.RemoveAttribute(AttributeNames.Number);
-            sequenceInfo.Attributes.Should().HaveCount(1).And.NotContainKey(AttributeNames.Name, AttributeNames.Number);
+            //sequenceInfo.Attributes.Should().HaveCount(1).And.NotContainKey(AttributeNames.Name, AttributeNames.Number);
+            //sequenceInfo.Attributes.Should().HaveCount(1).And.NotContainKey(AttributeNames.Name, AttributeNames.Number);
+            sequenceInfo.Attributes.Should().HaveCount(1).And.NotContain((attr) => attr.Key == AttributeNames.Name || attr.Key == AttributeNames.Number);
 
             sequenceInfo.RemoveAttribute(AttributeNames.Language);
             sequenceInfo.Attributes.Should().BeEmpty();
@@ -363,17 +375,19 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
             sequenceInfo.RemoveAttribute("NamE", true);
-            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContainKey(AttributeNames.Name);
+            //sequenceInfo.Attributes.Should().HaveCount(2).And.NotContainKey(AttributeNames.Name);
+            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContain((attr) => attr.Key == AttributeNames.Name);
 
             sequenceInfo.RemoveAttribute("NUmBeR", true);
-            sequenceInfo.Attributes.Should().HaveCount(1).And.NotContainKey(AttributeNames.Name, AttributeNames.Number);
+            //sequenceInfo.Attributes.Should().HaveCount(1).And.NotContainKey(AttributeNames.Name, AttributeNames.Number);
+            sequenceInfo.Attributes.Should().HaveCount(1).And.NotContain((attr) => attr.Key == AttributeNames.Name || attr.Key == AttributeNames.Number);
 
             sequenceInfo.RemoveAttribute("lAnG", true);
             sequenceInfo.Attributes.Should().BeEmpty();
@@ -389,20 +403,23 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
-            Func<KeyValuePair<string, string>, bool> nameWrongCasePredicate = (kvp) => kvp.Key.Equals("nAMe");
-            Func<KeyValuePair<string, string>, bool> nameAttributePredicate = (kvp) => kvp.Key.Equals(AttributeNames.Name);
+            //Func<KeyValuePair<string, string>, bool> nameWrongCasePredicate = (kvp) => kvp.Key.Equals("nAMe");
+            //Func<KeyValuePair<string, string>, bool> nameAttributePredicate = (kvp) => kvp.Key.Equals(AttributeNames.Name);
+
+            Func<Fb2Attribute, bool> nameWrongCasePredicate = (kvp) => kvp.Key.Equals("nAMe");
+            Func<Fb2Attribute, bool> nameAttributePredicate = (kvp) => kvp.Key.Equals(AttributeNames.Name);
 
             sequenceInfo.RemoveAttribute(nameWrongCasePredicate); // not removing anything, no matches
             sequenceInfo.Attributes.Should().HaveCount(3);
 
             sequenceInfo.RemoveAttribute(nameAttributePredicate);
-            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContainKey(AttributeNames.Name);
+            sequenceInfo.Attributes.Should().HaveCount(2).And.NotContain((attr) => attr.Key == AttributeNames.Name);
         }
 
         [Theory]
@@ -417,10 +434,10 @@ namespace Fb2.Document.Tests.ModelsTests
             instance.Attributes.Should().BeEmpty();
 
             instance.HasAttribute(instance.AllowedAttributes.First()).Should().BeFalse();
-            instance.HasAttribute(instance.AllowedAttributes.First(), "blah").Should().BeFalse();
+            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah")).Should().BeFalse();
 
             instance.HasAttribute(instance.AllowedAttributes.First(), true).Should().BeFalse();
-            instance.HasAttribute(instance.AllowedAttributes.First(), "blah", true).Should().BeFalse();
+            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah", "http://www.w3.org//xlink")).Should().BeFalse();
         }
 
         [Theory]
@@ -432,8 +449,11 @@ namespace Fb2.Document.Tests.ModelsTests
 
             instance.Attributes.Should().BeEmpty();
 
-            instance.GetAttribute(instance.AllowedAttributes.First()).Should().Be(default(KeyValuePair<string, string>));
-            instance.GetAttribute(instance.AllowedAttributes.First(), true).Should().Be(default(KeyValuePair<string, string>));
+            //instance.GetAttribute(instance.AllowedAttributes.First()).Should().Be(default(KeyValuePair<string, string>));
+            //instance.GetAttribute(instance.AllowedAttributes.First(), true).Should().Be(default(KeyValuePair<string, string>));
+
+            instance.GetAttribute(instance.AllowedAttributes.First()).Should().BeNull();
+            instance.GetAttribute(instance.AllowedAttributes.First(), true).Should().BeNull();
         }
 
         [Theory]
@@ -449,15 +469,19 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .BeFalse();
 
-            result.Key.Should().BeNullOrEmpty();
-            result.Value.Should().BeNullOrEmpty();
+            //result.Key.Should().BeNullOrEmpty();
+            //result.Value.Should().BeNullOrEmpty();
+            result.Should().BeNull();
+            //result.Value.Should().BeNullOrEmpty();
 
-            instance.TryGetAttribute(instance.AllowedAttributes.First(), out var resultIgnoreCase, true)
+            instance.TryGetAttribute(instance.AllowedAttributes.First(), true, out var resultIgnoreCase)
                 .Should()
                 .BeFalse();
 
-            resultIgnoreCase.Key.Should().BeNullOrEmpty();
-            resultIgnoreCase.Value.Should().BeNullOrEmpty();
+            resultIgnoreCase.Should().BeNull();
+
+            //resultIgnoreCase.Key.Should().BeNullOrEmpty();
+            //resultIgnoreCase.Value.Should().BeNullOrEmpty();
         }
 
         [Fact]
@@ -470,9 +494,9 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
@@ -487,21 +511,21 @@ namespace Fb2.Document.Tests.ModelsTests
             var hasNameAttributeIgnoringCasing = sequenceInfo.HasAttribute("NaMe", true);
             hasNameAttributeIgnoringCasing.Should().BeTrue();
 
-            var hasNameAttributeKeyWrongCasing = sequenceInfo.HasAttribute("NaMe", "Test Sequence");
-            hasNameAttributeKeyWrongCasing.Should().BeFalse();
+            var hasNameAttributeKeyWrongCasing = sequenceInfo.HasAttribute(new Fb2Attribute("NaMe", "Test Sequence"));
+            hasNameAttributeKeyWrongCasing.Should().BeTrue(); // default key case-insensitive comparison
 
-            var hasNameAttributeValueWrongCasing = sequenceInfo.HasAttribute(AttributeNames.Name, "TeSt SeQuEnCe");
+            var hasNameAttributeValueWrongCasing = sequenceInfo.HasAttribute(new Fb2Attribute(AttributeNames.Name, "TeSt SeQuEnCe"));
             hasNameAttributeValueWrongCasing.Should().BeFalse();
 
-            var hasNameAttributeKeyWrongCasingIgnore = sequenceInfo.HasAttribute("NaMe", "Test Sequence", true);
-            hasNameAttributeKeyWrongCasingIgnore.Should().BeTrue();
+            //var hasNameAttributeKeyWrongCasingIgnore = sequenceInfo.HasAttribute("NaMe", "Test Sequence", true);
+            //hasNameAttributeKeyWrongCasingIgnore.Should().BeTrue();
 
-            var hasNameAttributeValueWrongCasingIgnore = sequenceInfo.HasAttribute(AttributeNames.Name, "TeSt SeQuEnCe", true);
-            hasNameAttributeValueWrongCasingIgnore.Should().BeTrue();
+            //var hasNameAttributeValueWrongCasingIgnore = sequenceInfo.HasAttribute(AttributeNames.Name, "TeSt SeQuEnCe", true);
+            //hasNameAttributeValueWrongCasingIgnore.Should().BeTrue();
 
-            sequenceInfo.HasAttribute(AttributeNames.Name, "Test Sequence").Should().BeTrue();
-            sequenceInfo.HasAttribute(AttributeNames.Number, "1").Should().BeTrue();
-            sequenceInfo.HasAttribute(AttributeNames.Language, "eng").Should().BeTrue();
+            sequenceInfo.HasAttribute(new Fb2Attribute(AttributeNames.Name, "Test Sequence")).Should().BeTrue();
+            sequenceInfo.HasAttribute(new Fb2Attribute(AttributeNames.Number, "1")).Should().BeTrue();
+            sequenceInfo.HasAttribute(new Fb2Attribute(AttributeNames.Language, "eng")).Should().BeTrue();
         }
 
         [Fact]
@@ -514,37 +538,64 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
             // query
 
+            //sequenceInfo.GetAttribute(AttributeNames.Name)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+
+            var expectedAttr = new Fb2Attribute(AttributeNames.Name, "Test Sequence");
+
             sequenceInfo.GetAttribute(AttributeNames.Name)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+                .Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
+            //sequenceInfo.GetAttribute(AttributeNames.Number)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
             sequenceInfo.GetAttribute(AttributeNames.Number)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
+                .Be(new Fb2Attribute(AttributeNames.Number, "1"));
+
+            //sequenceInfo.GetAttribute(AttributeNames.Language)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
             sequenceInfo.GetAttribute(AttributeNames.Language)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                .Be(new Fb2Attribute(AttributeNames.Language, "eng"));
 
-            sequenceInfo.GetAttribute("NaMe").Should().Be(default(KeyValuePair<string, string>));
-            sequenceInfo.GetAttribute("NuMbEr").Should().Be(default(KeyValuePair<string, string>));
-            sequenceInfo.GetAttribute("LaNg").Should().Be(default(KeyValuePair<string, string>));
+            //sequenceInfo.GetAttribute("NaMe").Should().Be(default(KeyValuePair<string, string>));
+            //sequenceInfo.GetAttribute("NuMbEr").Should().Be(default(KeyValuePair<string, string>));
+            //sequenceInfo.GetAttribute("LaNg").Should().Be(default(KeyValuePair<string, string>));
+
+            sequenceInfo.GetAttribute("NaMe").Should().Be(null);
+            sequenceInfo.GetAttribute("NuMbEr").Should().Be(null);
+            sequenceInfo.GetAttribute("LaNg").Should().Be(null);
 
             sequenceInfo.GetAttribute("NaMe", true)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+                .Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
             sequenceInfo.GetAttribute("NuMbEr", true)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
+                .Be(new Fb2Attribute(AttributeNames.Number, "1"));
             sequenceInfo.GetAttribute("LaNg", true)
                 .Should()
-                .Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                .Be(new Fb2Attribute(AttributeNames.Language, "eng"));
+
+            //sequenceInfo.GetAttribute("NaMe", true)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+            //sequenceInfo.GetAttribute("NuMbEr", true)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
+            //sequenceInfo.GetAttribute("LaNg", true)
+            //    .Should()
+            //    .Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
         }
 
         [Fact]
@@ -557,9 +608,9 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo
                 .AddAttributes(
-                    new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"),
-                    new KeyValuePair<string, string>(AttributeNames.Number, "1"))
-                .AddAttribute(() => new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
 
             sequenceInfo.Attributes.Should().HaveCount(3);
 
@@ -569,49 +620,110 @@ namespace Fb2.Document.Tests.ModelsTests
             sequenceInfo.TryGetAttribute(AttributeNames.Name, out var nameResult)
                 .Should()
                 .BeTrue();
-            nameResult.Should().Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+            nameResult.Should().Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
 
             sequenceInfo.TryGetAttribute(AttributeNames.Number, out var numberResult)
                 .Should()
                 .BeTrue();
-            numberResult.Should().Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
+            numberResult.Should().Be(new Fb2Attribute(AttributeNames.Number, "1"));
 
             sequenceInfo.TryGetAttribute(AttributeNames.Language, out var langResult)
                 .Should()
                 .BeTrue();
-            langResult.Should().Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+            langResult.Should().Be(new Fb2Attribute(AttributeNames.Language, "eng"));
 
             // case sensitive, wrong key casing
             sequenceInfo.TryGetAttribute("NaMe", out var nameResultInvalidCasing)
                 .Should()
                 .BeFalse();
-            nameResultInvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            //nameResultInvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            nameResultInvalidCasing.Should().Be(null);
 
             sequenceInfo.TryGetAttribute("NuMbEr", out var numberResultInvalidCasing)
                 .Should()
                 .BeFalse();
-            numberResultInvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            //numberResultInvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            numberResultInvalidCasing.Should().Be(null);
 
             sequenceInfo.TryGetAttribute("LaNg", out var langResultIvalidCasing)
                 .Should()
                 .BeFalse();
-            langResultIvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            //langResultIvalidCasing.Should().Be(default(KeyValuePair<string, string>));
+            langResultIvalidCasing.Should().Be(null);
 
             // case in-sensitive, wrong key casing
-            sequenceInfo.TryGetAttribute("NaMe", out var nameResultInvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("NaMe", true, out var nameResultInvalidCasingIgnore)
                 .Should()
                 .BeTrue();
-            nameResultInvalidCasingIgnore.Should().Be(new KeyValuePair<string, string>(AttributeNames.Name, "Test Sequence"));
+            nameResultInvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
 
-            sequenceInfo.TryGetAttribute("NuMbEr", out var numberResultInvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("NuMbEr", true, out var numberResultInvalidCasingIgnore)
                 .Should()
                 .BeTrue();
-            numberResultInvalidCasingIgnore.Should().Be(new KeyValuePair<string, string>(AttributeNames.Number, "1"));
+            numberResultInvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Number, "1"));
 
-            sequenceInfo.TryGetAttribute("LaNg", out var langResultIvalidCasingIgnore, true)
+            sequenceInfo.TryGetAttribute("LaNg", true, out var langResultIvalidCasingIgnore)
                 .Should()
                 .BeTrue();
-            langResultIvalidCasingIgnore.Should().Be(new KeyValuePair<string, string>(AttributeNames.Language, "eng"));
+            langResultIvalidCasingIgnore.Should().Be(new Fb2Attribute(AttributeNames.Language, "eng"));
+        }
+
+        [Fact]
+        public void SequenceInfoNode_AppendAttribute_Works()
+        {
+            // setup
+            var sequenceInfo = new SequenceInfo();
+            sequenceInfo.AllowedAttributes.Should().HaveCount(3);
+            sequenceInfo.Attributes.Should().BeEmpty();
+
+            sequenceInfo
+                .AddAttributes(
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AppendAttribute(AttributeNames.Language, "eng");
+
+            sequenceInfo.Attributes.Should().HaveCount(3);
+
+            // query
+            sequenceInfo.TryGetAttribute(AttributeNames.Name, out var nameResult)
+                .Should()
+                .BeTrue();
+            nameResult.Should().Be(new Fb2Attribute(AttributeNames.Name, "Test Sequence"));
+
+            sequenceInfo.TryGetAttribute(AttributeNames.Number, out var numberResult)
+                .Should()
+                .BeTrue();
+            numberResult.Should().Be(new Fb2Attribute(AttributeNames.Number, "1"));
+
+            sequenceInfo.TryGetAttribute(AttributeNames.Language, out var langResult)
+                .Should()
+                .BeTrue();
+            langResult.Should().Be(new Fb2Attribute(AttributeNames.Language, "eng"));
+        }
+
+        [Fact]
+        public void Ancestors_Works()
+        {
+            var parent1 = new Strong().AppendTextContent("leaf node text");
+            parent1.Content.Should().HaveCount(1);
+
+            var leafText = parent1.Content.First();
+            leafText.Should().NotBeNull();
+            leafText.Should().BeOfType<TextItem>();
+            (leafText as TextItem)!.Content.Should().Be("leaf node text");
+
+            parent1.Parent.Should().BeNull();
+            parent1.GetAncestors().Should().NotBeNull().And.BeEmpty();
+            leafText.Parent.Should().Be(parent1);
+            var initialAncestors = leafText.GetAncestors();
+            initialAncestors.Should().HaveCount(1);
+            initialAncestors.Should().Contain(parent1);
+
+            var parent2 = new Emphasis().AppendContent(parent1);
+            var updatedAncestors = leafText.GetAncestors();
+            updatedAncestors.Should().HaveCount(2);
+            updatedAncestors.Should().Contain(parent1);
+            updatedAncestors.Should().Contain(parent2);
         }
 
         private static void CheckAttributes(
@@ -622,8 +734,9 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             instance.Should().NotBeNull();
             instance.Attributes.Should().HaveCount(expectedCount);
-            instance.Attributes.Should().ContainKey(expectedName);
-            instance.Attributes[expectedName].Should().Be(expectedValue);
+            instance.Attributes.Should().Contain((attr) => attr.Key == expectedName);
+            //instance.Attributes[expectedName].Should().Be(expectedValue);
+            instance.GetAttribute(expectedName).Value.Should().Be(expectedValue);
         }
     }
 }

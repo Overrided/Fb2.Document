@@ -1,3 +1,7 @@
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 name: Fb2.Document CI
 
 on:
@@ -12,32 +16,34 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install .NET Core 3.1.x
-        uses: actions/setup-dotnet@v1
+      - name: Setup .NET 3.1.x / 5.0.x / 6.0.x
+        uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: "3.1.x"
-
-      - name: Install .NET 5.0.x
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "5.0.x"
-
-      - name: Install .NET 6.0.x
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "6.0.x"
+          dotnet-version: | 
+            3.1.x
+            5.0.x
+            6.0.x
 
       - name: Build library
-        run: dotnet build -c release
+        run: dotnet build --configuration Release
 
       - name: Run tests
-        run: dotnet test --collect:"XPlat Code Coverage"
+        run: dotnet test --no-restore --collect:"XPlat Code Coverage"
+
+      - name: NuGet pack
+        run: dotnet pack 'Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --output dist
+
+      - name: Upload NuGet package artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: ${{ matrix.os }}-nuget
+          path: dist
 
       - name: ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0

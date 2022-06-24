@@ -171,6 +171,31 @@ namespace Fb2.Document.Tests.IntegrationTests
         }
 
         [Fact]
+        public async Task LoadWithoutMetadata_DifferentContent()
+        {
+            var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+            using (var fileReadStream = sampleFileInfo.OpenRead())
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(fileReadStream);
+
+                RewindStream(fileReadStream);
+
+                // loading document without unsafe nodes
+                var secondDocument = new Fb2Document();
+                await secondDocument.LoadAsync(fileReadStream, new Fb2StreamLoadingOptions(loadNamespaceMetadata: false));
+
+                firstDocument.Book!.NodeMetadata.Should().NotBeNull();
+                secondDocument.Book!.NodeMetadata.Should().BeNull();
+
+                firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
+                secondDocument.Bodies.First().NodeMetadata.Should().BeNull();
+            }
+        }
+
+        [Fact]
         public async Task Load_WithCloseInput_ClosesStream()
         {
             var sampleFileInfo = GetSampleFileInfo(SampleFileName);

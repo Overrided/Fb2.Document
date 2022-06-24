@@ -11,9 +11,15 @@ namespace Fb2.Document.Models
 
         public override bool IsInline => false;
 
-        public override void Load(
+        /// <summary>
+        /// Specific override to preserve original string content 
+        /// with '\t', ' ', '\r\n' etc. formatting.
+        /// </summary>
+        public sealed override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true) => base.Load(node, true, loadUnsafe);
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true) => base.Load(node, parentNode, true, loadUnsafe, loadNamespaceMetadata);
     }
 }

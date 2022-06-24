@@ -16,20 +16,20 @@ using Fb2.Document.Resolver;
 namespace Fb2.Document.Models.Base
 {
     /// <summary>
-    /// Represents container node, which can contain both text and other Fb2Node(s)
+    /// Represents container node, which can contain both text and other Fb2Node(s).
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
         private List<Fb2Node> content = new List<Fb2Node>();
 
         /// <summary>
-        /// Actual value is available after `Load()` method call.
+        /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
         /// </summary>
         public ImmutableList<Fb2Node> Content => content.ToImmutableList();
 
         /// <summary>
-        /// Indicates if instance of type Fb2Container can contain text.
-        /// `true` if element can contain text, otherwise - `false`.
+        /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
+        /// <see langword="true"/> if element can contain text, otherwise - <see langword="false"/>.
         /// </summary>
         public virtual bool CanContainText { get; private set; }
 
@@ -39,11 +39,14 @@ namespace Fb2.Document.Models.Base
         public abstract ImmutableHashSet<string> AllowedElements { get; }
 
         /// <summary>
-        /// Indicates whether element should start with a new line or be inline.
-        /// `true` if element is inline, otherwise - `false`.
+        /// <para>Indicates if content of an element should be written from a new line.</para>
+        /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
         /// </summary>
         public override bool IsInline { get; protected set; } = false;
 
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
         public override bool IsEmpty => content.Count == 0;
 
         /// <summary>
@@ -54,10 +57,12 @@ namespace Fb2.Document.Models.Base
         /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
         public override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, preserveWhitespace, loadUnsafe);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
             var element = node as XElement;
 
@@ -76,7 +81,7 @@ namespace Fb2.Document.Models.Base
 
                         var elementNode = n as XElement;
                         var nodeLocalName = elementNode.Name.LocalName;
-                        return !nodeLocalName.EqualsInvariant(ElementNames.FictionText) &&
+                        return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
                                Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
                     })
                 .ToList();
@@ -102,7 +107,7 @@ namespace Fb2.Document.Models.Base
                     continue;
 
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
-                elem.Load(validNode, preserveWhitespace, loadUnsafe);
+                elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
                 elem.IsUnsafe = isUnsafe;
 
                 content.Add(elem);
@@ -129,7 +134,7 @@ namespace Fb2.Document.Models.Base
         /// Converts Fb2Container to XElement with regards to all attributes, 
         /// by calling `ToXml()` on every node in `Content`.
         /// </summary>
-        /// <returns>XElement reflected from given Fb2Element</returns>
+        /// <returns><see cref="XElement"/> reflected from given Fb2Node.</returns>
         public override XElement ToXml()
         {
             var element = base.ToXml();
@@ -168,11 +173,22 @@ namespace Fb2.Document.Models.Base
 
         public sealed override int GetHashCode() => HashCode.Combine(base.GetHashCode(), CanContainText, content, AllowedElements);
 
+        /// <summary>
+        /// Clones given <see cref="Fb2Container"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <remarks>
+        /// Attention. 
+        /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Container.Content"/> and can be resource-demanding.
+        /// </remarks>
+        /// <returns>New instance of given <see cref="Fb2Container"/>.</returns>
         public sealed override object Clone()
         {
             var container = base.Clone() as Fb2Container;
-            container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
-            container.CanContainText = CanContainText;
+
+            if (!IsEmpty)
+                container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+
+            container!.CanContainText = CanContainText;
 
             return container;
         }
@@ -285,7 +301,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="node">Child node to add to Content.</param>
         /// <returns>Current container.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="UnknownNodeException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         /// <exception cref="UnexpectedNodeException"></exception>
         public Fb2Container AddContent(Fb2Node node)
         {
@@ -293,7 +309,7 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(node));
 
             if (!Fb2NodeFactory.IsKnownNode(node))
-                throw new UnknownNodeException(node);
+                throw new InvalidNodeException(node);
 
             var nodeName = node.Name;
             var isTextNode = node is TextItem;
@@ -305,7 +321,11 @@ namespace Fb2.Document.Models.Base
                 throw new UnexpectedNodeException(Name, nodeName);
 
             if (isTextNode)
-                return TryMergeTextContent((node as TextItem).Content);
+                return TryMergeTextContent((node as TextItem)!.Content);
+
+            node.Parent = this;
+            if (node.NodeMetadata == null && NodeMetadata?.DefaultNamespace != null) // copy parent default namespace to prevent serialization issues
+                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata?.DefaultNamespace);
 
             content.Add(node);
             return this;
@@ -319,8 +339,8 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(IEnumerable<Fb2Node> nodes)
         {
-            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
-                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
+            if (nodes == null || !nodes.Any())
+                throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array.");
 
             foreach (var node in nodes)
                 RemoveContent(node);
@@ -334,13 +354,17 @@ namespace Fb2.Document.Models.Base
         /// <param name="nodePredicate">Predicate to match node against.</param>
         /// <returns>Current container.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Container RemoveContent(Func<Fb2Node, bool> nodePredicate)
+        public Fb2Container RemoveContent([In] Func<Fb2Node, bool> nodePredicate)
         {
             if (nodePredicate == null)
                 throw new ArgumentNullException(nameof(nodePredicate));
 
             if (!IsEmpty)
-                content.RemoveAll(n => nodePredicate(n));
+            {
+                var nodesToRemove = content.Where(n => nodePredicate(n)).ToList();
+                foreach (var node in nodesToRemove)
+                    RemoveContent(node);
+            }
 
             return this;
         }
@@ -356,8 +380,11 @@ namespace Fb2.Document.Models.Base
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            if (!IsEmpty)
+            if (!IsEmpty && content.Contains(node))
+            {
                 content.Remove(node);
+                node.Parent = null;
+            }
 
             return this;
         }
@@ -369,7 +396,8 @@ namespace Fb2.Document.Models.Base
         public Fb2Container ClearContent()
         {
             if (!IsEmpty)
-                content.Clear();
+                for (int i = content.Count - 1; i >= 0; i--)
+                    RemoveContent(content[i]);
 
             return this;
         }
@@ -384,15 +412,19 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select child elements by. Case insensitive.</param>
         /// <returns>List of found child elements, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public IEnumerable<Fb2Node> GetChildren(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new InvalidNodeException(name);
+
+            if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
 
-            return content.Where(elem => elem.Name.EqualsInvariant(name));
+            return content.Where(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
@@ -406,36 +438,45 @@ namespace Fb2.Document.Models.Base
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
+            if (IsEmpty)
+                return Enumerable.Empty<Fb2Node>();
+
             return content.Where(c => predicate(c));
         }
 
         /// <summary>
         /// Gets first matching child of element by given name.
         /// </summary>
-        /// <param name="name">Name to select child element by.</param>
-        /// <returns>First matched child node.</returns>
+        /// <param name="name">Name to select child element by. Optional.</param>
+        /// <returns>First matched child node or <see langword="null"/>.</returns>
+        /// <exception cref="InvalidNodeException"></exception>
         public Fb2Node? GetFirstChild(string? name)
         {
-            if (IsEmpty ||
-                !string.IsNullOrWhiteSpace(name) &&
+            if (!string.IsNullOrEmpty(name) &&
                 !Fb2NodeFactory.IsKnownNodeName(name))
+                throw new InvalidNodeException(name);
+
+            if (IsEmpty)
                 return null;
 
             return string.IsNullOrWhiteSpace(name) ?
                 content.FirstOrDefault() :
-                content.FirstOrDefault(elem => elem.Name.EqualsInvariant(name));
+                content.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
         /// Gets first child of element that matches given predicate.
         /// </summary>
         /// <param name="predicate">Predicate to match child node against.</param>
-        /// <returns>First matched child node.</returns>
+        /// <returns>First matched child node or <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node? GetFirstChild(Func<Fb2Node, bool> predicate)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
+
+            if (IsEmpty)
+                return null;
 
             return content.FirstOrDefault(predicate);
         }
@@ -446,21 +487,25 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select descendants by.</param>
         /// <returns>List of found descendants, if any.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public IEnumerable<Fb2Node> GetDescendants(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
+            if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new InvalidNodeException(name);
+
             var result = new List<Fb2Node>();
 
-            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
+            if (IsEmpty)
                 return result;
 
             for (int i = 0; i < content.Count; i++)
             {
                 var element = content[i];
 
-                if (element.Name.EqualsInvariant(name))
+                if (element.Name.EqualsIgnoreCase(name))
                     result.Add(element);
 
                 if (element is Fb2Container containerElement)
@@ -514,21 +559,25 @@ namespace Fb2.Document.Models.Base
         /// Recursively looks for first matching descendant of element by given name.
         /// </summary>
         /// <param name="name">Name to select descendant by.</param>
-        /// <returns>First matching descendant node.</returns>
+        /// <returns>First matching descendant node or <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidNodeException"></exception>
         public Fb2Node? GetFirstDescendant(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (IsEmpty || !Fb2NodeFactory.IsKnownNodeName(name))
+            if (!Fb2NodeFactory.IsKnownNodeName(name))
+                throw new InvalidNodeException(name);
+
+            if (IsEmpty)
                 return null;
 
             for (int i = 0; i < content.Count; i++)
             {
                 var element = content[i];
 
-                if (element.Name.EqualsInvariant(name))
+                if (element.Name.EqualsIgnoreCase(name))
                     return element;
 
                 if (element is Fb2Container containerElement)
@@ -700,7 +749,7 @@ namespace Fb2.Document.Models.Base
         private T? GetFirstDescendantInternal<T>(Func<Fb2Node, bool>? predicate = null)
             where T : Fb2Node
         {
-            if (!content.Any())
+            if (IsEmpty)
                 return null;
 
             if (predicate == null)
@@ -726,12 +775,15 @@ namespace Fb2.Document.Models.Base
 
         private Fb2Container TryMergeTextContent(string newContent, string? separator = null)
         {
-            var lastChildNode = IsEmpty ? null : Content.LastOrDefault();
+            var lastChildNode = IsEmpty ? null : content.LastOrDefault();
 
-            // empty or has other containers
+            // empty or last item is not text, so cant append actual content nowhere
             if (lastChildNode == null ||
                 !(lastChildNode is TextItem lastTextItem))
-                content.Add(new TextItem().AddContent(newContent, separator));
+            {
+                var textNode = new TextItem { Parent = this }.AddContent(newContent, separator);
+                content.Add(textNode);
+            }
             else
                 lastTextItem.AddContent(newContent, separator);
 

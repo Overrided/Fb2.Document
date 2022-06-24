@@ -16,13 +16,14 @@ namespace Fb2.Document.Models
 
         public sealed override void Load(
             [In] XNode element,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            if (element == null)
-                throw new ArgumentNullException(nameof(element));
+            base.Load(element, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-            Validate(element);
+            content = Environment.NewLine; // double-check, just in case
         }
 
         public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;

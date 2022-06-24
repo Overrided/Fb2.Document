@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
-using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
@@ -20,7 +19,7 @@ namespace Fb2.Document.Models
                 AttributeNames.XHref,
                 AttributeNames.Type);
 
-        private readonly HashSet<string> InlineParentNodes = new HashSet<string>()
+        private static readonly HashSet<string> InlineParentNodes = new HashSet<string>()
         {
             ElementNames.Paragraph,
             ElementNames.StanzaV,
@@ -30,33 +29,33 @@ namespace Fb2.Document.Models
             ElementNames.TextAuthor
         };
 
-        private readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
+        private static readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
         {
             ElementNames.BookBody,
             ElementNames.BookBodySection,
             ElementNames.Coverpage
         };
 
-        public override string ToString()
+        public sealed override string ToString()
         {
-            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, out var result, true) ? $" {result.Value}" : string.Empty;
-
+            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, true, out var result) ? $" {result!.Value}" : string.Empty;
             return $"{Name}{formattedAttributeString}";
         }
 
-        public override void Load(
+        public sealed override void Load(
             [In] XNode node,
+            [In] Fb2Container? parentNode = null,
             bool preserveWhitespace = false,
-            bool loadUnsafe = true)
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            base.Load(node, preserveWhitespace, loadUnsafe);
-
-            IsInline = GetInline(node.Parent?.Name?.LocalName, node.NodeType);
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+            IsInline = GetInline(Parent?.Name);
         }
 
-        private bool GetInline(string? parentNodeName, XmlNodeType parentNodeType)
+        private static bool GetInline(string? parentNodeName)
         {
-            if (string.IsNullOrEmpty(parentNodeName) || parentNodeType != XmlNodeType.Element)
+            if (string.IsNullOrEmpty(parentNodeName))
                 return true;
 
             if (InlineParentNodes.Contains(parentNodeName))

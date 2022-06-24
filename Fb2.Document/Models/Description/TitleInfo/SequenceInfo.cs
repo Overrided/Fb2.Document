@@ -12,11 +12,8 @@ namespace Fb2.Document.Models
         public override bool IsInline => false;
 
         public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(
-                AttributeNames.Name,
-                AttributeNames.Number,
-                AttributeNames.Language);
+            ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Number, AttributeNames.Language);
 
-        public override Fb2Element AddContent(string newContent, string? separator = null) => this;
+        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
     }
 }
