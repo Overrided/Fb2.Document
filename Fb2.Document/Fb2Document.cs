@@ -166,35 +166,6 @@ namespace Fb2.Document
             });
         }
 
-        ///// <summary>
-        ///// Loads fb2 file's content into Fb2Document model from string asynchronously
-        ///// </summary>
-        ///// <param name="fileContent">Content of a file read as string</param>
-        ///// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
-        ///// <exception cref="ArgumentNullException"></exception>
-        ///// <remarks>
-        ///// This method is not Encoding-safe.
-        ///// Loading will proceed with Encoding of string received.
-        ///// This method exists mostly for lulz :)
-        ///// </remarks>
-        //public async Task LoadAsync([In] string fileContent, Fb2LoadingOptions loadingOptions = null)
-        //{
-        //    if (string.IsNullOrWhiteSpace(fileContent))
-        //        throw new ArgumentNullException(nameof(fileContent));
-
-        //    await LoadHandledAsync(async () =>
-        //    {
-        //        using (var reader = new StringReader(fileContent))
-        //        {
-        //            var document = await XDocument
-        //                .LoadAsync(reader, LoadOptions.None, default)
-        //                .ConfigureAwait(false);
-
-        //            Load(document.Root, loadingOptions);
-        //        }
-        //    });
-        //}
-
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>

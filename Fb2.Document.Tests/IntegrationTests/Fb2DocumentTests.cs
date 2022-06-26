@@ -225,9 +225,6 @@ namespace Fb2.Document.Tests.IntegrationTests
             var stringLoadedFb2Document = new Fb2Document();
             stringLoadedFb2Document.Load(fileStringContent); // string
 
-            var stringLoadedAsyncFb2Document = new Fb2Document();
-            await stringLoadedAsyncFb2Document.LoadAsync(fileStringContent);
-
             var xmlLoadedFb2Document = new Fb2Document();
             xmlLoadedFb2Document.Load(xDocument); // xDocument
 
@@ -242,15 +239,13 @@ namespace Fb2.Document.Tests.IntegrationTests
             }
 
             stringLoadedFb2Document
-                .Should().Be(stringLoadedAsyncFb2Document)
-                .And.Be(xmlLoadedFb2Document)
+                .Should().Be(xmlLoadedFb2Document)
                 .And.Be(streamLoadedFb2Document)
                 .And.Be(streamLoadedAsyncFb2Document);
 
 
             stringLoadedFb2Document.Book
-                .Should().Be(stringLoadedAsyncFb2Document.Book)
-                .And.Be(xmlLoadedFb2Document.Book)
+                .Should().Be(xmlLoadedFb2Document.Book)
                 .And.Be(streamLoadedFb2Document.Book)
                 .And.Be(streamLoadedAsyncFb2Document.Book);
         }
