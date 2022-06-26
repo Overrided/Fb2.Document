@@ -72,7 +72,7 @@ namespace Fb2.Document.Extensions
             (T)fb2Node.AddAttribute(attribute);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(string, string, string?)"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttribute(string, string, string)"/> method.
         /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/>.</para> 
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
@@ -84,7 +84,7 @@ namespace Fb2.Document.Extensions
         /// <para>NamespaceName for attribute, used by <see cref="ToXml"/> serialization.</para>
         /// </param>
         /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-        public static T AppendAttribute<T>(this T fb2Node, string key, string value, string? namespaceName = null) where T : Fb2Node =>
+        public static T AppendAttribute<T>(this T fb2Node, string key, string value, string namespaceName = null) where T : Fb2Node =>
             (T)fb2Node.AddAttribute(key, value, namespaceName);
 
         /// <summary>

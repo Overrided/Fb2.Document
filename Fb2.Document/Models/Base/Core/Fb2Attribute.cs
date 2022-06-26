@@ -9,9 +9,9 @@ namespace Fb2.Document.Models.Base
     {
         public string Key { get; }
         public string Value { get; set; }
-        public string? NamespaceName { get; }
+        public string NamespaceName { get; } = null;
 
-        public Fb2Attribute(string key, string value, string? namespaceName = null)
+        public Fb2Attribute(string key, string value, string namespaceName = null)
         {
             var escapedKey = SecurityElement.Escape(key);
             if (string.IsNullOrWhiteSpace(escapedKey))
@@ -27,7 +27,7 @@ namespace Fb2.Document.Models.Base
                 NamespaceName = namespaceName;
         }
 
-        public override bool Equals(object? obj) =>
+        public override bool Equals(object obj) =>
             obj != null &&
             obj is Fb2Attribute attribute &&
             Key.EqualsIgnoreCase(attribute.Key) &&

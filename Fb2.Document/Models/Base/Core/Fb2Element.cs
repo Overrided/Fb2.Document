@@ -42,19 +42,21 @@ namespace Fb2.Document.Models.Base
         /// <remarks>Original content of XNode is NOT preserved by default except for <seealso cref="Code" />.</remarks>
         public override void Load(
             [In] XNode node,
-            [In] Fb2Container? parentNode = null,
+            [In] Fb2Container parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
         {
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-            var rawContent = node.NodeType switch
-            {
-                XmlNodeType.Element => ((XElement)node).Value,
-                XmlNodeType.Text => ((XText)node).Value,
-                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-            };
+            string rawContent;
+
+            if (node.NodeType == XmlNodeType.Element)
+                rawContent = ((XElement)node).Value;
+            else if (node.NodeType == XmlNodeType.Text)
+                rawContent = ((XText)node).Value;
+            else
+                throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
 
             if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
                 content = trimWhitespace.Replace(rawContent, Whitespace);
@@ -69,7 +71,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator to split text from rest of the content.</param>
         /// <returns>Current element.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
+        public Fb2Element AddContent(Func<string> contentProvider, string separator = null)
         {
             if (contentProvider == null)
                 throw new ArgumentNullException(nameof(contentProvider));
@@ -90,7 +92,7 @@ namespace Fb2.Document.Models.Base
         /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual Fb2Element AddContent(string newContent, string? separator = null)
+        public virtual Fb2Element AddContent(string newContent, string separator = null)
         {
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent));
@@ -100,7 +102,7 @@ namespace Fb2.Document.Models.Base
                 SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
             newContent = newContent.Replace(Environment.NewLine, Whitespace);
-            newContent = SecurityElement.Escape(newContent)!;
+            newContent = SecurityElement.Escape(newContent);
 
             content = string.Join(separator, content, newContent);
 
@@ -138,7 +140,7 @@ namespace Fb2.Document.Models.Base
 
         public override string ToString() => Content;
 
-        public override bool Equals(object? other)
+        public override bool Equals(object other)
         {
             if (other == null)
                 return false;
@@ -167,7 +169,7 @@ namespace Fb2.Document.Models.Base
         public sealed override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element!.content = new string(Content);
+            element.content = new string(content.ToCharArray());
 
             return element;
         }

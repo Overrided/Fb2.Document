@@ -47,7 +47,7 @@ namespace Fb2.Document.Extensions
             (T)fb2Container.AddContent(nodes);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContent(string, string?)"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContent(string, string)"/> method.
         /// <para> Adds new text node to given <paramref name="fb2Container"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
@@ -58,7 +58,7 @@ namespace Fb2.Document.Extensions
         public static T AppendTextContent<T>(
             this T fb2Container,
             string content,
-            string? separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
+            string separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContent(IEnumerable{Fb2Node})"/> method.

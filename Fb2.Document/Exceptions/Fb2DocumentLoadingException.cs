@@ -7,7 +7,7 @@ namespace Fb2.Document.Exceptions
     /// </summary>
     public class Fb2DocumentLoadingException : Exception
     {
-        public Fb2DocumentLoadingException(string message, Exception? innerException = null)
+        public Fb2DocumentLoadingException(string message, Exception innerException = null)
             : base(message, innerException) { }
     }
 }

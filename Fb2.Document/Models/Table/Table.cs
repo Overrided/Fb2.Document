@@ -124,7 +124,7 @@ namespace Fb2.Document.Models
                 throw new ArgumentNullException();
 
             if (cell.TryGetAttribute(alignAttributeName, true, out var align))
-                return align!.Value;
+                return align.Value;
 
             return string.Empty;
         }
@@ -136,7 +136,7 @@ namespace Fb2.Document.Models
                 throw new ArgumentNullException();
 
             if (cell.TryGetAttribute(spanAttrName, true, out var span) &&
-                int.TryParse(span!.Value, out int spanNumber) && spanNumber > 1)
+                int.TryParse(span.Value, out int spanNumber) && spanNumber > 1)
                 return spanNumber;
 
             return 1;

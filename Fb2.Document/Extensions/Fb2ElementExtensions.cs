@@ -9,7 +9,7 @@ namespace Fb2.Document.Extensions
     public static class Fb2ElementExtensions
     {
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContent(string, string?)"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContent(string, string)"/> method.
         /// <para> Appends new plain text to given <paramref name="fb2Element"/>.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
@@ -20,10 +20,10 @@ namespace Fb2.Document.Extensions
         public static T AppendContent<T>(
             this T fb2Element,
             string newContent,
-            string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(newContent, separator);
+            string separator = null) where T : Fb2Element => (T)fb2Element.AddContent(newContent, separator);
 
         /// <summary>
-        /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContent(Func{string}, string?)"/> method.
+        /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContent(Func{string}, string)"/> method.
         /// <para> Appends new plain text to given <paramref name="fb2Element"/> using <paramref name="contentProvider"/> function.</para>
         /// </summary>
         /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
@@ -34,7 +34,7 @@ namespace Fb2.Document.Extensions
         public static T AppendContent<T>(
             this T fb2Element,
             Func<string> contentProvider,
-            string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
+            string separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Element.ClearContent()"/> method.
