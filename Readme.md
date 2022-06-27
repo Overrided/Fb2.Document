@@ -1,6 +1,6 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
-Fb2.Document is lightweight, fast .Net 3.1/5/6 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net Standard 2.0 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
@@ -99,19 +99,7 @@ fb2Document.Load(fileContent);
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
-2) ...from string asynchronously
-
-```csharp
-Fb2Document fb2Document = new Fb2Document();
-
-string fileContent = await dataService.GetFileContent(Fb2FilePath);
-
-await fb2Document.LoadAsync(fileContent);
-```
-
->WARNING! Method is not encoding-safe. [*](#Encoding-safety)
-
-3) ...from XDocument
+2) ...from XDocument
 
 ```csharp
 XDocument xDocument = dataService.GetFileAsXDoc(Fb2FilePath);
@@ -123,7 +111,7 @@ fb2Document.Load(xDocument);
 
 >WARNING! Method is not encoding-safe. [*](#Encoding-safety)
 
-4) ...from stream
+3) ...from stream
 
 ```csharp
 Fb2Document fb2Document = new Fb2Document();
@@ -138,7 +126,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-5) ...from stream asynchronously
+4) ...from stream asynchronously
 
 ```csharp
 Fb2Document fb2Document = new Fb2Document();
