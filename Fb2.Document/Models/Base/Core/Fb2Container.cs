@@ -115,32 +115,10 @@ namespace Fb2.Document.Models.Base
             if (validNodes.Count == 0)
                 return;
 
-            //if (content == null) // which it should be
-            //{
-            //    content = new List<Fb2Node>(validNodes.Length);
-
-            //    for (int i = 0; i < validNodes.Length; i++)
-            //    {
-            //        content[i] = validNodes[i];
-            //    }
-            //}
             if (content == null) // which it should be
-            {
-                //content = new List<Fb2Node>(validNodes);
                 content = new List<Fb2Node>(validNodes.Count);
 
-                for (int i = 0; i < validNodes.Count; i++)
-                {
-                    var nodeByIndex = validNodes[i];
-                    //content.Add(nodeByIndex);
-
-                    //Debug.WriteLine($"index {i}; content.Capacity {content.Capacity}; content.Count {content.Count}; validNodes.Count {validNodes.Count}");
-
-                    content[i] = nodeByIndex;
-                }
-            }
-            else
-                content.AddRange(validNodes); // which it should not
+            content.AddRange(validNodes);
         }
 
         public override string ToString()
