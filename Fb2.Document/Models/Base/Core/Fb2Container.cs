@@ -21,7 +21,6 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
-        //private List<Fb2Node> content = new List<Fb2Node>();
         private List<Fb2Node>? content = null;
 
         /// <summary>
@@ -71,54 +70,42 @@ namespace Fb2.Document.Models.Base
             if (element == null || element.IsEmpty)
                 return;
 
-            var nodes = element.Nodes()
-                .Where(n =>
-                    {
-                        if (n.NodeType == XmlNodeType.Text)
-                            return true;
+            var nodes = element.Nodes().Select(xNode =>
+            {
+                var nodeType = xNode.NodeType;
+                var isTextNode = nodeType == XmlNodeType.Text;
+                var isElementNode = nodeType == XmlNodeType.Element;
 
-                        var isElement = n.NodeType == XmlNodeType.Element;
-                        if (!isElement)
-                            return false;
+                if (!isTextNode && !isElementNode)
+                    return null;
 
-                        var elementNode = n as XElement;
-                        var nodeLocalName = elementNode!.Name.LocalName;
-                        return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                               Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
-                    });
+                var localName = isElementNode ?
+                    ((XElement)xNode).Name.LocalName.ToLowerInvariant() :
+                    ElementNames.FictionText;
 
-            if (!nodes.Any())
-                return;
+                if (isElementNode && localName.EqualsIgnoreCase(ElementNames.FictionText) ||
+                    !Fb2NodeFactory.IsKnownNodeName(localName))
+                    return null;
 
-            var validNodes = nodes
-                .Select(childNode =>
-                {
-                    string localName = childNode.NodeType == XmlNodeType.Element ?
-                        ((XElement)childNode).Name.LocalName.ToLowerInvariant() :
-                        ElementNames.FictionText;
+                var isUnsafe = isTextNode ? !CanContainText : !AllowedElements.Contains(localName);
 
-                    var isUnsafe = childNode.NodeType == XmlNodeType.Text ?
-                        !CanContainText :
-                        !AllowedElements.Contains(localName);
+                if (isUnsafe && !loadUnsafe)
+                    return null;
 
-                    if (isUnsafe && !loadUnsafe)
-                        return null;
+                var elem = Fb2NodeFactory.GetNodeByName(localName);
+                elem.Load(xNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+                elem.IsUnsafe = isUnsafe;
 
-                    var elem = Fb2NodeFactory.GetNodeByName(localName);
-                    elem.Load(childNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-                    elem.IsUnsafe = isUnsafe;
+                return elem;
+            }).OfType<Fb2Node>().ToList();
 
-                    return elem;
-                })
-                .OfType<Fb2Node>().ToList();
-
-            if (validNodes.Count == 0)
+            if (nodes.Count == 0)
                 return;
 
             if (content == null) // which it should be
-                content = new List<Fb2Node>(validNodes.Count);
+                content = new List<Fb2Node>(nodes.Count);
 
-            content.AddRange(validNodes);
+            content.AddRange(nodes);
         }
 
         public override string ToString()
@@ -149,7 +136,7 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return element;
 
-            var children = content.Select(ToXmlInternal);
+            var children = content!.Select(ToXmlInternal);
             element.Add(children);
 
             return element;
@@ -196,7 +183,7 @@ namespace Fb2.Document.Models.Base
             var container = base.Clone() as Fb2Container;
 
             if (!IsEmpty)
-                container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+                container!.content = new List<Fb2Node>(content!.Select(c => (Fb2Node)c.Clone()));
 
             container!.CanContainText = CanContainText;
 
@@ -374,7 +361,7 @@ namespace Fb2.Document.Models.Base
 
             if (!IsEmpty)
             {
-                var nodesToRemove = content.Where(n => nodePredicate(n)).ToList();
+                var nodesToRemove = content!.Where(n => nodePredicate(n)).ToList();
                 foreach (var node in nodesToRemove)
                     RemoveContent(node);
             }
@@ -437,7 +424,7 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
 
-            return content.Where(elem => elem.Name.EqualsIgnoreCase(name));
+            return content!.Where(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
@@ -454,7 +441,7 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return Enumerable.Empty<Fb2Node>();
 
-            return content.Where(c => predicate(c));
+            return content!.Where(c => predicate(c));
         }
 
         /// <summary>
@@ -473,8 +460,8 @@ namespace Fb2.Document.Models.Base
                 return null;
 
             return string.IsNullOrWhiteSpace(name) ?
-                content.FirstOrDefault() :
-                content.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
+                content!.FirstOrDefault() :
+                content!.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
         }
 
         /// <summary>
@@ -491,7 +478,7 @@ namespace Fb2.Document.Models.Base
             if (IsEmpty)
                 return null;
 
-            return content.FirstOrDefault(predicate);
+            return content!.FirstOrDefault(predicate);
         }
 
         /// <summary>

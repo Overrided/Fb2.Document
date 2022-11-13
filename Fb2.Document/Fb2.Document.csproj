@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Optimize>true</Optimize>
 		<Authors>Denys Pukhkyi</Authors>
 		<PackageProjectUrl>https://github.com/Overrided/Fb2.Document</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Overrided/Fb2.Document</RepositoryUrl>
