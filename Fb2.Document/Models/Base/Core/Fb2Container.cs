@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -26,7 +25,9 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
         /// </summary>
-        public ImmutableList<Fb2Node> Content => content == null ? ImmutableList<Fb2Node>.Empty : content.ToImmutableList();
+        public ImmutableList<Fb2Node> Content => content == null || content.Count == 0 ?
+            ImmutableList<Fb2Node>.Empty :
+            content.ToImmutableList();
 
         /// <summary>
         /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
@@ -156,14 +157,12 @@ namespace Fb2.Document.Models.Base
             var actualContent = content;
             var otherContent = otherContainer.content;
 
-            var sameContent = (actualContent == null && otherContent == null) ||
+            var result = (actualContent == null && otherContent == null) ||
                               (actualContent != null && otherContent != null &&
                               actualContent.Count == otherContent.Count &&
-                              actualContent.SequenceEqual(otherContent));
-
-            var result = sameContent &&
-                CanContainText == otherContainer.CanContainText &&
-                AllowedElements.SequenceEqual(otherContainer.AllowedElements);
+                              actualContent.SequenceEqual(otherContent)) &&
+                              CanContainText == otherContainer.CanContainText &&
+                              AllowedElements.SequenceEqual(otherContainer.AllowedElements);
 
             return result;
         }

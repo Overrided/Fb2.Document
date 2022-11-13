@@ -4,7 +4,6 @@ using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    // todo : override IsEmpty into checking attributes??
     public class SequenceInfo : Fb2Element
     {
         public override string Name => ElementNames.Sequence;
