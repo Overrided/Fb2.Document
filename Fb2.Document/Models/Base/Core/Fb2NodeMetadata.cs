@@ -9,22 +9,24 @@ namespace Fb2.Document.Models.Base
     {
         public XNamespace? DefaultNamespace { get; }
 
-        public IEnumerable<XAttribute>? NamespaceDeclarations { get; }
+        public List<XAttribute>? NamespaceDeclarations { get; }
 
         public Fb2NodeMetadata(
             XNamespace? defaultNamespace = null,
             IEnumerable<XAttribute>? namespaceDeclarations = null)
         {
-            if (defaultNamespace != null)
-                DefaultNamespace = defaultNamespace;
+            DefaultNamespace = defaultNamespace;
 
-            if (namespaceDeclarations != null && namespaceDeclarations.Any())
+            var namespaceDeclarationsArr = namespaceDeclarations?.ToArray();
+
+            if (namespaceDeclarationsArr != null && namespaceDeclarationsArr.Length != 0)
             {
                 var namespaceDeclarationsOnly = namespaceDeclarations.All(attr => attr.IsNamespaceDeclaration);
                 if (!namespaceDeclarationsOnly)
                     throw new ArgumentException($"{nameof(namespaceDeclarations)} should contain Namespace Declarations attributes only.");
 
-                NamespaceDeclarations = namespaceDeclarations;
+                NamespaceDeclarations = new List<XAttribute>(namespaceDeclarationsArr.Length);
+                NamespaceDeclarations.AddRange(namespaceDeclarationsArr);
             }
         }
     }

@@ -182,7 +182,10 @@ namespace Fb2.Document.Models.Base
             var container = base.Clone() as Fb2Container;
 
             if (!IsEmpty)
-                container!.content = new List<Fb2Node>(content!.Select(c => (Fb2Node)c.Clone()));
+            {
+                container!.content = new List<Fb2Node>(content!.Count);
+                container.content.AddRange(content!.Select(c => (Fb2Node)c.Clone()));
+            }
 
             container!.CanContainText = CanContainText;
 
