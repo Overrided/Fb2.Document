@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Tests", "Fb2.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document", "Fb2.Document\Fb2.Document.csproj", "{64E4C263-5F77-4920-88BA-937C2C59D48D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Document.Benchmark", "Fb2.Document.Benchmark\Fb2.Document.Benchmark.csproj", "{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
