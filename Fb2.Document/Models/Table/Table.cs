@@ -20,7 +20,7 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            if (IsEmpty)
+            if (!HasContent)
                 return string.Empty;
 
             // ommiting unsafe stuff etc

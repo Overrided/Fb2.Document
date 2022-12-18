@@ -30,7 +30,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any content.
         /// </summary>
-        public override bool IsEmpty => string.IsNullOrEmpty(content);
+        public override bool HasContent => !string.IsNullOrEmpty(content);
 
         /// <summary>
         /// Text node loading mechanism - formatting text and removal of unwanted characters.
@@ -113,7 +113,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current element.</returns>
         public virtual Fb2Element ClearContent()
         {
-            if (!IsEmpty)
+            if (HasContent)
                 content = string.Empty;
 
             return this;
@@ -130,7 +130,7 @@ namespace Fb2.Document.Models.Base
         public override XElement ToXml()
         {
             var element = base.ToXml();
-            if (!IsEmpty)
+            if (HasContent)
                 element.Value = content;
 
             return element;
@@ -167,9 +167,11 @@ namespace Fb2.Document.Models.Base
         public sealed override object Clone()
         {
             var element = base.Clone() as Fb2Element;
-            element!.content = new string(Content);
 
-            return element;
+            if (HasContent)
+                element!.content = new string(content);
+
+            return element!;
         }
     }
 }

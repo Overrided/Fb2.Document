@@ -10,7 +10,7 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.EmptyLine;
 
-        public override bool IsEmpty => true;
+        //public override bool HasContent => true;
 
         public EmptyLine() => content = Environment.NewLine;
 
@@ -22,7 +22,6 @@ namespace Fb2.Document.Models
             bool loadNamespaceMetadata = true)
         {
             base.Load(element, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-
             content = Environment.NewLine; // double-check, just in case
         }
 

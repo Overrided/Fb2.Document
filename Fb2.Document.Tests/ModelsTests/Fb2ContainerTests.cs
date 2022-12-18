@@ -714,9 +714,11 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             // setup 
             var paragraph = new Paragraph();
+            paragraph.HasContent.Should().BeFalse();
+
             paragraph.AddContent(new Strong().AddTextContent("strong text 1 "));
 
-            paragraph.IsEmpty.Should().BeFalse();
+            paragraph.HasContent.Should().BeTrue();
 
             paragraph
                 .AddContent(

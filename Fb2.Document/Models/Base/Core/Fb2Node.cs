@@ -33,12 +33,19 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any content.
         /// </summary>
-        public abstract bool IsEmpty { get; }
+        public abstract bool HasContent { get; }
 
         /// <summary>
         /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
         /// </summary>
-        public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
+        public ImmutableList<Fb2Attribute> Attributes => HasAttributes ?
+            attributes.ToImmutableList() :
+            ImmutableList<Fb2Attribute>.Empty;
+
+        /// <summary>
+        /// Indicates if element has any attributes.
+        /// </summary>
+        public bool HasAttributes => attributes.Any();
 
         /// <summary>
         /// List of allowed attribure names for particular element.
@@ -166,7 +173,7 @@ namespace Fb2.Document.Models.Base
             if (fb2Attribute == null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return false;
 
             var hasAttribute = attributes.Contains(fb2Attribute);
@@ -185,7 +192,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return false;
 
             return ignoreCase ?
@@ -373,7 +380,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return this;
 
             var attributesToDelete = attributes
@@ -397,7 +404,7 @@ namespace Fb2.Document.Models.Base
             if (attributePredicate == null)
                 throw new ArgumentNullException(nameof(attributePredicate));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return this;
 
             var attrsToRemove = attributes.Where(attributePredicate).ToList();
@@ -419,7 +426,7 @@ namespace Fb2.Document.Models.Base
             if (fb2Attribute == null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
-            if (attributes.Contains(fb2Attribute))
+            if (HasAttribute(fb2Attribute))
                 attributes.Remove(fb2Attribute);
 
             return this;
@@ -431,7 +438,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current node.</returns>
         public Fb2Node ClearAttributes()
         {
-            if (attributes.Any())
+            if (HasAttributes)
                 attributes.Clear();
 
             return this;
@@ -447,7 +454,7 @@ namespace Fb2.Document.Models.Base
             if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
                 result.AddRange(nodeNamespaceDeclarations);
 
-            if (attributes.Any()) // regular attributes
+            if (HasAttributes) // regular attributes
             {
                 var convertedAttributes = attributes.Select(attr =>
                 {
@@ -523,7 +530,7 @@ namespace Fb2.Document.Models.Base
             node.IsInline = IsInline;
             node.IsUnsafe = IsUnsafe;
 
-            if (attributes.Any())
+            if (HasAttributes)
                 node.attributes = new List<Fb2Attribute>(attributes);
 
             if (Parent != null)
