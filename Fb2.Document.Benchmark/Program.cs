@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
@@ -27,16 +28,37 @@ namespace Fb2.Document.Benchmark
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var currentFolder = Environment.CurrentDirectory;
-            var sampleFolderPath = Path.Combine(currentFolder, "Sample");
-            var sampleFilePath = Path.Combine(sampleFolderPath, "_Test_1.fb2");
+            var sampleFilePath = GetSampleFilePath();
             fb2FileContentStream = new FileStream(sampleFilePath, FileMode.Open);
+        }
+
+        private static string GetSampleFilePath()
+        {
+            var currentFolder = Environment.CurrentDirectory;
+            var pathChunks = currentFolder.Split(Path.DirectorySeparatorChar).ToList();
+            var pathChunksTopIndex = pathChunks.Count - 1;
+            for (int i = pathChunksTopIndex; i >= 0; i--)
+            {
+                var chunk = pathChunks[i];
+                if (chunk.Equals("Fb2.Document"))
+                {
+                    pathChunks.RemoveRange(i + 1, pathChunksTopIndex - i);
+                    break;
+                }
+            }
+
+            pathChunks.Add("Sample");
+            pathChunks.Add("_Test_1.fb2");
+
+            var sampleFilePath = Path.Combine(pathChunks.ToArray());
+            return sampleFilePath;
         }
 
         [IterationSetup]
         public void IterationSetup()
         {
-            fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
+            if (fb2FileContentStream!.Position != 0 && fb2FileContentStream!.CanSeek)
+                fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
         }
 
         [Benchmark]

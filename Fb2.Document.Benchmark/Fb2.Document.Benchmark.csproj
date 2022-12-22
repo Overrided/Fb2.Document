@@ -7,15 +7,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Sample\_Test_1.fb2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Sample\_Test_1.fb2">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
