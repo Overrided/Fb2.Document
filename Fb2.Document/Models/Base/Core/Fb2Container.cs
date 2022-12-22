@@ -80,8 +80,8 @@ namespace Fb2.Document.Models.Base
                         if (!isElement)
                             return false;
 
-                        var elementNode = n as XElement;
-                        var nodeLocalName = elementNode.Name.LocalName;
+                        var childNode = (XElement)n;
+                        var nodeLocalName = childNode.Name.LocalName;
                         return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
                                Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
                     })

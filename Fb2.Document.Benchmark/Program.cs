@@ -27,7 +27,10 @@ namespace Fb2.Document.Benchmark
         [GlobalSetup]
         public void GlobalSetup()
         {
-            fb2FileContentStream = new FileStream("D:\\Projects\\Fb2.Document.Bootstrap\\Samples\\Small\\_Test_1.fb2", FileMode.Open);
+            var currentFolder = Environment.CurrentDirectory;
+            var sampleFolderPath = Path.Combine(currentFolder, "Sample");
+            var sampleFilePath = Path.Combine(sampleFolderPath, "_Test_1.fb2");
+            fb2FileContentStream = new FileStream(sampleFilePath, FileMode.Open);
         }
 
         [IterationSetup]

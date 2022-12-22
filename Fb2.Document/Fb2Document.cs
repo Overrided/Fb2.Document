@@ -313,7 +313,7 @@ namespace Fb2.Document
             }
         }
 
-        private void Load([In] XElement root, Fb2LoadingOptions? loadingOptions = null)
+        private void Load([In] XElement? root, Fb2LoadingOptions? loadingOptions = null)
         {
             if (root == null)
                 throw new ArgumentNullException(nameof(root));
