@@ -6,5 +6,7 @@ namespace Fb2.Document.Models
     public class Lang : Fb2Element
     {
         public override string Name => ElementNames.Lang;
+
+        public override bool IsInline => false;
     }
 }
