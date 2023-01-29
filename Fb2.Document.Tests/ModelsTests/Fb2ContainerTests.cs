@@ -110,7 +110,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void Container_CantContainText_AddTextContent_Throws(Fb2Container node)
+        public async Task Container_CantContainText_AddTextContent_Throws(Fb2Container node)
         {
             node.Should().NotBeNull();
 
@@ -119,18 +119,33 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(new TextItem().AddContent("test text")))
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain 'text'.");
 
             node.Invoking(n => n.AddTextContent("test text"))
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
+
+            node.Invoking(n => n.AddTextContent(() => "test text"))
+                .Should()
+                .ThrowExactly<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
+
+            await node
+                .Invoking(async n => await n.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return "test text";
+                }))
+                .Should()
+                .ThrowExactlyAsync<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain 'text'.");
         }
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void Container_CanContainText_AddTextContent_Works(Fb2Container node)
+        public async Task Container_CanContainText_AddTextContent_Works(Fb2Container node)
         {
             node.Should().NotBeNull();
 
@@ -154,6 +169,26 @@ namespace Fb2.Document.Tests.ModelsTests
             (second as Fb2Element).Content.Should().Be("test text");
 
             ClearContainerContent(node);
+
+            node.AddTextContent(() => "test text");
+
+            node.Content.Count.Should().Be(1);
+            var third = node.Content.First();
+            third.Should().BeOfType(typeof(TextItem));
+            (third as Fb2Element).Content.Should().Be("test text");
+
+            ClearContainerContent(node);
+
+            await node.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return "test text";
+                });
+
+            node.Content.Count.Should().Be(1);
+            var forths = node.Content.First();
+            forths.Should().BeOfType(typeof(TextItem));
+            (forths as Fb2Element).Content.Should().Be("test text");
         }
 
         [Theory]
@@ -834,6 +869,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             node.ClearContent();
             node.Content.Should().BeEmpty();
+            node.HasContent.Should().BeFalse();
         }
     }
 }

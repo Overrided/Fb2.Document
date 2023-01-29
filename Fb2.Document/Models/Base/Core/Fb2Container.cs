@@ -246,7 +246,6 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        // TODO : add AddTextContentAsync method
         /// <summary>
         /// Appends plain text node to <see cref="Content"/>.
         /// </summary>
@@ -264,6 +263,49 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(newContent), $"{nameof(newContent)} is null or empty string.");
 
             return TryMergeTextContent(newContent, separator);
+        }
+
+        /// <summary>
+        /// Appends plain text node to <see cref="Content"/> using content provider function.
+        /// </summary>
+        /// <param name="contentProvider">Content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnexpectedNodeException"></exception>
+        public Fb2Container AddTextContent(Func<string> contentProvider, string? separator = null)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
+
+            if (!CanContainText)
+                throw new UnexpectedNodeException(Name, ElementNames.FictionText);
+
+            var newContent = contentProvider();
+
+            return AddTextContent(newContent, separator);
+        }
+
+        /// <summary>
+        /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
+        /// </summary>
+        /// <param name="contentProvider">Asynchronous content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns>Current container.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UnexpectedNodeException"></exception>
+        public async Task<Fb2Container> AddTextContentAsync(
+            Func<Task<string>> contentProvider, string? separator = null)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
+
+            if (!CanContainText)
+                throw new UnexpectedNodeException(Name, ElementNames.FictionText);
+
+            var newContent = await contentProvider();
+
+            return AddTextContent(newContent, separator);
         }
 
         /// <summary>

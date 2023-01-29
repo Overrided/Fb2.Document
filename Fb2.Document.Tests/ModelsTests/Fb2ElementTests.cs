@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
@@ -75,10 +76,14 @@ namespace Fb2.Document.Tests.ModelsTests
 
             fb2Element = fb2Element.AddContent("test content 1", "   "); // 3 whitespaces
             fb2Element.Content.Should().Be("   test content 1");
+            fb2Element.HasContent.Should().BeTrue();
 
             fb2Element.ClearContent();
+            fb2Element.HasContent.Should().BeFalse();
 
             fb2Element.AddContent("test content 1"); // no separator
+            fb2Element.HasContent.Should().BeTrue();
+
             fb2Element.Content.Should().Be("test content 1");
 
             fb2Element.AddContent("test content 2", "   ");
@@ -94,6 +99,52 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Be("test content 1   test content 2test content 3 _blah_ test   content 4");
 
             fb2Element.AddContent(() => $"test {Environment.NewLine} content 5", "  _blah_ ");
+            fb2Element
+                .Content
+                .Should()
+                .Be("test content 1   test content 2test content 3 _blah_ test   content 4  _blah_ test   content 5");
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public async Task Fb2Element_AddContent_FunctonProviders_Works(Fb2Element fb2Element)
+        {
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
+                return;
+
+            fb2Element = fb2Element.AddContent(() => "test content 1", "   "); // 3 whitespaces
+            fb2Element.Content.Should().Be("   test content 1");
+            fb2Element.HasContent.Should().BeTrue();
+
+            fb2Element.ClearContent();
+            fb2Element.HasContent.Should().BeFalse();
+
+            await fb2Element.AddContentAsync(async () =>
+            {
+                await Task.Delay(1);
+                return "test content 1";
+            }); // no separator
+            fb2Element.HasContent.Should().BeTrue();
+
+            fb2Element.Content.Should().Be("test content 1");
+
+            fb2Element.AddContent(() => "test content 2", "   ");
+            fb2Element.Content.Should().Be("test content 1   test content 2");
+
+            await fb2Element.AddContentAsync(() => Task.FromResult("test content 3")); // no separator
+            fb2Element.Content.Should().Be("test content 1   test content 2test content 3");
+
+            fb2Element.AddContent(() => $"test {Environment.NewLine} content 4", " _blah_ ");
+            fb2Element
+                .Content
+                .Should()
+                .Be("test content 1   test content 2test content 3 _blah_ test   content 4");
+
+            await fb2Element.AddContentAsync(async () =>
+            {
+                await Task.Delay(2);
+                return $"test {Environment.NewLine} content 5";
+            }, "  _blah_ ");
             fb2Element
                 .Content
                 .Should()

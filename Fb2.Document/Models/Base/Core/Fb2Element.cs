@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Exceptions;
@@ -77,6 +78,27 @@ namespace Fb2.Document.Models.Base
             var content = contentProvider();
 
             return AddContent(content, separator);
+        }
+
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
+        /// </summary>
+        /// <param name="contentProvider">Asynchronous content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns>Current element.</returns>
+        /// <remarks>
+        /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+        /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<Fb2Element> AddContentAsync(Func<Task<string>> contentProvider, string? separator = null)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
+
+            var newContent = await contentProvider();
+
+            return AddContent(newContent, separator);
         }
 
         /// <summary>

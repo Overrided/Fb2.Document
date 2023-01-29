@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Extensions
@@ -35,6 +36,24 @@ namespace Fb2.Document.Extensions
             this T fb2Element,
             Func<string> contentProvider,
             string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
+
+        /// <summary>
+        /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContentAsync(Func{Task{string}}, string?)"/> method.
+        /// <para> Appends new plain text to given <paramref name="fb2Element"/> using async <paramref name="contentProvider"/> function.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+        /// <param name="fb2Element">Fb2Element node to use extension on.</param>
+        /// <param name="contentProvider">Asynchronous content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
+        public static async Task<T> AppendContentAsync<T>(
+            this T fb2Element,
+            Func<Task<string>> contentProvider,
+            string? separator = null) where T : Fb2Element
+        {
+            var result = await fb2Element.AddContentAsync(contentProvider, separator);
+            return (T)result;
+        }
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Element.ClearContent()"/> method.
