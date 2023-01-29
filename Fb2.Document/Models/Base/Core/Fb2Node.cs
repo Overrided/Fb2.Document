@@ -19,7 +19,6 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        // backing field for `Attributes` property
         private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
 
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
@@ -38,9 +37,9 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
         /// </summary>
-        public ImmutableList<Fb2Attribute> Attributes => HasAttributes ?
-            attributes.ToImmutableList() :
-            ImmutableList<Fb2Attribute>.Empty;
+        public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ?
+            attributes.ToImmutableHashSet() :
+            ImmutableHashSet<Fb2Attribute>.Empty;
 
         /// <summary>
         /// Indicates if element has any attributes.
@@ -109,18 +108,19 @@ namespace Fb2.Document.Models.Base
             if (!AllowedAttributes.Any())
                 return;
 
-            var filteredAttributes = allAttributes
-                .Where(attr => AllowedAttributes.Contains(attr.Name.LocalName, StringComparer.InvariantCultureIgnoreCase))
-                .Select(attr =>
-                {
-                    var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                    return new Fb2Attribute(attr.Name.LocalName, attr.Value, attributeNamespace);
-                });
+            foreach (var allowedAttrName in AllowedAttributes)
+            {
+                var attr = allAttributes
+                    .FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(allowedAttrName));
 
-            if (!filteredAttributes.Any())
-                return;
+                if (attr == null)
+                    continue;
 
-            attributes.AddRange(filteredAttributes);
+                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+
+                attributes.Add(fb2Attribute);
+            }
         }
 
         /// <summary>

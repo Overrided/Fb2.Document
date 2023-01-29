@@ -52,6 +52,9 @@
             <id>0618f0d5-f9db-4036-a73c-61552da41254</id>
             <version>0.1</version>
         </document-info>
+        <custom-info>
+            Some test custom info here.
+        </custom-info>
     </description>
 
     <body>

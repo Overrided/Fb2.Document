@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
@@ -71,6 +72,39 @@ namespace Fb2.Document.Tests.ModelsTests
 
             paragTwo.AddAttribute(new Fb2Attribute(AttributeNames.Id, "testId"));
             paragOne.Should().Be(paragTwo);
+        }
+
+        [Fact]
+        public void Load_WithDublicateAttributes_Works()
+        {
+            var paragraphString = "<p id=\"p_1\" ID=\"p_2\" iD=\"p_3\" Id=\"p_3\" lang=\"ua\" Lang=\"ua1\" lAng=\"ua2\" laNg=\"ua3\" lanG=\"ua4\" LAng=\"ua5\">test text</p>";
+
+            var document = XDocument.Parse(paragraphString);
+            var xNode = document.FirstNode;
+
+            var paragraphNode = new Paragraph();
+            paragraphNode.Load(xNode!);
+
+            paragraphNode.HasContent.Should().BeTrue();
+            paragraphNode.Content.Count.Should().Be(1);
+
+            paragraphNode.HasAttributes.Should().BeTrue();
+            paragraphNode.Attributes.Should().HaveCount(2);
+            var idAttr = paragraphNode
+                .Attributes
+                .FirstOrDefault(a => a.Key.Equals(AttributeNames.Id));
+
+            idAttr.Should().NotBeNull();
+            idAttr!.Key.Should().Be(AttributeNames.Id);
+            idAttr!.Value.Should().Be("p_1");
+
+            var langAttr = paragraphNode
+                .Attributes
+                .FirstOrDefault(a => a.Key.Equals(AttributeNames.Language));
+
+            langAttr.Should().NotBeNull();
+            langAttr!.Key.Should().Be(AttributeNames.Language);
+            langAttr!.Value.Should().Be("ua");
         }
 
         [Theory]
@@ -293,7 +327,7 @@ namespace Fb2.Document.Tests.ModelsTests
             //attributes.Should().HaveCount(1).And.ContainKey(firstAlowedAttributeName);
             //attributes[firstAlowedAttributeName].Should().Be("testValue");
             attributes.Should().HaveCount(1).And.Contain((attr) => attr.Key == firstAlowedAttributeName);
-            attributes[0].Value.Should().Be("testValue");
+            attributes.First().Value.Should().Be("testValue");
         }
 
         [Theory]
