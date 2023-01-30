@@ -52,7 +52,7 @@ jobs:
         with:
           reports: "**/TestResults/**/*.xml"
           targetdir: "coveragereport"
-          reporttypes: "Html_Dark"
+          reporttypes: "Html"
           verbosity: "Info"
           tag: '${{ github.run_number }}_${{ github.run_id }}'
           toolpath: "reportgeneratortool"
