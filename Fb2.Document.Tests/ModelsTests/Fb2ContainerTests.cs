@@ -417,7 +417,7 @@ namespace Fb2.Document.Tests.ModelsTests
             ClearContainerContent(node);
 
             //string name
-            node.AddContent(node.AllowedElements.First());
+            node.AddContent(allowedElementName);
 
             node.Content.Should().HaveCount(1);
         }

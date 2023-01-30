@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document", "Fb2.Documen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Benchmark", "Fb2.Document.Benchmark\Fb2.Document.Benchmark.csproj", "{AD05D2B0-DAAD-4521-86B6-9310E801C4F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Document.Playground", "Fb2.Document.Playground\Fb2.Document.Playground.csproj", "{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Playground", "Fb2.Document.Playground\Fb2.Document.Playground.csproj", "{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

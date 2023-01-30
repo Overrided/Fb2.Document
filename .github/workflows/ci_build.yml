@@ -52,8 +52,9 @@ jobs:
         with:
           reports: "**/TestResults/**/*.xml"
           targetdir: "coveragereport"
-          reporttypes: "HtmlSummary"
+          reporttypes: "Html_Dark"
           verbosity: "Info"
+          tag: '${{ github.run_number }}_${{ github.run_id }}'
           toolpath: "reportgeneratortool"
 
       - name: Upload coverage report artifact
