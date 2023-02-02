@@ -260,7 +260,7 @@ namespace Fb2.Document.Models.Base
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
             if (string.IsNullOrEmpty(newContent))
-                throw new ArgumentNullException(nameof(newContent), $"{nameof(newContent)} is null or empty string.");
+                throw new ArgumentNullException(nameof(newContent));
 
             return TryMergeTextContent(newContent, separator);
         }

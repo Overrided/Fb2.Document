@@ -145,6 +145,38 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
+        public async Task Container_CanContainText_AddTextContent_NullContent_Throws(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.Invoking(n => n.AddContent(new TextItem().AddContent((string)null)))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.AddTextContent((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.AddTextContent(() => null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            await node
+                .Invoking(async n => await n.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return null;
+                }))
+                .Should()
+                .ThrowExactlyAsync<ArgumentNullException>();
+        }
+
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
         public async Task Container_CanContainText_AddTextContent_Works(Fb2Container node)
         {
             node.Should().NotBeNull();
