@@ -897,6 +897,52 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Subject.Content.Should().Be("bold strikethrough text ");
         }
 
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void EmptyContainer_ToString_ReturnsEmptyString(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+            var toString = node.ToString();
+            toString.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void NotEmptyContainer_ToString_ReturnsValue()
+        {
+            var paragraph = new Paragraph();
+            paragraph.AddTextContent("Test text ");
+            paragraph.AddContent(new Strong().AddTextContent("and strong text"));
+
+            var toString = paragraph.ToString();
+
+            toString.Should().NotBeNullOrEmpty();
+            toString.Should().NotBeNullOrWhiteSpace();
+
+            toString.Should().Be("Test text and strong text");
+        }
+
+        [Fact]
+        public void NotEmptyContainer_NotInlineChildren_ToString_ReturnsValue()
+        {
+            var bodySection = new BodySection();
+
+            var paragraph1 = new Paragraph();
+            paragraph1.AddTextContent("Test text paragraph 1 ");
+            paragraph1.AddContent(new Strong().AddTextContent("and strong text 1."));
+
+            var paragraph2 = new Paragraph();
+            paragraph2.AddTextContent("Test text paragraph 2 ");
+            paragraph2.AddContent(new Strong().AddTextContent("and strong text 2."));
+
+            bodySection.AddContent(paragraph1, paragraph2);
+
+            var toString = bodySection.ToString();
+            toString.Should().NotBeNullOrEmpty();
+            toString.Should().NotBeNullOrWhiteSpace();
+
+            toString.Should().Be($"{Environment.NewLine}Test text paragraph 1 and strong text 1.{Environment.NewLine}Test text paragraph 2 and strong text 2.");
+        }
+
         private static void ClearContainerContent(Fb2Container node)
         {
             node.ClearContent();
