@@ -525,21 +525,33 @@ namespace Fb2.Document.Models.Base
         /// <returns>New instance of given <see cref="Fb2Node"/>.</returns>
         public virtual object Clone()
         {
-            var node = Fb2NodeFactory.GetNodeByName(Name);
-
-            node.IsInline = IsInline;
-            node.IsUnsafe = IsUnsafe;
-
-            if (HasAttributes)
-                node.attributes = new List<Fb2Attribute>(attributes);
+            var cloneNode = CloneNodeInternal(this);
 
             if (Parent != null)
-                node.Parent = (Fb2Container)Parent.Clone();
+            {
+                var cloneParentNode = CloneNodeInternal(Parent);
+                cloneNode.Parent = (Fb2Container)cloneParentNode;
+            }
 
-            if (NodeMetadata != null)
-                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata.DefaultNamespace, NodeMetadata.NamespaceDeclarations);
+            return cloneNode;
+        }
 
-            return node;
+        private Fb2Node CloneNodeInternal(Fb2Node node)
+        {
+            var cloneNode = Fb2NodeFactory.GetNodeByName(node.Name);
+
+            cloneNode.IsInline = node.IsInline;
+            cloneNode.IsUnsafe = node.IsUnsafe;
+
+            if (node.HasAttributes)
+                cloneNode.attributes = node.attributes
+                    .Select(a => new Fb2Attribute(a.Key, a.Value, a.NamespaceName))
+                    .ToList();
+
+            if (node.NodeMetadata != null)
+                cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata.DefaultNamespace, node.NodeMetadata.NamespaceDeclarations);
+
+            return cloneNode;
         }
     }
 }

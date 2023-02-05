@@ -774,6 +774,66 @@ namespace Fb2.Document.Tests.ModelsTests
             resultBookBody.Should().BeNull();
         }
 
+        [Fact]
+        public void Container_QueryDescendants_Works()
+        {
+            var section = new BodySection();
+
+            var paragraph = new Paragraph();
+            var plainText1 = new TextItem().AddContent("plain text 1 ");
+            var strong = new Strong().AddTextContent("strong content ");
+            var plainText2 = new TextItem().AddContent("plain text 2");
+
+            paragraph.AddContent(plainText1, strong, plainText2);
+
+            section.AddContent(paragraph);
+
+            var queryByNameResult = section.GetDescendants(ElementNames.Strong);
+            var queryByTypeResult = section.GetDescendants<Strong>();
+            var queryByPredicateResult = section.GetDescendants((n) => n is Strong);
+
+            queryByNameResult.Should().HaveCount(1);
+            queryByNameResult.Should().HaveSameCount(queryByTypeResult);
+            queryByPredicateResult.Should().HaveSameCount(queryByNameResult);
+
+            var firstQueryByNameResult = queryByNameResult.First();
+            var firstQueryByTypeResult = queryByTypeResult.First();
+            var firstQueryByPredicateResult = queryByPredicateResult.First();
+
+            firstQueryByNameResult.Should().Be(firstQueryByTypeResult);
+            firstQueryByPredicateResult.Should().Be(firstQueryByNameResult);
+            firstQueryByNameResult.Should().BeOfType<Strong>();
+            firstQueryByNameResult.Name.Should().Be(ElementNames.Strong);
+
+            firstQueryByNameResult.HasContent.Should().BeTrue();
+            firstQueryByTypeResult.Content.Should().HaveCount(1);
+            firstQueryByTypeResult.Content.First().Should().BeOfType<TextItem>();
+            (firstQueryByTypeResult.Content.First() as TextItem)!.Content.Should().Be("strong content ");
+
+            var singularResultByName = section.GetFirstDescendant(ElementNames.Strong);
+            var singularResultByType = section.GetFirstDescendant<Strong>();
+            var singularResultByPredicate = section.GetFirstDescendant((n) => n is Strong);
+
+            singularResultByName.Should().NotBeNull();
+            singularResultByType.Should().NotBeNull();
+            singularResultByPredicate.Should().NotBeNull();
+
+            singularResultByName.Should().Be(singularResultByType);
+            singularResultByPredicate.Should().Be(singularResultByName);
+
+            singularResultByName!.Name.Should().Be(ElementNames.Strong);
+            singularResultByName!.Should().BeOfType<Strong>();
+
+            singularResultByName.HasContent.Should().BeTrue();
+
+            singularResultByType!.Content.Should().HaveCount(1);
+            var singularResultByTypeChild = singularResultByType.Content.First();
+            singularResultByTypeChild.Should().NotBeNull();
+            singularResultByTypeChild.Should().BeOfType<TextItem>();
+
+            (singularResultByTypeChild as TextItem)!.Content.Should().Be("strong content ");
+        }
+
         // it's a bit complex to run tests for each model
         // so in those lazy tests Paragraph is used as parent element
         [Fact]
@@ -941,6 +1001,23 @@ namespace Fb2.Document.Tests.ModelsTests
             toString.Should().NotBeNullOrWhiteSpace();
 
             toString.Should().Be($"{Environment.NewLine}Test text paragraph 1 and strong text 1.{Environment.NewLine}Test text paragraph 2 and strong text 2.");
+        }
+
+        [Fact]
+        public void CloneContainer_HasContent_ClonesContent()
+        {
+            var paragraph1 = new Paragraph();
+            paragraph1.AddTextContent("Test text paragraph 1 ");
+            paragraph1.AddContent(new Strong().AddTextContent("and strong text 1."));
+            paragraph1.HasContent.Should().BeTrue();
+            paragraph1.Content.Should().HaveCount(2);
+
+            var paragraph2 = paragraph1.Clone();
+
+            paragraph2.Should().Be(paragraph1);
+            paragraph2.Should().BeOfType<Paragraph>();
+            (paragraph2 as Fb2Container)!.HasContent.Should().BeTrue();
+            (paragraph2 as Fb2Container)!.Content.Should().HaveCount(2);
         }
 
         private static void ClearContainerContent(Fb2Container node)

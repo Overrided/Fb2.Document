@@ -33,8 +33,10 @@ namespace Fb2.Document.Tests.ModelsTests
         [ClassData(typeof(Fb2NodeCollection))]
         public void CloneNode_EqualityTest(Fb2Node instance)
         {
-            var instanceTwo = Fb2NodeFactory.GetNodeByName(instance.Name);
-            instance.Should().Be(instanceTwo);
+            var instance2 = instance.Clone();
+            var instance3 = Fb2NodeFactory.GetNodeByName(instance.Name);
+            instance.Should().Be(instance2);
+            instance.Should().Be(instance3);
         }
 
         [Theory]

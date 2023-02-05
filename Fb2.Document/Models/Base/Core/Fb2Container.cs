@@ -187,14 +187,13 @@ namespace Fb2.Document.Models.Base
         /// <returns>New instance of given <see cref="Fb2Container"/>.</returns>
         public sealed override object Clone()
         {
-            var container = base.Clone() as Fb2Container;
+            var clone = base.Clone() as Fb2Container;
+            clone!.CanContainText = CanContainText;
 
             if (HasContent)
-                container!.content = new List<Fb2Node>(content.Select(c => (Fb2Node)c.Clone()));
+                clone!.content = content.Select(c => (Fb2Node)c.Clone()).ToList();
 
-            container!.CanContainText = CanContainText;
-
-            return container;
+            return clone;
         }
 
         #region Content editing
