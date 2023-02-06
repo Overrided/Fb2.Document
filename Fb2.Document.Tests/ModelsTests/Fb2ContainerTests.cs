@@ -1018,6 +1018,21 @@ namespace Fb2.Document.Tests.ModelsTests
             paragraph2.Should().BeOfType<Paragraph>();
             (paragraph2 as Fb2Container)!.HasContent.Should().BeTrue();
             (paragraph2 as Fb2Container)!.Content.Should().HaveCount(2);
+
+            var strong1 = paragraph1.Content.Last() as Fb2Container;
+            strong1.Should().NotBeNull();
+            strong1!.Name.Should().Be(ElementNames.Strong);
+            strong1.Parent.Should().NotBeNull().And.Be(paragraph1);
+
+            strong1.HasContent.Should().BeTrue();
+            strong1.Content.Should().HaveCount(1);
+
+            var strong1Clone = strong1.Clone() as Fb2Container;
+            strong1Clone.Should().NotBeNull();
+            strong1Clone!.Parent.Should().BeNull();
+
+            strong1Clone.HasContent.Should().BeTrue();
+            strong1Clone.Content.Should().HaveCount(1);
         }
 
         private static void ClearContainerContent(Fb2Container node)
