@@ -191,7 +191,10 @@ namespace Fb2.Document.Models.Base
             clone!.CanContainText = CanContainText;
 
             if (HasContent)
-                clone!.content = content.Select(c => (Fb2Node)c.Clone()).ToList();
+            {
+                var clonedContent = content.Select(c => (Fb2Node)c.Clone()).ToList();
+                clone.AddContent(clonedContent);
+            }
 
             return clone;
         }

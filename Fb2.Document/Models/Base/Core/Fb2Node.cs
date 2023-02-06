@@ -527,16 +527,10 @@ namespace Fb2.Document.Models.Base
         {
             var cloneNode = CloneNodeInternal(this);
 
-            if (Parent != null)
-            {
-                var cloneParentNode = CloneNodeInternal(Parent);
-                cloneNode.Parent = (Fb2Container)cloneParentNode;
-            }
-
             return cloneNode;
         }
 
-        private Fb2Node CloneNodeInternal(Fb2Node node)
+        protected Fb2Node CloneNodeInternal(Fb2Node node)
         {
             var cloneNode = Fb2NodeFactory.GetNodeByName(node.Name);
 

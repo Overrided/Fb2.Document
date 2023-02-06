@@ -188,12 +188,12 @@ namespace Fb2.Document.Models.Base
         /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
         public sealed override object Clone()
         {
-            var element = base.Clone() as Fb2Element;
+            var clone = base.Clone() as Fb2Element;
 
             if (HasContent)
-                element!.content = new string(content);
+                clone!.content = new string(content);
 
-            return element!;
+            return clone!;
         }
     }
 }
