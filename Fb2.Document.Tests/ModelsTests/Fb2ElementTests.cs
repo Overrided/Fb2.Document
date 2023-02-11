@@ -22,7 +22,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
             fb2Element.Invoking(f => f.Load(null))
                 .Should()
-                .Throw<ArgumentNullException>();
+                .ThrowExactly<ArgumentNullException>();
         }
 
         [Theory]
@@ -65,6 +65,29 @@ namespace Fb2.Document.Tests.ModelsTests
             emptyLine.ClearContent();
 
             emptyLine.Content.Should().Be(Environment.NewLine);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ElementCollection))]
+        public async Task Fb2Element_AddNullOrEmpty_Content_Throws(Fb2Element fb2Element)
+        {
+            if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
+                return;
+
+            fb2Element
+                .Invoking(n => n.AddContent((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            fb2Element
+                .Invoking(n => n.AddContent((Func<string>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            await fb2Element
+                .Invoking(n => n.AddContentAsync(null))
+                .Should()
+                .ThrowExactlyAsync<ArgumentNullException>();
         }
 
         [Theory]

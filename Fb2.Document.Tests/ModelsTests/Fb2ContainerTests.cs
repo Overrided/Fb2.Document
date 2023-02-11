@@ -164,6 +164,14 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
+            node.Invoking(n => n.AddTextContent((Func<string>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            await node.Invoking(n => n.AddTextContentAsync(null))
+                 .Should()
+                 .ThrowExactlyAsync<ArgumentNullException>();
+
             await node
                 .Invoking(async n => await n.AddTextContentAsync(async () =>
                 {
@@ -173,7 +181,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
         }
-
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
