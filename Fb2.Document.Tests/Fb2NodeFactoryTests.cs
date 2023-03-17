@@ -12,6 +12,36 @@ namespace Fb2.Document.Tests
 {
     public class Fb2NodeFactoryTests
     {
+        [Theory()]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        public void IsKnownNodeName_NullOrEmptyName_Throws(string? nodeName)
+        {
+            Action act = () => { var node = Fb2NodeFactory.IsKnownNodeName(nodeName); };
+
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void IsKnownNode_NullNode_Throws()
+        {
+            Action act = () => { var node = Fb2NodeFactory.IsKnownNode(null); };
+
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Theory()]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        public void GetNodeByName_NullOrEmptyName_Throws(string? nodeName)
+        {
+            Action act = () => { var node = Fb2NodeFactory.GetNodeByName(nodeName); };
+
+            act.Should().Throw<ArgumentNullException>();
+        }
+
         [Fact]
         public void IsKnownNodeName_InvalidNodeName_ReturnsFalse()
         {
