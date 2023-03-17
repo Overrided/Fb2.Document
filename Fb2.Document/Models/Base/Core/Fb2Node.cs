@@ -102,6 +102,7 @@ namespace Fb2.Document.Models.Base
             {
                 var defaultNodeNamespace = element.GetDefaultNamespace();
                 var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
+
                 NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
             }
 
@@ -543,7 +544,7 @@ namespace Fb2.Document.Models.Base
                     .ToList();
 
             if (node.NodeMetadata != null)
-                cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata.DefaultNamespace, node.NodeMetadata.NamespaceDeclarations);
+                cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata);
 
             return cloneNode;
         }

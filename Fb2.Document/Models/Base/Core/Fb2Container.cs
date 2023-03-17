@@ -372,8 +372,8 @@ namespace Fb2.Document.Models.Base
                 return TryMergeTextContent((node as TextItem)!.Content);
 
             node.Parent = this;
-            if (node.NodeMetadata == null && NodeMetadata?.DefaultNamespace != null) // copy parent default namespace to prevent serialization issues
-                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata?.DefaultNamespace);
+            if (node.NodeMetadata == null && NodeMetadata != null) // copy parent default namespace to prevent serialization issues
+                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata);
 
             content.Add(node);
             return this;
