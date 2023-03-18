@@ -285,7 +285,6 @@ namespace Fb2.Document.Tests.ModelsTests
             var second = node.GetFirstChild<TextItem>()!;
             second.Should().NotBeNull();
             second.Content.Should().Be("test text test text 2 ");
-            //second.Parent.Should().NotBeNull();
             first.Content.Should().Be("test text test text 2 ");
 
             node.AddContent(node.AllowedElements.First());
@@ -719,8 +718,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            //result.Should().BeNull();
-
             node.Invoking(n => n.GetChildren(invalidNodeName))
                 .Should()
                 .ThrowExactly<InvalidNodeException>()
@@ -869,20 +866,20 @@ namespace Fb2.Document.Tests.ModelsTests
             paragraph.Content.Should().HaveCount(4);
 
             var firstStrong = paragraph.Content.First() as Strong;
-            firstStrong.Content.Should().HaveCount(1);
+            firstStrong!.Content.Should().HaveCount(1);
             firstStrong.Content.First().Should().BeOfType<TextItem>();
 
             var firstItalic = paragraph.Content[1] as Emphasis;
-            firstItalic.Content.Should().HaveCount(2);
+            firstItalic!.Content.Should().HaveCount(2);
             firstItalic.Content.First().Should().BeOfType<TextItem>();
             firstItalic.Content[1].Should().BeOfType<Strong>();
 
             var secondStrong = paragraph.Content[2] as Strong;
-            secondStrong.Content.Should().HaveCount(1);
+            secondStrong!.Content.Should().HaveCount(1);
             secondStrong.Content.First().Should().BeOfType<TextItem>();
 
             var plainText = paragraph.Content.Last() as TextItem;
-            plainText.Content.Should().Be("plain text 1");
+            plainText!.Content.Should().Be("plain text 1");
 
             // children query example
 
@@ -907,7 +904,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var plainGenericText = paragraph.GetFirstChild<TextItem>();
 
             plainTextByName.Should().NotBeNull();
-            (plainTextByName as Fb2Element).Content.Should().Be("plain text 1");
+            (plainTextByName as Fb2Element)!.Content.Should().Be("plain text 1");
             plainTextByName.Should().Be(plainPredicateText).And.Be(plainGenericText);
 
             // and to stress the obvios
