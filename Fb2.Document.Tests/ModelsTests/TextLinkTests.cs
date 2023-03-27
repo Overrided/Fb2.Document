@@ -2,9 +2,6 @@
 using Fb2.Document.Factories;
 using Fb2.Document.Models.Base;
 using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests
