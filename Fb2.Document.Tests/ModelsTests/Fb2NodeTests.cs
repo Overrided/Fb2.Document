@@ -77,7 +77,7 @@ namespace Fb2.Document.Tests.ModelsTests
         }
 
         [Fact]
-        public void Load_WithDublicateAttributes_Works()
+        public void Load_WithDuplicateAttributes_Works()
         {
             var paragraphString = "<p id=\"p_1\" ID=\"p_2\" iD=\"p_3\" Id=\"p_3\" lang=\"ua\" Lang=\"ua1\" lAng=\"ua2\" laNg=\"ua3\" lanG=\"ua4\" LAng=\"ua5\">test text</p>";
 
