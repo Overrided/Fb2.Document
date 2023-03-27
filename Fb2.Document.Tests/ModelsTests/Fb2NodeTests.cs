@@ -176,6 +176,11 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<ArgumentNullException>();
 
             instance
+                .Invoking(i => i.AddAttribute((Func<Fb2Attribute>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            instance
                 .Invoking(i => i.AddAttributeAsync(null))
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
@@ -425,6 +430,49 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo.RemoveAttribute(nameAttributePredicate);
             sequenceInfo.Attributes.Should().HaveCount(2).And.NotContain((attr) => attr.Key == AttributeNames.Name);
+        }
+
+        [Fact]
+        public void Fb2Node_HasAttributes_ClearAttribute_Works()
+        {
+            // setup
+            var sequenceInfo = new SequenceInfo();
+            sequenceInfo.AllowedAttributes.Should().HaveCount(3);
+            sequenceInfo.Attributes.Should().BeEmpty();
+            sequenceInfo.HasAttributes.Should().BeFalse();
+
+            sequenceInfo
+                .AddAttributes(
+                    new Fb2Attribute(AttributeNames.Name, "Test Sequence"),
+                    new Fb2Attribute(AttributeNames.Number, "1"))
+                .AddAttribute(() => new Fb2Attribute(AttributeNames.Language, "eng"));
+
+            sequenceInfo.HasAttributes.Should().BeTrue();
+            sequenceInfo.Attributes.Should().HaveCount(3);
+
+            sequenceInfo.ClearAttributes();
+            sequenceInfo.Attributes.Should().BeEmpty();
+            sequenceInfo.HasAttributes.Should().BeFalse();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void Fb2Node_HasAttribute_NullAttribute_Throws(Fb2Node instance)
+        {
+            instance.HasAttributes.Should().BeFalse();
+
+            if (instance.AllowedAttributes.Count == 0)
+                return;
+
+            instance
+                .Invoking(i => i.HasAttribute((Fb2Attribute)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            instance
+                .Invoking(i => i.HasAttribute((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
         }
 
         [Theory]
