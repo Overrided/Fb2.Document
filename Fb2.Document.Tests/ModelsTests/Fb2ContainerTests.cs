@@ -726,7 +726,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void EmpyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
+        public void EmptyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
         {
             var firstAllowedChildName = node.AllowedElements.First();
             bool firstAllowedChildPredicate(Fb2Node nodeToCompare) => nodeToCompare.Name.Equals(firstAllowedChildName);
@@ -746,7 +746,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void EmpyContainerNode_QueryDescendantNodes_ReturnsNullOrEmpty(Fb2Container node)
+        public void EmptyContainerNode_QueryDescendantNodes_ReturnsNullOrEmpty(Fb2Container node)
         {
             var firstAllowedChildName = node.AllowedElements.First();
             Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
@@ -836,6 +836,9 @@ namespace Fb2.Document.Tests.ModelsTests
             singularResultByTypeChild.Should().BeOfType<TextItem>();
 
             (singularResultByTypeChild as TextItem)!.Content.Should().Be("strong content ");
+
+            var abstractDescendantQuery = section.GetDescendants<Fb2Node>();
+            abstractDescendantQuery.Should().NotBeNullOrEmpty().And.HaveCount(5);
         }
 
         // it's a bit complex to run tests for each model

@@ -37,6 +37,29 @@ namespace Fb2.Document.Tests.IntegrationTests
         }
 
         [Fact]
+        public void Fb2Document_NotLoaded_ToXml_ReturnsNull()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+
+            doc.Book.Should().BeNull();
+
+            doc.ToXml().Should().BeNull();
+            doc.ToXmlString().Should().BeNull();
+        }
+
+
+        [Fact]
+        public void Fb2Document_NotLoaded_ToString_ReturnsNull()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+            doc.Book.Should().BeNull();
+
+            doc.ToString().Should().BeEmpty();
+        }
+
+        [Fact]
         public void Fb2Document_Loaded_MalformedContent_Throws()
         {
             var doc = new Fb2Document();
