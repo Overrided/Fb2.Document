@@ -55,6 +55,30 @@ namespace Fb2.Document.Tests.ModelsTests
             instanceTwo.Attributes.Should().NotBeEmpty().And.HaveCount(1);
         }
 
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void Clone_Node_WithAttributes_AndMetadata(Fb2Node instance)
+        {
+            if (instance.AllowedAttributes == null || !instance.AllowedAttributes.Any())
+                return;
+
+            instance.AddAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "testValue"));
+            instance.NodeMetadata = new Fb2NodeMetadata("default");
+
+            instance.HasAttributes.Should().BeTrue();
+            instance.Attributes.Should().HaveCount(1);
+            instance.NodeMetadata.Should().NotBeNull();
+
+            var instanceTwo = instance.Clone() as Fb2Node;
+
+            instanceTwo.Should().NotBeNull();
+            instanceTwo!.HasAttributes.Should().BeTrue();
+            instanceTwo.Attributes.Should().HaveCount(1);
+            instanceTwo.NodeMetadata.Should().NotBeNull();
+
+            instance.Should().Be(instanceTwo);
+        }
+
         [Fact]
         public void SimilarModifications_ElementsEquality()
         {
@@ -430,6 +454,32 @@ namespace Fb2.Document.Tests.ModelsTests
 
             sequenceInfo.RemoveAttribute(nameAttributePredicate);
             sequenceInfo.Attributes.Should().HaveCount(2).And.NotContain((attr) => attr.Key == AttributeNames.Name);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void Fb2Node_RemoveAttribute_InvalidAttribute_Fails(Fb2Node instance)
+        {
+            if (instance.AllowedAttributes.Count == 0)
+                return;
+
+            instance
+                .Invoking(i => i.RemoveAttribute((Fb2Attribute)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>()
+                .WithParameterName("fb2Attribute");
+
+            instance
+                .Invoking(i => i.RemoveAttribute((Func<Fb2Attribute, bool>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>()
+                .WithParameterName("attributePredicate");
+
+            instance
+                .Invoking(i => i.RemoveAttribute((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>()
+                .WithParameterName("key");
         }
 
         [Fact]
