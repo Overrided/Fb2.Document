@@ -21,5 +21,21 @@ namespace Fb2.Document.Tests.ModelsTests
 
             image.IsInline.Should().BeTrue();
         }
+
+        [Fact]
+        public void NoAttributes_ToString_ReturnsName()
+        {
+            var image = new Image();
+            image.HasAttributes.Should().BeFalse();
+
+            var stringWithoutHref = image.ToString();
+            stringWithoutHref.Should().NotBeNullOrWhiteSpace().And.Be(image.Name);
+
+            image.AddAttribute(AttributeNames.XHref, "testXHrefAttributeValue");
+            image.HasAttributes.Should().BeTrue();
+
+            var stringWithHref = image.ToString();
+            stringWithHref.Should().NotBeNullOrWhiteSpace().And.Be($"{image.Name} testXHrefAttributeValue");
+        }
     }
 }
