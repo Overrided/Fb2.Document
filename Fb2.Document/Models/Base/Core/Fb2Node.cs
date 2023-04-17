@@ -503,7 +503,10 @@ namespace Fb2.Document.Models.Base
                 AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
                 AreAttributesEqual(otherNode.attributes) &&
                 IsInline == otherNode.IsInline &&
-                IsUnsafe == otherNode.IsUnsafe;
+                IsUnsafe == otherNode.IsUnsafe &&
+                ((NodeMetadata == null && otherNode.NodeMetadata == null) ||
+                (NodeMetadata != null && otherNode.NodeMetadata != null &&
+                NodeMetadata.Equals(otherNode.NodeMetadata)));
 
             return result;
         }
@@ -527,7 +530,6 @@ namespace Fb2.Document.Models.Base
         public virtual object Clone()
         {
             var cloneNode = CloneNodeInternal(this);
-
             return cloneNode;
         }
 

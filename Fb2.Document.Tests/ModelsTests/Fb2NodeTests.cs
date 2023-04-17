@@ -63,7 +63,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance.AddAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "testValue"));
-            instance.NodeMetadata = new Fb2NodeMetadata("default");
+            instance.NodeMetadata = new Fb2NodeMetadata(XNamespace.Xml);
 
             instance.HasAttributes.Should().BeTrue();
             instance.Attributes.Should().HaveCount(1);

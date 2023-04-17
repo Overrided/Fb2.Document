@@ -260,6 +260,8 @@ namespace Fb2.Document.Tests.IntegrationTests
 
                 firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
                 secondDocument.Bodies.First().NodeMetadata.Should().BeNull();
+
+                firstDocument.Should().NotBe(secondDocument);
             }
         }
 

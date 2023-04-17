@@ -462,6 +462,24 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_WithMetadata_AddContent_AllowedElement_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+            var allowedElementName = node.AllowedElements.First();
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(allowedElementName);
+
+            var testMetadata = new Fb2NodeMetadata(XNamespace.Xml);
+            node.NodeMetadata = testMetadata;
+            node.AddContent(firstAllowedNode);
+
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
+            var first = node.Content.First();
+            first.Should().NotBeNull();
+            first.NodeMetadata.Should().NotBeNull().And.Be(testMetadata);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
         public void Container_RemoveContent_NullNode_Throws(Fb2Container node)
         {
             var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());

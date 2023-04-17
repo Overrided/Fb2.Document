@@ -40,5 +40,66 @@ namespace Fb2.Document.Models.Base
                 new List<XAttribute>(other.NamespaceDeclarations) :
                 null;
         }
+
+        // maybe later
+        //public static bool operator ==(Fb2NodeMetadata? left, Fb2NodeMetadata? right)
+        //{
+        //    // cant use == here lol
+        //    var bothAreNull = left is null && right is null;
+        //    var bothAreNotNull = !(left is null) && !(right is null);
+
+        //    if (!bothAreNull && !bothAreNotNull) // one is null other one is not
+        //        return false;
+
+        //    if (bothAreNull)
+        //        return true;
+
+        //    if (bothAreNotNull)
+        //        return left!.Equals(right!);
+
+        //    return false;
+        //}
+
+        //public static bool operator !=(Fb2NodeMetadata? left, Fb2NodeMetadata? right)
+        //{
+        //    return !(left == right);
+        //}
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (!(obj is Fb2NodeMetadata otherMetadata))
+                return false;
+
+            if (ReferenceEquals(this, otherMetadata))
+                return true;
+
+            if (DefaultNamespace == null &&
+                NamespaceDeclarations == null &&
+                otherMetadata.DefaultNamespace == null &&
+                otherMetadata.NamespaceDeclarations == null)
+                return true;
+
+            var defaultNamespaceAreEqual = otherMetadata.DefaultNamespace == DefaultNamespace;
+            if (!defaultNamespaceAreEqual)
+                return false;
+
+            var namespaceDeclarationsAreEqual =
+                NamespaceDeclarations == null && otherMetadata.NamespaceDeclarations == null ||
+                (NamespaceDeclarations?.Count == otherMetadata.NamespaceDeclarations?.Count &&
+                NamespaceDeclarations != null && otherMetadata.NamespaceDeclarations != null &&
+                NamespaceDeclarations.All(nd =>
+                    otherMetadata.NamespaceDeclarations!.Any(nd2 =>
+                        nd2.IsNamespaceDeclaration == nd.IsNamespaceDeclaration &&
+                        nd2.Name == nd.Name &&
+                        nd2.Value.Equals(nd.Value)
+                )));
+
+            return namespaceDeclarationsAreEqual;
+        }
+
+        public override int GetHashCode() => HashCode.Combine(DefaultNamespace, NamespaceDeclarations);
     }
 }

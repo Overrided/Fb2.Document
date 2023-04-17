@@ -42,14 +42,109 @@ namespace Fb2.Document.Tests
             act.Should().NotThrow();
         }
 
-
         [Fact]
-        public void Fb2MetadataCopyContructor_Works()
+        public void Fb2MetadataCopyConstructor_Works()
         {
             var originalMetadata = new Fb2NodeMetadata(XNamespace.Xml);
             var metadataClone = new Fb2NodeMetadata(originalMetadata);
 
             metadataClone.DefaultNamespace.Should().Be(XNamespace.Xml);
+        }
+
+        [Fact]
+        public void Fb2Metadata_EqualNodes_Test()
+        {
+            var emptyMetadata = new Fb2NodeMetadata();
+            var emptyMetadataClone = new Fb2NodeMetadata();
+
+            emptyMetadata.Should().Be(emptyMetadataClone);
+
+            var metadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xmlns);
+            var metadataWithNamespaceOnlyClone = new Fb2NodeMetadata(XNamespace.Xmlns);
+
+            metadataWithNamespaceOnly.Should().Be(metadataWithNamespaceOnlyClone);
+
+            var metadataWithNamespaceAttributesOnly =
+                new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            var metadataWithNamespaceAttributesOnlyClone =
+                new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            metadataWithNamespaceAttributesOnly.Should().Be(metadataWithNamespaceAttributesOnlyClone);
+
+            var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            fullMetadata.Should().Be(fullMetadata); // Reference equals
+
+            var fullMetadataClone = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            fullMetadata.Should().Be(fullMetadataClone);
+        }
+
+        [Fact]
+        public void Fb2Metadata_NotEqualNodes_Test()
+        {
+            var emptyMetadata = new Fb2NodeMetadata();
+
+            var metadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xmlns);
+
+            var metadataWithNamespaceAttributesOnly =
+                new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            var fullMetadataWithDifferentNamespace = new Fb2NodeMetadata(XNamespace.Xmlns, new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            emptyMetadata.Should()
+                .NotBe(metadataWithNamespaceOnly)
+                .And.NotBe(metadataWithNamespaceAttributesOnly)
+                .And.NotBe(fullMetadata)
+                .And.NotBe(fullMetadataWithDifferentNamespace);
+
+            metadataWithNamespaceOnly.Should()
+                .NotBe(emptyMetadata)
+                .And.NotBe(metadataWithNamespaceAttributesOnly)
+                .And.NotBe(fullMetadata)
+                .And.NotBe(fullMetadataWithDifferentNamespace);
+
+            metadataWithNamespaceAttributesOnly.Should()
+                .NotBe(metadataWithNamespaceOnly)
+                .And.NotBe(emptyMetadata)
+                .And.NotBe(fullMetadata)
+                .And.NotBe(fullMetadataWithDifferentNamespace);
+
+            fullMetadata.Should()
+                .NotBe(metadataWithNamespaceOnly)
+                .And.NotBe(metadataWithNamespaceAttributesOnly)
+                .And.NotBe(emptyMetadata)
+                .And.NotBe(fullMetadataWithDifferentNamespace);
+
+            fullMetadataWithDifferentNamespace.Should()
+                .NotBe(metadataWithNamespaceOnly)
+                .And.NotBe(metadataWithNamespaceAttributesOnly)
+                .And.NotBe(fullMetadata)
+                .And.NotBe(emptyMetadata);
         }
 
         [Fact]
@@ -59,7 +154,8 @@ namespace Fb2.Document.Tests
             Action action = () =>
             {
                 var metadata = new Fb2NodeMetadata(
-                    namespaceDeclarations: new List<XAttribute> { attr });
+                    XNamespace.Xml,
+                    new List<XAttribute> { attr });
             };
             action
                 .Should()
