@@ -111,7 +111,7 @@ namespace Fb2.Document.Tests
         {
             var emptyMetadata = new Fb2NodeMetadata();
 
-            emptyMetadata.Should().NotBe(null);
+            emptyMetadata.Equals(null).Should().BeFalse();
             emptyMetadata.Should().NotBe(new object());
 
             var metadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xmlns);

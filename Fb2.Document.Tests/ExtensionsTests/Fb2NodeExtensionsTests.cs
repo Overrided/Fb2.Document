@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Fb2.Document.Constants;
 using Fb2.Document.Extensions;
@@ -75,6 +76,37 @@ namespace Fb2.Document.Tests.ExtensionsTests
             parag.EraseAttributes();
             parag.HasAttributes.Should().BeFalse();
             parag.Attributes.Should().BeEmpty();
+        }
+
+
+        [Fact]
+        public async Task DeleteAttributes_Works()
+        {
+            var parag = new Paragraph();
+            parag.HasAttributes.Should().BeFalse();
+            parag.Attributes.Should().BeEmpty();
+
+            parag.AppendAttributes(
+                new Fb2Attribute(AttributeNames.Id, "testId"),
+                new Fb2Attribute(AttributeNames.Language, "ua"));
+
+            parag.DeleteAttribute(AttributeNames.Id);
+
+            parag.Attributes.Should().HaveCount(1);
+
+            parag.DeleteAttribute(a => a.Key == AttributeNames.Language);
+
+            parag.Attributes.Should().BeEmpty();
+
+            var idAttribute = new Fb2Attribute(AttributeNames.Id, "testId1");
+            parag.AppendAttributes(
+                idAttribute,
+                new Fb2Attribute(AttributeNames.Language, "ua"));
+
+            parag.DeleteAttribute(idAttribute);
+
+            parag.Attributes.Should().HaveCount(1);
+            parag.Attributes.First().Key.Should().Be(AttributeNames.Language);
         }
     }
 }

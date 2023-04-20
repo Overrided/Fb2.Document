@@ -130,7 +130,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ElementCollection))]
-        public async Task Fb2Element_AddContent_FunctonProviders_Works(Fb2Element fb2Element)
+        public async Task Fb2Element_AddContent_FunctionProviders_Works(Fb2Element fb2Element)
         {
             if (fb2Element is EmptyLine || fb2Element is SequenceInfo)
                 return;
