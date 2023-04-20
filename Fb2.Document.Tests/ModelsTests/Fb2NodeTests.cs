@@ -27,6 +27,9 @@ namespace Fb2.Document.Tests.ModelsTests
             instanceTwo.Should().NotBe(null);
 
             instance.Should().Be(instanceTwo);
+
+            instance.Equals(null).Should().BeFalse();
+            instance.Equals(new object()).Should().BeFalse();
         }
 
         [Theory]
@@ -480,6 +483,30 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Should()
                 .ThrowExactly<ArgumentNullException>()
                 .WithParameterName("key");
+        }
+
+
+        [Theory]
+        [ClassData(typeof(Fb2NodeCollection))]
+        public void Fb2Node_EmptyNode_RemoveAttribute_Ignored(Fb2Node instance)
+        {
+            if (instance.AllowedAttributes.Count == 0)
+                return;
+
+            instance
+                .Invoking(i => i.RemoveAttribute(instance.AllowedAttributes.First()))
+                .Should()
+                .NotThrow();
+
+            instance
+                .Invoking(i => i.RemoveAttribute((a) => a.Key == instance.AllowedAttributes.First()))
+                .Should()
+                .NotThrow();
+
+            instance
+                .Invoking(i => i.RemoveAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "test")))
+                .Should()
+                .NotThrow();
         }
 
         [Fact]
