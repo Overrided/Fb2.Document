@@ -45,10 +45,23 @@ namespace Fb2.Document.Tests
         [Fact]
         public void Fb2MetadataCopyConstructor_Works()
         {
-            var originalMetadata = new Fb2NodeMetadata(XNamespace.Xml);
-            var metadataClone = new Fb2NodeMetadata(originalMetadata);
+            var originalMetadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xml);
+            var metadataCloneWithNamespaceOnly = new Fb2NodeMetadata(originalMetadataWithNamespaceOnly);
 
-            metadataClone.DefaultNamespace.Should().Be(XNamespace.Xml);
+            metadataCloneWithNamespaceOnly.DefaultNamespace.Should().Be(XNamespace.Xml);
+            metadataCloneWithNamespaceOnly.Should().Be(originalMetadataWithNamespaceOnly);
+
+            var fullMetadata = new Fb2NodeMetadata(
+                XNamespace.Xml,
+                new List<XAttribute>
+                {
+                    new XAttribute("xmlns", "www.fourthcoffee.com")
+                });
+
+            var fullMetadataClone = new Fb2NodeMetadata(fullMetadata);
+            fullMetadataClone.DefaultNamespace.Should().Be(XNamespace.Xml);
+            fullMetadataClone.NamespaceDeclarations.Should().HaveCount(1);
+            fullMetadataClone.Should().Be(fullMetadata);
         }
 
         [Fact]
@@ -97,6 +110,9 @@ namespace Fb2.Document.Tests
         public void Fb2Metadata_NotEqualNodes_Test()
         {
             var emptyMetadata = new Fb2NodeMetadata();
+
+            emptyMetadata.Should().NotBe(null);
+            emptyMetadata.Should().NotBe(new object());
 
             var metadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xmlns);
 
