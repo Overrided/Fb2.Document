@@ -66,6 +66,8 @@ namespace Fb2.Document.Tests.ModelsTests
             var attribute2 = new Fb2Attribute("1", "2");
 
             attribute1.Should().Be(attribute1);
+            attribute1.Equals(null).Should().BeFalse();
+            attribute1.Should().NotBeNull();
 
             attribute1.Should().Be(attribute2);
             attribute1.Should().BeEquivalentTo(attribute2);
