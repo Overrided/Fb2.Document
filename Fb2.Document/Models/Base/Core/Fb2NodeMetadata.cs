@@ -5,10 +5,19 @@ using System.Xml.Linq;
 
 namespace Fb2.Document.Models.Base
 {
+    /// <summary>
+    /// Represents data used for serializing Fb2Node to XML.
+    /// </summary>
     public class Fb2NodeMetadata
     {
+        /// <summary>
+        /// Default Namespace of original XNode.
+        /// </summary>
         public XNamespace? DefaultNamespace { get; private set; }
 
+        /// <summary>
+        /// Namespace Declaration attributes of original XNode.
+        /// </summary>
         public List<XAttribute>? NamespaceDeclarations { get; private set; }
 
         public Fb2NodeMetadata(
@@ -31,7 +40,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// copy-constructor
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="other">Metadata to copy</param>
         public Fb2NodeMetadata(Fb2NodeMetadata other)
         {
             DefaultNamespace = other.DefaultNamespace;
@@ -40,30 +49,6 @@ namespace Fb2.Document.Models.Base
                 new List<XAttribute>(other.NamespaceDeclarations) :
                 null;
         }
-
-        // maybe later
-        //public static bool operator ==(Fb2NodeMetadata? left, Fb2NodeMetadata? right)
-        //{
-        //    // cant use == here lol
-        //    var bothAreNull = left is null && right is null;
-        //    var bothAreNotNull = !(left is null) && !(right is null);
-
-        //    if (!bothAreNull && !bothAreNotNull) // one is null other one is not
-        //        return false;
-
-        //    if (bothAreNull)
-        //        return true;
-
-        //    if (bothAreNotNull)
-        //        return left!.Equals(right!);
-
-        //    return false;
-        //}
-
-        //public static bool operator !=(Fb2NodeMetadata? left, Fb2NodeMetadata? right)
-        //{
-        //    return !(left == right);
-        //}
 
         public override bool Equals(object? obj)
         {

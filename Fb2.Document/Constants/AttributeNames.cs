@@ -1,5 +1,8 @@
 ﻿namespace Fb2.Document.Constants
 {
+    /// <summary>
+    /// Contains all standard Fb2 attributes.
+    /// </summary>
     public class AttributeNames
     {
         public const string Name = "name";
