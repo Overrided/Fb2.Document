@@ -35,7 +35,7 @@ namespace Fb2.Document.Tests.ModelsTests
             tableString
                 .Should().NotBeNullOrEmpty()
                 .And
-                .Be("-------------\r\n|0.0|0.1|0.2|\r\n|---|---|---|\r\n|1.0|1.1|1.2|\r\n|---|---|---|\r\n|2.0|2.1|2.2|\r\n-------------\r\n");
+                .Be($"-------------{Environment.NewLine}|0.0|0.1|0.2|{Environment.NewLine}|---|---|---|{Environment.NewLine}|1.0|1.1|1.2|{Environment.NewLine}|---|---|---|{Environment.NewLine}|2.0|2.1|2.2|{Environment.NewLine}-------------{Environment.NewLine}");
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Fb2.Document.Tests.ModelsTests
             tableString
                 .Should().NotBeNullOrEmpty()
                 .And
-                .Be("---------------\r\n|0.0|  0.1.2  |\r\n|---|         |\r\n|1.0|         |\r\n|---|---------|\r\n|2.0| 2.1 |2.2|\r\n---------------\r\n");
+                .Be($"---------------{Environment.NewLine}|0.0|  0.1.2  |{Environment.NewLine}|---|         |{Environment.NewLine}|1.0|         |{Environment.NewLine}|---|---------|{Environment.NewLine}|2.0| 2.1 |2.2|{Environment.NewLine}---------------{Environment.NewLine}");
         }
 
     }
