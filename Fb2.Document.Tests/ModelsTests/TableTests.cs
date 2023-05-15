@@ -307,5 +307,62 @@ namespace Fb2.Document.Tests.ModelsTests
             var tableString = table.ToString();
             tableString.Should().BeEmpty();
         }
+
+        // --------------
+        // |    |0.1|0.2|
+        // |    |---|---|
+        // |    |1.0|1.1|
+        // |    |---|---|
+        // |0.0 |2.0|2.1|
+        // |    |---|---|
+        // |    |3.0|3.1|
+        // --------------
+        [Fact]
+        public void SimpleTable4x4_ToString()
+        {
+            var table = new Table();
+
+            // Generate table
+            for (int i = 0; i < 4; i++)
+            {
+                var tableRow = new TableRow();
+
+                if (i == 0)
+                {
+                    var firstCellWithSpans = new TableCell();
+                    firstCellWithSpans.AddTextContent("0.0");
+                    firstCellWithSpans.AddAttributes(
+                        new Fb2Attribute(AttributeNames.ColumnSpan, "2"),
+                        new Fb2Attribute(AttributeNames.RowSpan, "4"),
+                        new Fb2Attribute(AttributeNames.VerticalAlign, "Middle"));
+
+                    var secondCell = new TableCell();
+                    secondCell.AddTextContent($"{i}.1");
+
+                    var thirdCell = new TableCell();
+                    thirdCell.AddTextContent($"{i}.2");
+
+                    tableRow.AddContent(firstCellWithSpans, secondCell, thirdCell);
+                }
+                else
+                {
+                    for (int j = 0; j < 2; j++)
+                    {
+                        var cell = new TableCell();
+                        cell.AddTextContent($"{i}.{j}");
+                        tableRow.AddContent(cell);
+                    }
+                }
+
+                table.AddContent(tableRow);
+            }
+
+            var tableString = table.ToString();
+            tableString
+                .Should()
+                .NotBeNullOrWhiteSpace()
+                .And
+                .Be($"--------------{Environment.NewLine}|    |0.1|0.2|{Environment.NewLine}|    |---|---|{Environment.NewLine}|    |1.0|1.1|{Environment.NewLine}|    |---|---|{Environment.NewLine}|0.0 |2.0|2.1|{Environment.NewLine}|    |---|---|{Environment.NewLine}|    |3.0|3.1|{Environment.NewLine}--------------{Environment.NewLine}");
+        }
     }
 }
