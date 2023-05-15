@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests
@@ -266,6 +268,44 @@ namespace Fb2.Document.Tests.ModelsTests
                 .NotBeNullOrWhiteSpace()
                 .And
                 .Be($"-------------{Environment.NewLine}|0.0|0.1|0.2|{Environment.NewLine}|---|---|---|{Environment.NewLine}|1.0|1.1|1.2|{Environment.NewLine}|------------{Environment.NewLine}");
+        }
+
+        [Fact]
+        public void Table_ToString_IgnoresNotTableRows()
+        {
+            var table = new Table();
+
+            var cell1XElement = new XElement(ElementNames.TableCell, "1");
+            var cell2XElement = new XElement(ElementNames.TableCell, "2");
+            var tableRowXElement = new XElement(ElementNames.TableRow, cell1XElement, cell2XElement);
+
+            var unsafeParagraphXElement = new XElement(ElementNames.Paragraph, "test parag text.");
+
+            var tableXElement = new XElement(ElementNames.Table, tableRowXElement, unsafeParagraphXElement);
+
+            table.Load(tableXElement);
+
+            var tableString = table.ToString();
+            tableString
+                .Should()
+                .NotBeNullOrWhiteSpace()
+                .And
+                .Be($"-----{Environment.NewLine}|1|2|{Environment.NewLine}-----{Environment.NewLine}");
+        }
+
+        [Fact]
+        public void Table_WithoutRows_ToString_ReturnEmptyString()
+        {
+            var table = new Table();
+
+            var unsafeParagraphXElement = new XElement(ElementNames.Paragraph, "test parag text.");
+
+            var tableXElement = new XElement(ElementNames.Table, unsafeParagraphXElement);
+
+            table.Load(tableXElement);
+
+            var tableString = table.ToString();
+            tableString.Should().BeEmpty();
         }
     }
 }
