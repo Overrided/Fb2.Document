@@ -238,8 +238,11 @@ namespace Fb2.Document.Models
                     horizontalBorder.Append(cellString.HorizontalBorder);
                 }
 
-                rowStrings.AppendLine(rowString.ToString());
-                rowStrings.AppendLine(horizontalBorder.ToString());
+                if (rowString.Length > 1)
+                    rowStrings.AppendLine(rowString.ToString());
+
+                if (horizontalBorder.Length > 1)
+                    rowStrings.AppendLine(horizontalBorder.ToString());
             }
 
             return rowStrings.ToString();
@@ -253,7 +256,8 @@ namespace Fb2.Document.Models
                     .Skip(cell.RenderStartColumnIndex)
                     .Take(cell.ColSpan).ToList();
 
-                return allColumnCharWidths.Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
+                return allColumnCharWidths.
+                    Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
             }
 
             return columnCharWidths[colIndex];

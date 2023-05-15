@@ -232,5 +232,40 @@ namespace Fb2.Document.Tests.ModelsTests
                 .And
                 .Be($"-----------------{Environment.NewLine}| 0.0 |         |{Environment.NewLine}|-----|         |{Environment.NewLine}| 1.0 |    0.1.2|{Environment.NewLine}|---------------|{Environment.NewLine}|2.1.2      |2.0|{Environment.NewLine}|           |---|{Environment.NewLine}|           |3.0|{Environment.NewLine}-----------------{Environment.NewLine}");
         }
+
+        // -------------
+        // |0.0|0.1|0.2|
+        // |---|---|---|
+        // |1.0|1.1|1.2|
+        // |------------
+        [Fact]
+        public void Table_ToString_IgnoresEmptyRows()
+        {
+            var table = new Table();
+
+            for (int i = 0; i < 3; i++)
+            {
+                var tableRow = new TableRow();
+
+                if (i < 2)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        var cell = new TableCell();
+                        cell.AddTextContent($"{i}.{j}");
+                        tableRow.AddContent(cell);
+                    }
+                }
+
+                table.AddContent(tableRow);
+            }
+
+            var tableString = table.ToString();
+            tableString
+                .Should()
+                .NotBeNullOrWhiteSpace()
+                .And
+                .Be($"-------------{Environment.NewLine}|0.0|0.1|0.2|{Environment.NewLine}|---|---|---|{Environment.NewLine}|1.0|1.1|1.2|{Environment.NewLine}|------------{Environment.NewLine}");
+        }
     }
 }
