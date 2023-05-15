@@ -256,8 +256,9 @@ namespace Fb2.Document.Models
                     .Skip(cell.RenderStartColumnIndex)
                     .Take(cell.ColSpan).ToList();
 
-                return allColumnCharWidths.
-                    Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
+                return allColumnCharWidths
+                    .Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v)
+                    .Sum();
             }
 
             return columnCharWidths[colIndex];
