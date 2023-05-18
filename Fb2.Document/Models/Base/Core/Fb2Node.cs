@@ -343,7 +343,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="NoAttributesAllowedException"></exception>
-        /// <exception cref="UnexpectedAtrributeException"></exception>
+        /// <exception cref="UnexpectedAttributeException"></exception>
         public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
         {
             if (fb2Attribute == null)
@@ -355,7 +355,7 @@ namespace Fb2.Document.Models.Base
             var key = fb2Attribute.Key;
 
             if (!AllowedAttributes.Contains(key))
-                throw new UnexpectedAtrributeException(Name, key);
+                throw new UnexpectedAttributeException(Name, key);
 
             // update or insert
             if (TryGetAttribute(key, true, out var existingAttribute))

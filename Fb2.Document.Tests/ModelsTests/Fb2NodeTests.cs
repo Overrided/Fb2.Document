@@ -138,7 +138,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2NodeCollection))]
-        public void AddAttribute_NoAttributesAllowed_Throws(Fb2Node instance)
+        public async Task AddAttribute_NoAttributesAllowed_Throws(Fb2Node instance)
         {
             instance.Should().NotBe(null);
 
@@ -149,19 +149,28 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.")
+                .And.NodeName
+                .Should()
+                .Be(instance.Name);
 
             instance
                 .Invoking(i => i.AddAttribute(() => new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.")
+                .And.NodeName
+                .Should()
+                .Be(instance.Name);
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("testKey", "testValue")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.")
+                .And.NodeName
+                .Should()
+                .Be(instance.Name); ;
 
             instance
                 .Invoking(i => i.AddAttributes(
@@ -169,7 +178,10 @@ namespace Fb2.Document.Tests.ModelsTests
                     new Fb2Attribute("testKey2", "testValue2")))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.")
+                .And.NodeName
+                .Should()
+                .Be(instance.Name); ;
 
             instance
                 .Invoking(i => i.AddAttributes(
@@ -179,13 +191,19 @@ namespace Fb2.Document.Tests.ModelsTests
                     }))
                 .Should()
                 .ThrowExactly<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes.")
+                .And.NodeName
+                .Should()
+                .Be(instance.Name);
 
-            instance
+            (await instance
                 .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new Fb2Attribute("testKey", "testValue"))))
                 .Should()
                 .ThrowExactlyAsync<NoAttributesAllowedException>()
-                .WithMessage($"Node '{instance.Name}' has no allowed attributes.");
+                .WithMessage($"Node '{instance.Name}' has no allowed attributes."))
+                .And.NodeName
+                .Should()
+                .Be(instance.Name);
         }
 
         [Theory]
@@ -278,35 +296,38 @@ namespace Fb2.Document.Tests.ModelsTests
             if (!instance.AllowedAttributes.Any())
                 return;
 
-            instance // whitespace
+            var exc = instance // whitespace
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("  NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
+
+            exc.Which.NodeName.Should().Be(instance.Name);
+            exc.Which.AttributeName.Should().Be("  NotExistingKey");
 
             instance // whitespace
                 .Invoking(i => i.AddAttribute(new Fb2Attribute(" NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute('\t' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute(Environment.NewLine + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute('\n' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
 
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute('\r' + "NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
         }
 
         [Theory]
@@ -321,7 +342,7 @@ namespace Fb2.Document.Tests.ModelsTests
             instance
                 .Invoking(i => i.AddAttribute(new Fb2Attribute("NotExistingKey", "NotExistingValue")))
                 .Should()
-                .ThrowExactly<UnexpectedAtrributeException>();
+                .ThrowExactly<UnexpectedAttributeException>();
         }
 
         [Theory]
