@@ -216,30 +216,33 @@ namespace Fb2.Document.Tests.ExtensionTests
 
             var notAllowedNode = Fb2NodeFactory.GetNodeByName(notAllowedElementName);
 
-            node.Invoking(n => n.AppendContent(notAllowedNode.Name)) // string nodeName
+            var exc = node.Invoking(n => n.AppendContent(notAllowedNode.Name)) // string nodeName
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
+
+            exc.Which.ParentNodeName.Should().Be(node.Name);
+            exc.Which.ChildNodeName.Should().Be(notAllowedNode.Name);
 
             node.Invoking(n => n.AppendContent(notAllowedNode)) // Fb2Node 
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             // params Fb2Node[] nodes
             node.Invoking(n => n.AppendContent(notAllowedNode, notAllowedNode)) // lol
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AppendContent(() => notAllowedNode)) // Func<Fb2Node>
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             node.Invoking(n => n.AppendContent(new List<Fb2Node> { notAllowedNode })) // IEnumerable<Fb2Node>
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
             node.Invoking(async n =>
