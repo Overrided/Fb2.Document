@@ -265,7 +265,8 @@ namespace Fb2.Document.Tests.ModelsTests
                         new Fb2Attribute( "", "testValue" ) }
                     ))
                 .Should()
-                .ThrowExactly<InvalidAttributeException>();
+                .ThrowExactly<InvalidAttributeException>()
+                .And.AttributeKey.Should().Be("");
         }
 
         [Theory]

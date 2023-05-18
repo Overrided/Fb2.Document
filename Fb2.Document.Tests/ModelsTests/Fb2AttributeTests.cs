@@ -23,7 +23,10 @@ namespace Fb2.Document.Tests.ModelsTests
             action
                 .Should()
                 .ThrowExactly<InvalidAttributeException>()
-                .WithMessage("AttributeKey is null or empty string, or contains invalid characters.");
+                .WithMessage("AttributeKey is null or empty string, or contains invalid characters.")
+                .And.AttributeKey
+                .Should()
+                .Be(emptyKey);
         }
 
         [Fact]

@@ -82,29 +82,44 @@ namespace Fb2.Document.Tests.ExtensionTests
             node.Invoking(n => n.AppendContent(impostor)) // Fb2Node 
                .Should()
                .ThrowExactly<InvalidNodeException>()
-               .WithMessage($"'Impostor' is not known Fb2 node name.");
+               .WithMessage($"'Impostor' is not known Fb2 node name.")
+               .And.NodeName
+               .Should()
+               .Be(impostor.Name);
 
             node.Invoking(n => n.AppendContent(() => impostor)) // Func<Fb2Node>
                 .Should()
                 .ThrowExactly<InvalidNodeException>()
-                .WithMessage($"'{impostor.Name}' is not known Fb2 node name.");
+                .WithMessage($"'{impostor.Name}' is not known Fb2 node name.")
+                .And.NodeName
+                .Should()
+                .Be(impostor.Name);
 
             node.Invoking(n => n.AppendContent(impostor.Name)) // name
                .Should()
                .ThrowExactly<InvalidNodeException>()
-               .WithMessage($"'Impostor' is not known Fb2 node name.");
+               .WithMessage($"'Impostor' is not known Fb2 node name.")
+               .And.NodeName
+               .Should()
+               .Be(impostor.Name);
 
             var sneakyImpostor = new ImpostorNode(ElementNames.Paragraph);
 
             node.Invoking(n => n.AppendContent(sneakyImpostor)) // Fb2Node 
                .Should()
                .ThrowExactly<InvalidNodeException>()
-               .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.");
+               .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.")
+               .And.NodeName
+               .Should()
+               .Be(sneakyImpostor.Name);
 
             node.Invoking(n => n.AppendContent(() => sneakyImpostor)) // Func<Fb2Node>
                .Should()
                .ThrowExactly<InvalidNodeException>()
-               .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.");
+               .WithMessage($"'{sneakyImpostor.Name}' is not known Fb2 node name.")
+               .And.NodeName
+               .Should()
+               .Be(sneakyImpostor.Name);
         }
 
         [Theory]
