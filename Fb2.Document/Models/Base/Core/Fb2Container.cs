@@ -409,7 +409,6 @@ namespace Fb2.Document.Models.Base
 
             if (HasContent)
             {
-                //var nodesToRemove = content.Where(n => nodePredicate(n)).ToList();
                 var nodesToRemove = GetChildren(nodePredicate).ToList();
                 foreach (var node in nodesToRemove)
                     RemoveContent(node);
