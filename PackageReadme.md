@@ -5,7 +5,7 @@ Fb2.Document is lightweight, fast .Net 3.1/5/6/7 lib with bunch of APIs to opera
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
 
-Version `2.3.0` brings `net7.0` support alongside with bugfixes, new methods and improved test coverage.
+Version `2.3.0` brings `net7.0` support alongside with bugfixes, new `APIs` and improved test coverage.
 
 For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 
@@ -38,5 +38,5 @@ For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 * `Lang`, `SrcLang`:
     * `IsInline` property returns false now
 * `EmptyLine`:
-    * removed `IsEmpty` (`HasContent`) override. Now, `EmptyLine.HasContent` returns `true`. It's kinda counter-inuitive, but well, technicaly `Environment.NewLine` that's `content` of `EmptyLine` is not `null` or `empty` string )
+    * removed `HasContent` (`IsEmpty`) override. Now, `EmptyLine.HasContent` returns `true`. It's somewhat counter-intuitive, but well, technically `Environment.NewLine` that's `content` of `EmptyLine` is not `null` or `empty` string :)
 * Renamed `UnexpectedAtrributeException` to `UnexpectedAttributeException`
