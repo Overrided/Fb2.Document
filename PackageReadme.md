@@ -9,7 +9,7 @@ Version `2.3.0` brings `net7.0` support alongside with bugfixes, new `APIs` and 
 
 For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 
-## Solution updates
+## Solution changes
 
 * Added `net7.0` support.
 * Added `Fb2.Document.Benchmark`
