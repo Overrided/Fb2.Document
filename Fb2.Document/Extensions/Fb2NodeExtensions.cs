@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Extensions

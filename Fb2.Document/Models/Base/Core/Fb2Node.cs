@@ -19,7 +19,6 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        // backing field for `Attributes` property
         private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
 
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
@@ -33,12 +32,19 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any content.
         /// </summary>
-        public abstract bool IsEmpty { get; }
+        public abstract bool HasContent { get; }
 
         /// <summary>
         /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
         /// </summary>
-        public ImmutableList<Fb2Attribute> Attributes => attributes.ToImmutableList();
+        public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ?
+            attributes.ToImmutableHashSet() :
+            ImmutableHashSet<Fb2Attribute>.Empty;
+
+        /// <summary>
+        /// Indicates if element has any attributes.
+        /// </summary>
+        public bool HasAttributes => attributes.Any();
 
         /// <summary>
         /// List of allowed attribure names for particular element.
@@ -96,24 +102,26 @@ namespace Fb2.Document.Models.Base
             {
                 var defaultNodeNamespace = element.GetDefaultNamespace();
                 var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
+
                 NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
             }
 
             if (!AllowedAttributes.Any())
                 return;
 
-            var filteredAttributes = allAttributes
-                .Where(attr => AllowedAttributes.Contains(attr.Name.LocalName, StringComparer.InvariantCultureIgnoreCase))
-                .Select(attr =>
-                {
-                    var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                    return new Fb2Attribute(attr.Name.LocalName, attr.Value, attributeNamespace);
-                });
+            foreach (var allowedAttrName in AllowedAttributes)
+            {
+                var attr = allAttributes
+                    .FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(allowedAttrName));
 
-            if (!filteredAttributes.Any())
-                return;
+                if (attr == null)
+                    continue;
 
-            attributes.AddRange(filteredAttributes);
+                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+
+                attributes.Add(fb2Attribute);
+            }
         }
 
         /// <summary>
@@ -166,7 +174,7 @@ namespace Fb2.Document.Models.Base
             if (fb2Attribute == null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return false;
 
             var hasAttribute = attributes.Contains(fb2Attribute);
@@ -185,7 +193,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return false;
 
             return ignoreCase ?
@@ -335,7 +343,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="NoAttributesAllowedException"></exception>
-        /// <exception cref="UnexpectedAtrributeException"></exception>
+        /// <exception cref="UnexpectedAttributeException"></exception>
         public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
         {
             if (fb2Attribute == null)
@@ -347,7 +355,7 @@ namespace Fb2.Document.Models.Base
             var key = fb2Attribute.Key;
 
             if (!AllowedAttributes.Contains(key))
-                throw new UnexpectedAtrributeException(Name, key);
+                throw new UnexpectedAttributeException(Name, key);
 
             // update or insert
             if (TryGetAttribute(key, true, out var existingAttribute))
@@ -373,7 +381,7 @@ namespace Fb2.Document.Models.Base
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return this;
 
             var attributesToDelete = attributes
@@ -397,7 +405,7 @@ namespace Fb2.Document.Models.Base
             if (attributePredicate == null)
                 throw new ArgumentNullException(nameof(attributePredicate));
 
-            if (!attributes.Any())
+            if (!HasAttributes)
                 return this;
 
             var attrsToRemove = attributes.Where(attributePredicate).ToList();
@@ -419,7 +427,7 @@ namespace Fb2.Document.Models.Base
             if (fb2Attribute == null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
-            if (attributes.Contains(fb2Attribute))
+            if (HasAttribute(fb2Attribute))
                 attributes.Remove(fb2Attribute);
 
             return this;
@@ -431,7 +439,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current node.</returns>
         public Fb2Node ClearAttributes()
         {
-            if (attributes.Any())
+            if (HasAttributes)
                 attributes.Clear();
 
             return this;
@@ -447,7 +455,7 @@ namespace Fb2.Document.Models.Base
             if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
                 result.AddRange(nodeNamespaceDeclarations);
 
-            if (attributes.Any()) // regular attributes
+            if (HasAttributes) // regular attributes
             {
                 var convertedAttributes = attributes.Select(attr =>
                 {
@@ -495,7 +503,10 @@ namespace Fb2.Document.Models.Base
                 AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
                 AreAttributesEqual(otherNode.attributes) &&
                 IsInline == otherNode.IsInline &&
-                IsUnsafe == otherNode.IsUnsafe;
+                IsUnsafe == otherNode.IsUnsafe &&
+                ((NodeMetadata == null && otherNode.NodeMetadata == null) ||
+                (NodeMetadata != null && otherNode.NodeMetadata != null &&
+                NodeMetadata.Equals(otherNode.NodeMetadata)));
 
             return result;
         }
@@ -518,21 +529,26 @@ namespace Fb2.Document.Models.Base
         /// <returns>New instance of given <see cref="Fb2Node"/>.</returns>
         public virtual object Clone()
         {
-            var node = Fb2NodeFactory.GetNodeByName(Name);
+            var cloneNode = CloneNodeInternal(this);
+            return cloneNode;
+        }
 
-            node.IsInline = IsInline;
-            node.IsUnsafe = IsUnsafe;
+        protected Fb2Node CloneNodeInternal(Fb2Node node)
+        {
+            var cloneNode = Fb2NodeFactory.GetNodeByName(node.Name);
 
-            if (attributes.Any())
-                node.attributes = new List<Fb2Attribute>(attributes);
+            cloneNode.IsInline = node.IsInline;
+            cloneNode.IsUnsafe = node.IsUnsafe;
 
-            if (Parent != null)
-                node.Parent = (Fb2Container)Parent.Clone();
+            if (node.HasAttributes)
+                cloneNode.attributes = node.attributes
+                    .Select(a => new Fb2Attribute(a.Key, a.Value, a.NamespaceName))
+                    .ToList();
 
-            if (NodeMetadata != null)
-                node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata.DefaultNamespace, NodeMetadata.NamespaceDeclarations);
+            if (node.NodeMetadata != null)
+                cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata);
 
-            return node;
+            return cloneNode;
         }
     }
 }

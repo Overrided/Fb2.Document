@@ -26,5 +26,12 @@ namespace Fb2.Document.Tests.ModelsTests
 
             emptyLine.Content.Should().Be(Environment.NewLine);
         }
+
+        [Fact]
+        public void EmptyLine_HasContent_Returns_True()
+        {
+            var emptyLine = Fb2NodeFactory.GetNodeByName(ElementNames.EmptyLine) as Fb2Element;
+            emptyLine.HasContent.Should().BeTrue(); // funny, but Environment.Newline is not empty string ;)
+        }
     }
 }

@@ -61,6 +61,36 @@ namespace Fb2.Document.Extensions
             string? separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
 
         /// <summary>
+        /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContent(Func{string}, string?)"/> method.
+        /// <para> Adds new text node to given <paramref name="fb2Container"/> using content provider function.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+        /// <param name="fb2Container">Fb2Container node to use extension on.</param>
+        /// <param name="contentProvider">Content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
+        public static T AppendTextContent<T>(
+            this T fb2Container,
+            Func<string> contentProvider,
+            string? separator = null) where T : Fb2Container =>
+                (T)fb2Container.AddTextContent(contentProvider, separator);
+
+        /// <summary>
+        /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContentAsync(Func{Task{string}}, string?)"/> method.
+        /// <para> Adds new text node to given <paramref name="fb2Container"/> using async content provider function.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+        /// <param name="fb2Container">Fb2Container node to use extension on.</param>
+        /// <param name="contentProvider">Async content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
+        public static async Task<T> AppendTextContentAsync<T>(
+            this T fb2Container,
+            Func<Task<string>> contentProvider,
+            string? separator = null) where T : Fb2Container =>
+                (T)(await fb2Container.AddTextContentAsync(contentProvider, separator));
+
+        /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContent(IEnumerable{Fb2Node})"/> method.
         /// <para> Adds <paramref name="nodes"/> to given <paramref name="fb2Container"/>.</para>
         /// </summary>

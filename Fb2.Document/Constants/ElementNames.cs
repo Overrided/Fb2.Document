@@ -1,5 +1,8 @@
 ﻿namespace Fb2.Document.Constants
 {
+    /// <summary>
+    /// Contains all standard Fb2 element names.
+    /// </summary>
     public class ElementNames
     {
         public const string FictionBook = "fictionbook";

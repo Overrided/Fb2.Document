@@ -313,7 +313,7 @@ namespace Fb2.Document
             }
         }
 
-        private void Load([In] XElement root, Fb2LoadingOptions? loadingOptions = null)
+        private void Load([In] XElement? root, Fb2LoadingOptions? loadingOptions = null)
         {
             if (root == null)
                 throw new ArgumentNullException(nameof(root));
@@ -321,10 +321,10 @@ namespace Fb2.Document
             var options = loadingOptions ?? new Fb2LoadingOptions();
 
             var loadUnsafeElements = options.LoadUnsafeElements;
-            var loadNamespanceMetadata = options.LoadNamespaceMetadata;
+            var loadNamespaceMetadata = options.LoadNamespaceMetadata;
 
             Book = new FictionBook();
-            Book.Load(root, loadUnsafe: loadUnsafeElements, loadNamespaceMetadata: loadNamespanceMetadata);
+            Book.Load(root, loadUnsafe: loadUnsafeElements, loadNamespaceMetadata: loadNamespaceMetadata);
 
             IsLoaded = true;
         }

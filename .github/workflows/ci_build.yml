@@ -23,13 +23,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup .NET 3.1.x / 5.0.x / 6.0.x
+      - name: Setup .NET 3.1.x / 5.0.x / 6.0.x / 7.0.x
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: | 
             3.1.x
             5.0.x
             6.0.x
+            7.0.x
 
       - name: Build library
         run: dotnet build --configuration Release
@@ -51,8 +52,9 @@ jobs:
         with:
           reports: "**/TestResults/**/*.xml"
           targetdir: "coveragereport"
-          reporttypes: "HtmlSummary"
+          reporttypes: "Html"
           verbosity: "Info"
+          tag: '${{ github.run_number }}_${{ github.run_id }}'
           toolpath: "reportgeneratortool"
 
       - name: Upload coverage report artifact

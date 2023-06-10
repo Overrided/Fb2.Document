@@ -21,6 +21,6 @@ namespace Fb2.Document.Tests.Common
             protected set;
         }
 
-        public override bool IsEmpty => false;
+        public override bool HasContent => false;
     }
 }
