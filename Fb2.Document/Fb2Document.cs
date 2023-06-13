@@ -302,10 +302,10 @@ namespace Fb2.Document
             var options = loadingOptions ?? new Fb2LoadingOptions();
 
             var loadUnsafeElements = options.LoadUnsafeElements;
-            var loadNamespanceMetadata = options.LoadNamespaceMetadata;
+            var loadNamespaceMetadata = options.LoadNamespaceMetadata;
 
             Book = new FictionBook();
-            Book.Load(root, loadUnsafe: loadUnsafeElements, loadNamespaceMetadata: loadNamespanceMetadata);
+            Book.Load(root, loadUnsafe: loadUnsafeElements, loadNamespaceMetadata: loadNamespaceMetadata);
 
             IsLoaded = true;
         }

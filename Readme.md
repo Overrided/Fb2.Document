@@ -51,7 +51,7 @@ You can download and use Fb2Document package in your app via
 
 In fact, `fb2` file is just an `XML` with a set of custom nodes, attributes and data relations. However, validation of given `fb2` file against appropriate `xsd` scheme is not an option as there are LOTS of semi-valid `fb2` files in the wild.
 
-So, `xsd` scheme validation is ommited.
+So, `xsd` scheme validation is omitted.
 
 Library creates tree document model similar to what original file had, removing invalid nodes.
 
@@ -157,7 +157,7 @@ paragraph.Load(node);
 
 ## Encoding
 
-If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, cyrillic text, etc.
+If method is marked as "not encoding safe" - means content's original encoding is kept, which can cause text symbols rendering issues in case of running into an old encoding like `KOI-8`, Cyrillic text, etc.
 
 If method is encoding-safe - during loading process library will try to determine exact encoding of a document and re-encode content of a file info `UTF8`. If automatic encoding detection fails, .Net `Encoding.Default` is used.
 
@@ -169,7 +169,7 @@ All descendants of `Fb2Node` (itself included) class provide build-in methods to
 
 ### Query Fb2Element
 
-`Fb2Element` class desendants APIs allows to work with plain text content, `leaves` of the `fb2 DOM` tree. 
+`Fb2Element` class descendants APIs allows to work with plain text content, `leaves` of the `fb2 DOM` tree. 
 
 `Content` property of `Fb2Element` is get-only to prevent random and/or incorrect changes.
 
@@ -209,7 +209,7 @@ var firstImageInParagraphByType = paragraph.GetFirstChild<Image>();
 
 ### Query Fb2Container sub-tree
 
-`Descendant` node is contained either in `Content` propery of given element directly, or is contained further in `Fb2 DOM` sub-tree (indirect content).
+`Descendant` node is contained either in `Content` property of given element directly, or is contained further in `Fb2 DOM` sub-tree (indirect content).
 
 `Fb2Container` built-in APIs allow to search for descendants nodes:
 
@@ -254,13 +254,13 @@ if(hasCustomInfoByType)
 
 `Fb2Node` base class provides `Attributes` access and modifications methods.
 
-Lots of operations with `Fb2Document` - like searching / rendering / querying are heavily dependant on `Attributes`.
+Lots of operations with `Fb2Document` - like searching / rendering / querying are heavily dependent on `Attributes`.
 
 So there are few methods designed to simplify `Attributes` reading.
 
 For more details on methods for querying node attributes, see [Fb2Node.Methods](#Fb2Node-Methods).
 
-1) Check if `Fb2Node` has `Attribute` with patricular `Name` (in this case `Id`):
+1) Check if `Fb2Node` has `Attribute` with particular `Name` (in this case `Id`):
 
 ```csharp
 bool hasAttributeByKey = fb2Node.HasAttribute(AttributeNames.Id);
@@ -331,7 +331,7 @@ Debug.WriteLine(updatedContent);
 
 > Attention!
 >
-> Due to metioned `xml` format limitations, both parameters - `newContent` and `separator` in `AddContent` method are escaped by replacing `Environment.NewLine` with " " (whitespace) and symbols `<`, `>`, `&`, `'`, `"` with encoded counterparts - `&lt;`, `&gt;`, `&quot;` etc. 
+> Due to mentioned `xml` format limitations, both parameters - `newContent` and `separator` in `AddContent` method are escaped by replacing `Environment.NewLine` with " " (whitespace) and symbols `<`, `>`, `&`, `'`, `"` with encoded counterparts - `&lt;`, `&gt;`, `&quot;` etc. 
 
 
 3) To clear `Content`:
@@ -487,7 +487,7 @@ paragraph
     .AddTextContent("plain text 1");
 ```
 
-But, there are few limitations due to `fb2-tree` implementation & `c#` not supporting covariant retun types.  
+But, there are few limitations due to `fb2-tree` implementation & `c#` not supporting covariant return types.  
 As eagle-eyed readers might have noticed that:
 
 1) Part of `Editing API` implemented in `Fb2Container` class - node related - like `AddContent(Fb2Node node)`, `AddContent(IEnumerable<Fb2Node> nodes)`, `RemoveContent(Fb2Node node)` etc - all have return type of `Fb2Container`.  
@@ -566,7 +566,7 @@ To simplify error-handling for different validation, loading and editing errors 
 `Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.  
 `NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.  
 `InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.  
-`UnexpectedAtrributeException`  - thrown on attemt to add attribute not listed in `AllowedAttributes`.  
+`UnexpectedAttributeException`  - thrown on attempt to add attribute not listed in `AllowedAttributes`.  
 `InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
 `UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.  
 

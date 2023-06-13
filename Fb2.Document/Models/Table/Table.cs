@@ -20,10 +20,10 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            if (IsEmpty)
+            if (!HasContent)
                 return string.Empty;
 
-            // ommiting unsafe stuff etc
+            // omitting unsafe stuff etc
             var rows = GetChildren<TableRow>().ToList();
             var rowsCount = rows.Count;
 
@@ -58,7 +58,7 @@ namespace Fb2.Document.Models
             {
                 var row = rows[rowIndex];
 
-                var collSpanDeltaInRow = 0;
+                var colSpanDeltaInRow = 0;
 
                 var cellsInRow = row.GetChildren<TableCellBase>().ToList();
                 var cellsInRowCount = cellsInRow.Count;
@@ -71,16 +71,16 @@ namespace Fb2.Document.Models
                 {
                     var cellNode = cellsInRow[arrayColumnIndex];
 
-                    var renderColumnIndex = collSpanDeltaInRow != 0 ? arrayColumnIndex + collSpanDeltaInRow : arrayColumnIndex;
-                    // check prev rows and check if any cell are impacting current cell
+                    var renderColumnIndex = colSpanDeltaInRow != 0 ? arrayColumnIndex + colSpanDeltaInRow : arrayColumnIndex;
+                    // check previous rows and check if any cell are impacting current cell
                     renderColumnIndex = UpdateRenderColumnIndex(tableRowSpans, rowIndex, renderColumnIndex);
 
-                    var collSpanNum = GetCellSpan(cellNode, AttributeNames.ColumnSpan);
+                    var colSpanNum = GetCellSpan(cellNode, AttributeNames.ColumnSpan);
                     columnCountsInRow[rowIndex] = Math.Max(columnCountsInRow[rowIndex], renderColumnIndex + 1); // absolute unit width of a cell
 
                     // to know how far to move next cell in table row - save "total span" number in row
-                    // if no ColSpan -> collSpanNum - 1 = 0
-                    collSpanDeltaInRow += collSpanNum - 1; // -1 because of cell itself has width
+                    // if no ColSpan -> colSpanNum - 1 = 0
+                    colSpanDeltaInRow += colSpanNum - 1; // -1 because of cell itself has width
 
                     var rowSpanNum = GetCellSpan(cellNode, AttributeNames.RowSpan);
                     var cellContent = cellNode.ToString();
@@ -97,7 +97,7 @@ namespace Fb2.Document.Models
                             rowIndex,
                             renderColumnIndex,
                             cellContent,
-                            collSpanNum,
+                            colSpanNum,
                             rowSpanNum,
                             verticalAlign,
                             horizontalCellAlign));
@@ -130,12 +130,12 @@ namespace Fb2.Document.Models
         }
 
         // if no span found return 1 as minimal cell unit width/height
-        private static int GetCellSpan(Fb2Node cell, string spanAttrName)
+        private static int GetCellSpan(Fb2Node cell, string spanAttributeName)
         {
-            if (cell == null || string.IsNullOrWhiteSpace(spanAttrName))
+            if (cell == null || string.IsNullOrWhiteSpace(spanAttributeName))
                 throw new ArgumentNullException();
 
-            if (cell.TryGetAttribute(spanAttrName, true, out var span) &&
+            if (cell.TryGetAttribute(spanAttributeName, true, out var span) &&
                 int.TryParse(span.Value, out int spanNumber) && spanNumber > 1)
                 return spanNumber;
 
@@ -190,13 +190,13 @@ namespace Fb2.Document.Models
                 {
                     var columnCell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
                     if (columnCell == null)
-                        continue; // shouldnt be the case, but what do I know
+                        continue; // shouldn't be the case, but what do I know
 
                     var colCharWidth = columnCell.RenderStartColumnIndex == actualColIndex ?
                                         columnCell.Content.Length : 0;
 
-                    var prev = columnCharWidths[actualColIndex];
-                    columnCharWidths[actualColIndex] = Math.Max(prev, colCharWidth);
+                    var previous = columnCharWidths[actualColIndex];
+                    columnCharWidths[actualColIndex] = Math.Max(previous, colCharWidth);
                 }
             }
 
@@ -225,7 +225,7 @@ namespace Fb2.Document.Models
                 {
                     var cell = tableRowSpans.FirstOrDefault(cm => TableCellPredicate(cm, rowIndex, actualColIndex));
                     if (cell == null)
-                        continue; // shouldnt be the case, but what do I know
+                        continue; // shouldn't be the case, but what do I know
 
                     int colWidth = CalculateCellCharWidth(columnCharWidths, actualColIndex, cell);
 
@@ -238,8 +238,11 @@ namespace Fb2.Document.Models
                     horizontalBorder.Append(cellString.HorizontalBorder);
                 }
 
-                rowStrings.AppendLine(rowString.ToString());
-                rowStrings.AppendLine(horizontalBorder.ToString());
+                if (rowString.Length > 1)
+                    rowStrings.AppendLine(rowString.ToString());
+
+                if (horizontalBorder.Length > 1)
+                    rowStrings.AppendLine(horizontalBorder.ToString());
             }
 
             return rowStrings.ToString();
@@ -253,7 +256,9 @@ namespace Fb2.Document.Models
                     .Skip(cell.RenderStartColumnIndex)
                     .Take(cell.ColSpan).ToList();
 
-                return allColumnCharWidths.Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v).Sum();
+                return allColumnCharWidths
+                    .Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v)
+                    .Sum();
             }
 
             return columnCharWidths[colIndex];

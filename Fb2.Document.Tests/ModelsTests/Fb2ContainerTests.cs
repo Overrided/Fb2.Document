@@ -110,7 +110,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void Container_CantContainText_AddTextContent_Throws(Fb2Container node)
+        public async Task Container_CantContainText_AddTextContent_Throws(Fb2Container node)
         {
             node.Should().NotBeNull();
 
@@ -119,18 +119,72 @@ namespace Fb2.Document.Tests.ModelsTests
 
             node.Invoking(n => n.AddContent(new TextItem().AddContent("test text")))
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain 'text'.");
 
             node.Invoking(n => n.AddTextContent("test text"))
                 .Should()
-                .Throw<UnexpectedNodeException>()
+                .ThrowExactly<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
+
+            node.Invoking(n => n.AddTextContent(() => "test text"))
+                .Should()
+                .ThrowExactly<UnexpectedNodeException>()
+                .WithMessage($"Node '{node.Name}' can not contain 'text'.");
+
+            await node
+                .Invoking(async n => await n.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return "test text";
+                }))
+                .Should()
+                .ThrowExactlyAsync<UnexpectedNodeException>()
                 .WithMessage($"Node '{node.Name}' can not contain 'text'.");
         }
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void Container_CanContainText_AddTextContent_Works(Fb2Container node)
+        public async Task Container_CanContainText_AddTextContent_NullContent_Throws(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+
+            if (!node.CanContainText)
+                return;
+
+            node.Invoking(n => n.AddContent(new TextItem().AddContent((string)null)))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.AddTextContent((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.AddTextContent(() => null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            node.Invoking(n => n.AddTextContent((Func<string>)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            await node.Invoking(n => n.AddTextContentAsync(null))
+                 .Should()
+                 .ThrowExactlyAsync<ArgumentNullException>();
+
+            await node
+                .Invoking(async n => await n.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return null;
+                }))
+                .Should()
+                .ThrowExactlyAsync<ArgumentNullException>();
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public async Task Container_CanContainText_AddTextContent_Works(Fb2Container node)
         {
             node.Should().NotBeNull();
 
@@ -154,6 +208,26 @@ namespace Fb2.Document.Tests.ModelsTests
             (second as Fb2Element).Content.Should().Be("test text");
 
             ClearContainerContent(node);
+
+            node.AddTextContent(() => "test text");
+
+            node.Content.Count.Should().Be(1);
+            var third = node.Content.First();
+            third.Should().BeOfType(typeof(TextItem));
+            (third as Fb2Element).Content.Should().Be("test text");
+
+            ClearContainerContent(node);
+
+            await node.AddTextContentAsync(async () =>
+                {
+                    await Task.Delay(5);
+                    return "test text";
+                });
+
+            node.Content.Count.Should().Be(1);
+            var forths = node.Content.First();
+            forths.Should().BeOfType(typeof(TextItem));
+            (forths as Fb2Element).Content.Should().Be("test text");
         }
 
         [Theory]
@@ -211,7 +285,6 @@ namespace Fb2.Document.Tests.ModelsTests
             var second = node.GetFirstChild<TextItem>()!;
             second.Should().NotBeNull();
             second.Content.Should().Be("test text test text 2 ");
-            //second.Parent.Should().NotBeNull();
             first.Content.Should().Be("test text test text 2 ");
 
             node.AddContent(node.AllowedElements.First());
@@ -382,9 +455,27 @@ namespace Fb2.Document.Tests.ModelsTests
             ClearContainerContent(node);
 
             //string name
-            node.AddContent(node.AllowedElements.First());
+            node.AddContent(allowedElementName);
 
             node.Content.Should().HaveCount(1);
+        }
+
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void Container_WithMetadata_AddContent_AllowedElement_Works(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+            var allowedElementName = node.AllowedElements.First();
+            var firstAllowedNode = Fb2NodeFactory.GetNodeByName(allowedElementName);
+
+            var testMetadata = new Fb2NodeMetadata(XNamespace.Xml);
+            node.NodeMetadata = testMetadata;
+            node.AddContent(firstAllowedNode);
+
+            node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
+            var first = node.Content.First();
+            first.Should().NotBeNull();
+            first.NodeMetadata.Should().NotBeNull().And.Be(testMetadata);
         }
 
         [Theory]
@@ -645,8 +736,6 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<InvalidNodeException>()
                 .And.Message.Should().Be("'blahNameInvalid' is not known Fb2 node name.");
 
-            //result.Should().BeNull();
-
             node.Invoking(n => n.GetChildren(invalidNodeName))
                 .Should()
                 .ThrowExactly<InvalidNodeException>()
@@ -655,7 +744,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void EmpyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
+        public void EmptyContainerNode_QueryChildrenNodes_ReturnsNullOrEmpty(Fb2Container node)
         {
             var firstAllowedChildName = node.AllowedElements.First();
             bool firstAllowedChildPredicate(Fb2Node nodeToCompare) => nodeToCompare.Name.Equals(firstAllowedChildName);
@@ -675,7 +764,7 @@ namespace Fb2.Document.Tests.ModelsTests
 
         [Theory]
         [ClassData(typeof(Fb2ContainerCollection))]
-        public void EmpyContainerNode_QueryDescendantNodes_ReturnsNullOrEmpty(Fb2Container node)
+        public void EmptyContainerNode_QueryDescendantNodes_ReturnsNullOrEmpty(Fb2Container node)
         {
             var firstAllowedChildName = node.AllowedElements.First();
             Func<Fb2Node, bool> firstAllowedChildPredicate = nodeToCompare => nodeToCompare.Name.Equals(firstAllowedChildName);
@@ -707,6 +796,69 @@ namespace Fb2.Document.Tests.ModelsTests
             resultBookBody.Should().BeNull();
         }
 
+        [Fact]
+        public void Container_QueryDescendants_Works()
+        {
+            var section = new BodySection();
+
+            var paragraph = new Paragraph();
+            var plainText1 = new TextItem().AddContent("plain text 1 ");
+            var strong = new Strong().AddTextContent("strong content ");
+            var plainText2 = new TextItem().AddContent("plain text 2");
+
+            paragraph.AddContent(plainText1, strong, plainText2);
+
+            section.AddContent(paragraph);
+
+            var queryByNameResult = section.GetDescendants(ElementNames.Strong);
+            var queryByTypeResult = section.GetDescendants<Strong>();
+            var queryByPredicateResult = section.GetDescendants((n) => n is Strong);
+
+            queryByNameResult.Should().HaveCount(1);
+            queryByNameResult.Should().HaveSameCount(queryByTypeResult);
+            queryByPredicateResult.Should().HaveSameCount(queryByNameResult);
+
+            var firstQueryByNameResult = queryByNameResult.First();
+            var firstQueryByTypeResult = queryByTypeResult.First();
+            var firstQueryByPredicateResult = queryByPredicateResult.First();
+
+            firstQueryByNameResult.Should().Be(firstQueryByTypeResult);
+            firstQueryByPredicateResult.Should().Be(firstQueryByNameResult);
+            firstQueryByNameResult.Should().BeOfType<Strong>();
+            firstQueryByNameResult.Name.Should().Be(ElementNames.Strong);
+
+            firstQueryByNameResult.HasContent.Should().BeTrue();
+            firstQueryByTypeResult.Content.Should().HaveCount(1);
+            firstQueryByTypeResult.Content.First().Should().BeOfType<TextItem>();
+            (firstQueryByTypeResult.Content.First() as TextItem)!.Content.Should().Be("strong content ");
+
+            var singularResultByName = section.GetFirstDescendant(ElementNames.Strong);
+            var singularResultByType = section.GetFirstDescendant<Strong>();
+            var singularResultByPredicate = section.GetFirstDescendant((n) => n is Strong);
+
+            singularResultByName.Should().NotBeNull();
+            singularResultByType.Should().NotBeNull();
+            singularResultByPredicate.Should().NotBeNull();
+
+            singularResultByName.Should().Be(singularResultByType);
+            singularResultByPredicate.Should().Be(singularResultByName);
+
+            singularResultByName!.Name.Should().Be(ElementNames.Strong);
+            singularResultByName!.Should().BeOfType<Strong>();
+
+            singularResultByName.HasContent.Should().BeTrue();
+
+            singularResultByType!.Content.Should().HaveCount(1);
+            var singularResultByTypeChild = singularResultByType.Content.First();
+            singularResultByTypeChild.Should().NotBeNull();
+            singularResultByTypeChild.Should().BeOfType<TextItem>();
+
+            (singularResultByTypeChild as TextItem)!.Content.Should().Be("strong content ");
+
+            var abstractDescendantQuery = section.GetDescendants<Fb2Node>();
+            abstractDescendantQuery.Should().NotBeNullOrEmpty().And.HaveCount(5);
+        }
+
         // it's a bit complex to run tests for each model
         // so in those lazy tests Paragraph is used as parent element
         [Fact]
@@ -714,9 +866,11 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             // setup 
             var paragraph = new Paragraph();
+            paragraph.HasContent.Should().BeFalse();
+
             paragraph.AddContent(new Strong().AddTextContent("strong text 1 "));
 
-            paragraph.IsEmpty.Should().BeFalse();
+            paragraph.HasContent.Should().BeTrue();
 
             paragraph
                 .AddContent(
@@ -733,20 +887,20 @@ namespace Fb2.Document.Tests.ModelsTests
             paragraph.Content.Should().HaveCount(4);
 
             var firstStrong = paragraph.Content.First() as Strong;
-            firstStrong.Content.Should().HaveCount(1);
+            firstStrong!.Content.Should().HaveCount(1);
             firstStrong.Content.First().Should().BeOfType<TextItem>();
 
             var firstItalic = paragraph.Content[1] as Emphasis;
-            firstItalic.Content.Should().HaveCount(2);
+            firstItalic!.Content.Should().HaveCount(2);
             firstItalic.Content.First().Should().BeOfType<TextItem>();
             firstItalic.Content[1].Should().BeOfType<Strong>();
 
             var secondStrong = paragraph.Content[2] as Strong;
-            secondStrong.Content.Should().HaveCount(1);
+            secondStrong!.Content.Should().HaveCount(1);
             secondStrong.Content.First().Should().BeOfType<TextItem>();
 
             var plainText = paragraph.Content.Last() as TextItem;
-            plainText.Content.Should().Be("plain text 1");
+            plainText!.Content.Should().Be("plain text 1");
 
             // children query example
 
@@ -771,7 +925,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var plainGenericText = paragraph.GetFirstChild<TextItem>();
 
             plainTextByName.Should().NotBeNull();
-            (plainTextByName as Fb2Element).Content.Should().Be("plain text 1");
+            (plainTextByName as Fb2Element)!.Content.Should().Be("plain text 1");
             plainTextByName.Should().Be(plainPredicateText).And.Be(plainGenericText);
 
             // and to stress the obvios
@@ -828,10 +982,89 @@ namespace Fb2.Document.Tests.ModelsTests
                 .Subject.Content.Should().Be("bold strikethrough text ");
         }
 
+        [Theory]
+        [ClassData(typeof(Fb2ContainerCollection))]
+        public void EmptyContainer_ToString_ReturnsEmptyString(Fb2Container node)
+        {
+            node.Should().NotBeNull();
+            var toString = node.ToString();
+            toString.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void NotEmptyContainer_ToString_ReturnsValue()
+        {
+            var paragraph = new Paragraph();
+            paragraph.AddTextContent("Test text ");
+            paragraph.AddContent(new Strong().AddTextContent("and strong text"));
+
+            var toString = paragraph.ToString();
+
+            toString.Should().NotBeNullOrEmpty();
+            toString.Should().NotBeNullOrWhiteSpace();
+
+            toString.Should().Be("Test text and strong text");
+        }
+
+        [Fact]
+        public void NotEmptyContainer_NotInlineChildren_ToString_ReturnsValue()
+        {
+            var bodySection = new BodySection();
+
+            var paragraph1 = new Paragraph();
+            paragraph1.AddTextContent("Test text paragraph 1 ");
+            paragraph1.AddContent(new Strong().AddTextContent("and strong text 1."));
+
+            var paragraph2 = new Paragraph();
+            paragraph2.AddTextContent("Test text paragraph 2 ");
+            paragraph2.AddContent(new Strong().AddTextContent("and strong text 2."));
+
+            bodySection.AddContent(paragraph1, paragraph2);
+
+            var toString = bodySection.ToString();
+            toString.Should().NotBeNullOrEmpty();
+            toString.Should().NotBeNullOrWhiteSpace();
+
+            toString.Should().Be($"{Environment.NewLine}Test text paragraph 1 and strong text 1.{Environment.NewLine}Test text paragraph 2 and strong text 2.");
+        }
+
+        [Fact]
+        public void CloneContainer_HasContent_ClonesContent()
+        {
+            var paragraph1 = new Paragraph();
+            paragraph1.AddTextContent("Test text paragraph 1 ");
+            paragraph1.AddContent(new Strong().AddTextContent("and strong text 1."));
+            paragraph1.HasContent.Should().BeTrue();
+            paragraph1.Content.Should().HaveCount(2);
+
+            var paragraph2 = paragraph1.Clone();
+
+            paragraph2.Should().Be(paragraph1);
+            paragraph2.Should().BeOfType<Paragraph>();
+            (paragraph2 as Fb2Container)!.HasContent.Should().BeTrue();
+            (paragraph2 as Fb2Container)!.Content.Should().HaveCount(2);
+
+            var strong1 = paragraph1.Content.Last() as Fb2Container;
+            strong1.Should().NotBeNull();
+            strong1!.Name.Should().Be(ElementNames.Strong);
+            strong1.Parent.Should().NotBeNull().And.Be(paragraph1);
+
+            strong1.HasContent.Should().BeTrue();
+            strong1.Content.Should().HaveCount(1);
+
+            var strong1Clone = strong1.Clone() as Fb2Container;
+            strong1Clone.Should().NotBeNull();
+            strong1Clone!.Parent.Should().BeNull();
+
+            strong1Clone.HasContent.Should().BeTrue();
+            strong1Clone.Content.Should().HaveCount(1);
+        }
+
         private static void ClearContainerContent(Fb2Container node)
         {
             node.ClearContent();
             node.Content.Should().BeEmpty();
+            node.HasContent.Should().BeFalse();
         }
     }
 }

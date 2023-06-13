@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Exceptions;
@@ -30,7 +31,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any content.
         /// </summary>
-        public override bool IsEmpty => string.IsNullOrEmpty(content);
+        public override bool HasContent => !string.IsNullOrEmpty(content);
 
         /// <summary>
         /// Text node loading mechanism - formatting text and removal of unwanted characters.
@@ -82,6 +83,27 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
+        /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
+        /// </summary>
+        /// <param name="contentProvider">Asynchronous content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns>Current element.</returns>
+        /// <remarks>
+        /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+        /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<Fb2Element> AddContentAsync(Func<Task<string>> contentProvider, string separator = null)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
+
+            var newContent = await contentProvider();
+
+            return AddContent(newContent, separator);
+        }
+
+        /// <summary>
         /// Appends new plain text to <see cref="Content"/>.
         /// </summary>
         /// <param name="newContent">Plain text to append.</param>
@@ -115,7 +137,7 @@ namespace Fb2.Document.Models.Base
         /// <returns>Current element.</returns>
         public virtual Fb2Element ClearContent()
         {
-            if (!IsEmpty)
+            if (HasContent)
                 content = string.Empty;
 
             return this;
@@ -132,7 +154,7 @@ namespace Fb2.Document.Models.Base
         public override XElement ToXml()
         {
             var element = base.ToXml();
-            if (!IsEmpty)
+            if (HasContent)
                 element.Value = content;
 
             return element;
@@ -168,10 +190,12 @@ namespace Fb2.Document.Models.Base
         /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
         public sealed override object Clone()
         {
-            var element = base.Clone() as Fb2Element;
-            element.content = new string(content.ToCharArray());
+            var clone = base.Clone() as Fb2Element;
 
-            return element;
+            if (HasContent)
+                clone.content = new string(content.ToCharArray());
+
+            return clone;
         }
     }
 }

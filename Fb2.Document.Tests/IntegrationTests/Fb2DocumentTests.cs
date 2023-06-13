@@ -20,6 +20,70 @@ namespace Fb2.Document.Tests.IntegrationTests
         private const string InvalidSampleFileName = "_Test_Invalid.fb2";
 
         [Fact]
+        public void Fb2Document_NotLoaded_ShortcutProperties_ReturnNull()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+
+            doc.Book.Should().BeNull();
+
+            doc.Bodies.Should().BeEmpty();
+            doc.BookDescription.Should().BeNull();
+            doc.Title.Should().BeNull();
+            doc.SourceTitle.Should().BeNull();
+            doc.DocumentInfo.Should().BeNull();
+            doc.PublishInfo.Should().BeNull();
+            doc.CustomInfo.Should().BeNull();
+        }
+
+        [Fact]
+        public void Fb2Document_NotLoaded_ToXml_ReturnsNull()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+
+            doc.Book.Should().BeNull();
+
+            doc.ToXml().Should().BeNull();
+            doc.ToXmlString().Should().BeNull();
+        }
+
+
+        [Fact]
+        public void Fb2Document_NotLoaded_ToString_ReturnsNull()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+            doc.Book.Should().BeNull();
+
+            doc.ToString().Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Fb2Document_Loaded_MalformedContent_Throws()
+        {
+            var doc = new Fb2Document();
+            doc.IsLoaded.Should().BeFalse();
+            doc.Book.Should().BeNull();
+
+            doc.Invoking(d => d.Load((Stream)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            doc.Invoking(d => d.Load((string)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            doc.Invoking(d => d.Load((XDocument)null))
+                .Should()
+                .ThrowExactly<ArgumentNullException>();
+
+            doc.Invoking(async d => await d.LoadAsync((Stream)null))
+                .Should()
+                .ThrowExactlyAsync<ArgumentNullException>();
+        }
+
+        [Fact]
         public void Fb2Document_Empty_EqualityTest()
         {
             var emptyFirstDocument = new Fb2Document();
@@ -192,6 +256,8 @@ namespace Fb2.Document.Tests.IntegrationTests
 
                 firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
                 secondDocument.Bodies.First().NodeMetadata.Should().BeNull();
+
+                firstDocument.Should().NotBe(secondDocument);
             }
         }
 

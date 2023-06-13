@@ -38,8 +38,11 @@ namespace Fb2.Document.Models
 
         public sealed override string ToString()
         {
-            var formattedAttributeString = TryGetAttribute(AttributeNames.XHref, true, out var result) ? $" {result.Value}" : string.Empty;
-            return $"{Name}{formattedAttributeString}";
+            var hasHref = TryGetAttribute(AttributeNames.XHref, true, out var result);
+            if (!hasHref)
+                return Name;
+
+            return $"{Name} {result.Value}";
         }
 
         public sealed override void Load(

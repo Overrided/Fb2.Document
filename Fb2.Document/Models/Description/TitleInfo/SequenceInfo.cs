@@ -1,10 +1,10 @@
 ﻿using System.Collections.Immutable;
+using System.Text;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
 namespace Fb2.Document.Models
 {
-    // todo : override IsEmpty into checking attributes??
     public class SequenceInfo : Fb2Element
     {
         public override string Name => ElementNames.Sequence;
@@ -15,5 +15,23 @@ namespace Fb2.Document.Models
             ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Number, AttributeNames.Language);
 
         public sealed override Fb2Element AddContent(string newContent, string separator = null) => this;
+
+        public sealed override Fb2Element ClearContent() => this;
+
+        public sealed override string ToString()
+        {
+            if (!HasAttributes)
+                return string.Empty;
+
+            var sb = new StringBuilder();
+
+            if (TryGetAttribute(AttributeNames.Name, true, out var nameAttr))
+                sb.Append(nameAttr.Value);
+
+            if (TryGetAttribute(AttributeNames.Number, true, out var numberAttr))
+                sb.Append(sb.Length > 0 ? $" {numberAttr.Value}" : numberAttr.Value);
+
+            return sb.ToString();
+        }
     }
 }

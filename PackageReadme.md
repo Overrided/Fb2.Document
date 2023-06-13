@@ -6,7 +6,7 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 
 ## Backport
 
-Version `1.2.0` is de-facto backport of [2.2.0](https://github.com/Overrided/Fb2.Document/releases/tag/v2.2.0) version to `.net standard2.0`.
+Version `1.3.0` is de-facto backport of [2.3.0](https://github.com/Overrided/Fb2.Document/releases/tag/v2.3.0) version to `.net standard2.0`.
 
 Backport comes with all latest features - including bug fixes, renames, new APIs, extensions, exceptions, etc.
 
