@@ -7,14 +7,14 @@
     <PackageProjectUrl>https://github.com/Overrided/Fb2.Document</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Overrided/Fb2.Document</RepositoryUrl>
     <Description>.Net library for parsing *.fb2 files, which provides few different ways read files into model, and write them back into file once it needed.</Description>
-    <Copyright>2023 Denys Pukhkyi</Copyright>
+    <Copyright>2024 Denys Pukhkyi</Copyright>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Fb2.Document</PackageId>
     <PackageLicenseFile>License.md</PackageLicenseFile>
-    <AssemblyVersion>2.3.0.0</AssemblyVersion>
-    <FileVersion>2.3.0.0</FileVersion>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>PackageReadme.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

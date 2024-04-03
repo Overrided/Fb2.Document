@@ -41,7 +41,7 @@ jobs:
       - name: Upload NuGet package artifact
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ matrix.os }}-nuget
+          name: ${{ matrix.os }}-${{ matrix.dotnet }}-nuget
           path: dist
 
       - name: ReportGenerator
@@ -51,11 +51,11 @@ jobs:
           targetdir: "coveragereport"
           reporttypes: "Html"
           verbosity: "Info"
-          tag: '${{ github.run_number }}_${{ github.run_id }}'
+          tag: '${{ matrix.os }}_${{ matrix.dotnet }}_${{ github.run_number }}_${{ github.run_id }}'
           toolpath: "reportgeneratortool"
 
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ matrix.os }}-coverageReport
+          name: ${{ matrix.os }}-${{ matrix.dotnet }}-coverageReport
           path: coveragereport
