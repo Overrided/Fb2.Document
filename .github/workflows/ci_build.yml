@@ -21,16 +21,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup .NET 3.1.x / 5.0.x / 6.0.x / 7.0.x
-        uses: actions/setup-dotnet@v2
+      - name: Setup .NET 3.1.x / 5.0.x / 6.0.x / 7.0.x / 8.0.x
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: | 
             3.1.x
             5.0.x
             6.0.x
             7.0.x
+            8.0.x
 
       - name: Build library
         run: dotnet build --configuration Release
