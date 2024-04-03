@@ -26,8 +26,15 @@ jobs:
 
       - name: Setup .NET ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v4
+        id: stepid
         with:
           dotnet-version: ${{ matrix.dotnet }}
+
+
+      - run: echo '${{ steps.stepid.outputs.dotnet-version }}' # echo '{"sdk":{"version": "${{ steps.stepid.outputs.dotnet-version }}"}}' > ./global.json
+
+      - name: Create temporary global.json
+        run: echo '{"sdk":{"version": "${{ steps.stepid.outputs.dotnet-version }}"}}' > ./global.json
 
       - name: Build library
         run: dotnet build --configuration Release
