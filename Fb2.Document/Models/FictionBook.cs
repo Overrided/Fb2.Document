@@ -2,19 +2,18 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
+namespace Fb2.Document.Models;
+
+public class FictionBook : Fb2Container
 {
-    public class FictionBook : Fb2Container
-    {
-        public override string Name => ElementNames.FictionBook;
+    public override string Name => ElementNames.FictionBook;
 
-        public override bool CanContainText => false;
+    public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(
-                ElementNames.BinaryImage,
-                ElementNames.BookBody,
-                ElementNames.Description,
-                ElementNames.Stylesheet);
-    }
+    public override ImmutableHashSet<string> AllowedElements =>
+        ImmutableHashSet.Create(
+            ElementNames.BinaryImage,
+            ElementNames.BookBody,
+            ElementNames.Description,
+            ElementNames.Stylesheet);
 }

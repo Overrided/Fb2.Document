@@ -2,17 +2,16 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
+namespace Fb2.Document.Models;
+
+public class Title : Fb2Container
 {
-    public class Title : Fb2Container
-    {
-        public override string Name => ElementNames.Title;
+    public override string Name => ElementNames.Title;
 
-        public override bool CanContainText => false;
+    public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(ElementNames.Paragraph, ElementNames.EmptyLine);
-    }
+    public override ImmutableHashSet<string> AllowedElements =>
+        ImmutableHashSet.Create(ElementNames.Paragraph, ElementNames.EmptyLine);
 }

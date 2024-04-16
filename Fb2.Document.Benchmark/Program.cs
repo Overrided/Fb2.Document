@@ -6,78 +6,77 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
-namespace Fb2.Document.Benchmark
+namespace Fb2.Document.Benchmark;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            var summary = BenchmarkRunner.Run<Fb2DocumentBenchMark>();
-        }
+        var summary = BenchmarkRunner.Run<Fb2DocumentBenchMark>();
+    }
+}
+
+[SimpleJob(RuntimeMoniker.NetCoreApp31)]
+[SimpleJob(RuntimeMoniker.Net50)]
+[SimpleJob(RuntimeMoniker.Net60)]
+[SimpleJob(RuntimeMoniker.Net70)]
+[MemoryDiagnoser]
+public class Fb2DocumentBenchMark
+{
+    public FileStream? fb2FileContentStream;
+
+    [GlobalSetup]
+    public void GlobalSetup()
+    {
+        var sampleFilePath = GetSampleFilePath();
+        fb2FileContentStream = new FileStream(sampleFilePath, FileMode.Open);
     }
 
-    [SimpleJob(RuntimeMoniker.NetCoreApp31)]
-    [SimpleJob(RuntimeMoniker.Net50)]
-    [SimpleJob(RuntimeMoniker.Net60)]
-    [SimpleJob(RuntimeMoniker.Net70)]
-    [MemoryDiagnoser]
-    public class Fb2DocumentBenchMark
+    private static string GetSampleFilePath()
     {
-        public FileStream? fb2FileContentStream;
-
-        [GlobalSetup]
-        public void GlobalSetup()
+        var currentFolder = Environment.CurrentDirectory;
+        var pathChunks = currentFolder.Split(Path.DirectorySeparatorChar).ToList();
+        var pathChunksTopIndex = pathChunks.Count - 1;
+        for (int i = pathChunksTopIndex; i >= 0; i--)
         {
-            var sampleFilePath = GetSampleFilePath();
-            fb2FileContentStream = new FileStream(sampleFilePath, FileMode.Open);
-        }
-
-        private static string GetSampleFilePath()
-        {
-            var currentFolder = Environment.CurrentDirectory;
-            var pathChunks = currentFolder.Split(Path.DirectorySeparatorChar).ToList();
-            var pathChunksTopIndex = pathChunks.Count - 1;
-            for (int i = pathChunksTopIndex; i >= 0; i--)
+            var chunk = pathChunks[i];
+            if (chunk.Equals("Fb2.Document"))
             {
-                var chunk = pathChunks[i];
-                if (chunk.Equals("Fb2.Document"))
-                {
-                    pathChunks.RemoveRange(i + 1, pathChunksTopIndex - i);
-                    break;
-                }
+                pathChunks.RemoveRange(i + 1, pathChunksTopIndex - i);
+                break;
             }
-
-            pathChunks.Add("Sample");
-            pathChunks.Add("_Test_1.fb2");
-
-            var sampleFilePath = Path.Combine(pathChunks.ToArray());
-            return sampleFilePath;
         }
 
-        [IterationSetup]
-        public void IterationSetup()
-        {
-            if (fb2FileContentStream!.Position != 0 && fb2FileContentStream!.CanSeek)
-                fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
-        }
+        pathChunks.Add("Sample");
+        pathChunks.Add("_Test_1.fb2");
 
-        [Benchmark]
-        public async Task<Fb2Document> LoadDocumentFromStreamAsync()
-        {
-            var doc = new Fb2Document();
-            await doc.LoadAsync(fb2FileContentStream!);
+        var sampleFilePath = Path.Combine(pathChunks.ToArray());
+        return sampleFilePath;
+    }
 
-            return doc;
-        }
+    [IterationSetup]
+    public void IterationSetup()
+    {
+        if (fb2FileContentStream!.Position != 0 && fb2FileContentStream!.CanSeek)
+            fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
+    }
 
-        [GlobalCleanup]
-        public void GlobalCleanup()
+    [Benchmark]
+    public async Task<Fb2Document> LoadDocumentFromStreamAsync()
+    {
+        var doc = new Fb2Document();
+        await doc.LoadAsync(fb2FileContentStream!);
+
+        return doc;
+    }
+
+    [GlobalCleanup]
+    public void GlobalCleanup()
+    {
+        if (fb2FileContentStream != null)
         {
-            if (fb2FileContentStream != null)
-            {
-                fb2FileContentStream.Close();
-                fb2FileContentStream.Dispose();
-            }
+            fb2FileContentStream.Close();
+            fb2FileContentStream.Dispose();
         }
     }
 }

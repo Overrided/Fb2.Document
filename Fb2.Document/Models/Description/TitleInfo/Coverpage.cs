@@ -2,14 +2,13 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
+namespace Fb2.Document.Models;
+
+public class Coverpage : Fb2Container
 {
-    public class Coverpage : Fb2Container
-    {
-        public override string Name => ElementNames.Coverpage;
+    public override string Name => ElementNames.Coverpage;
 
-        public override bool CanContainText => false;
+    public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.Image);
-    }
+    public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.Image);
 }
