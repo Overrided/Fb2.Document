@@ -1,12 +1,13 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
-Fb2.Document is lightweight, fast .Net 3.1/5/6/7/8 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 8 lib with bunch of APIs to operate `fb2` file's contents.
 
-Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
+Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
 ## Table of contents
 
 * [Installation](#Installation)
+    * [DotNet Versioning](#dotnet-versioning)
 
 * [Document infrastructure](#Document-infrastructure)
 
@@ -45,6 +46,27 @@ You can download and use Fb2Document package in your app via
 * Package Manager Console: PM> `Install-Package Fb2.Document`
 
 * dotnet cli: `dotnet add package Fb2.Document`
+
+### DotNet Versioning
+
+<!--Starting with version `2.4.0` project changes strategy of targeting `.net` versions.-->
+
+<!--From version `2.4.0` and above - project will target singular `latest LTS` (Long Term Support) version of `.net`.-->
+Starting with version `2.4.0` project will target singular `latest LTS` (Long Term Support) version of `.net`.
+
+Version `2.4.0` introduces this change by moving away from multiple framework versions target - `netcoreapp3.1;net5.0;net6.0;net7.0` - and targeting `net8.0` only instead.
+
+This allows to use latest features and reduce package size.
+
+Table below describes package .net targets and compatibility per version:
+
+| Package version | .Net version(s) target             |
+|-----------------|------------------------------------|
+| 1.3.0           | netstandard2.0                     |
+| 2.3.0           | netcoreapp3.1;net5.0;net6.0;net7.0 |
+| 2.4.0           | net8.0                             |
+
+For more info on .Net versions support please see [.NET and .NET Core Support Policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
 
 
 ## Document infrastructure
@@ -181,7 +203,7 @@ All descendants of `Fb2Node` (itself included) class provide build-in methods to
 
 ### Query Fb2Element
 
-`Fb2Element` class descendants APIs allows to work with plain text content, `leaves` of the `fb2 DOM` tree. 
+`Fb2Element` class descendants APIs allows to work with plain text content, `leaves` of the `fb2 DOM` tree.
 
 `Content` property of `Fb2Element` is get-only to prevent random and/or incorrect changes.
 
@@ -259,7 +281,7 @@ if(hasCustomInfoByType)
 
 > Attention!
 >
-> Methods `GetChildren` and `GetDescendants` never returns null. Instead, empty `IEnumerable` is always returned. 
+> Methods `GetChildren` and `GetDescendants` never returns null. Instead, empty `IEnumerable` is always returned.
 
 
 ### Querying Attributes
@@ -295,7 +317,7 @@ Fb2Attribute? attributeCaseIgnore = fb2Node.GetAttribute(AttributeNames.Name, tr
 ```csharp
 bool hasAttribute = fb2Node.TryGetAttribute(AttributeNames.Name, out Fb2Attribute attributeResult);
 bool hasAttributeCaseIgnore = fb2Node.TryGetAttribute(AttributeNames.Name, true, out Fb2Attribute attributeResultCaseIgnore);
-``` 
+```
 
 4) Need to parse attribute value into `Enum` or something?
 
@@ -321,7 +343,7 @@ Naturally, both types provide different APIs for editing respective `Content` pr
 
 ### Editing `Fb2Element` content
 
-As far as `Fb2Element` is purely-text representation entity, working with it looks like working with a `string`.  
+As far as `Fb2Element` is purely-text representation entity, working with it looks like working with a `string`.
 While this is true for `reading` string `Content`, this is not exactly the case for `changing` it as whole `fb2` format relies on `xml`. All content - nodes, text, `Attributes` - should comply with `xml` format, which brings some restrictions.
 
 1) Adding new text content in simplest manner is using `TextItem`, which directly represents plain text.
@@ -343,7 +365,7 @@ Debug.WriteLine(updatedContent);
 
 > Attention!
 >
-> Due to mentioned `xml` format limitations, both parameters - `newContent` and `separator` in `AddContent` method are escaped by replacing `Environment.NewLine` with " " (whitespace) and symbols `<`, `>`, `&`, `'`, `"` with encoded counterparts - `&lt;`, `&gt;`, `&quot;` etc. 
+> Due to mentioned `xml` format limitations, both parameters - `newContent` and `separator` in `AddContent` method are escaped by replacing `Environment.NewLine` with " " (whitespace) and symbols `<`, `>`, `&`, `'`, `"` with encoded counterparts - `&lt;`, `&gt;`, `&quot;` etc.
 
 
 3) To clear `Content`:
@@ -414,7 +436,7 @@ var paragraph = new Paragraph().AddContent(strong, italic, strikethrough).AddTex
 
 // remove content how you see fit
 paragraph.RemoveContent(new List<Fb2Node> { strong, italic }); // drop strong and italic nodes using IEnumerable<Fb2Nodes>
-paragraph.RemoveContent(n => n is Strong || n is Emphasis); // drop strong and italic nodes using Func<Fb2Node, bool> predicate 
+paragraph.RemoveContent(n => n is Strong || n is Emphasis); // drop strong and italic nodes using Func<Fb2Node, bool> predicate
 paragraph.RemoveContent(strong); // drop particular node
 ```
 
@@ -452,7 +474,7 @@ await paragraph.AddAttributeAsync(async () => { // adding single attribute via a
 var paragraph = new Paragraph();
 
 paragraph.AddAttributes(
-        new Fb2Attribute(AttributeNames.Id, "testId"), 
+        new Fb2Attribute(AttributeNames.Id, "testId"),
         new Fb2Attribute(AttributeNames.Language, "eng")); // params Fb2Attribute[] attributes
 // or:
 paragraph.AddAttributes(new List<Fb2Attribute>{ new Fb2Attribute(AttributeNames.Id, "testId"), new Fb2Attribute(AttributeNames.Language, "eng") });
@@ -464,7 +486,7 @@ paragraph.AddAttributes(new List<Fb2Attribute>{ new Fb2Attribute(AttributeNames.
 
 // remove attributes
 string attributeName = ....;
-paragraph.RemoveAttribute(attributeName); // removing attribute by Key, case sensitive! 
+paragraph.RemoveAttribute(attributeName); // removing attribute by Key, case sensitive!
 // or:
 paragraph.RemoveAttribute(attributeName, true); // removing attribute by Key, case insensitive!
 // or:
@@ -481,7 +503,7 @@ paragraph.ClearAttributes();
 
 ### Method chaining
 
-Editing API calls can be chained, because each editing API call return entity which is being edited itself, allowing calls like this: 
+Editing API calls can be chained, because each editing API call return entity which is being edited itself, allowing calls like this:
 
 ```csharp
 var paragraph = new Paragraph();
@@ -499,10 +521,10 @@ paragraph
     .AddTextContent("plain text 1");
 ```
 
-But, there are few limitations due to `fb2-tree` implementation & `c#` not supporting covariant return types.  
+But, there are few limitations due to `fb2-tree` implementation & `c#` not supporting covariant return types.
 As eagle-eyed readers might have noticed that:
 
-1) Part of `Editing API` implemented in `Fb2Container` class - node related - like `AddContent(Fb2Node node)`, `AddContent(IEnumerable<Fb2Node> nodes)`, `RemoveContent(Fb2Node node)` etc - all have return type of `Fb2Container`.  
+1) Part of `Editing API` implemented in `Fb2Container` class - node related - like `AddContent(Fb2Node node)`, `AddContent(IEnumerable<Fb2Node> nodes)`, `RemoveContent(Fb2Node node)` etc - all have return type of `Fb2Container`.
 
 ```csharp
 // So, this will work:
@@ -511,16 +533,16 @@ Fb2Container paragraph = new Paragraph().AddContent(() => new Strong().AddTextCo
 Paragraph paragraph = new Paragraph().AddContent(new Strong().AddTextContent("strong text 1 ")); // returns `Fb2Container`, not `Paragraph`
 ```
 
-2) Part of `Editing API` implemented in `Fb2Element` class - text related - like `AddContent(string newContent, string? separator = null)` or `ClearContent()` etc - all have return type of `Fb2Element`.  
+2) Part of `Editing API` implemented in `Fb2Element` class - text related - like `AddContent(string newContent, string? separator = null)` or `ClearContent()` etc - all have return type of `Fb2Element`.
 
 ```csharp
-// So, this will work:  
+// So, this will work:
 Fb2Element plainTextItem = new TextItem().AddContent(() => "text 1 "); // or use any other overload of `AddContent`
 // This WILL NOT:
-TextItem plainTextItem = new TextItem().AddContent(() => "text 1 "); // returns `Fb2Element`, not `TextItem` 
+TextItem plainTextItem = new TextItem().AddContent(() => "text 1 "); // returns `Fb2Element`, not `TextItem`
 ```
 
-3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(Fb2Attribute attribute)`, `AddAttributes(params Fb2Attribute[] attributes)` or `RemoveAttribute(Fb2Attribute fb2Attribute)` etc - all have return type of `Fb2Node`.  
+3) Part of `Editing API` implemented in `Fb2Node` class - `Attributes` related - like `AddAttribute(Fb2Attribute attribute)`, `AddAttributes(params Fb2Attribute[] attributes)` or `RemoveAttribute(Fb2Attribute fb2Attribute)` etc - all have return type of `Fb2Node`.
 
 ```csharp
 //So, this will work:
@@ -535,13 +557,13 @@ Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue
 
 ## Extensions
 
-If you care about what exact type is being returned while editing node, you can use `Fb2ContainerExtensions`, `Fb2ElementExtensions`, `Fb2NodeExtensions` classes from `Fb2.Document.Extensions` namespace.  
+If you care about what exact type is being returned while editing node, you can use `Fb2ContainerExtensions`, `Fb2ElementExtensions`, `Fb2NodeExtensions` classes from `Fb2.Document.Extensions` namespace.
 
 Extensions methods naming is slightly differs from naming of appropriate classes, e.g. `AppendContent` extension corresponds to `AddContent`, `DeleteContent` to `RemoveContent` and `EraseContent` to `ClearContent`.
 
 Extensions are generic wrappers around Editing APIs of respective classes - `Fb2Container`, `Fb2Element` and `Fb2Node` - implementations, returning same type of node that was used, without cutting type down to base classes, i.e.:
 
- This ***will work***: 
+ This ***will work***:
 ```csharp
 Paragraph paragraph = new Paragraph().AppendAttribute(AttributeNames.Id, "testValue");
 ```
@@ -574,13 +596,13 @@ As in fact library operates on top of `XDocument` ([Linq to XML](https://docs.mi
 
 To simplify error-handling for different validation, loading and editing errors library provides custom exceptions:
 
-`Fb2DocumentLoadingException`  - thrown if `Fb2Document.Load(...)` or `Fb2Document.LoadAsync(...)` fails.  
-`Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.  
-`NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.  
-`InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.  
-`UnexpectedAttributeException`  - thrown on attempt to add attribute not listed in `AllowedAttributes`.  
-`InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.  
-`UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.  
+`Fb2DocumentLoadingException`  - thrown if `Fb2Document.Load(...)` or `Fb2Document.LoadAsync(...)` fails.
+`Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.
+`NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.
+`InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.
+`UnexpectedAttributeException`  - thrown on attempt to add attribute not listed in `AllowedAttributes`.
+`InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.
+`UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.
 
 For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).
 
