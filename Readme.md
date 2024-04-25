@@ -49,16 +49,13 @@ You can download and use Fb2Document package in your app via
 
 ### DotNet Versioning
 
-<!--Starting with version `2.4.0` project changes strategy of targeting `.net` versions.-->
-
-<!--From version `2.4.0` and above - project will target singular `latest LTS` (Long Term Support) version of `.net`.-->
 Starting with version `2.4.0` project will target singular `latest LTS` (Long Term Support) version of `.net`.
 
-Version `2.4.0` introduces this change by moving away from multiple framework versions target - `netcoreapp3.1;net5.0;net6.0;net7.0` - and targeting `net8.0` only instead.
+Version `2.4.0` introduces this change moving away from multiple framework versions target - `netcoreapp3.1;net5.0;net6.0;net7.0` - and targeting `net8.0` only instead.
 
 This allows to use latest features and reduce package size.
 
-Table below describes package .net targets and compatibility per version:
+Table below describes `.net` targets per package version:
 
 | Package version | .Net version(s) target             |
 |-----------------|------------------------------------|
