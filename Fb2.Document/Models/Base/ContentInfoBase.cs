@@ -7,15 +7,15 @@ public abstract class ContentInfoBase : Fb2Container
 {
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Paragraph,
-            ElementNames.Poem,
-            ElementNames.Quote,
-            ElementNames.SubTitle,
-            ElementNames.EmptyLine,
-            ElementNames.Table);
+    [
+        ElementNames.Paragraph,
+        ElementNames.Poem,
+        ElementNames.Quote,
+        ElementNames.SubTitle,
+        ElementNames.EmptyLine,
+        ElementNames.Table
+    ];
 }

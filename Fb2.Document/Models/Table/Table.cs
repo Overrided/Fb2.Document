@@ -14,9 +14,9 @@ public class Table : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
 
-    public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.TableRow);
+    public override ImmutableHashSet<string> AllowedElements => [ElementNames.TableRow];
 
     public sealed override string ToString()
     {

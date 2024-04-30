@@ -5,12 +5,33 @@ using Fb2.Document.Extensions;
 
 namespace Fb2.Document.Models.Base;
 
+/// <summary>
+/// 
+/// </summary>
 public class Fb2Attribute
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public string Key { get; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public string Value { get; set; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public string? NamespaceName { get; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <param name="namespaceName"></param>
+    /// <exception cref="InvalidAttributeException"></exception>
     public Fb2Attribute(string key, string value, string? namespaceName = null)
     {
         var escapedKey = SecurityElement.Escape(key);

@@ -10,13 +10,13 @@ public class BookBody : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Language];
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Image,
-            ElementNames.Title,
-            ElementNames.Epigraph,
-            ElementNames.BookBodySection);
+    [
+        ElementNames.Image,
+        ElementNames.Title,
+        ElementNames.Epigraph,
+        ElementNames.BookBodySection
+    ];
 }

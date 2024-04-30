@@ -11,14 +11,15 @@ public class DocumentInfo : Fb2Container
     public override bool CanContainText => false;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Author,
-            ElementNames.ProgramUsed,
-            ElementNames.Date,
-            ElementNames.SrcUrl,
-            ElementNames.SrcOcr,
-            ElementNames.FictionId,
-            ElementNames.Version,
-            ElementNames.History,
-            ElementNames.Publisher);
+    [
+        ElementNames.Author,
+        ElementNames.ProgramUsed,
+        ElementNames.Date,
+        ElementNames.SrcUrl,
+        ElementNames.SrcOcr,
+        ElementNames.FictionId,
+        ElementNames.Version,
+        ElementNames.History,
+        ElementNames.Publisher,
+    ];
 }

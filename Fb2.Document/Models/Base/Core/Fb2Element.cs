@@ -149,7 +149,7 @@ public abstract class Fb2Element : Fb2Node
     /// Only formatted content is serialized.
     /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/>.</para>
     /// </remarks>
-    public override XElement ToXml()
+    public override XElement ToXml(bool serializeUnsafeNodes = true)
     {
         var element = base.ToXml();
         if (HasContent)

@@ -10,14 +10,14 @@ public class Poem : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Title,
-            ElementNames.Epigraph,
-            ElementNames.Stanza,
-            ElementNames.TextAuthor,
-            ElementNames.Date);
+    [
+        ElementNames.Title,
+        ElementNames.Epigraph,
+        ElementNames.Stanza,
+        ElementNames.TextAuthor,
+        ElementNames.Date
+    ];
 }

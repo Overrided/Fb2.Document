@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Fb2.Document.Exceptions;
 using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
+using Fb2.Document.SerializingOptions;
 
 namespace Fb2.Document;
 
@@ -260,33 +261,41 @@ public sealed class Fb2Document
     }
 
     /// <summary>
-    /// Generates XDocument using previously loaded FictionBook.
+    /// Renders content of FictionBook as XDocument.
     /// </summary>
+    /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
     /// <returns>
     /// XDocument instance formatted accordingly to Fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
     /// </returns>
-    public XDocument? ToXml()
+    public XDocument? ToXml(Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
     {
         if (Book == null || !IsLoaded)
             return null;
 
-        var xmlRoot = Book.ToXml();
-        var xmlDoc = new XDocument(DefaultDeclaration, xmlRoot);
+        var serializeUnsafeNodes = fb2XmlSerializingOptions?.SerializeUnsafeElements ?? true;
+        var xmlRoot = Book.ToXml(serializeUnsafeNodes);
+        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration;
+        var xmlDoc = new XDocument(declaration, xmlRoot);
         return xmlDoc;
     }
 
     /// <summary>
-    /// Renders content of FictionBook as formatted xml string.
+    /// Renders content of FictionBook as formatted XML string.
     /// </summary>
-    /// <returns>String content of a XDocument.</returns>
-    public string? ToXmlString()
+    /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
+    /// <returns>Content of a <see cref="Fb2Document"/> in <see cref="string"/> format if <see cref="Book"/> is loaded - otherwise <see langword="null"/>.
+    /// </returns> 
+    public string? ToXmlString(Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
     {
-        var document = ToXml();
+        var document = ToXml(fb2XmlSerializingOptions);
 
         if (document == null)
             return null;
 
-        return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
+        return string.Join(
+            Environment.NewLine,
+            fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration,
+            document.ToString());
     }
 
     private static void LoadHandled(Action loadingAction)

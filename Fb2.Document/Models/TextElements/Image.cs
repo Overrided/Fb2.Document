@@ -12,29 +12,30 @@ public class Image : Fb2Element
     public override string Name => ElementNames.Image;
 
     public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(
-            AttributeNames.Id,
-            AttributeNames.Alt,
-            AttributeNames.Title,
-            AttributeNames.XHref,
-            AttributeNames.Type);
+    [
+        AttributeNames.Id,
+        AttributeNames.Alt,
+        AttributeNames.Title,
+        AttributeNames.XHref,
+        AttributeNames.Type
+    ];
 
-    private static readonly HashSet<string> InlineParentNodes = new HashSet<string>()
-    {
+    private static readonly HashSet<string> InlineParentNodes =
+    [
         ElementNames.Paragraph,
         ElementNames.StanzaV,
         ElementNames.SubTitle,
         ElementNames.TableHeader,
         ElementNames.TableCell,
         ElementNames.TextAuthor
-    };
+    ];
 
-    private static readonly HashSet<string> NotInlineParentNodes = new HashSet<string>()
-    {
+    private static readonly HashSet<string> NotInlineParentNodes =
+    [
         ElementNames.BookBody,
         ElementNames.BookBodySection,
         ElementNames.Coverpage
-    };
+    ];
 
     public sealed override string ToString()
     {

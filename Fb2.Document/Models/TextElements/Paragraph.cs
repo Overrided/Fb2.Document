@@ -10,6 +10,5 @@ public class Paragraph : TextContainerBase
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
 }

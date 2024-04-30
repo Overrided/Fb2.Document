@@ -8,12 +8,13 @@ public abstract class CreatorBase : Fb2Container
     public override bool CanContainText => false;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.FirstName,
-            ElementNames.MiddleName,
-            ElementNames.LastName,
-            ElementNames.NickName,
-            ElementNames.Email,
-            ElementNames.HomePage,
-            ElementNames.FictionId);
+    [
+        ElementNames.FirstName,
+        ElementNames.MiddleName,
+        ElementNames.LastName,
+        ElementNames.NickName,
+        ElementNames.Email,
+        ElementNames.HomePage,
+        ElementNames.FictionId,
+    ];
 }

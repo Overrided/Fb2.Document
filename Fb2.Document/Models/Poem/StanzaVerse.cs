@@ -10,5 +10,5 @@ public class StanzaVerse : TextContainerBase
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
 }

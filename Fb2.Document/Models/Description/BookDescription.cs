@@ -11,10 +11,11 @@ public class BookDescription : Fb2Container
     public override bool CanContainText => false;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.TitleInfo,
-            ElementNames.SrcTitleInfo,
-            ElementNames.DocumentInfo,
-            ElementNames.PublishInfo,
-            ElementNames.CustomInfo);
+    [
+        ElementNames.TitleInfo,
+        ElementNames.SrcTitleInfo,
+        ElementNames.DocumentInfo,
+        ElementNames.PublishInfo,
+        ElementNames.CustomInfo
+    ];
 }

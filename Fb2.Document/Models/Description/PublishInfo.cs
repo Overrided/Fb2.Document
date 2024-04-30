@@ -11,11 +11,12 @@ public class PublishInfo : Fb2Container
     public override bool CanContainText => false;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.BookName,
-            ElementNames.Publisher,
-            ElementNames.City,
-            ElementNames.Year,
-            ElementNames.ISBN,
-            ElementNames.Sequence);
+    [
+        ElementNames.BookName,
+        ElementNames.Publisher,
+        ElementNames.City,
+        ElementNames.Year,
+        ElementNames.ISBN,
+        ElementNames.Sequence
+    ];
 }

@@ -11,9 +11,10 @@ public class FictionBook : Fb2Container
     public override bool CanContainText => false;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.BinaryImage,
-            ElementNames.BookBody,
-            ElementNames.Description,
-            ElementNames.Stylesheet);
+    [
+        ElementNames.BinaryImage,
+        ElementNames.BookBody,
+        ElementNames.Description,
+        ElementNames.Stylesheet
+    ];
 }

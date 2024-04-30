@@ -10,9 +10,5 @@ public class Stanza : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Title,
-            ElementNames.SubTitle,
-            ElementNames.StanzaV);
+    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Title, ElementNames.SubTitle, ElementNames.StanzaV];
 }

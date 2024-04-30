@@ -10,15 +10,15 @@ public class Quote : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Paragraph,
-            ElementNames.SubTitle,
-            ElementNames.EmptyLine,
-            ElementNames.Poem,
-            ElementNames.Table,
-            ElementNames.TextAuthor);
+    [
+        ElementNames.Paragraph,
+        ElementNames.SubTitle,
+        ElementNames.EmptyLine,
+        ElementNames.Poem,
+        ElementNames.Table,
+        ElementNames.TextAuthor,
+    ];
 }

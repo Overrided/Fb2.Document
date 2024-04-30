@@ -10,5 +10,5 @@ public class Coverpage : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.Image);
+    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Image];
 }

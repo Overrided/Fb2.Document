@@ -9,8 +9,7 @@ public class TextLink : TextContainerBase
 {
     public override string Name => ElementNames.TextLink;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.XHref, AttributeNames.Type);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.XHref, AttributeNames.Type];
 
     public sealed override string ToString()
     {

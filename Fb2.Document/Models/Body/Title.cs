@@ -10,8 +10,7 @@ public class Title : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Language];
 
-    public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(ElementNames.Paragraph, ElementNames.EmptyLine);
+    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Paragraph, ElementNames.EmptyLine];
 }

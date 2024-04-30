@@ -139,14 +139,18 @@ public abstract class Fb2Container : Fb2Node
     /// by calling `ToXml()` on every node in `Content`.
     /// </summary>
     /// <returns><see cref="XElement"/> reflected from given Fb2Node.</returns>
-    public override XElement ToXml()
+    public override XElement ToXml(bool serializeUnsafeNodes = true)
     {
-        var element = base.ToXml();
+        var element = base.ToXml(serializeUnsafeNodes);
 
         if (HasContent)
         {
-            var children = content.Select(ToXmlInternal);
-            element.Add(children);
+            var children = serializeUnsafeNodes ?
+                content :
+                content.Where(x => !x.IsUnsafe);
+
+            var serializedChildren = children.Select(ToXmlInternal);
+            element.Add(serializedChildren);
         }
 
         return element;

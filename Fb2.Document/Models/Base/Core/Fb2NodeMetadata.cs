@@ -6,7 +6,7 @@ using System.Xml.Linq;
 namespace Fb2.Document.Models.Base;
 
 /// <summary>
-/// Represents data used for serializing Fb2Node to XML.
+/// Represents metadata used for serializing Fb2Node to XML.
 /// </summary>
 public class Fb2NodeMetadata
 {
@@ -20,6 +20,12 @@ public class Fb2NodeMetadata
     /// </summary>
     public List<XAttribute>? NamespaceDeclarations { get; private set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="defaultNamespace"></param>
+    /// <param name="namespaceDeclarations"></param>
+    /// <exception cref="ArgumentException"></exception>
     public Fb2NodeMetadata(
         XNamespace? defaultNamespace = null,
         IEnumerable<XAttribute>? namespaceDeclarations = null)

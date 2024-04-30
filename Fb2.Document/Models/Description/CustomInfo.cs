@@ -12,7 +12,7 @@ public class CustomInfo : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.InfoType);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.InfoType];
 
     /// <summary>
     /// Specific override to preserve original string content 

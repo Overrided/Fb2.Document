@@ -16,7 +16,7 @@ public class Program
     }
 }
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net80, 10, 5, 10, 10)]
 [MemoryDiagnoser]
 public class Fb2DocumentBenchMark
 {

@@ -10,13 +10,14 @@ public class Epigraph : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Paragraph,
-            ElementNames.Poem,
-            ElementNames.Quote,
-            ElementNames.EmptyLine,
-            ElementNames.TextAuthor);
+    [
+        ElementNames.Paragraph,
+        ElementNames.Poem,
+        ElementNames.Quote,
+        ElementNames.EmptyLine,
+        ElementNames.TextAuthor
+    ];
 }

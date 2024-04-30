@@ -10,14 +10,15 @@ public abstract class TextContainerBase : Fb2Container
     public override bool CanContainText => true;
 
     public override ImmutableHashSet<string> AllowedElements =>
-        ImmutableHashSet.Create(
-            ElementNames.Strong,
-            ElementNames.Emphasis,
-            ElementNames.TextStyle,
-            ElementNames.TextLink,
-            ElementNames.Strikethrough,
-            ElementNames.Subscript,
-            ElementNames.Superscript,
-            ElementNames.Code,
-            ElementNames.Image);
+    [
+        ElementNames.Strong,
+        ElementNames.Emphasis,
+        ElementNames.TextStyle,
+        ElementNames.TextLink,
+        ElementNames.Strikethrough,
+        ElementNames.Subscript,
+        ElementNames.Superscript,
+        ElementNames.Code,
+        ElementNames.Image,
+    ];
 }

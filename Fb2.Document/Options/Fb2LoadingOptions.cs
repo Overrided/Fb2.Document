@@ -3,6 +3,12 @@
 /// <summary>
 /// Specifies a set of option to use during 
 /// </summary>
+/// 
+
+
+/// <summary>
+/// Specifies a set of options to use during <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.LoadAsync(System.IO.Stream, Fb2StreamLoadingOptions?)"/>
+/// </summary>
 public class Fb2LoadingOptions
 {
     /// <summary>

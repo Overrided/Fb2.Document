@@ -10,5 +10,5 @@ public class Publisher : CreatorBase
 
     public override bool CanContainText => true;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Language];
 }

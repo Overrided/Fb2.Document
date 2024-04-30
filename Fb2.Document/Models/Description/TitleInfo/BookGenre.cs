@@ -10,5 +10,5 @@ public class BookGenre : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Match);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Match];
 }

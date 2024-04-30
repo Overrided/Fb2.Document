@@ -8,5 +8,5 @@ public class Stylesheet : Fb2Element
 {
     public override string Name => ElementNames.Stylesheet;
 
-    public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Type);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Type];
 }

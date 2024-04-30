@@ -12,8 +12,7 @@ public class BinaryImage : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
-        ImmutableHashSet.Create(AttributeNames.ContentType, AttributeNames.Id);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.ContentType, AttributeNames.Id];
 
     public sealed override void Load(
         [In] XNode node,
