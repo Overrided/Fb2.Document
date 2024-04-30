@@ -38,13 +38,13 @@ jobs:
         run: dotnet pack 'Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --output dist
 
       - name: Upload NuGet package artifact
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: ${{ matrix.os }}-nuget
           path: dist
 
       - name: ReportGenerator
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.5
         with:
           reports: "**/TestResults/**/*.xml"
           targetdir: "coveragereport"
@@ -54,7 +54,7 @@ jobs:
           toolpath: "reportgeneratortool"
 
       - name: Upload coverage report artifact
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: ${{ matrix.os }}-coverageReport
           path: coveragereport
