@@ -273,8 +273,9 @@ public sealed class Fb2Document
             return null;
 
         var serializeUnsafeNodes = fb2XmlSerializingOptions?.SerializeUnsafeElements ?? true;
-        var xmlRoot = Book.ToXml(serializeUnsafeNodes);
         var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration;
+
+        var xmlRoot = Book.ToXml(serializeUnsafeNodes);
         var xmlDoc = new XDocument(declaration, xmlRoot);
         return xmlDoc;
     }
@@ -292,9 +293,11 @@ public sealed class Fb2Document
         if (document == null)
             return null;
 
+        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration;
+
         return string.Join(
             Environment.NewLine,
-            fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration,
+            declaration,
             document.ToString());
     }
 

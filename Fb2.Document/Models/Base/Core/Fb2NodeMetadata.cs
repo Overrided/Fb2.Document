@@ -6,25 +6,25 @@ using System.Xml.Linq;
 namespace Fb2.Document.Models.Base;
 
 /// <summary>
-/// Represents metadata used for serializing Fb2Node to XML.
+/// Represents metadata used for serializing <see cref="Fb2Node"/> to XML.
 /// </summary>
 public class Fb2NodeMetadata
 {
     /// <summary>
-    /// Default Namespace of original XNode.
+    /// Default Namespace of original <see cref="XNode"/>.
     /// </summary>
     public XNamespace? DefaultNamespace { get; private set; }
 
     /// <summary>
-    /// Namespace Declaration attributes of original XNode.
+    /// Namespace Declaration attributes of original <see cref="XNode"/>.
     /// </summary>
     public List<XAttribute>? NamespaceDeclarations { get; private set; }
 
     /// <summary>
-    /// 
+    /// Creates new instance of <see cref="Fb2NodeMetadata"/>.
     /// </summary>
-    /// <param name="defaultNamespace"></param>
-    /// <param name="namespaceDeclarations"></param>
+    /// <param name="defaultNamespace"> Default Namespace of original <see cref="XNode"/>. Optional, <see langword="null"/> by default.</param>
+    /// <param name="namespaceDeclarations">Set of Namespace Declaration Attributes of original <see cref="XNode"/>. </param>
     /// <exception cref="ArgumentException"></exception>
     public Fb2NodeMetadata(
         XNamespace? defaultNamespace = null,

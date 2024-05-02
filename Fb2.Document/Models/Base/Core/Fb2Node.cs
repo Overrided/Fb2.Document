@@ -125,9 +125,9 @@ public abstract class Fb2Node : ICloneable
     }
 
     /// <summary>
-    /// Basic method to serialize Fb2Node back to XElement.
+    /// Basic method to serialize <see cref="Fb2Node"/> back to <see cref="XElement"/>.
     /// </summary>
-    /// <returns>XElement instance with attributes reflecting Attributes property.</returns>
+    /// <returns><see cref="XElement"/> instance with attributes reflecting <seealso cref="Attributes"/> property.</returns>
     public virtual XElement ToXml(bool serializeUnsafeNodes = true)
     {
         var defaultNamespace = NodeMetadata?.DefaultNamespace;

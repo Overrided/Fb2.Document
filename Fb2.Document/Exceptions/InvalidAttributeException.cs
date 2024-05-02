@@ -3,7 +3,7 @@
 namespace Fb2.Document.Exceptions;
 
 /// <summary>
-/// Thrown on attempt to create <seealso cref="Models.Attributes.Fb2Attribute"/> with null or empty <seealso cref="Models.Attributes.Fb2Attribute.Key"/>.
+/// Thrown on attempt to create <see cref="Models.Base.Fb2Attribute"/> with null or empty <see cref="Models.Base.Fb2Attribute.Key"/>.
 /// </summary>
 public class InvalidAttributeException : Exception
 {

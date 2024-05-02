@@ -13,7 +13,7 @@ namespace Fb2.Document.Factories;
 
 public static class Fb2NodeFactory
 {
-    private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>
+    private static readonly Dictionary<string, Type> KnownNodes = new()
     {
         { ElementNames.FictionBook, typeof(FictionBook) },
         { ElementNames.BinaryImage, typeof(BinaryImage) },
@@ -91,7 +91,7 @@ public static class Fb2NodeFactory
     };
 
     /// <summary>
-    /// Creates new Fb2Node by given name.
+    /// Creates new <see cref="Fb2Node"/> by given name.
     /// </summary>
     /// <param name="nodeName">Name to create node by.</param>
     /// <returns>New instance of node created by given <paramref name="nodeName"/>.</returns>

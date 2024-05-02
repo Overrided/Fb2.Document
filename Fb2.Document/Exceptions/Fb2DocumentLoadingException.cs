@@ -3,7 +3,7 @@
 namespace Fb2.Document.Exceptions;
 
 /// <summary>
-/// Thrown if loading of a Fb2Document failed.
+/// Thrown if loading of a <see cref="Fb2Document"/> failed.
 /// </summary>
 public class Fb2DocumentLoadingException : Exception
 {
