@@ -72,8 +72,7 @@ public abstract class Fb2Element : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
     {
-        if (contentProvider == null)
-            throw new ArgumentNullException(nameof(contentProvider));
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var content = contentProvider();
 
@@ -93,8 +92,7 @@ public abstract class Fb2Element : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public async Task<Fb2Element> AddContentAsync(Func<Task<string>> contentProvider, string? separator = null)
     {
-        if (contentProvider == null)
-            throw new ArgumentNullException(nameof(contentProvider));
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = await contentProvider();
 
@@ -114,8 +112,7 @@ public abstract class Fb2Element : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public virtual Fb2Element AddContent(string newContent, string? separator = null)
     {
-        if (string.IsNullOrEmpty(newContent))
-            throw new ArgumentNullException(nameof(newContent));
+        ArgumentNullException.ThrowIfNullOrEmpty(newContent, nameof(newContent));
 
         separator = string.IsNullOrEmpty(separator) ?
             string.Empty :
@@ -165,7 +162,7 @@ public abstract class Fb2Element : Fb2Node
         if (other == null)
             return false;
 
-        if (!(other is Fb2Element otherElement))
+        if (other is not Fb2Element otherElement)
             return false;
 
         if (!base.Equals(otherElement))
@@ -181,17 +178,13 @@ public abstract class Fb2Element : Fb2Node
     /// <summary>
     /// Clones given <see cref="Fb2Element"/> creating new instance of same node, attaching attributes etc.
     /// </summary>
-    /// <remarks>
-    /// Attention. 
-    /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Element.Content"/> and can be resource-demanding.
-    /// </remarks>
     /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
     public sealed override object Clone()
     {
         var clone = base.Clone() as Fb2Element;
 
         if (HasContent)
-            clone!.content = new string(content);
+            clone!.content = new(content);
 
         return clone!;
     }

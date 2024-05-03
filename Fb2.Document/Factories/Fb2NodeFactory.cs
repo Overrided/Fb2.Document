@@ -120,8 +120,7 @@ public static class Fb2NodeFactory
     /// <exception cref="ArgumentNullException"></exception>
     public static bool IsKnownNode([In] Fb2Node node)
     {
-        if (node == null)
-            throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node, nameof(node));
 
         var hasKnownName = IsKnownNodeName(node.Name);
         var hasKnownType = KnownNodes.ContainsValue(node.GetType());

@@ -19,9 +19,9 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Node : ICloneable
 {
-    private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
+    private List<Fb2Attribute> attributes = [];
 
-    protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
+    protected static readonly Regex trimWhitespace = new(@"\s+", RegexOptions.Multiline);
     protected const string Whitespace = " ";
 
     /// <summary>
@@ -49,7 +49,7 @@ public abstract class Fb2Node : ICloneable
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet<string>.Empty;
+    public virtual ImmutableHashSet<string> AllowedAttributes => [];
 
     /// <summary>
     /// Indicates if element sholud be inline or start from new line.
@@ -93,7 +93,7 @@ public abstract class Fb2Node : ICloneable
 
         Parent = parentNode;
 
-        if (!(node is XElement element))
+        if (node is not XElement element)
             return;
 
         var allAttributes = element.Attributes();
@@ -106,7 +106,7 @@ public abstract class Fb2Node : ICloneable
             NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
-        if (!AllowedAttributes.Any())
+        if (AllowedAttributes.IsEmpty)
             return;
 
         foreach (var allowedAttrName in AllowedAttributes)
@@ -152,7 +152,7 @@ public abstract class Fb2Node : ICloneable
     {
         var parent = this.Parent;
         if (parent == null)
-            return Enumerable.Empty<Fb2Container>();
+            return [];
 
         var result = new List<Fb2Container> { parent };
 
@@ -171,8 +171,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public bool HasAttribute(Fb2Attribute fb2Attribute)
     {
-        if (fb2Attribute == null)
-            throw new ArgumentNullException(nameof(fb2Attribute));
+        ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
         if (!HasAttributes)
             return false;
@@ -190,8 +189,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public bool HasAttribute(string key, bool ignoreCase = false)
     {
-        if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentNullException(nameof(key));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
 
         if (!HasAttributes)
             return false;
@@ -297,8 +295,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
     {
-        if (attributeProvider == null)
-            throw new ArgumentNullException(nameof(attributeProvider));
+        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 
         var attribute = await attributeProvider();
 
@@ -313,8 +310,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node AddAttribute(Func<Fb2Attribute> attributeProvider)
     {
-        if (attributeProvider == null)
-            throw new ArgumentNullException(nameof(attributeProvider));
+        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 
         var attribute = attributeProvider();
 
@@ -346,10 +342,9 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="UnexpectedAttributeException"></exception>
     public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
     {
-        if (fb2Attribute == null)
-            throw new ArgumentNullException(nameof(fb2Attribute));
+        ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
-        if (!AllowedAttributes.Any())
+        if (AllowedAttributes.IsEmpty)
             throw new NoAttributesAllowedException(Name);
 
         var key = fb2Attribute.Key;
@@ -378,8 +373,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node RemoveAttribute(string key, bool ignoreCase = false)
     {
-        if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentNullException(nameof(key));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
 
         if (!HasAttributes)
             return this;
@@ -402,8 +396,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node RemoveAttribute(Func<Fb2Attribute, bool> attributePredicate)
     {
-        if (attributePredicate == null)
-            throw new ArgumentNullException(nameof(attributePredicate));
+        ArgumentNullException.ThrowIfNull(attributePredicate, nameof(attributePredicate));
 
         if (!HasAttributes)
             return this;
@@ -424,8 +417,7 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node RemoveAttribute(Fb2Attribute fb2Attribute)
     {
-        if (fb2Attribute == null)
-            throw new ArgumentNullException(nameof(fb2Attribute));
+        ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
         if (HasAttribute(fb2Attribute))
             attributes.Remove(fb2Attribute);
@@ -478,8 +470,7 @@ public abstract class Fb2Node : ICloneable
 
     protected void Validate(XNode node)
     {
-        if (node == null)
-            throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node, nameof(node));
 
         if (node.NodeType != XmlNodeType.Element)
             return;
@@ -493,7 +484,7 @@ public abstract class Fb2Node : ICloneable
         if (other == null)
             return false;
 
-        if (!(other is Fb2Node otherNode))
+        if (other is not Fb2Node otherNode)
             return false;
 
         if (ReferenceEquals(this, otherNode))
@@ -525,7 +516,6 @@ public abstract class Fb2Node : ICloneable
     /// <summary>
     /// Clones given <see cref="Fb2Node"/> creating new instance of same node, attaching attributes etc.
     /// </summary>
-    /// <remarks>Attention. This method also clones node's <see cref="Fb2Node.Parent"/> and can be resource-demanding.</remarks>
     /// <returns>New instance of given <see cref="Fb2Node"/>.</returns>
     public virtual object Clone()
     {
@@ -533,7 +523,7 @@ public abstract class Fb2Node : ICloneable
         return cloneNode;
     }
 
-    protected Fb2Node CloneNodeInternal(Fb2Node node)
+    protected static Fb2Node CloneNodeInternal(Fb2Node node)
     {
         var cloneNode = Fb2NodeFactory.GetNodeByName(node.Name);
 

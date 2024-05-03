@@ -21,8 +21,8 @@ public sealed class Fb2Document
 {
     private const string DefaultXmlVersion = "1.0";
 
-    private static readonly XDeclaration DefaultDeclaration = new XDeclaration(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
-    private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
+    private static readonly XDeclaration DefaultDeclaration = new(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
+    private static readonly XmlReaderSettings DefaultXmlReaderSettings = new()
     {
         Async = true,
         CheckCharacters = true,
@@ -83,7 +83,7 @@ public sealed class Fb2Document
         get
         {
             if (!IsLoaded || Book == null)
-                return ImmutableList<BookBody>.Empty;
+                return [];
 
             return Book.GetChildren<BookBody>().ToImmutableList();
         }
@@ -97,7 +97,7 @@ public sealed class Fb2Document
         get
         {
             if (!IsLoaded || Book == null)
-                return ImmutableList<BinaryImage>.Empty;
+                return [];
 
             return Book.GetChildren<BinaryImage>().ToImmutableList();
         }
@@ -138,8 +138,7 @@ public sealed class Fb2Document
     /// </remarks>
     public void Load([In] XDocument document, Fb2LoadingOptions? loadingOptions = null)
     {
-        if (document == null)
-            throw new ArgumentNullException(nameof(document));
+        ArgumentNullException.ThrowIfNull(document, nameof(document));
 
         LoadHandled(() => Load(document.Root, loadingOptions));
     }
@@ -184,14 +183,12 @@ public sealed class Fb2Document
 
         await LoadHandledAsync(async () =>
         {
-            using (var reader = new StringReader(fileContent))
-            {
-                var document = await XDocument
-                    .LoadAsync(reader, LoadOptions.None, default)
-                    .ConfigureAwait(false);
+            using var reader = new StringReader(fileContent);
+            var document = await XDocument
+                .LoadAsync(reader, LoadOptions.None, default)
+                .ConfigureAwait(false);
 
-                Load(document.Root, loadingOptions);
-            }
+            Load(document.Root, loadingOptions);
         });
     }
 
@@ -205,8 +202,7 @@ public sealed class Fb2Document
     /// <remarks>Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used.</remarks>
     public void Load([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
     {
-        if (fileContent == null)
-            throw new ArgumentNullException(nameof(fileContent));
+        ArgumentNullException.ThrowIfNull(fileContent, nameof(fileContent));
 
         if (!fileContent.CanRead)
             throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
@@ -236,8 +232,7 @@ public sealed class Fb2Document
     /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
     public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
     {
-        if (fileContent == null)
-            throw new ArgumentNullException(nameof(fileContent));
+        ArgumentNullException.ThrowIfNull(fileContent, nameof(fileContent));
 
         if (!fileContent.CanRead)
             throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
@@ -249,14 +244,12 @@ public sealed class Fb2Document
 
         await LoadHandledAsync(async () =>
         {
-            using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
-            {
-                var document = await XDocument
-                    .LoadAsync(reader, LoadOptions.None, default)
-                    .ConfigureAwait(false);
+            using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
+            var document = await XDocument
+                .LoadAsync(reader, LoadOptions.None, default)
+                .ConfigureAwait(false);
 
-                Load(document.Root, options);
-            }
+            Load(document.Root, options);
         });
     }
 
@@ -325,10 +318,9 @@ public sealed class Fb2Document
         }
     }
 
-    private void Load([In] XElement? root, Fb2LoadingOptions? loadingOptions = null)
+    private void Load([In] XElement root, Fb2LoadingOptions? loadingOptions = null)
     {
-        if (root == null)
-            throw new ArgumentNullException(nameof(root));
+        ArgumentNullException.ThrowIfNull(root, nameof(root));
 
         var options = loadingOptions ?? new Fb2LoadingOptions();
 

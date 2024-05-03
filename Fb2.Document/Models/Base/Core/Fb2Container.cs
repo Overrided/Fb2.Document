@@ -161,7 +161,7 @@ public abstract class Fb2Container : Fb2Node
         if (other == null)
             return false;
 
-        if (!(other is Fb2Container otherContainer))
+        if (other is not Fb2Container otherContainer)
             return false;
 
         if (!base.Equals(otherContainer))
@@ -184,10 +184,6 @@ public abstract class Fb2Container : Fb2Node
     /// <summary>
     /// Clones given <see cref="Fb2Container"/> creating new instance of same node, attaching attributes etc.
     /// </summary>
-    /// <remarks>
-    /// Attention. 
-    /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Container.Content"/> and can be resource-demanding.
-    /// </remarks>
     /// <returns>New instance of given <see cref="Fb2Container"/>.</returns>
     public sealed override object Clone()
     {
@@ -213,8 +209,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
     {
-        if (nodeProvider == null)
-            throw new ArgumentNullException(nameof(nodeProvider));
+        ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
 
         var newNode = await nodeProvider().ConfigureAwait(false);
         return AddContent(newNode);
@@ -228,8 +223,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
     {
-        if (nodeProvider == null)
-            throw new ArgumentNullException(nameof(nodeProvider));
+        ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
 
         var node = nodeProvider();
         return AddContent(node);
@@ -265,8 +259,7 @@ public abstract class Fb2Container : Fb2Node
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-        if (string.IsNullOrEmpty(newContent))
-            throw new ArgumentNullException(nameof(newContent));
+        ArgumentNullException.ThrowIfNullOrEmpty(newContent, nameof(newContent));
 
         return TryMergeTextContent(newContent, separator);
     }
@@ -281,14 +274,12 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="UnexpectedNodeException"></exception>
     public Fb2Container AddTextContent(Func<string> contentProvider, string? separator = null)
     {
-        if (contentProvider == null)
-            throw new ArgumentNullException(nameof(contentProvider));
-
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-        var newContent = contentProvider();
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
+        var newContent = contentProvider();
         return AddTextContent(newContent, separator);
     }
 
@@ -303,14 +294,12 @@ public abstract class Fb2Container : Fb2Node
     public async Task<Fb2Container> AddTextContentAsync(
         Func<Task<string>> contentProvider, string? separator = null)
     {
-        if (contentProvider == null)
-            throw new ArgumentNullException(nameof(contentProvider));
-
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-        var newContent = await contentProvider();
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
+        var newContent = await contentProvider();
         return AddTextContent(newContent, separator);
     }
 
@@ -343,7 +332,6 @@ public abstract class Fb2Container : Fb2Node
             throw new ArgumentNullException(nameof(nodeName));
 
         var node = Fb2NodeFactory.GetNodeByName(nodeName);
-
         return AddContent(node);
     }
 
@@ -357,8 +345,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="UnexpectedNodeException"></exception>
     public Fb2Container AddContent(Fb2Node node)
     {
-        if (node == null)
-            throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node, nameof(node));
 
         if (!Fb2NodeFactory.IsKnownNode(node))
             throw new InvalidNodeException(node);
@@ -408,8 +395,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Container RemoveContent([In] Func<Fb2Node, bool> nodePredicate)
     {
-        if (nodePredicate == null)
-            throw new ArgumentNullException(nameof(nodePredicate));
+        ArgumentNullException.ThrowIfNull(nodePredicate, nameof(nodePredicate));
 
         if (HasContent)
         {
@@ -429,8 +415,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Container RemoveContent(Fb2Node node)
     {
-        if (node == null)
-            throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node, nameof(node));
 
         if (HasContent && content.Contains(node))
         {
@@ -476,7 +461,7 @@ public abstract class Fb2Container : Fb2Node
         if (HasContent)
             return content.Where(elem => elem.Name.EqualsIgnoreCase(name));
 
-        return Enumerable.Empty<Fb2Node>();
+        return [];
     }
 
     /// <summary>
@@ -487,13 +472,12 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public IEnumerable<Fb2Node> GetChildren(Func<Fb2Node, bool> predicate)
     {
-        if (predicate == null)
-            throw new ArgumentNullException(nameof(predicate));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         if (HasContent)
             return content.Where(c => predicate(c));
 
-        return Enumerable.Empty<Fb2Node>();
+        return [];
     }
 
     /// <summary>
@@ -524,8 +508,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node? GetFirstChild(Func<Fb2Node, bool> predicate)
     {
-        if (predicate == null)
-            throw new ArgumentNullException(nameof(predicate));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         if (HasContent)
             return content.FirstOrDefault(predicate);
@@ -580,8 +563,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public IEnumerable<Fb2Node> GetDescendants(Func<Fb2Node, bool> predicate)
     {
-        if (predicate == null)
-            throw new ArgumentNullException(nameof(predicate));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         var result = new List<Fb2Node>();
 
@@ -652,8 +634,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node? GetFirstDescendant(Func<Fb2Node, bool> predicate)
     {
-        if (predicate == null)
-            throw new ArgumentNullException(nameof(predicate));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         if (!HasContent)
             return null;
@@ -711,12 +692,12 @@ public abstract class Fb2Container : Fb2Node
     public IEnumerable<T> GetChildren<T>() where T : Fb2Node
     {
         if (!HasContent)
-            return Enumerable.Empty<T>();
+            return [];
 
         var predicate = PredicateResolver.GetPredicate<T>();
         var result = content.Where(predicate);
 
-        return result.Any() ? result.Cast<T>() : Enumerable.Empty<T>();
+        return result.Any() ? result.Cast<T>() : [];
     }
 
     /// <summary>
@@ -773,7 +754,7 @@ public abstract class Fb2Container : Fb2Node
         where T : Fb2Node
     {
         if (!HasContent)
-            return Enumerable.Empty<T>();
+            return [];
 
         var result = new List<Fb2Node>();
 
@@ -831,7 +812,7 @@ public abstract class Fb2Container : Fb2Node
 
         // empty or last item is not text, so cant append actual content nowhere
         if (lastChildNode == null ||
-            !(lastChildNode is TextItem lastTextItem))
+            lastChildNode is not TextItem lastTextItem)
         {
             var textNode = new TextItem { Parent = this }.AddContent(newContent, separator);
             content.Add(textNode);

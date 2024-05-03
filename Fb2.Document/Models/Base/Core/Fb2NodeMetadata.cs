@@ -39,7 +39,7 @@ public class Fb2NodeMetadata
             if (!namespaceDeclarationsOnly)
                 throw new ArgumentException($"{nameof(namespaceDeclarations)} should contain Namespace Declarations attributes only.");
 
-            NamespaceDeclarations = new List<XAttribute>(namespaceDeclarations);
+            NamespaceDeclarations = new(namespaceDeclarations);
         }
     }
 
@@ -52,7 +52,7 @@ public class Fb2NodeMetadata
         DefaultNamespace = other.DefaultNamespace;
 
         NamespaceDeclarations = other.NamespaceDeclarations != null && other.NamespaceDeclarations.Any() ?
-            new List<XAttribute>(other.NamespaceDeclarations) :
+            new(other.NamespaceDeclarations) :
             null;
     }
 
@@ -61,7 +61,7 @@ public class Fb2NodeMetadata
         if (obj == null)
             return false;
 
-        if (!(obj is Fb2NodeMetadata otherMetadata))
+        if (obj is not Fb2NodeMetadata otherMetadata)
             return false;
 
         if (ReferenceEquals(this, otherMetadata))
