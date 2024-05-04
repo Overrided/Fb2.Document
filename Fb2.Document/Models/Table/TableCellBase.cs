@@ -13,6 +13,6 @@ public abstract class TableCellBase : TextContainerBase
         AttributeNames.RowSpan,
         AttributeNames.Align,
         AttributeNames.VerticalAlign,
-        AttributeNames.Language,
+        AttributeNames.Language
     ];
 }

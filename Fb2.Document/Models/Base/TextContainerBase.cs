@@ -19,6 +19,6 @@ public abstract class TextContainerBase : Fb2Container
         ElementNames.Subscript,
         ElementNames.Superscript,
         ElementNames.Code,
-        ElementNames.Image,
+        ElementNames.Image
     ];
 }

@@ -24,6 +24,6 @@ public class BodySection : Fb2Container
         ElementNames.EmptyLine,
         ElementNames.SubTitle,
         ElementNames.Table,
-        ElementNames.Annotation,
+        ElementNames.Annotation
     ];
 }

@@ -20,6 +20,6 @@ public class DocumentInfo : Fb2Container
         ElementNames.FictionId,
         ElementNames.Version,
         ElementNames.History,
-        ElementNames.Publisher,
+        ElementNames.Publisher
     ];
 }

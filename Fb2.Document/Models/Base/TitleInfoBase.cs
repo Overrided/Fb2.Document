@@ -20,6 +20,6 @@ public abstract class TitleInfoBase : Fb2Container
         ElementNames.SubTitle,
         ElementNames.Date,
         ElementNames.Lang,
-        ElementNames.SrcLang,
+        ElementNames.SrcLang
     ];
 }

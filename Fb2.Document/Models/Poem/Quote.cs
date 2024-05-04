@@ -19,6 +19,6 @@ public class Quote : Fb2Container
         ElementNames.EmptyLine,
         ElementNames.Poem,
         ElementNames.Table,
-        ElementNames.TextAuthor,
+        ElementNames.TextAuthor
     ];
 }

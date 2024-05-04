@@ -25,8 +25,7 @@ public abstract class Fb2Container : Fb2Node
     /// <summary>
     /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
     /// </summary>
-    public ImmutableList<Fb2Node> Content => HasContent ?
-        content.ToImmutableList() : ImmutableList<Fb2Node>.Empty;
+    public ImmutableList<Fb2Node> Content => HasContent ? [.. content] : [];
 
     /// <summary>
     /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
