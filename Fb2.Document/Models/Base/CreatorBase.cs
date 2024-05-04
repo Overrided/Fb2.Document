@@ -15,6 +15,6 @@ public abstract class CreatorBase : Fb2Container
         ElementNames.NickName,
         ElementNames.Email,
         ElementNames.HomePage,
-        ElementNames.FictionId,
+        ElementNames.FictionId
     ];
 }

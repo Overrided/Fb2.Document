@@ -259,7 +259,8 @@ public abstract class Fb2Container : Fb2Node
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-        ArgumentNullException.ThrowIfNullOrEmpty(newContent, nameof(newContent));
+        if (string.IsNullOrEmpty(newContent))
+            throw new ArgumentNullException(nameof(newContent));
 
         return TryMergeTextContent(newContent, separator);
     }

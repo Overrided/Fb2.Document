@@ -17,11 +17,11 @@ namespace Fb2.Document.Models.Base;
 /// Base class - describes basic node of fb2 document.
 /// Has Name, list of valid attributes and actual attribute values.
 /// </summary>
-public abstract class Fb2Node : ICloneable
+public abstract partial class Fb2Node : ICloneable
 {
     private List<Fb2Attribute> attributes = [];
 
-    protected static readonly Regex trimWhitespace = new(@"\s+", RegexOptions.Multiline);
+    protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
     protected const string Whitespace = " ";
 
     /// <summary>
@@ -37,9 +37,7 @@ public abstract class Fb2Node : ICloneable
     /// <summary>
     /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ?
-        attributes.ToImmutableHashSet() :
-        ImmutableHashSet<Fb2Attribute>.Empty;
+    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes] : [];
 
     /// <summary>
     /// Indicates if element has any attributes.
@@ -189,7 +187,8 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public bool HasAttribute(string key, bool ignoreCase = false)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentNullException(nameof(key));
 
         if (!HasAttributes)
             return false;
@@ -373,7 +372,8 @@ public abstract class Fb2Node : ICloneable
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Node RemoveAttribute(string key, bool ignoreCase = false)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentNullException(nameof(key));
 
         if (!HasAttributes)
             return this;
@@ -540,4 +540,7 @@ public abstract class Fb2Node : ICloneable
 
         return cloneNode;
     }
+
+    [GeneratedRegex(@"\s+", RegexOptions.Multiline)]
+    private static partial Regex TrimWhitespaceCompiledRegex();
 }

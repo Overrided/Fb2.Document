@@ -9,8 +9,8 @@ using Fb2.Document.Exceptions;
 namespace Fb2.Document.Models.Base;
 
 /// <summary>
-/// Represents text Node of Fb2Document.
-/// Any class derived from Fb2Element can contain text only.
+/// Represents text Node of <see cref="Fb2Document"/>.
+/// Any class derived from <see cref="Fb2Element"/> can contain text only.
 /// </summary>
 public abstract class Fb2Element : Fb2Node
 {
@@ -112,16 +112,17 @@ public abstract class Fb2Element : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public virtual Fb2Element AddContent(string newContent, string? separator = null)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(newContent, nameof(newContent));
+        if (string.IsNullOrEmpty(newContent))
+            throw new ArgumentNullException(nameof(newContent));
 
-        separator = string.IsNullOrEmpty(separator) ?
+        var normalizedSeparator = string.IsNullOrEmpty(separator) ?
             string.Empty :
             SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
-        newContent = newContent.Replace(Environment.NewLine, Whitespace);
-        newContent = SecurityElement.Escape(newContent)!;
+        var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
+        normalizedNewContent = SecurityElement.Escape(normalizedNewContent)!;
 
-        content = string.Join(separator, content, newContent);
+        content = string.Join(normalizedSeparator, content, normalizedNewContent);
 
         return this;
     }

@@ -103,6 +103,8 @@ public class Fb2ElementTests
 
         fb2Element.ClearContent();
         fb2Element.HasContent.Should().BeFalse();
+        fb2Element.Content.Should().Be(string.Empty);
+        fb2Element.Content.Length.Should().Be(0);
 
         fb2Element.AddContent("test content 1"); // no separator
         fb2Element.HasContent.Should().BeTrue();

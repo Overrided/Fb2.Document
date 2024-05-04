@@ -505,6 +505,12 @@ public class Fb2NodeTests
             .Should()
             .ThrowExactly<ArgumentNullException>()
             .WithParameterName("key");
+
+        instance
+            .Invoking(i => i.RemoveAttribute(string.Empty))
+            .Should()
+            .ThrowExactly<ArgumentNullException>()
+            .WithParameterName("key");
     }
 
 
@@ -570,6 +576,11 @@ public class Fb2NodeTests
 
         instance
             .Invoking(i => i.HasAttribute((string)null))
+            .Should()
+            .ThrowExactly<ArgumentNullException>();
+
+        instance
+            .Invoking(i => i.HasAttribute(string.Empty))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
