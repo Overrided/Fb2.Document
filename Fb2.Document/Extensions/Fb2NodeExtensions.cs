@@ -12,7 +12,7 @@ public static class Fb2NodeExtensions
 {
     /// <summary>
     /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(Fb2Attribute[])"/> method.
-    /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <seealso cref="params Fb2Attribute[]"/>.</para>
+    /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <see cref="params Fb2Attribute[]"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
     /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
@@ -23,7 +23,7 @@ public static class Fb2NodeExtensions
 
     /// <summary>
     /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributes(IEnumerable{Fb2Attribute})"/> method.
-    /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <seealso cref="IEnumerable{Fb2Attribute}."/></para>
+    /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <see cref="IEnumerable{Fb2Attribute}."/></para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
     /// <param name="fb2Node">Fb2Node instance to use extension on.</param>

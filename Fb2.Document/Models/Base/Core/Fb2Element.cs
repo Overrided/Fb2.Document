@@ -40,7 +40,7 @@ public abstract class Fb2Element : Fb2Node
     /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
     /// <param name="loadUnsafe"> Is ignored by Fb2Element loading.</param>
     /// <exception cref="Fb2NodeLoadingException"></exception>
-    /// <remarks>Original content of XNode is NOT preserved by default except for <seealso cref="Code" />.</remarks>
+    /// <remarks>Original content of XNode is NOT preserved by default except for <see cref="Code" />.</remarks>
     public override void Load(
         [In] XNode node,
         [In] Fb2Container? parentNode = null,

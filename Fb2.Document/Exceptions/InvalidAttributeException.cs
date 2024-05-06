@@ -12,6 +12,10 @@ public class InvalidAttributeException : Exception
     /// </summary>
     public string AttributeKey { get; }
 
+    /// <summary>
+    /// Creates new instance of <see cref="InvalidAttributeException"/>.
+    /// </summary>
+    /// <param name="attributeKey">Attribute Name that caused exception.</param>
     public InvalidAttributeException(string attributeKey) :
         base("AttributeKey is null or empty string, or contains invalid characters.")
     {

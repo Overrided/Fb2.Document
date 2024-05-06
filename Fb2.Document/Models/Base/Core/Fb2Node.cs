@@ -125,7 +125,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// Basic method to serialize <see cref="Fb2Node"/> back to <see cref="XElement"/>.
     /// </summary>
-    /// <returns><see cref="XElement"/> instance with attributes reflecting <seealso cref="Attributes"/> property.</returns>
+    /// <returns><see cref="XElement"/> instance with attributes reflecting <see cref="Attributes"/> property.</returns>
     public virtual XElement ToXml(bool serializeUnsafeNodes = true)
     {
         var defaultNamespace = NodeMetadata?.DefaultNamespace;
@@ -223,7 +223,7 @@ public abstract partial class Fb2Node : ICloneable
     /// Attempts to get first matching <c>Fb2Attribute</c> by given <paramref name="key"/>.
     /// </summary>
     /// <param name="key">Key to match attribute by.</param>
-    /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+    /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
     /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
     public bool TryGetAttribute(string key, out Fb2Attribute? result)
     {
@@ -238,7 +238,7 @@ public abstract partial class Fb2Node : ICloneable
     /// </summary>
     /// <param name="key">Key to match attribute by.</param>
     /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
-    /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+    /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
     /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
     public bool TryGetAttribute(string key, bool ignoreCase, out Fb2Attribute? result)
     {
@@ -253,7 +253,7 @@ public abstract partial class Fb2Node : ICloneable
     #region Node editing
 
     /// <summary>
-    /// Adds multiple attributes to node using <seealso cref="params Fb2Attribute[]"/>.
+    /// Adds multiple attributes to node using <see cref="params Fb2Attribute[]"/>.
     /// </summary>
     /// <param name="attributes">Set of attributes to add.</param>
     /// <returns>Current node.</returns>
@@ -270,7 +270,7 @@ public abstract partial class Fb2Node : ICloneable
     }
 
     /// <summary>
-    /// Adds multiple attributes using <seealso cref="IEnumerable{Fb2Attribute}." />
+    /// Adds multiple attributes using <see cref="IEnumerable{Fb2Attribute}." />
     /// </summary>
     /// <param name="attributes">Set of attributes to add.</param>
     /// <returns>Current node.</returns>

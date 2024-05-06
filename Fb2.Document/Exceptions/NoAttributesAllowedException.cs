@@ -3,7 +3,7 @@
 namespace Fb2.Document.Exceptions;
 
 /// <summary>
-/// Thrown when attempt to add attribute(s) no Fb2Node without <seealso cref="Models.Base.Fb2Node.AllowedAttributes"/>.
+/// Thrown when attempt to add attribute(s) to <see cref="Models.Base.Fb2Node"/> without <see cref="Models.Base.Fb2Node.AllowedAttributes"/>.
 /// </summary>
 public class NoAttributesAllowedException : Exception
 {
@@ -12,6 +12,10 @@ public class NoAttributesAllowedException : Exception
     /// </summary>
     public string NodeName { get; }
 
+    /// <summary>
+    /// Creates new instance of <see cref="NoAttributesAllowedException"/>.
+    /// </summary>
+    /// <param name="nodeName">Name of Node that attribute(s) where attempted to be added to.</param>
     public NoAttributesAllowedException(string nodeName) : base($"Node '{nodeName}' has no allowed attributes.")
     {
         NodeName = nodeName;

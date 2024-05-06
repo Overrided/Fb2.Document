@@ -136,7 +136,9 @@ public sealed class Fb2Document
     /// This method is not Encoding-safe. 
     /// Loading will proceed with Encoding of XDocument received.
     /// </remarks>
-    public void Load([In] XDocument document, Fb2LoadingOptions? loadingOptions = null)
+    public void Load(
+        [In] XDocument document,
+        [In] Fb2LoadingOptions? loadingOptions = null)
     {
         ArgumentNullException.ThrowIfNull(document, nameof(document));
 
@@ -153,7 +155,9 @@ public sealed class Fb2Document
     /// This method is not Encoding-safe.
     /// Loading will proceed with Encoding of string received.
     /// </remarks>
-    public void Load([In] string fileContent, Fb2LoadingOptions? loadingOptions = null)
+    public void Load(
+        [In] string fileContent,
+        [In] Fb2LoadingOptions? loadingOptions = null)
     {
         if (string.IsNullOrWhiteSpace(fileContent))
             throw new ArgumentNullException(nameof(fileContent));
@@ -176,7 +180,9 @@ public sealed class Fb2Document
     /// Loading will proceed with Encoding of string received.
     /// This method exists mostly for lulz :)
     /// </remarks>
-    public async Task LoadAsync([In] string fileContent, Fb2LoadingOptions? loadingOptions = null)
+    public async Task LoadAsync(
+        [In] string fileContent,
+        [In] Fb2LoadingOptions? loadingOptions = null)
     {
         if (string.IsNullOrWhiteSpace(fileContent))
             throw new ArgumentNullException(nameof(fileContent));
@@ -200,7 +206,9 @@ public sealed class Fb2Document
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
     /// <remarks>Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used.</remarks>
-    public void Load([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
+    public void Load(
+        [In] Stream fileContent,
+        [In] Fb2StreamLoadingOptions? loadingOptions = null)
     {
         ArgumentNullException.ThrowIfNull(fileContent, nameof(fileContent));
 
@@ -230,7 +238,9 @@ public sealed class Fb2Document
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception> 
     /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
-    public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions? loadingOptions = null)
+    public async Task LoadAsync(
+        [In] Stream fileContent,
+        [In] Fb2StreamLoadingOptions? loadingOptions = null)
     {
         ArgumentNullException.ThrowIfNull(fileContent, nameof(fileContent));
 
@@ -260,7 +270,7 @@ public sealed class Fb2Document
     /// <returns>
     /// XDocument instance formatted accordingly to Fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
     /// </returns>
-    public XDocument? ToXml(Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
+    public XDocument? ToXml([In] Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
     {
         if (Book == null || !IsLoaded)
             return null;
@@ -279,7 +289,7 @@ public sealed class Fb2Document
     /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
     /// <returns>Content of a <see cref="Fb2Document"/> in <see cref="string"/> format if <see cref="Book"/> is loaded - otherwise <see langword="null"/>.
     /// </returns> 
-    public string? ToXmlString(Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
+    public string? ToXmlString([In] Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
     {
         var document = ToXml(fb2XmlSerializingOptions);
 
@@ -318,7 +328,7 @@ public sealed class Fb2Document
         }
     }
 
-    private void Load([In] XElement root, Fb2LoadingOptions? loadingOptions = null)
+    private void Load([In] XElement root, [In] Fb2LoadingOptions? loadingOptions = null)
     {
         ArgumentNullException.ThrowIfNull(root, nameof(root));
 
