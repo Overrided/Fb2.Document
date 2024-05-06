@@ -609,7 +609,6 @@ public class Fb2ContainerTests
         strong.Content.Should().BeEmpty();
     }
 
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -630,18 +629,21 @@ public class Fb2ContainerTests
         var serialized = strong.ToXml(serializeUnsafe);
         serialized.Should().NotBeNull().And.BeOfType<XElement>();
 
+        var serializedNodes = serialized.Nodes();
+
         if (serializeUnsafe)
         {
-            serialized.Nodes().Should().HaveCount(1);
+            serializedNodes.Should().HaveCount(1);
+            serializedNodes.First().Should().BeOfType<XElement>();
+            (serializedNodes.First() as XElement)!.Name.ToString().Should().Be(ElementNames.Paragraph);
         }
         else
         {
-            serialized.Nodes().Should().BeEmpty();
+            serializedNodes.Should().BeEmpty();
         }
 
         ClearContainerContent(strong);
     }
-
 
     [Fact]
     public void ContainerNode_ChangeChildrenContent_Works()

@@ -12,8 +12,8 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 * [Document infrastructure](#Document-infrastructure)
 
 * [Loading](#Loading)
-    * [Fb2Document](#fb2document)
-    * [...particular node](#particular-node)
+    * [Loading Fb2Document](#loading-fb2document)
+    * [Loading Fb2Node](#loading-fb2node)
 
 * [Encoding](#encoding)
 
@@ -27,6 +27,10 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
     * [Editing Fb2Container content](#editing-fb2container-content)
     * [Editing Attributes](#editing-attributes)
     * [Method chaining](#method-chaining)
+
+* [Serialization](#serialization)
+    * [Serializing Fb2Document](#serializing-fb2document)
+    * [Serializing Fb2Node](#serializing-fb2node)
 
 * [Extensions](#extensions)
 
@@ -100,7 +104,7 @@ For full list of allowed elements and attribute names see [ElementNames](https:/
 
 There are API's that enable loading `Fb2 DOM` in different scenarios, for both `Fb2Document` and any particular node.
 
-### Fb2Document
+### Loading Fb2Document
 
 All `Load` or `LoadAsync` methods of `Fb2Document` class accept either `Fb2LoadingOptions` or `Fb2StreamLoadingOptions` optional parameter to configure content loading. For more info see [LoadingOptions](https://github.com/Overrided/Fb2.Document/tree/master/Fb2.Document/LoadingOptions).
 
@@ -172,7 +176,7 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
 
 >Method is encoding-safe. [*](#Encoding-safety)
 
-### ...particular node
+### Loading Fb2Node
 
 In corner-case scenario you might need to load some part of a document into the model, instead of loading whole thing.
 
@@ -195,7 +199,7 @@ If method is encoding-safe - during loading process library will try to determin
 
 ## Querying
 
-All descendants of `Fb2Node` (itself included) class provide build-in methods to query and manipulate parsed data in multiple ways.
+All descendants of `Fb2Node` class (itself included) provide build-in methods to query and manipulate parsed data in multiple ways.
 
 
 ### Query Fb2Element
@@ -329,7 +333,7 @@ if (tableCellFb2Node.TryGetAttribute(AttributeNames.Align, true, out var alignAt
 
 ## Editing
 
-All descendants of `Fb2Node` class provide content manipulation APIs along with `Attributes` modification methods.
+All descendants of `Fb2Node` class provide `Content` manipulation APIs along with `Attributes` modification methods.
 All content of `Fb2Document` is represented by instances of two core classes:
 
  - `Fb2Element` - represents `plain text` node of some kind.
@@ -551,6 +555,53 @@ Paragraph paragraph = new Paragraph().AddAttribute(AttributeNames.Id, "testValue
 >
 > Once `AddAttribute` method (or any overload) is used on `Fb2Element` or `Fb2Container`, returned value is converted to `Fb2Node` type, allowing access for `Attributes` only. This can break method chaining, so it is recommended to use `Attributes`-related methods in last turn in call chain, or to use [Extensions](#extensions).
 
+
+## Serialization
+
+All descendants of `Fb2Node` class (itself included) provide build-in methods to serialize back to `XML` format.
+`Fb2Document` class exposes similar APIs which cover whole book content serialization.
+
+Basically, it's opposite to `Load` method call.
+
+### Serializing Fb2Document
+To serialize `Fb2Document` class instance back into XML form there are two options: `ToXml` / `ToXmlString` methods. Both accept optional `Fb2XmlSerializingOptions` parameter to configure serialization.
+
+1) `ToXml` example:
+```csharp
+// without Fb2XmlSerializingOptions
+XDocument? doc = fb2Document.ToXml();
+
+// using Fb2XmlSerializingOptions
+XDocument? doc = fb2Document.ToXml(new Fb2XmlSerializingOptions { SerializeUnsafeElements = false });
+```
+
+`ToXml` method returns `XDocument` if `Fb2Document.Book.IsLoaded` or `null` otherwise.
+
+2) `ToXmlString` example:
+
+```csharp
+// without Fb2XmlSerializingOptions
+string? xmlString = fb2Document.ToXmlString();
+
+// using Fb2XmlSerializingOptions
+string? xmlString = fb2Document.ToXmlString(new Fb2XmlSerializingOptions { SerializeUnsafeElements = false });
+```
+
+### Serializing Fb2Node
+
+To serialize given `Fb2Node`, use `ToXml` method:
+
+```csharp
+// set up
+var paragraph = new Paragraph();
+paragraph.Load(...);
+
+// without parameters
+XElement serializedParagraph = paragraph.ToXml();
+
+// using serializeUnsafeNodes boolean parameter
+XElement serializedParagraph = paragraph.ToXml(false);
+```
 
 ## Extensions
 
