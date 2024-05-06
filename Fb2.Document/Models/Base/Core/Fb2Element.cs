@@ -149,7 +149,7 @@ public abstract class Fb2Element : Fb2Node
     /// </remarks>
     public override XElement ToXml(bool serializeUnsafeNodes = true)
     {
-        var element = base.ToXml();
+        var element = base.ToXml(serializeUnsafeNodes);
         if (HasContent)
             element.Value = content;
 

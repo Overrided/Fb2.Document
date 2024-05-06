@@ -101,7 +101,7 @@ public abstract partial class Fb2Node : ICloneable
             var defaultNodeNamespace = element.GetDefaultNamespace();
             var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
 
-            NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
+            NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
         if (AllowedAttributes.IsEmpty)
@@ -507,8 +507,7 @@ public abstract partial class Fb2Node : ICloneable
         if (ReferenceEquals(attributes, otherAttributes))
             return true;
 
-        return attributes.Count == otherAttributes.Count &&
-               attributes.All(k => otherAttributes.Contains(k));
+        return attributes.Count == otherAttributes.Count && attributes.All(otherAttributes.Contains);
     }
 
     public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
@@ -532,11 +531,11 @@ public abstract partial class Fb2Node : ICloneable
 
         if (node.HasAttributes)
             cloneNode.attributes = node.attributes
-                .Select(a => new Fb2Attribute(a.Key, a.Value, a.NamespaceName))
+                .Select(a => new Fb2Attribute(a))
                 .ToList();
 
         if (node.NodeMetadata != null)
-            cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata);
+            cloneNode.NodeMetadata = new(node.NodeMetadata);
 
         return cloneNode;
     }

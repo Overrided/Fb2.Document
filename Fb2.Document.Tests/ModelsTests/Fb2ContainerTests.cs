@@ -587,6 +587,7 @@ public class Fb2ContainerTests
         strong.Content.Should().HaveCount(1);
         strong.Content.First().Should().BeOfType<TextItem>();
         (strong.Content.First() as TextItem).Content.Should().Be(validStrongXNodeText);
+        (strong.Content.First() as TextItem).IsUnsafe.Should().BeFalse();
 
         ClearContainerContent(strong);
 
@@ -598,6 +599,7 @@ public class Fb2ContainerTests
 
         strong.Content.Should().HaveCount(1);
         strong.Content.First().Should().BeOfType<Paragraph>(); // this is bad as most readers will not comply
+        (strong.Content.First() as Paragraph).IsUnsafe.Should().BeTrue();
 
         ClearContainerContent(strong);
 
@@ -606,6 +608,40 @@ public class Fb2ContainerTests
 
         strong.Content.Should().BeEmpty();
     }
+
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ContainerNode_Serialize_IgnoreUnsafeNode_Works(bool serializeUnsafe)
+    {
+        var strong = new Strong();
+
+        var unsafeParagraph = new XElement(ElementNames.Paragraph, "render-breaking text"); // this will really bend rendering
+        var boldXNodeWithParagraph = new XElement(ElementNames.Strong, unsafeParagraph);
+
+        // bad scenario
+        strong.Load(boldXNodeWithParagraph);
+
+        strong.Content.Should().HaveCount(1);
+        strong.Content.First().Should().BeOfType<Paragraph>(); // this is bad as most readers will not comply
+        (strong.Content.First() as Paragraph).IsUnsafe.Should().BeTrue();
+
+        var serialized = strong.ToXml(serializeUnsafe);
+        serialized.Should().NotBeNull().And.BeOfType<XElement>();
+
+        if (serializeUnsafe)
+        {
+            serialized.Nodes().Should().HaveCount(1);
+        }
+        else
+        {
+            serialized.Nodes().Should().BeEmpty();
+        }
+
+        ClearContainerContent(strong);
+    }
+
 
     [Fact]
     public void ContainerNode_ChangeChildrenContent_Works()

@@ -358,7 +358,7 @@ public class Fb2DocumentTests
             .WithMessage("Document loading failed.");
     }
 
-    private FileInfo GetSampleFileInfo(string fileName)
+    private static FileInfo GetSampleFileInfo(string fileName)
     {
         var samplesFolderPath = Path.Combine(Environment.CurrentDirectory, SamplesFolderName);
 
@@ -376,7 +376,7 @@ public class Fb2DocumentTests
         return fileInfo;
     }
 
-    private async Task<string> ReadFileAsString(FileInfo fileInfo)
+    private static async Task<string> ReadFileAsString(FileInfo fileInfo)
     {
         using (var stream = fileInfo.OpenRead())
         using (var streamReader = new StreamReader(stream, true))
@@ -387,7 +387,7 @@ public class Fb2DocumentTests
     }
 
     // recommended setting to read xml
-    private async Task<XDocument> ReadFileAsXDocument(FileInfo fileInfo)
+    private static async Task<XDocument> ReadFileAsXDocument(FileInfo fileInfo)
     {
         using (var stream = fileInfo.OpenRead())
         using (var reader = XmlReader.Create(stream, new XmlReaderSettings
@@ -403,7 +403,7 @@ public class Fb2DocumentTests
         }
     }
 
-    private void RewindStream(Stream stream)
+    private static void RewindStream(Stream stream)
     {
         if (!stream.CanSeek)
             return;

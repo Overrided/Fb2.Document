@@ -20,7 +20,7 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Container : Fb2Node
 {
-    private List<Fb2Node> content = new List<Fb2Node>();
+    private readonly List<Fb2Node> content = [];
 
     /// <summary>
     /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
@@ -134,10 +134,10 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
-    /// Converts Fb2Container to XElement with regards to all attributes, 
+    /// Converts Fb2Container to <see cref="XElement"/> with regards to all attributes, 
     /// by calling `ToXml()` on every node in `Content`.
     /// </summary>
-    /// <returns><see cref="XElement"/> reflected from given Fb2Node.</returns>
+    /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Node"/>.</returns>
     public override XElement ToXml(bool serializeUnsafeNodes = true)
     {
         var element = base.ToXml(serializeUnsafeNodes);
@@ -147,6 +147,9 @@ public abstract class Fb2Container : Fb2Node
             var children = serializeUnsafeNodes ?
                 content :
                 content.Where(x => !x.IsUnsafe);
+
+            if (!children.Any())
+                return element;
 
             var serializedChildren = children.Select(ToXmlInternal);
             element.Add(serializedChildren);
@@ -823,7 +826,7 @@ public abstract class Fb2Container : Fb2Node
         return this;
     }
 
-    private XNode ToXmlInternal(Fb2Node element) =>
+    private static XNode ToXmlInternal(Fb2Node element) =>
         element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml();
 
     #endregion

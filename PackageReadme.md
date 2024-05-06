@@ -12,4 +12,5 @@ For more info see [Readme](https://github.com/Overrided/Fb2.Document).
 ## Solution changes
 
 * Added `net8.0` support.
-* Added `.editorconfig`
+* Added `Fb2XmlSerializingOptions`.
+* Added `.editorconfig`.
