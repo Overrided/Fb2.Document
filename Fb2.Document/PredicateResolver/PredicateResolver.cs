@@ -11,7 +11,7 @@ internal static class PredicateResolver
     private static Func<Fb2Node, bool> GetClassPredicate(Type targetType)
         => element => element.GetType().Equals(targetType);
 
-    public static Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
+    internal static Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
     {
         var targetType = typeof(T);
 

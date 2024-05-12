@@ -19,16 +19,31 @@ namespace Fb2.Document;
 /// </summary>
 public sealed class Fb2Document
 {
-    private const string DefaultXmlVersion = "1.0";
+    /// <summary>
+    /// Default XML Version used for serialization in <see cref="DefaultXDeclaration"/>.
+    /// </summary>
+    public const string DefaultXmlVersion = "1.0";
 
-    private static readonly XDeclaration DefaultDeclaration = new(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
-    private static readonly XmlReaderSettings DefaultXmlReaderSettings = new()
+    private static readonly XDeclaration defaultXDeclaration = new(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
+    private static readonly XmlReaderSettings defaultXmlReaderSettings = new()
     {
         Async = true,
         CheckCharacters = true,
         IgnoreWhitespace = true,
         ConformanceLevel = ConformanceLevel.Document
     };
+
+    // get-only copies to avoid tampering with defaults
+
+    /// <summary>
+    /// Default <see cref="XDeclaration"/> used for serialization by <see cref="ToXml(Fb2XmlSerializingOptions?)"/> and <see cref="ToXmlString(Fb2XmlSerializingOptions?)"/>.
+    /// </summary>
+    public static XDeclaration DefaultXDeclaration => new(defaultXDeclaration);
+
+    /// <summary>
+    /// Default <see cref="XmlReaderSettings"/> used for document loading by <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/> and <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/>.
+    /// </summary>
+    public static XmlReaderSettings DefaultXmlReaderSettings => defaultXmlReaderSettings.Clone();
 
     /// <summary>
     /// Represents <FictionBook> - root element of a file.
@@ -217,7 +232,7 @@ public sealed class Fb2Document
 
         var options = loadingOptions ?? new Fb2StreamLoadingOptions();
 
-        var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+        var xmlReaderSetting = defaultXmlReaderSettings.Clone();
         xmlReaderSetting.CloseInput = options.CloseInputStream;
 
         LoadHandled(() =>
@@ -249,7 +264,7 @@ public sealed class Fb2Document
 
         var options = loadingOptions ?? new Fb2StreamLoadingOptions();
 
-        var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
+        var xmlReaderSetting = defaultXmlReaderSettings.Clone();
         xmlReaderSetting.CloseInput = options.CloseInputStream;
 
         await LoadHandledAsync(async () =>
@@ -276,7 +291,7 @@ public sealed class Fb2Document
             return null;
 
         var serializeUnsafeNodes = fb2XmlSerializingOptions?.SerializeUnsafeElements ?? true;
-        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration;
+        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? defaultXDeclaration;
 
         var xmlRoot = Book.ToXml(serializeUnsafeNodes);
         var xmlDoc = new XDocument(declaration, xmlRoot);
@@ -296,7 +311,7 @@ public sealed class Fb2Document
         if (document == null)
             return null;
 
-        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultDeclaration;
+        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? defaultXDeclaration;
 
         return string.Join(
             Environment.NewLine,

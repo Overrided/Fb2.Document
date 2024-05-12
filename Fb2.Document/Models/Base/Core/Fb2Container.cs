@@ -491,8 +491,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="InvalidNodeException"></exception>
     public Fb2Node? GetFirstChild(string? name)
     {
-        if (!string.IsNullOrEmpty(name) &&
-            !Fb2NodeFactory.IsKnownNodeName(name))
+        if (!string.IsNullOrEmpty(name) && !Fb2NodeFactory.IsKnownNodeName(name))
             throw new InvalidNodeException(name);
 
         if (HasContent)
