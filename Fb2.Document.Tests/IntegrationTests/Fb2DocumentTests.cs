@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -34,6 +35,13 @@ public class Fb2DocumentTests
         doc.DocumentInfo.Should().BeNull();
         doc.PublishInfo.Should().BeNull();
         doc.CustomInfo.Should().BeNull();
+
+        var fb2DocumentDefaultXDeclaration = Fb2Document.DefaultXDeclaration;
+
+        fb2DocumentDefaultXDeclaration.Should().NotBeNull();
+        fb2DocumentDefaultXDeclaration.Version.Should().Be(Fb2Document.DefaultXmlVersion);
+        fb2DocumentDefaultXDeclaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
+        fb2DocumentDefaultXDeclaration.Standalone.Should().BeNullOrEmpty();
     }
 
     [Fact]
