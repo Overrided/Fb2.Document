@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -540,6 +541,7 @@ public abstract partial class Fb2Node : ICloneable
         return cloneNode;
     }
 
+    [ExcludeFromCodeCoverage(Justification = @"Compile-time code-generated '\s+' Regex implementation.")]
     [GeneratedRegex(@"\s+", RegexOptions.Multiline)]
     private static partial Regex TrimWhitespaceCompiledRegex();
 }
