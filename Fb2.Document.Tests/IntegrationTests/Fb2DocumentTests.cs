@@ -9,6 +9,7 @@ using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
+using Fb2.Document.SerializingOptions;
 using FluentAssertions;
 using Xunit;
 
@@ -200,23 +201,51 @@ public class Fb2DocumentTests
     {
         var sampleFileInfo = GetSampleFileInfo(SampleFileName);
 
-        using (var fileReadStream = sampleFileInfo.OpenRead())
-        {
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(fileReadStream);
+        using var fileReadStream = sampleFileInfo.OpenRead();
+        // loading document first time
+        var firstDocument = new Fb2Document();
+        await firstDocument.LoadAsync(fileReadStream);
 
-            var firstDocXml = firstDocument.ToXml();
-            var secondDocument = new Fb2Document();
-            secondDocument.Load(firstDocXml);
+        var firstDocXml = firstDocument.ToXml();
+        var secondDocument = new Fb2Document();
+        secondDocument.Load(firstDocXml!);
 
-            firstDocument.Should().Be(secondDocument);
+        firstDocument.Should().Be(secondDocument);
 
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
+        var firstBook = firstDocument.Book;
+        var secondBook = secondDocument.Book;
 
-            firstBook.Should().Be(secondBook);
-        }
+        firstBook.Should().Be(secondBook);
+    }
+
+    [Fact]
+    public async Task ExportDocument_WithoutUnsafeNodes_AndReload_DifferentContent()
+    {
+        var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+        using var fileReadStream = sampleFileInfo.OpenRead();
+        // loading document first time
+        var firstDocument = new Fb2Document();
+        await firstDocument.LoadAsync(fileReadStream);
+
+
+        var firstUnsafeNodes = firstDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
+        firstUnsafeNodes.Should().NotBeNullOrEmpty();
+
+
+        var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false));
+        var secondDocument = new Fb2Document();
+        secondDocument.Load(firstDocXml!);
+
+        var secondUnsafeNodes = secondDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
+        secondUnsafeNodes.Should().BeNullOrEmpty();
+
+        firstDocument.Should().NotBe(secondDocument);
+
+        var firstBook = firstDocument.Book;
+        var secondBook = secondDocument.Book;
+
+        firstBook.Should().NotBe(secondBook);
     }
 
     [Fact]

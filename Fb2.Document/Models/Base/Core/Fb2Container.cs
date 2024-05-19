@@ -144,14 +144,14 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
         {
-            var children = serializeUnsafeNodes ?
+            var childrenToSerialize = serializeUnsafeNodes ?
                 content :
                 content.Where(x => !x.IsUnsafe);
 
-            if (!children.Any())
+            if (childrenToSerialize == null || !childrenToSerialize.Any())
                 return element;
 
-            var serializedChildren = children.Select(ToXmlInternal);
+            var serializedChildren = childrenToSerialize.Select(n => ToXmlInternal(n, serializeUnsafeNodes));
             element.Add(serializedChildren);
         }
 
@@ -825,8 +825,8 @@ public abstract class Fb2Container : Fb2Node
         return this;
     }
 
-    private static XNode ToXmlInternal(Fb2Node element) =>
-        element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml();
+    private static XNode ToXmlInternal(Fb2Node element, bool serializeUnsafeElements) =>
+        element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
 
     #endregion
 }
