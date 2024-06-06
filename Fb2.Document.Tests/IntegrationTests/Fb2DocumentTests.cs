@@ -25,8 +25,8 @@ public class Fb2DocumentTests
     public void Fb2Document_NotLoaded_ShortcutProperties_ReturnNull()
     {
         var doc = new Fb2Document();
-        doc.IsLoaded.Should().BeFalse();
 
+        doc.IsLoaded.Should().BeFalse();
         doc.Book.Should().BeNull();
 
         doc.Bodies.Should().BeEmpty();
@@ -36,6 +36,7 @@ public class Fb2DocumentTests
         doc.DocumentInfo.Should().BeNull();
         doc.PublishInfo.Should().BeNull();
         doc.CustomInfo.Should().BeNull();
+        doc.BinaryImages.Should().BeNullOrEmpty();
 
         var fb2DocumentDefaultXDeclaration = Fb2Document.DefaultXDeclaration;
 
@@ -43,6 +44,13 @@ public class Fb2DocumentTests
         fb2DocumentDefaultXDeclaration.Version.Should().Be(Fb2Document.DefaultXmlVersion);
         fb2DocumentDefaultXDeclaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
         fb2DocumentDefaultXDeclaration.Standalone.Should().BeNullOrEmpty();
+
+        var defaultReaderSettings = Fb2Document.DefaultXmlReaderSettings;
+
+        defaultReaderSettings.Async.Should().BeTrue();
+        defaultReaderSettings.CheckCharacters.Should().BeTrue();
+        defaultReaderSettings.IgnoreWhitespace.Should().BeTrue();
+        defaultReaderSettings.ConformanceLevel.Should().Be(ConformanceLevel.Document);
     }
 
     [Fact]
