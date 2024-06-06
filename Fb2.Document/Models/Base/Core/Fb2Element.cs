@@ -160,13 +160,10 @@ public abstract class Fb2Element : Fb2Node
 
     public override bool Equals(object? other)
     {
-        if (other == null)
+        if (!base.Equals(other))
             return false;
 
         if (other is not Fb2Element otherElement)
-            return false;
-
-        if (!base.Equals(otherElement))
             return false;
 
         var result = content.Equals(otherElement.content, StringComparison.InvariantCulture);

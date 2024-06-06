@@ -160,13 +160,10 @@ public abstract class Fb2Container : Fb2Node
 
     public override bool Equals(object? other)
     {
-        if (other == null)
+        if (!base.Equals(other))
             return false;
 
         if (other is not Fb2Container otherContainer)
-            return false;
-
-        if (!base.Equals(otherContainer))
             return false;
 
         var actualContent = content;
