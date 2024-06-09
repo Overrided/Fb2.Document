@@ -54,6 +54,24 @@ public class Fb2DocumentTests
     }
 
     [Fact]
+    public void Fb2Document_CreateDocument_ShortcutProperties_ReturnNull()
+    {
+        var doc = Fb2Document.CreateDocument();
+
+        doc.IsLoaded.Should().BeFalse();
+        doc.Book.Should().BeNull();
+
+        doc.Bodies.Should().BeEmpty();
+        doc.BookDescription.Should().BeNull();
+        doc.Title.Should().BeNull();
+        doc.SourceTitle.Should().BeNull();
+        doc.DocumentInfo.Should().BeNull();
+        doc.PublishInfo.Should().BeNull();
+        doc.CustomInfo.Should().BeNull();
+        doc.BinaryImages.Should().BeNullOrEmpty();
+    }
+
+    [Fact]
     public void Fb2Document_NotLoaded_ToXml_ReturnsNull()
     {
         var doc = new Fb2Document();
