@@ -257,6 +257,26 @@ public class Fb2DocumentTests
     }
 
     [Fact]
+    public async Task ExportDocument_WithDifferentOptions()
+    {
+        var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+        using var fileReadStream = sampleFileInfo.OpenRead();
+        // loading document first time
+        var firstDocument = new Fb2Document();
+        await firstDocument.LoadAsync(fileReadStream);
+
+
+        var firstUnsafeNodes = firstDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
+        firstUnsafeNodes.Should().NotBeNullOrEmpty();
+
+
+        var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false, new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
+        firstDocXml.Declaration.Version.Should().Be("2.0");
+        firstDocXml.Declaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
+    }
+
+    [Fact]
     public async Task LoadWithoutUnsafeNodes_DifferentContent()
     {
         var sampleFileInfo = GetSampleFileInfo(SampleFileName);
