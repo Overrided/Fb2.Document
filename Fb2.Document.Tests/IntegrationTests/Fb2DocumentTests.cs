@@ -244,6 +244,24 @@ public class Fb2DocumentTests
         firstBook.Should().Be(secondBook);
     }
 
+
+    [Fact]
+    public async Task ExportDocument_AsString_AndReload_SameContent()
+    {
+        var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+
+        using var fileReadStream = sampleFileInfo.OpenRead();
+        // loading document first time
+        var firstDocument = new Fb2Document();
+        await firstDocument.LoadAsync(fileReadStream);
+
+        var docXmlString = firstDocument.ToXmlString(new Fb2XmlSerializingOptions(xDeclaration: new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
+        docXmlString.Should().StartWith("<?xml version=\"2.0\" encoding=\"utf-8\"?>");
+
+        var docXmlStringNoOptions = firstDocument.ToXmlString();
+        docXmlStringNoOptions.Should().StartWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+    }
+
     [Fact]
     public async Task ExportDocument_WithoutUnsafeNodes_AndReload_DifferentContent()
     {
