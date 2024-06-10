@@ -83,7 +83,6 @@ public class Fb2DocumentTests
         doc.ToXmlString().Should().BeNull();
     }
 
-
     [Fact]
     public void Fb2Document_NotLoaded_ToString_ReturnsNull()
     {
@@ -219,6 +218,13 @@ public class Fb2DocumentTests
             thirdBodySections.Should().HaveCount(1);
 
             document.BinaryImages.Should().HaveCount(33);
+            document.BookDescription.Should().NotBeNull();
+            document.Title.Should().NotBeNull();
+            document.DocumentInfo.Should().NotBeNull();
+
+            document.SourceTitle.Should().BeNull();
+            document.PublishInfo.Should().BeNull();
+            document.CustomInfo.Should().BeNull();
         }
     }
 
