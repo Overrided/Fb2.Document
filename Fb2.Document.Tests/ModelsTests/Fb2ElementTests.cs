@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
@@ -8,6 +9,7 @@ using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests;
@@ -35,7 +37,21 @@ public class Fb2ElementTests
 
         fb2Element.Invoking(f => f.Load(invalidXmlNode))
             .Should()
-            .Throw<Fb2NodeLoadingException>();
+            .ThrowExactly<Fb2NodeLoadingException>();
+    }
+
+    [Theory]
+    [ClassData(typeof(Fb2ElementCollection))]
+    public void Fb2Element_Load_InvalidXmlNodeType_Throws(Fb2Element fb2Element)
+    {
+        fb2Element.Should().NotBeNull();
+
+        var invalidXmlNode = new XComment("test comment");
+
+        fb2Element.Invoking(f => f.Load(invalidXmlNode))
+            .Should()
+        .ThrowExactly<Fb2NodeLoadingException>()
+            .WithMessage($"Unsupported nodeType: received {XmlNodeType.Comment}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
     }
 
     [Fact]
