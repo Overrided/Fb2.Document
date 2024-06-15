@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -97,6 +98,10 @@ public static class Fb2NodeFactory
     /// <returns>New instance of node created by given <paramref name="nodeName"/>.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="InvalidNodeException"></exception>
+    [UnconditionalSuppressMessage(
+        "AssemblyLoadTrimming",
+        "IL2072",
+        Justification = "Everything referenced is in the same loaded assembly, so it's safe")]
     public static Fb2Node GetNodeByName([In] string nodeName)
     {
         if (string.IsNullOrWhiteSpace(nodeName))
@@ -108,7 +113,7 @@ public static class Fb2NodeFactory
         var result = KnownNodes.First(kvp => kvp.Key.EqualsIgnoreCase(nodeName));
         var modelType = result.Value;
 
-        var model = Activator.CreateInstance(modelType) as Fb2Node;
+        var model = Activator.CreateInstance(modelType) as Fb2Node; // suppressed warning
         return model!;
     }
 
