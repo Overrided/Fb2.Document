@@ -50,7 +50,7 @@ public class Fb2NodeExtensionsTests
     }
 
     [Fact]
-    public async Task AppendAttributes_Works()
+    public void AppendAttributes_Works()
     {
         var parag = new Paragraph();
         parag.HasAttributes.Should().BeFalse();
@@ -80,7 +80,7 @@ public class Fb2NodeExtensionsTests
 
 
     [Fact]
-    public async Task DeleteAttributes_Works()
+    public void DeleteAttributes_Works()
     {
         var parag = new Paragraph();
         parag.HasAttributes.Should().BeFalse();

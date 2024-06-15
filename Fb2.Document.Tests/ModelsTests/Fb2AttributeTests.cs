@@ -13,7 +13,7 @@ public class Fb2AttributeTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("  ")]
-    public void Fb2Attribute_Create_EmptyKey_Throws(string emptyKey)
+    public void Fb2Attribute_Create_EmptyKey_Throws(string? emptyKey)
     {
         Action action = () =>
         {
