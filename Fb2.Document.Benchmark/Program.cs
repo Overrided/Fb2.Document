@@ -1,12 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 
@@ -20,48 +21,28 @@ public class Program
 public class AntiVirusFriendlyConfig : ManualConfig
 {
     public AntiVirusFriendlyConfig() =>
-        AddJob(
-            Job.Default
+        AddJob(Job.Default
             .WithRuntime(CoreRuntime.Core80)
             .WithWarmupCount(5)
             .WithLaunchCount(10)
-            .WithIterationCount(100)
+            .WithIterationCount(1000)
             .WithToolchain(InProcessNoEmitToolchain.Instance))
-        .AddDiagnoser(MemoryDiagnoser.Default);
+        .AddDiagnoser(MemoryDiagnoser.Default, ThreadingDiagnoser.Default, ExceptionDiagnoser.Default)
+        .AddLogger(ConsoleLogger.Default)
+        .AddColumn(StatisticColumn.AllStatistics);
 }
 
 [Config(typeof(AntiVirusFriendlyConfig))]
 public class Fb2DocumentBenchMark
 {
-    public FileStream? fb2FileContentStream;
+    public Stream? fb2FileContentStream;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
-        var sampleFilePath = GetSampleFilePath();
-        fb2FileContentStream = new FileStream(sampleFilePath, FileMode.Open);
-    }
-
-    private static string GetSampleFilePath()
-    {
-        var currentFolder = Environment.CurrentDirectory;
-        var pathChunks = currentFolder.Split(Path.DirectorySeparatorChar).ToList();
-        var pathChunksTopIndex = pathChunks.Count - 1;
-        for (int i = pathChunksTopIndex; i >= 0; i--)
-        {
-            var chunk = pathChunks[i];
-            if (chunk.Equals("Fb2.Document"))
-            {
-                pathChunks.RemoveRange(i + 1, pathChunksTopIndex - i);
-                break;
-            }
-        }
-
-        pathChunks.Add("Sample");
-        pathChunks.Add("_Test_1.fb2");
-
-        var sampleFilePath = Path.Combine(pathChunks.ToArray());
-        return sampleFilePath;
+        var x = Assembly.GetExecutingAssembly();
+        var names = x.GetManifestResourceNames();
+        fb2FileContentStream = x.GetManifestResourceStream(names[0]); // only one resource
     }
 
     [IterationSetup]
@@ -76,7 +57,6 @@ public class Fb2DocumentBenchMark
     {
         var doc = new Fb2Document();
         await doc.LoadAsync(fb2FileContentStream!);
-
         return doc;
     }
 
