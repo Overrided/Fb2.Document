@@ -5,6 +5,8 @@
     <TargetFrameworks>net8.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PublishTrimmed>True</PublishTrimmed>
+    <PublishAot>True</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>

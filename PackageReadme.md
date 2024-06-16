@@ -27,6 +27,7 @@ This allows to use latest features and reduce package size.
 ## Solution Updates
 
 * Added `Fb2XmlSerializingOptions`.
+* Enabled project trimming (`IsTrimmable` / `IsAotCompatible`).
 * Using `GeneratedRegexAttribute` to improve performance for underlying `RegEx`.
 * Exposing `DefaultXmlVersion`, `DefaultXDeclaration` and `DefaultXmlReaderSettings` members of `Fb2Document` class.
 

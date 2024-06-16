@@ -3,21 +3,34 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 
 namespace Fb2.Document.Benchmark;
 
 public class Program
 {
-    public static void Main(string[] args)
-    {
-        var summary = BenchmarkRunner.Run<Fb2DocumentBenchMark>();
-    }
+    public static void Main(string[] args) => _ = BenchmarkRunner.Run<Fb2DocumentBenchMark>();
 }
 
-[SimpleJob(RuntimeMoniker.Net80, 10, 5, 10, 10)]
-[MemoryDiagnoser]
+public class AntiVirusFriendlyConfig : ManualConfig
+{
+    public AntiVirusFriendlyConfig() =>
+        AddJob(
+            Job.Default
+            .WithRuntime(CoreRuntime.Core80)
+            .WithWarmupCount(5)
+            .WithLaunchCount(10)
+            .WithIterationCount(100)
+            .WithToolchain(InProcessNoEmitToolchain.Instance))
+        .AddDiagnoser(MemoryDiagnoser.Default);
+}
+
+[Config(typeof(AntiVirusFriendlyConfig))]
 public class Fb2DocumentBenchMark
 {
     public FileStream? fb2FileContentStream;
