@@ -245,7 +245,6 @@ public class Fb2DocumentTests
         firstBook.Should().Be(secondBook);
     }
 
-
     [Fact]
     public async Task ExportDocument_AsString_AndReload_SameContent()
     {
@@ -453,6 +452,12 @@ public class Fb2DocumentTests
             .Invoking(s => s.Load(invalidFileInfoStream))
             .Should()
             .ThrowExactly<ArgumentException>()
+            .WithMessage($"Can`t read fileContent, {nameof(Stream.CanRead)} is {false}");
+
+        await thrirdDocument
+            .Invoking(async s => await s.LoadAsync(invalidFileInfoStream))
+            .Should()
+            .ThrowExactlyAsync<ArgumentException>()
             .WithMessage($"Can`t read fileContent, {nameof(Stream.CanRead)} is {false}");
     }
 
