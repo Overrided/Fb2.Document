@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Samples\_Test_1.fb2">
+    <EmbeddedResource Include="..\Sample\_Test_1.fb2" Link="_Test_1.fb2">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Samples\_Test_Invalid.fb2">
+    <EmbeddedResource Include="..\Sample\_Test_Invalid.fb2" Link="_Test_Invalid.fb2">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

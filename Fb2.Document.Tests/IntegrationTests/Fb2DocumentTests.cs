@@ -217,7 +217,7 @@ public class Fb2DocumentTests
 
         document.SourceTitle.Should().BeNull();
         document.PublishInfo.Should().BeNull();
-        document.CustomInfo.Should().BeNull();
+        document.CustomInfo.Should().NotBeNull();
 
         var strContent = document.ToString();
         strContent.Should().NotBeNullOrEmpty();
