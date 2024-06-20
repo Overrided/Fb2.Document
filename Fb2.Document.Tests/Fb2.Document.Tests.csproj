@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Samples\_Test_1.fb2">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Samples\_Test_Invalid.fb2">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
@@ -23,15 +32,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fb2.Document\Fb2.Document.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Samples\_Test_1.fb2">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Samples\_Test_Invalid.fb2">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
