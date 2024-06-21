@@ -50,11 +50,15 @@ public abstract class Fb2Container : Fb2Node
     public override bool HasContent => content.Any();
 
     /// <summary>
-    /// Container node loading mechanism. Loads attributes and sequentially calls `Load` on all child nodes.
+    /// Container Node loading mechanism. Loads <see cref="Content"/> and sequentially calls <see cref="Fb2Node.Load(XNode,Fb2Container?,bool, bool, bool)"/> on all child nodes.
     /// </summary>
-    /// <param name="node">Node to load as Fb2Container</param>
-    /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
-    /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
+    /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Container"/>.</param>
+    /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+    /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+    /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+    /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Fb2NodeLoadingException"></exception>
     public override void Load(
         [In] XNode node,
         [In] Fb2Container? parentNode = null,
@@ -134,10 +138,11 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
-    /// Converts Fb2Container to <see cref="XElement"/> with regards to all attributes, 
-    /// by calling `ToXml()` on every node in `Content`.
+    /// Converts <see cref="Fb2Container"/> to <see cref="XElement"/> with regards to all attributes, 
+    /// by calling <see cref="ToXml(bool)"/> on every descendant node in <see cref="Content"/> recursively.
     /// </summary>
-    /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Node"/>.</returns>
+    /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
+    /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Container"/>.</returns>
     public override XElement ToXml(bool serializeUnsafeNodes = true)
     {
         var element = base.ToXml(serializeUnsafeNodes);
@@ -321,7 +326,7 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
-    /// Adds new node to <see cref="Content"/> using node's `Name`.
+    /// Adds new node to <see cref="Content"/> using node's <see cref="Fb2Node.Name"/>.
     /// </summary>
     /// <param name="nodeName">Name to instantiate node by.</param>
     /// <returns>Current container.</returns>
@@ -336,7 +341,7 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
-    /// Adds given node to <see cref="Content"/>.
+    /// Adds given <paramref name="node"/> to <see cref="Content"/>.
     /// </summary>
     /// <param name="node">Child node to add to Content.</param>
     /// <returns>Current container.</returns>

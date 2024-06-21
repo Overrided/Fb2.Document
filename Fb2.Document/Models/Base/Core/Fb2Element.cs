@@ -34,13 +34,16 @@ public abstract class Fb2Element : Fb2Node
     public override bool HasContent => !string.IsNullOrEmpty(content);
 
     /// <summary>
-    /// Text node loading mechanism - formatting text and removal of unwanted characters.
+    /// Text node loading mechanism. Loads <see cref="Content"/> after formatting and removal of unwanted characters.
     /// </summary>
-    /// <param name="node">Node to load as Fb2Element.</param>
-    /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
-    /// <param name="loadUnsafe"> Is ignored by Fb2Element loading.</param>
+    /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Element"/>.</param>
+    /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+    /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+    /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+    /// <param name="loadNamespaceMetadata">Indicates whether XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
+    /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Fb2NodeLoadingException"></exception>
-    /// <remarks>Original content of XNode is NOT preserved by default except for <see cref="Code" />.</remarks>
+    /// <remarks>Original content of <see cref="XNode"/> is  <c>NOT preserved</c>  except for <see cref="Code" />.</remarks>
     public override void Load(
         [In] XNode node,
         [In] Fb2Container? parentNode = null,
@@ -140,9 +143,10 @@ public abstract class Fb2Element : Fb2Node
     }
 
     /// <summary>
-    /// Converts Fb2Element to XElement with regards to all attributes.
+    /// Converts <see cref="Fb2Element"/> to <see cref="XElement"/> with regards to all attributes.
     /// </summary>
-    /// <returns>XElement reflected from given Fb2Element.</returns>
+    /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
+    /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Element"/>.</returns>
     /// <remarks>
     /// Only formatted content is serialized.
     /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/>.</para>

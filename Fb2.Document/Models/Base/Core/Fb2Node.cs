@@ -74,13 +74,15 @@ public abstract partial class Fb2Node : ICloneable
     public Fb2NodeMetadata? NodeMetadata { get; set; }
 
     /// <summary>
-    /// Basic Load of node - validation and populating Attributes.
+    /// Basic Load of node - <paramref name="node"/> validation and populating <see cref="Attributes"/> and <see cref="NodeMetadata"/>.
     /// </summary>
-    /// <param name="node">XNode to load as <c>Fb2Node</c>.</param>
-    /// <param name="parentNode">Parent node of node being loaded, can be <see langword="null"/>.</param>
-    /// <param name="preserveWhitespace">Is ignored during <c>Fb2Node</c> loading.</param>
-    /// <param name="loadUnsafe">Is ignored during <c>Fb2Node</c> loading.</param>
+    /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Node"/>.</param>
+    /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+    /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+    /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+    /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
     /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Fb2NodeLoadingException"></exception>
     public virtual void Load(
         [In] XNode node,
         [In] Fb2Container? parentNode = null,
@@ -126,6 +128,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// Basic method to serialize <see cref="Fb2Node"/> back to <see cref="XElement"/>.
     /// </summary>
+    /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
     /// <returns><see cref="XElement"/> instance with attributes reflecting <see cref="Attributes"/> property.</returns>
     public virtual XElement ToXml(bool serializeUnsafeNodes = true)
     {
