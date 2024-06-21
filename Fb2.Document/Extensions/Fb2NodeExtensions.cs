@@ -15,9 +15,12 @@ public static class Fb2NodeExtensions
     /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <see cref="params Fb2Attribute[]"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attributes">Set of attributes to add to given <paramref name="fb2Node"/>.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static T AppendAttributes<T>(this T fb2Node, params Fb2Attribute[] attributes) where T : Fb2Node =>
         (T)fb2Node.AddAttributes(attributes);
 
@@ -26,9 +29,12 @@ public static class Fb2NodeExtensions
     /// <para> Adds multiple attributes to <see cref="Fb2Node.Attributes"/> using <see cref="IEnumerable{Fb2Attribute}."/></para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attributes">Set of attributes to add to given <paramref name="fb2Node"/>.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static T AppendAttributes<T>(this T fb2Node, IEnumerable<Fb2Attribute> attributes) where T : Fb2Node =>
         (T)fb2Node.AddAttributes(attributes);
 
@@ -37,9 +43,12 @@ public static class Fb2NodeExtensions
     /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static async Task<T> AppendAttributeAsync<T>(
         this T fb2Node,
         Func<Task<Fb2Attribute>> attributeProvider) where T : Fb2Node
@@ -53,9 +62,12 @@ public static class Fb2NodeExtensions
     /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using <paramref name="attributeProvider"/> function.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attributeProvider">Attribute provider function.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static T AppendAttribute<T>(this T fb2Node, Func<Fb2Attribute> attributeProvider) where T : Fb2Node =>
         (T)fb2Node.AddAttribute(attributeProvider);
 
@@ -64,9 +76,12 @@ public static class Fb2NodeExtensions
     /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attribute">Attribute to add to <paramref name="fb2Node"/>.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static T AppendAttribute<T>(this T fb2Node, Fb2Attribute attribute) where T : Fb2Node =>
         (T)fb2Node.AddAttribute(attribute);
 
@@ -75,7 +90,7 @@ public static class Fb2NodeExtensions
     /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/>.</para> 
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="key">Attribute key to add.</param>
     /// <param name="value">Attribute value to add.</param>
     /// <param name="namespaceName">
@@ -83,6 +98,9 @@ public static class Fb2NodeExtensions
     /// <para>NamespaceName for attribute, used by <see cref="ToXml"/> serialization.</para>
     /// </param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
+    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
     public static T AppendAttribute<T>(this T fb2Node, string key, string value, string? namespaceName = null) where T : Fb2Node =>
         (T)fb2Node.AddAttribute(key, value, namespaceName);
 
@@ -91,10 +109,11 @@ public static class Fb2NodeExtensions
     /// <para> Removes attribute from <see cref="Fb2Node.Attributes"/> by given attribute key.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="key">Attribute name.</param>
     /// <param name="ignoreCase">Indicates if matching attributes against <paramref name="key"/> should be case-sensitive.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T DeleteAttribute<T>(
         this T fb2Node,
         string key,
@@ -105,9 +124,10 @@ public static class Fb2NodeExtensions
     /// <para> Removes attributes matching given predicate from <see cref="Fb2Node.Attributes"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attributePredicate">Predicate function to match attributes against.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T DeleteAttribute<T>(
         this T fb2Node,
         Func<Fb2Attribute, bool> attributePredicate) where T : Fb2Node => (T)fb2Node.RemoveAttribute(attributePredicate);
@@ -117,9 +137,10 @@ public static class Fb2NodeExtensions
     /// <para> Removes given <paramref name="attribute"/> from <see cref="Fb2Node.Attributes"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <param name="attribute">Attribute to remove.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T DeleteAttribute<T>(
         this T fb2Node,
         Fb2Attribute attribute) where T : Fb2Node => (T)fb2Node.RemoveAttribute(attribute);
@@ -129,7 +150,7 @@ public static class Fb2NodeExtensions
     /// <para> Erases all attributes of given <paramref name="fb2Node"/></para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node">Fb2Node instance to use extension on.</param>
+    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
     /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
     public static T EraseAttributes<T>(this T fb2Node) where T : Fb2Node => (T)fb2Node.ClearAttributes();
 }

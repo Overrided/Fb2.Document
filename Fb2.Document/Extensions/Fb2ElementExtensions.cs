@@ -14,10 +14,11 @@ public static class Fb2ElementExtensions
     /// <para> Appends new plain text to given <paramref name="fb2Element"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Element">Fb2Element node to use extension on.</param>
+    /// <param name="fb2Element"><see cref="Fb2Element"/> node instance to use extension on.</param>
     /// <param name="newContent">Plain text to append to given <paramref name="fb2Element"/>.</param>
     /// <param name="separator">Separator string used to join new text with existing content.</param>
     /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T AppendContent<T>(
         this T fb2Element,
         string newContent,
@@ -28,10 +29,11 @@ public static class Fb2ElementExtensions
     /// <para> Appends new plain text to given <paramref name="fb2Element"/> using <paramref name="contentProvider"/> function.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Element">Fb2Element node to use extension on.</param>
+    /// <param name="fb2Element"><see cref="Fb2Element"/> node instance to use extension on.</param>
     /// <param name="contentProvider">Content provider function.</param>
     /// <param name="separator">Separator string used to join new text with existing content.</param>
     /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T AppendContent<T>(
         this T fb2Element,
         Func<string> contentProvider,
@@ -42,10 +44,11 @@ public static class Fb2ElementExtensions
     /// <para> Appends new plain text to given <paramref name="fb2Element"/> using async <paramref name="contentProvider"/> function.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Element">Fb2Element node to use extension on.</param>
+    /// <param name="fb2Element"><see cref="Fb2Element"/> node instance to use extension on.</param>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
     /// <param name="separator">Separator string used to join new text with existing content.</param>
     /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static async Task<T> AppendContentAsync<T>(
         this T fb2Element,
         Func<Task<string>> contentProvider,
@@ -60,7 +63,7 @@ public static class Fb2ElementExtensions
     /// <para> Clears content of given <paramref name="fb2Element"/>.</para>
     /// </summary>
     /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Element">Fb2Element node to use extension on.</param>
+    /// <param name="fb2Element"><see cref="Fb2Element"/> node instance to use extension on.</param>
     /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
     public static T EraseContent<T>(this T fb2Element) where T : Fb2Element => (T)fb2Element.ClearContent();
 }
