@@ -11,8 +11,7 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 Latest release of an `Fb2.Document` library brings `.Net` version targeting strategy change, code updates and new minor cosmetic changes.
 
 - [.Net 8](#.net-8)
-- [Solution Updates](#code-updates)
-- [Code-style Updates](#code-style)
+- [Other Updates](#updates)
 
 For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
 
@@ -24,15 +23,13 @@ Version `2.4.0` introduces this change moving away from multiple framework versi
 
 This allows to use latest features and reduce package size.
 
-## Solution Updates
+## Other Updates
 
 * Added `Fb2XmlSerializingOptions`.
 * Enabled project trimming (`IsTrimmable` / `IsAotCompatible`).
 * Using `GeneratedRegexAttribute` to improve performance for underlying `RegEx`.
 * Exposing `DefaultXmlVersion`, `DefaultXDeclaration` and `DefaultXmlReaderSettings` members of `Fb2Document` class.
-
-## Code-style Updates
-
 * Moved library to `file-scoped namespaces` approach.
 * Using `Collection expressions` for `Enumerable` instances initialization.
 * Added `.editorconfig`.
+* `Tests` and `Benchmark` projects are now using same `Sample` folder contents via resourse embedding.
