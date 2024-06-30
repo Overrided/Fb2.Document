@@ -2,13 +2,11 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
-{
-    public class TextStyle : TextContainerBase
-    {
-        public override string Name => ElementNames.TextStyle;
+namespace Fb2.Document.Models;
 
-        public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Language);
-    }
+public class TextStyle : TextContainerBase
+{
+    public override string Name => ElementNames.TextStyle;
+
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Language];
 }

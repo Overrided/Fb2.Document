@@ -344,7 +344,7 @@
                     &lt;xsl:template match="fb:stanza"&gt;
                     &lt;xsl:choose&gt;
                     &lt;xsl:when test="count(fb:title) &gt; 0"&gt;
-                    &lt;formalpara role="poem"&gt;
+                        &lt;formalpara role="poem"&gt;
                     &lt;xsl:call-template name="section_title"/&gt;
                     &lt;para role="poem"&gt;
                     &lt;xsl:apply-templates select="@xml:lang|@id"/&gt;
@@ -353,11 +353,11 @@
                     &lt;/para&gt;
                     &lt;/formalpara&gt;
                     &lt;/xsl:when&gt;
-                    &lt;xsl:otherwise&gt;
+                        &lt;xsl:otherwise&gt;
                     &lt;literallayout xml:space="preserve" role="poem"&gt;&lt;xsl:apply-templates
                     select="@xml:lang|@id"/&gt;&lt;xsl:apply-templates
                     select="fb:v"/&gt;&lt;/literallayout&gt;
-                    &lt;/xsl:otherwise&gt;
+                        &lt;/xsl:otherwise&gt;
                     &lt;/xsl:choose&gt;
                     &lt;/xsl:template&gt;
                 </code>

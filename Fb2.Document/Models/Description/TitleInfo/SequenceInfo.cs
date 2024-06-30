@@ -3,35 +3,33 @@ using System.Text;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
+namespace Fb2.Document.Models;
+
+public class SequenceInfo : Fb2Element
 {
-    public class SequenceInfo : Fb2Element
+    public override string Name => ElementNames.Sequence;
+
+    public override bool IsInline => false;
+
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Number, AttributeNames.Language];
+
+    public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
+
+    public sealed override Fb2Element ClearContent() => this;
+
+    public sealed override string ToString()
     {
-        public override string Name => ElementNames.Sequence;
+        if (!HasAttributes)
+            return string.Empty;
 
-        public override bool IsInline => false;
+        var sb = new StringBuilder();
 
-        public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Number, AttributeNames.Language);
+        if (TryGetAttribute(AttributeNames.Name, true, out var nameAttr))
+            sb.Append(nameAttr!.Value);
 
-        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
+        if (TryGetAttribute(AttributeNames.Number, true, out var numberAttr))
+            sb.Append(sb.Length > 0 ? $" {numberAttr!.Value}" : numberAttr!.Value);
 
-        public sealed override Fb2Element ClearContent() => this;
-
-        public sealed override string ToString()
-        {
-            if (!HasAttributes)
-                return string.Empty;
-
-            var sb = new StringBuilder();
-
-            if (TryGetAttribute(AttributeNames.Name, true, out var nameAttr))
-                sb.Append(nameAttr!.Value);
-
-            if (TryGetAttribute(AttributeNames.Number, true, out var numberAttr))
-                sb.Append(sb.Length > 0 ? $" {numberAttr!.Value}" : numberAttr!.Value);
-
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }

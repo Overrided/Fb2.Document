@@ -2,22 +2,21 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models
+namespace Fb2.Document.Models;
+
+public class BookBody : Fb2Container
 {
-    public class BookBody : Fb2Container
-    {
-        public override string Name => ElementNames.BookBody;
+    public override string Name => ElementNames.BookBody;
 
-        public override bool CanContainText => false;
+    public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Language);
+    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Language];
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(
-                ElementNames.Image,
-                ElementNames.Title,
-                ElementNames.Epigraph,
-                ElementNames.BookBodySection);
-    }
+    public override ImmutableHashSet<string> AllowedElements =>
+    [
+        ElementNames.Image,
+        ElementNames.Title,
+        ElementNames.Epigraph,
+        ElementNames.BookBodySection
+    ];
 }

@@ -1,42 +1,35 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
 
-Fb2.Document is lightweight, fast .Net 3.1/5/6/7 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 8 lib with bunch of APIs to operate `fb2` file's contents.
 
-Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.  
+Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
-Version `2.3.0` brings `net7.0` support alongside with bugfixes, new `APIs` and improved test coverage.
 
-For more info see [Readme](https://github.com/Overrided/Fb2.Document).
+# Version 2.4.0
 
-## Solution changes
+Latest release of an `Fb2.Document` library brings `.Net` version targeting strategy change, code updates and new minor cosmetic changes.
 
-* Added `net7.0` support.
-* Added `Fb2.Document.Benchmark`
-* Added `Fb2.Document.Playground`
-* Refactored `Fb2.Document.Tests`
+- [.Net 8](#.net-8)
+- [Other Updates](#updates)
 
-## New features
+For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
 
-* `Fb2Node`:
-    * Added `HasAttributes` property
+## .Net 8
 
-* `Fb2Element`:
-    * Added `AddContentAsync` method
+Starting with version `2.4.0` project will target singular `latest LTS` (Long Term Support) version of `.net`.
 
-* `Fb2Container`:
-    * Added `AddTextContent` method
-    * Added `AddTextContentAsync` method
+Version `2.4.0` introduces this change moving away from multiple framework versions target - `netcoreapp3.1;net5.0;net6.0;net7.0` - and targeting `net8.0` only instead.
 
-## Updates
+This allows to use latest features and reduce package size.
 
-* `Fb2Node`:
-    * Renamed `IsEmpty` Property to `HasContent` - breaking change
-    * Fixed `Attributes` loading bug
-* `SequenceInfo`, `Image`, `TextLink`:
-    * Updated `ToString` override
-* `Lang`, `SrcLang`:
-    * `IsInline` property returns false now
-* `EmptyLine`:
-    * removed `HasContent` (`IsEmpty`) override. Now, `EmptyLine.HasContent` returns `true`. It's somewhat counter-intuitive, but well, technically `Environment.NewLine` that's `content` of `EmptyLine` is not `null` or `empty` string :)
-* Renamed `UnexpectedAtrributeException` to `UnexpectedAttributeException`
+## Other Updates
+
+* Added `Fb2XmlSerializingOptions`.
+* Enabled project trimming (`IsTrimmable` / `IsAotCompatible`).
+* Using `GeneratedRegexAttribute` to improve performance for underlying `RegEx`.
+* Exposing `DefaultXmlVersion`, `DefaultXDeclaration` and `DefaultXmlReaderSettings` members of `Fb2Document` class.
+* Moved library to `file-scoped namespaces` approach.
+* Using `Collection expressions` for `Enumerable` instances initialization.
+* Added `.editorconfig`.
+* `Tests` and `Benchmark` projects are now using same `Sample` folder contents via resourse embedding.
