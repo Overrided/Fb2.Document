@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 
 namespace Fb2.Document.Models.Base;
@@ -9,7 +9,7 @@ public abstract class TextContainerBase : Fb2Container
 
     public override bool CanContainText => true;
 
-    public override ImmutableHashSet<string> AllowedElements =>
+    public override FrozenSet<string> AllowedElements =>
     [
         ElementNames.Strong,
         ElementNames.Emphasis,

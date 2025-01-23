@@ -48,9 +48,10 @@ public class Fb2ElementTests
 
         var invalidXmlNode = new XComment("test comment");
 
-        fb2Element.Invoking(f => f.Load(invalidXmlNode))
+        fb2Element
+            .Invoking(f => f.Load(invalidXmlNode))
             .Should()
-        .ThrowExactly<Fb2NodeLoadingException>()
+            .ThrowExactly<Fb2NodeLoadingException>()
             .WithMessage($"Unsupported nodeType: received {XmlNodeType.Comment}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
     }
 

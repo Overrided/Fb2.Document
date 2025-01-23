@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -8,5 +8,5 @@ public class Stylesheet : Fb2Element
 {
     public override string Name => ElementNames.Stylesheet;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Type];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.Type];
 }

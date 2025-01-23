@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using System.Text;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
@@ -9,7 +9,7 @@ public class TextLink : TextContainerBase
 {
     public override string Name => ElementNames.TextLink;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.XHref, AttributeNames.Type];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.XHref, AttributeNames.Type];
 
     public sealed override string ToString()
     {

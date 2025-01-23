@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Fb2.Document.Constants;
@@ -14,9 +14,9 @@ public class Table : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.Id];
 
-    public override ImmutableHashSet<string> AllowedElements => [ElementNames.TableRow];
+    public override FrozenSet<string> AllowedElements => [ElementNames.TableRow];
 
     public sealed override string ToString()
     {

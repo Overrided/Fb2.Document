@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -6,8 +6,7 @@ namespace Fb2.Document.Models;
 
 public abstract class TableCellBase : TextContainerBase
 {
-    public override ImmutableHashSet<string> AllowedAttributes =>
-    [
+    public override FrozenSet<string> AllowedAttributes => [
         AttributeNames.Id,
         AttributeNames.ColumnSpan,
         AttributeNames.RowSpan,

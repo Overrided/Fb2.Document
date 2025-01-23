@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -12,7 +12,7 @@ public class CustomInfo : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.InfoType];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.InfoType];
 
     /// <summary>
     /// Specific override to preserve original string content 

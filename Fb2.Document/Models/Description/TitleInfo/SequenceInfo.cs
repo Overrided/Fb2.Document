@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using System.Text;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
@@ -11,7 +11,7 @@ public class SequenceInfo : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Number, AttributeNames.Language];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Number, AttributeNames.Language];
 
     public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
 

@@ -32,7 +32,7 @@ public class Fb2NodeMetadataTests
         Action act = () =>
         {
             var namespaceAttribute = new XAttribute("xmlns", "www.fourthcoffee.com");
-            meta = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute> { namespaceAttribute });
+            meta = new Fb2NodeMetadata(XNamespace.Xml, [namespaceAttribute]);
             meta.Should().NotBeNull();
             meta.DefaultNamespace.Should().Be(XNamespace.Xml);
             meta.NamespaceDeclarations.Should().NotBeNullOrEmpty().And.HaveCount(1);

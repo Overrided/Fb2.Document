@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,7 +10,7 @@ public class BookDescription : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements =>
+    public override FrozenSet<string> AllowedElements =>
     [
         ElementNames.TitleInfo,
         ElementNames.SrcTitleInfo,

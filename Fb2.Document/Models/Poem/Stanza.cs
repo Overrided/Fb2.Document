@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,5 +10,5 @@ public class Stanza : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Title, ElementNames.SubTitle, ElementNames.StanzaV];
+    public override FrozenSet<string> AllowedElements => [ElementNames.Title, ElementNames.SubTitle, ElementNames.StanzaV];
 }

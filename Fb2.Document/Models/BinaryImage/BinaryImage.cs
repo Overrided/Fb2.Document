@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -12,7 +12,7 @@ public class BinaryImage : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.ContentType, AttributeNames.Id];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.ContentType, AttributeNames.Id];
 
     public sealed override void Load(
         [In] XNode node,

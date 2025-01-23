@@ -232,11 +232,10 @@ public sealed class Fb2Document
 
         LoadHandled(() =>
         {
-            using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
-            {
-                var document = XDocument.Load(reader);
-                Load(document.Root, options);
-            }
+            using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
+            var document = XDocument.Load(reader);
+
+            Load(document.Root, options);
         });
     }
 

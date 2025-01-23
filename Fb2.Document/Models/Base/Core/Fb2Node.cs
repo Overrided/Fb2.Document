@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -36,9 +36,9 @@ public abstract partial class Fb2Node : ICloneable
     public abstract bool HasContent { get; }
 
     /// <summary>
-    /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
+    /// Returns actual node's attributes in form of <see cref="FrozenSet{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes] : [];
+    public FrozenSet<Fb2Attribute> Attributes => HasAttributes ? attributes.ToFrozenSet() : [];
 
     /// <summary>
     /// Indicates if element has any attributes.
@@ -48,7 +48,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual ImmutableHashSet<string> AllowedAttributes => [];
+    public virtual FrozenSet<string> AllowedAttributes => [];
 
     /// <summary>
     /// Indicates if element sholud be inline or start from new line.
@@ -107,7 +107,7 @@ public abstract partial class Fb2Node : ICloneable
             NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
-        if (AllowedAttributes.IsEmpty)
+        if (AllowedAttributes.Count == 0)
             return;
 
         foreach (var allowedAttrName in AllowedAttributes)
@@ -347,7 +347,7 @@ public abstract partial class Fb2Node : ICloneable
     {
         ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
-        if (AllowedAttributes.IsEmpty)
+        if (AllowedAttributes.Count == 0)
             throw new NoAttributesAllowedException(Name);
 
         var key = fb2Attribute.Key;

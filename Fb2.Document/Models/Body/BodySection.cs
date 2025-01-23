@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,9 +10,9 @@ public class BodySection : Fb2Container
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
 
-    public override ImmutableHashSet<string> AllowedElements =>
+    public override FrozenSet<string> AllowedElements =>
     [
         ElementNames.Title,
         ElementNames.Epigraph,

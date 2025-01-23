@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
@@ -11,7 +11,7 @@ public class Image : Fb2Element
 {
     public override string Name => ElementNames.Image;
 
-    public override ImmutableHashSet<string> AllowedAttributes =>
+    public override FrozenSet<string> AllowedAttributes =>
     [
         AttributeNames.Id,
         AttributeNames.Alt,

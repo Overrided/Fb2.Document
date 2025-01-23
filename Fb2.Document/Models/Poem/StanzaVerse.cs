@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,5 +10,5 @@ public class StanzaVerse : TextContainerBase
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
+    public override FrozenSet<string> AllowedAttributes => [AttributeNames.Id];
 }

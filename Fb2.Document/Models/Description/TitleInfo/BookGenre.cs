@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
+using System.Collections.Generic;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -10,5 +11,5 @@ public class BookGenre : Fb2Element
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Match];
+    public override FrozenSet<string> AllowedAttributes => new List<string> { AttributeNames.Match }.ToFrozenSet();
 }
