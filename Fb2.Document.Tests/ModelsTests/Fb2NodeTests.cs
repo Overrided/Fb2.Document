@@ -142,7 +142,7 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (instance.AllowedAttributes.Any())
+        if (instance.HasAllowedAttributes)
             return;
 
         instance
@@ -212,7 +212,7 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
@@ -252,7 +252,7 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
@@ -293,7 +293,7 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         var exc = instance // whitespace
@@ -336,7 +336,7 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
@@ -351,7 +351,8 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        //if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         var firstAlowedAttributeName = instance.AllowedAttributes.First();
@@ -369,7 +370,8 @@ public class Fb2NodeTests
     {
         instance.Should().NotBe(null);
 
-        if (!instance.AllowedAttributes.Any())
+        //if (!instance.AllowedAttributes.Any())
+        if (!instance.HasAllowedAttributes)
             return;
 
         var firstAlowedAttributeName = instance.AllowedAttributes.First();
@@ -485,7 +487,7 @@ public class Fb2NodeTests
     [ClassData(typeof(Fb2NodeCollection))]
     public void Fb2Node_RemoveAttribute_InvalidAttribute_Fails(Fb2Node instance)
     {
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
@@ -518,7 +520,7 @@ public class Fb2NodeTests
     [ClassData(typeof(Fb2NodeCollection))]
     public void Fb2Node_EmptyNode_RemoveAttribute_Ignored(Fb2Node instance)
     {
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
@@ -566,16 +568,16 @@ public class Fb2NodeTests
     {
         instance.HasAttributes.Should().BeFalse();
 
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance
-            .Invoking(i => i.HasAttribute((Fb2Attribute)null))
+            .Invoking(i => i.HasAttribute((Fb2Attribute?)null))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
         instance
-            .Invoking(i => i.HasAttribute((string)null))
+            .Invoking(i => i.HasAttribute((string?)null))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
@@ -591,47 +593,47 @@ public class Fb2NodeTests
     {
         instance.HasAttributes.Should().BeFalse();
 
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance.Attributes.Should().BeEmpty();
 
-        instance.HasAttribute(instance.AllowedAttributes.First()).Should().BeFalse();
-        instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah")).Should().BeFalse();
+        instance.HasAttribute(instance.AllowedAttributes!.First()).Should().BeFalse();
+        instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes!.First(), "blah")).Should().BeFalse();
 
-        instance.HasAttribute(instance.AllowedAttributes.First(), true).Should().BeFalse();
-        instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah", "http://www.w3.org//xlink")).Should().BeFalse();
+        instance.HasAttribute(instance.AllowedAttributes!.First(), true).Should().BeFalse();
+        instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes!.First(), "blah", "http://www.w3.org//xlink")).Should().BeFalse();
     }
 
     [Theory]
     [ClassData(typeof(Fb2NodeCollection))]
     public void EmptyNode_GetAttribute_ReturnsDefaultKeyValuePair(Fb2Node instance)
     {
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance.Attributes.Should().BeEmpty();
 
-        instance.GetAttribute(instance.AllowedAttributes.First()).Should().BeNull();
-        instance.GetAttribute(instance.AllowedAttributes.First(), true).Should().BeNull();
+        instance.GetAttribute(instance.AllowedAttributes!.First()).Should().BeNull();
+        instance.GetAttribute(instance.AllowedAttributes!.First(), true).Should().BeNull();
     }
 
     [Theory]
     [ClassData(typeof(Fb2NodeCollection))]
     public void EmptyNode_TryGetAttribute_ReturnsFalse(Fb2Node instance)
     {
-        if (instance.AllowedAttributes.Count == 0)
+        if (!instance.HasAllowedAttributes)
             return;
 
         instance.Attributes.Should().BeEmpty();
 
-        instance.TryGetAttribute(instance.AllowedAttributes.First(), out var result)
+        instance.TryGetAttribute(instance.AllowedAttributes!.First(), out var result)
             .Should()
             .BeFalse();
 
         result.Should().BeNull();
 
-        instance.TryGetAttribute(instance.AllowedAttributes.First(), true, out var resultIgnoreCase)
+        instance.TryGetAttribute(instance.AllowedAttributes!.First(), true, out var resultIgnoreCase)
             .Should()
             .BeFalse();
 

@@ -20,7 +20,7 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
-    private List<Fb2Attribute> attributes = [];
+    private List<Fb2Attribute>? attributes = null;
 
     protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
     protected const string Whitespace = " ";
@@ -36,19 +36,24 @@ public abstract partial class Fb2Node : ICloneable
     public abstract bool HasContent { get; }
 
     /// <summary>
-    /// Returns actual node's attributes in form of <see cref="FrozenSet{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
+    /// Returns actual node's attributes in form of <see cref="List{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public FrozenSet<Fb2Attribute> Attributes => HasAttributes ? attributes.ToFrozenSet() : [];
+    public List<Fb2Attribute> Attributes => HasAttributes ? new List<Fb2Attribute>(attributes!) : [];
 
     /// <summary>
     /// Indicates if element has any attributes.
     /// </summary>
-    public bool HasAttributes => attributes.Any();
+    public bool HasAttributes => attributes is { Count: > 0 };
 
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual FrozenSet<string> AllowedAttributes => [];
+    public virtual FrozenSet<string>? AllowedAttributes => null;
+
+    /// <summary>
+    /// Indicates if element can have any attributes.
+    /// </summary>
+    public bool HasAllowedAttributes => AllowedAttributes is { Count: > 0 };
 
     /// <summary>
     /// Indicates if element sholud be inline or start from new line.
@@ -107,8 +112,10 @@ public abstract partial class Fb2Node : ICloneable
             NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
-        if (AllowedAttributes.Count == 0)
+        if (AllowedAttributes is not { Count: > 0 })
             return;
+
+        EnsureAttributesInitialized(AllowedAttributes.Count);
 
         foreach (var allowedAttrName in AllowedAttributes)
         {
@@ -121,7 +128,7 @@ public abstract partial class Fb2Node : ICloneable
             var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
             var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
 
-            attributes.Add(fb2Attribute);
+            attributes!.Add(fb2Attribute);
         }
     }
 
@@ -267,6 +274,8 @@ public abstract partial class Fb2Node : ICloneable
         if (attributes == null || !attributes.Any())
             throw new ArgumentNullException(nameof(attributes));
 
+        EnsureAttributesInitialized(attributes.Length);
+
         foreach (var attribute in attributes)
             AddAttribute(attribute);
 
@@ -284,8 +293,7 @@ public abstract partial class Fb2Node : ICloneable
         if (attributes == null || !attributes.Any())
             throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
-        foreach (var attribute in attributes)
-            AddAttribute(attribute);
+        this.AddAttributes([.. attributes]);
 
         return this;
     }
@@ -347,22 +355,24 @@ public abstract partial class Fb2Node : ICloneable
     {
         ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
-        if (AllowedAttributes.Count == 0)
+        if (!HasAllowedAttributes)
             throw new NoAttributesAllowedException(Name);
 
         var key = fb2Attribute.Key;
 
-        if (!AllowedAttributes.Contains(key))
+        if (!AllowedAttributes!.Contains(key))
             throw new UnexpectedAttributeException(Name, key);
+
+        EnsureAttributesInitialized(1);
 
         // update or insert
         if (TryGetAttribute(key, true, out var existingAttribute))
         {
-            var existingAttributeIndex = attributes.IndexOf(existingAttribute!);
+            var existingAttributeIndex = attributes!.IndexOf(existingAttribute!);
             attributes[existingAttributeIndex] = fb2Attribute; // replace existing, should not be -1
         }
         else
-            attributes.Add(fb2Attribute);
+            attributes!.Add(fb2Attribute);
 
         return this;
     }
@@ -495,7 +505,10 @@ public abstract partial class Fb2Node : ICloneable
             return true;
 
         var result = Name == otherNode.Name &&
-            AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
+            ((AllowedAttributes == null && otherNode.AllowedAttributes == null) ||
+            (AllowedAttributes != null && otherNode.AllowedAttributes != null &&
+            AllowedAttributes.Count == otherNode.AllowedAttributes.Count &&
+            AllowedAttributes.All(otherNode.AllowedAttributes.Contains))) &&
             AreAttributesEqual(otherNode.attributes) &&
             IsInline == otherNode.IsInline &&
             IsUnsafe == otherNode.IsUnsafe &&
@@ -506,12 +519,27 @@ public abstract partial class Fb2Node : ICloneable
         return result;
     }
 
-    private bool AreAttributesEqual(List<Fb2Attribute> otherAttributes)
+    private bool AreAttributesEqual(List<Fb2Attribute>? otherAttributes)
     {
+        if (attributes == null && otherAttributes == null)
+            return true;
+
         if (ReferenceEquals(attributes, otherAttributes))
             return true;
 
-        return attributes.Count == otherAttributes.Count && attributes.All(otherAttributes.Contains);
+        var equals = attributes != null && otherAttributes != null &&
+                        attributes.Count == otherAttributes.Count &&
+                        attributes.All(otherAttributes.Contains);
+
+        return equals;
+    }
+
+    private void EnsureAttributesInitialized(int capacity)
+    {
+        if (HasAttributes)
+            return;
+
+        attributes = new List<Fb2Attribute>(capacity);
     }
 
     public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
@@ -534,7 +562,7 @@ public abstract partial class Fb2Node : ICloneable
         cloneNode.IsUnsafe = node.IsUnsafe;
 
         if (node.HasAttributes)
-            cloneNode.attributes = node.attributes
+            cloneNode.attributes = node.attributes!
                 .Select(a => new Fb2Attribute(a))
                 .ToList();
 

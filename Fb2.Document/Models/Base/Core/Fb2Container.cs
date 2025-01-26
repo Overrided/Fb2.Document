@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -48,7 +47,7 @@ public abstract class Fb2Container : Fb2Node
     /// <summary>
     /// Indicates if element has any content.
     /// </summary>
-    public override bool HasContent => (content?.Count ?? 0) > 0;
+    public override bool HasContent => content is { Count: > 0 };
 
     /// <summary>
     /// Container Node loading mechanism. Loads <see cref="Content"/> and sequentially calls <see cref="Fb2Node.Load(XNode,Fb2Container?,bool, bool, bool)"/> on all child nodes.
@@ -61,11 +60,11 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Fb2NodeLoadingException"></exception>
     public override void Load(
-        [In] XNode node,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
+            [In] XNode node,
+            [In] Fb2Container? parentNode = null,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
     {
         base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
@@ -86,17 +85,10 @@ public abstract class Fb2Container : Fb2Node
 
                 var isUsableNodeType = isXElement || isXText;
                 if (!isUsableNodeType)
-                {
-                    Debug.WriteLine("Not usable node type");
                     return false;
-                }
 
                 if (isXText)
-                {
-                    var canNotLoad = !CanContainText && !loadUnsafe;
-                    Debug.WriteLine($"is text {canNotLoad}");
-                    return !canNotLoad;
-                }
+                    return !(!CanContainText && !loadUnsafe);
 
                 var childNode = (XElement)n;
                 var rawNodeLocalName = childNode.Name.LocalName;
@@ -108,9 +100,6 @@ public abstract class Fb2Container : Fb2Node
                     AllowedElements.Contains(rawNodeLocalName);
 
                 var canNotLoadElem = !isSafeXElement && !loadUnsafe;
-
-
-                Debug.WriteLine($"is elem {canNotLoadElem}");
                 return !canNotLoadElem;
             })
             .Select(validNode =>
@@ -140,8 +129,8 @@ public abstract class Fb2Container : Fb2Node
         if (nodesCount == 0)
             return;
 
-        content = new List<Fb2Node>(nodesCount);
-        content.AddRange(nodes);
+        EnsureContentInitialized(nodesCount);
+        content!.AddRange(nodes);
     }
 
     public override string ToString()
