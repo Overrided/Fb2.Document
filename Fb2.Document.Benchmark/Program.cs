@@ -25,7 +25,7 @@ public class AntiVirusFriendlyConfig : ManualConfig
             .WithRuntime(CoreRuntime.Core90)
             .WithWarmupCount(5)
             .WithLaunchCount(10)
-            .WithIterationCount(1000)
+            .WithIterationCount(100)
             .WithToolchain(InProcessNoEmitToolchain.Instance))
         .AddDiagnoser(MemoryDiagnoser.Default, ThreadingDiagnoser.Default, ExceptionDiagnoser.Default)
         .AddLogger(ConsoleLogger.Default)
@@ -33,31 +33,46 @@ public class AntiVirusFriendlyConfig : ManualConfig
 }
 
 [Config(typeof(AntiVirusFriendlyConfig))]
+//[HardwareCounters(
+//    HardwareCounter.BranchMispredictions,
+//    HardwareCounter.BranchInstructions)] //  BenchmarkDotNet.Diagnostics.Windows
+
 public class Fb2DocumentBenchMark
 {
     public Stream? fb2FileContentStream;
 
-    [GlobalSetup]
-    public void GlobalSetup()
-    {
-        var x = Assembly.GetExecutingAssembly();
-        var names = x.GetManifestResourceNames();
-        fb2FileContentStream = x.GetManifestResourceStream(names[0]); // only one resource
-    }
+    //[GlobalSetup]
+    //public void GlobalSetup()
+    //{
+
+    //}
 
     [IterationSetup]
     public void IterationSetup()
     {
+        var x = Assembly.GetExecutingAssembly();
+        var names = x.GetManifestResourceNames();
+        fb2FileContentStream = x.GetManifestResourceStream(names[0]); // only one resource
         if (fb2FileContentStream!.Position != 0 && fb2FileContentStream!.CanSeek)
             fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
     }
 
-    [Benchmark]
+    [Benchmark()]
     public async Task<Fb2Document> LoadDocumentFromStreamAsync()
     {
         var doc = new Fb2Document();
         await doc.LoadAsync(fb2FileContentStream!);
         return doc;
+    }
+
+    [IterationCleanup]
+    public void IterationCleanup()
+    {
+        if (fb2FileContentStream != null)
+        {
+            fb2FileContentStream.Close();
+            fb2FileContentStream.Dispose();
+        }
     }
 
     [GlobalCleanup]
