@@ -22,7 +22,7 @@ public class AntiVirusFriendlyConfig : ManualConfig
 {
     public AntiVirusFriendlyConfig() =>
         AddJob(Job.Default
-            .WithRuntime(CoreRuntime.Core80)
+            .WithRuntime(CoreRuntime.Core90)
             .WithWarmupCount(5)
             .WithLaunchCount(10)
             .WithIterationCount(1000)
