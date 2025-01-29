@@ -14,12 +14,12 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Element : Fb2Node
 {
-    protected string content = string.Empty;
+    protected string? content = null;
 
     /// <summary>
     /// Content (value) of element. Available after Load(...) method call.
     /// </summary>
-    public string Content => content;
+    public string Content => HasContent ? content! : string.Empty;
 
     /// <summary>
     /// <para>Indicates if content of an element should be written from a new line.</para>
@@ -137,7 +137,7 @@ public abstract class Fb2Element : Fb2Node
     public virtual Fb2Element ClearContent()
     {
         if (HasContent)
-            content = string.Empty;
+            content = null;
 
         return this;
     }
@@ -155,7 +155,7 @@ public abstract class Fb2Element : Fb2Node
     {
         var element = base.ToXml(serializeUnsafeNodes);
         if (HasContent)
-            element.Value = content;
+            element.Value = content!;
 
         return element;
     }
@@ -170,7 +170,21 @@ public abstract class Fb2Element : Fb2Node
         if (other is not Fb2Element otherElement)
             return false;
 
-        var result = content.Equals(otherElement.content, StringComparison.InvariantCulture);
+        var otherContent = otherElement.content;
+
+        var bothContensAreNull = content is null && otherContent is null;
+        if (bothContensAreNull)
+            return true;
+
+        var bothContensAreEmpty = string.IsNullOrEmpty(content) && string.IsNullOrEmpty(otherContent);
+        if (bothContensAreEmpty)
+            return true;
+
+        var bothContentsAreNotEmpty = !string.IsNullOrEmpty(content) && !string.IsNullOrEmpty(otherContent);
+        if (!bothContentsAreNotEmpty)
+            return false;
+
+        var result = content!.Equals(otherContent, StringComparison.InvariantCulture);
 
         return result;
     }
