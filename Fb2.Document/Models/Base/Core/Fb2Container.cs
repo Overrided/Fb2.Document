@@ -845,7 +845,7 @@ public abstract class Fb2Container : Fb2Node
         if (capacity < 0)
             throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
 
-        if (content is not null)
+        if (HasContent)
             return;
 
         content = new List<Fb2Node>(capacity);

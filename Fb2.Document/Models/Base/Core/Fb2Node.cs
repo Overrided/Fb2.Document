@@ -48,7 +48,12 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual ImmutableHashSet<string> AllowedAttributes => [];
+    public virtual ImmutableHashSet<string>? AllowedAttributes => null;
+
+    /// <summary>
+    /// Indicates if element has any AllowedAttibutes.
+    /// </summary>
+    public bool HasAllowedAttributes => AllowedAttributes is { Count: > 0 };
 
     /// <summary>
     /// Indicates if element sholud be inline or start from new line.
@@ -107,12 +112,12 @@ public abstract partial class Fb2Node : ICloneable
             NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
-        if (AllowedAttributes.IsEmpty)
+        if (!HasAllowedAttributes)
             return;
 
         var allFilteredAttributes = allAttributes
             .DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
-            .Where(da => AllowedAttributes.Contains(da.Name.LocalName.ToLowerInvariant()))
+            .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
             .Select(attr =>
             {
                 var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
@@ -353,12 +358,12 @@ public abstract partial class Fb2Node : ICloneable
     {
         ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
-        if (AllowedAttributes.IsEmpty)
+        if (!HasAllowedAttributes)
             throw new NoAttributesAllowedException(Name);
 
         var key = fb2Attribute.Key;
 
-        if (!AllowedAttributes.Contains(key))
+        if (!AllowedAttributes!.Contains(key))
             throw new UnexpectedAttributeException(Name, key);
 
         EnsureAttributesInitialized(1);
@@ -534,6 +539,9 @@ public abstract partial class Fb2Node : ICloneable
 
     private void EnsureAttributesInitialized(int capacity)
     {
+        if (capacity < 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
         if (HasAttributes)
             return;
 
@@ -560,7 +568,7 @@ public abstract partial class Fb2Node : ICloneable
         cloneNode.IsUnsafe = node.IsUnsafe;
 
         if (node.HasAttributes)
-            cloneNode.attributes = node.attributes
+            cloneNode.attributes = node.attributes!
                 .Select(a => new Fb2Attribute(a))
                 .ToList();
 
