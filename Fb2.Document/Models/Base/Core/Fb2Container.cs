@@ -20,7 +20,7 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Container : Fb2Node
 {
-    private List<Fb2Node>? content = null;
+    private List<Fb2Node>? content;
 
     /// <summary>
     /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.

@@ -14,7 +14,7 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Element : Fb2Node
 {
-    protected string? content = null;
+    protected string? content;
 
     /// <summary>
     /// Content (value) of element. Available after Load(...) method call.

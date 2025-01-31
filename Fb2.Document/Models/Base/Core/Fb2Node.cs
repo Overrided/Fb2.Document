@@ -20,7 +20,7 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
-    private List<Fb2Attribute>? attributes = null;
+    private List<Fb2Attribute>? attributes;
 
     protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
     protected const string Whitespace = " ";
@@ -48,7 +48,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual ImmutableHashSet<string>? AllowedAttributes => null;
+    public virtual ImmutableHashSet<string>? AllowedAttributes { get; }
 
     /// <summary>
     /// Indicates if element has any AllowedAttibutes.
