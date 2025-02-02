@@ -6,7 +6,7 @@ using Fb2.Document.Extensions;
 namespace Fb2.Document.Models.Base;
 
 /// <summary>
-/// 
+/// Represents Fb2 Attribute key-value pair.
 /// </summary>
 public class Fb2Attribute
 {
