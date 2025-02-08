@@ -3,7 +3,7 @@
 /// <summary>
 /// Contains all standard Fb2 attribute names.
 /// </summary>
-public class AttributeNames
+public struct AttributeNames
 {
     public const string Name = "name";
     public const string Id = "id";
