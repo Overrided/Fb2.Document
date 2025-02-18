@@ -461,7 +461,7 @@ public class Fb2DocumentTests
             .WithMessage($"Can`t read fileContent, {nameof(Stream.CanRead)} is {false}");
     }
 
-    private static Stream? GetSampleFileInfo(string fileName)
+    private static Stream GetSampleFileInfo(string fileName)
     {
         var x = Assembly.GetExecutingAssembly();
         var names = x.GetManifestResourceNames();
@@ -471,6 +471,9 @@ public class Fb2DocumentTests
             throw new Exception();
 
         var fb2FileContentStream = x.GetManifestResourceStream(normalizedName);
+        if (fb2FileContentStream is null)
+            throw new Exception();
+
         return fb2FileContentStream;
     }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
@@ -144,7 +143,7 @@ public static class Fb2NodeFactory
         if (string.IsNullOrWhiteSpace(nodeName))
             throw new ArgumentNullException(nameof(nodeName));
 
-        var isKnownName = KnownNodes.Keys.Contains(nodeName, StringComparer.Create(CultureInfo.InvariantCulture, true));
+        var isKnownName = KnownNodes.ContainsKey(nodeName.ToLowerInvariant());
         return isKnownName;
     }
 }

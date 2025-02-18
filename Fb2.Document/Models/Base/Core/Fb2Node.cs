@@ -20,10 +20,10 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
-    private List<Fb2Attribute>? attributes;
-
-    protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
     protected const string Whitespace = " ";
+    protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
+
+    private List<Fb2Attribute>? attributes;
 
     /// <summary>
     /// Node name, used during document parsing and validation.

@@ -75,23 +75,30 @@ public abstract class Fb2Container : Fb2Node
 
         var nodes = element.Nodes()
             .Where(n =>
-                {
-                    if (n.NodeType == XmlNodeType.Text)
-                        return true;
+            {
+                var nodeType = n.NodeType;
 
-                    var isElement = n.NodeType == XmlNodeType.Element;
-                    if (!isElement)
-                        return false;
+                if (nodeType == XmlNodeType.Text)
+                    return loadUnsafe || CanContainText;
 
-                    var childNode = (XElement)n;
-                    var nodeLocalName = childNode.Name.LocalName;
-                    return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                           Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
-                })
+                var isElement = nodeType == XmlNodeType.Element;
+                if (!isElement)
+                    return false;
+
+                var childNode = (XElement)n;
+                var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
+
+                var isValid = !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
+                                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+
+                if (!isValid)
+                    return false;
+
+                return loadUnsafe || AllowedElements.Contains(nodeLocalName);
+            })
             .ToList();
 
         var nodesCount = nodes.Count;
-
         if (nodesCount == 0)
             return;
 
@@ -108,9 +115,6 @@ public abstract class Fb2Container : Fb2Node
             var isUnsafe = validNode.NodeType == XmlNodeType.Text ?
                 !CanContainText :
                 !AllowedElements.Contains(localName);
-
-            if (isUnsafe && !loadUnsafe)
-                continue;
 
             var elem = Fb2NodeFactory.GetNodeByName(localName);
             elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);

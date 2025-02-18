@@ -51,7 +51,7 @@ public class Fb2NodeMetadata
     {
         DefaultNamespace = other.DefaultNamespace;
 
-        NamespaceDeclarations = other.NamespaceDeclarations != null && other.NamespaceDeclarations.Any() ?
+        NamespaceDeclarations = other.NamespaceDeclarations is { Count: > 0 } ?
             new(other.NamespaceDeclarations) :
             null;
     }
