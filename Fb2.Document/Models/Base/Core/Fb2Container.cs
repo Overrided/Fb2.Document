@@ -124,6 +124,47 @@ public abstract class Fb2Container : Fb2Node
         }
     }
 
+    public override async Task LoadFromReaderAsync([In] XmlReader reader)
+    {
+        await base.LoadFromReaderAsync(reader);
+
+        EnsureContentInitialized(1);
+
+        var readChild = await reader.ReadAsync();
+
+        while (readChild)
+        {
+            var nodeType = reader.NodeType;
+            if (nodeType != XmlNodeType.Element && nodeType != XmlNodeType.Text)
+            {
+                readChild = await reader.ReadAsync();
+                continue;
+            }
+
+            var isTextNode = nodeType == XmlNodeType.Text;
+
+            if (!isTextNode)
+            {
+                var localName = reader.LocalName.ToLowerInvariant();
+                var isKnownNode = Fb2NodeFactory.IsKnownNodeName(reader.LocalName);
+                if (!isKnownNode || localName.Equals(ElementNames.FictionText))
+                {
+                    readChild = await reader.ReadAsync();
+                    continue;
+                }
+            }
+
+
+            Fb2Node node = Fb2NodeFactory.GetNodeByName(isTextNode ? ElementNames.FictionText : reader.LocalName);
+            var childContentReader = isTextNode ? reader : reader.ReadSubtree();
+            await node.LoadFromReaderAsync(childContentReader);
+
+            content!.Add(node);
+
+            readChild = await reader.ReadAsync();
+        }
+    }
+
     public override string ToString()
     {
         if (!HasContent)

@@ -66,6 +66,34 @@ public abstract class Fb2Element : Fb2Node
             content = rawContent;
     }
 
+    public override async Task LoadFromReaderAsync([In] XmlReader reader)
+    {
+        await base.LoadFromReaderAsync(reader);
+
+        var nodeType = reader.NodeType;
+
+        if (reader.Name.ToLowerInvariant().Contains("impostor"))
+        {
+            var a = 1;
+        }
+
+        if (nodeType == XmlNodeType.None && reader.ReadState == ReadState.EndOfFile)
+        {
+            return;
+        }
+
+        var rawContent = nodeType switch
+        {
+            XmlNodeType.Element => reader.Value,
+            XmlNodeType.Text => reader.Value,
+            _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {nodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+        };
+
+        Console.WriteLine($"{new string(' ', reader.Depth)}{rawContent}");
+
+        content = rawContent;
+    }
+
     /// <summary>
     /// Appends new plain text to <see cref="Content"/> using provider function.
     /// </summary>

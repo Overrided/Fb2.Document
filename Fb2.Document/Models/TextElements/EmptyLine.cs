@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
@@ -21,6 +23,12 @@ public class EmptyLine : Fb2Element
     {
         base.Load(element, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
         content = Environment.NewLine; // double-check, just in case
+    }
+
+    public override async Task LoadFromReaderAsync([In] XmlReader reader)
+    {
+        await base.LoadFromReaderAsync(reader);
+        content = Environment.NewLine; // double-check, just in cases
     }
 
     public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;

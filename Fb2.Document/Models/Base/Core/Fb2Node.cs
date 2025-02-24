@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
@@ -133,6 +134,31 @@ public abstract partial class Fb2Node : ICloneable
         EnsureAttributesInitialized(allFilteredAttributes.Count);
 
         attributes!.AddRange(allFilteredAttributes);
+    }
+
+    public virtual async Task LoadFromReaderAsync([In] XmlReader reader)
+    {
+        if (reader.NodeType != XmlNodeType.Element)
+            await reader.MoveToContentAsync();
+
+        //var attributesCount = reader.AttributeCount;
+
+        //var hasAttributes = reader.MoveToFirstAttribute();
+        //if (hasAttributes && attributesCount > 1)
+        //{
+        //    var attrVal = await reader.GetValueAsync();
+
+        //    for (var i = 1; i < attributesCount; i++) // 1 sinse line 146
+        //    {
+        //        reader.MoveToNextAttribute();
+        //        var attrVal2 = await reader.GetValueAsync();
+        //    }
+        //}
+
+        var readerName = reader.LocalName;
+
+        if (!readerName.EqualsIgnoreCase(Name) && reader.NodeType != XmlNodeType.Text)
+            await reader.ReadAsync(); // move one step forward
     }
 
     /// <summary>
