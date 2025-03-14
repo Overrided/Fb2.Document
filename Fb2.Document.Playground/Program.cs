@@ -25,6 +25,7 @@ public class Program
             fb2FileContentStream.Seek(0, System.IO.SeekOrigin.Begin);
 
             await fb2Document1.LoadOptimizedAsync(fb2FileContentStream);
+            var optContent = fb2Document1.ToString();
             var a = 1;
         }
         //await fb2Document.LoadAsync(fb2FileContentStream);

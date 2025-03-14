@@ -26,36 +26,44 @@ public class Fb2DocumentBenchmarks
             fb2FileContentStream!.Seek(0, SeekOrigin.Begin);
     }
 
+    //[Benchmark]
+    //public async Task<Fb2Document> LoadDocument_Full_FromStreamAsync()
+    //{
+    //    var doc = new Fb2Document();
+    //    await doc.LoadAsync(fb2FileContentStream!);
+    //    return doc;
+    //}
+
     [Benchmark]
-    public async Task<Fb2Document> LoadDocument_Full_FromStreamAsync()
+    public async Task<Fb2Document> LoadDocument_Optimized_FromStreamAsync()
     {
         var doc = new Fb2Document();
-        await doc.LoadAsync(fb2FileContentStream!);
+        await doc.LoadOptimizedAsync(fb2FileContentStream!);
         return doc;
     }
 
-    [Benchmark]
-    public async Task<Fb2Document> LoadDocument_NoUnsafe_FromStreamAsync()
-    {
-        var doc = new Fb2Document();
-        await doc.LoadAsync(fb2FileContentStream!, new Fb2StreamLoadingOptions
-        {
-            LoadUnsafeElements = false
-        });
-        return doc;
-    }
+    //[Benchmark]
+    //public async Task<Fb2Document> LoadDocument_NoUnsafe_FromStreamAsync()
+    //{
+    //    var doc = new Fb2Document();
+    //    await doc.LoadAsync(fb2FileContentStream!, new Fb2StreamLoadingOptions
+    //    {
+    //        LoadUnsafeElements = false
+    //    });
+    //    return doc;
+    //}
 
-    [Benchmark]
-    public async Task<Fb2Document> LoadDocument_NoUnsafe_NoMetadata_FromStreamAsync()
-    {
-        var doc = new Fb2Document();
-        await doc.LoadAsync(fb2FileContentStream!, new Fb2StreamLoadingOptions
-        {
-            LoadNamespaceMetadata = false,
-            LoadUnsafeElements = false
-        });
-        return doc;
-    }
+    //[Benchmark]
+    //public async Task<Fb2Document> LoadDocument_NoUnsafe_NoMetadata_FromStreamAsync()
+    //{
+    //    var doc = new Fb2Document();
+    //    await doc.LoadAsync(fb2FileContentStream!, new Fb2StreamLoadingOptions
+    //    {
+    //        LoadNamespaceMetadata = false,
+    //        LoadUnsafeElements = false
+    //    });
+    //    return doc;
+    //}
 
     [GlobalCleanup]
     public void GlobalCleanup()

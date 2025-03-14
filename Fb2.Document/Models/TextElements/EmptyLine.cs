@@ -25,9 +25,15 @@ public class EmptyLine : Fb2Element
         content = Environment.NewLine; // double-check, just in case
     }
 
-    public override async Task LoadFromReaderAsync([In] XmlReader reader)
+    public override async Task LoadFromReaderAsync(
+        [In] XmlReader reader,
+        //XmlNamespaceManager xmlNamespaceManager,
+        [In] Fb2Container? parentNode = null,
+        bool preserveWhitespace = false,
+        bool loadUnsafe = true,
+        bool loadNamespaceMetadata = true)
     {
-        await base.LoadFromReaderAsync(reader);
+        await base.LoadFromReaderAsync(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
         content = Environment.NewLine; // double-check, just in cases
     }
 

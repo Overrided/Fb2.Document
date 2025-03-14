@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
@@ -136,24 +135,71 @@ public abstract partial class Fb2Node : ICloneable
         attributes!.AddRange(allFilteredAttributes);
     }
 
-    public virtual async Task LoadFromReaderAsync([In] XmlReader reader)
+    public virtual async Task LoadFromReaderAsync(
+        [In] XmlReader reader,
+        [In] Fb2Container? parentNode = null,
+        bool preserveWhitespace = false,
+        bool loadUnsafe = true,
+        bool loadNamespaceMetadata = true)
     {
         if (reader.NodeType != XmlNodeType.Element)
             await reader.MoveToContentAsync();
 
-        //var attributesCount = reader.AttributeCount;
+        Parent = parentNode;
 
-        //var hasAttributes = reader.MoveToFirstAttribute();
-        //if (hasAttributes && attributesCount > 1)
-        //{
-        //    var attrVal = await reader.GetValueAsync();
+        if (loadNamespaceMetadata || HasAllowedAttributes)
+        {
+            List<XAttribute> namespaceDeclrs = [];
+            HashSet<Fb2Attribute> fb2Attributes = [];
+            XNamespace? defaultNamespace = null;
 
-        //    for (var i = 1; i < attributesCount; i++) // 1 sinse line 146
-        //    {
-        //        reader.MoveToNextAttribute();
-        //        var attrVal2 = await reader.GetValueAsync();
-        //    }
-        //}
+            while (reader.MoveToNextAttribute())
+            {
+                var attrValue = reader.Value;
+                var attrNamespaceUri = reader.NamespaceURI;
+                var attrLocalName = reader.LocalName;
+
+                if (attrLocalName == "xmlns")
+                {
+                    defaultNamespace = XNamespace.Get(attrValue); // TODO : use `attrValue` ?
+                    continue;
+                }
+
+                var xName = XName.Get(attrLocalName, attrNamespaceUri);
+                var xAttr = new XAttribute(xName, attrValue);
+
+                var xAttrLocName = xAttr.Name.LocalName;
+
+                if (xAttr.IsNamespaceDeclaration && loadNamespaceMetadata)
+                {
+                    namespaceDeclrs.Add(xAttr);
+                    continue;
+                }
+
+                if (!HasAllowedAttributes)
+                    continue;
+
+                var allowedAttrName = xAttrLocName.ToLowerInvariant();
+
+                if (!AllowedAttributes!.Contains(allowedAttrName) ||
+                    fb2Attributes.Any(a => a.Key.Equals(allowedAttrName))) // skip duplicate
+                    continue;
+
+                var attributeNamespace = xAttr.Name.Namespace?.NamespaceName;
+                var fb2Attribute = new Fb2Attribute(allowedAttrName, attrValue, attributeNamespace);
+                fb2Attributes.Add(fb2Attribute);
+            }
+
+            NodeMetadata = new Fb2NodeMetadata(defaultNamespace, namespaceDeclrs);
+
+            if (fb2Attributes.Count > 0)
+            {
+                EnsureAttributesInitialized(fb2Attributes.Count);
+                attributes!.AddRange(fb2Attributes);
+            }
+
+            reader.MoveToElement();
+        }
 
         var readerName = reader.LocalName;
 

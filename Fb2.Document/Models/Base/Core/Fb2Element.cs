@@ -66,32 +66,31 @@ public abstract class Fb2Element : Fb2Node
             content = rawContent;
     }
 
-    public override async Task LoadFromReaderAsync([In] XmlReader reader)
+    public override async Task LoadFromReaderAsync(
+        [In] XmlReader reader,
+        [In] Fb2Container? parentNode = null,
+        bool preserveWhitespace = false,
+        bool loadUnsafe = true,
+        bool loadNamespaceMetadata = true)
     {
-        await base.LoadFromReaderAsync(reader);
+        await base.LoadFromReaderAsync(
+            reader,
+            parentNode,
+            preserveWhitespace,
+            loadUnsafe,
+            loadNamespaceMetadata);
 
-        var nodeType = reader.NodeType;
+        var originalNodeType = reader.NodeType;
 
-        if (reader.Name.ToLowerInvariant().Contains("impostor"))
-        {
-            var a = 1;
-        }
+        if (originalNodeType == XmlNodeType.Element) // go to text content inside node
+            await reader.ReadAsync();
 
-        if (nodeType == XmlNodeType.None && reader.ReadState == ReadState.EndOfFile)
-        {
-            return;
-        }
+        var rawContent = reader.Value;
 
-        var rawContent = nodeType switch
-        {
-            XmlNodeType.Element => reader.Value,
-            XmlNodeType.Text => reader.Value,
-            _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {nodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-        };
-
-        Console.WriteLine($"{new string(' ', reader.Depth)}{rawContent}");
-
-        content = rawContent;
+        if (trimWhitespace.IsMatch(rawContent))
+            content = trimWhitespace.Replace(rawContent, Whitespace);
+        else
+            content = rawContent;
     }
 
     /// <summary>

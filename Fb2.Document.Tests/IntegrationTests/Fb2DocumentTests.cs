@@ -226,6 +226,53 @@ public class Fb2DocumentTests
     }
 
     [Fact]
+    public async Task BookContentCheck2()
+    {
+        using var sampleFileInfo = GetSampleFileInfo(SampleFileName);
+        var document = new Fb2Document();
+        await document.LoadOptimizedAsync(sampleFileInfo);
+
+        document.Bodies.Should().HaveCount(3);
+
+        var firstBody = document.Bodies[0];
+        var firstBodyTitle = firstBody.GetFirstChild<Title>();
+        firstBodyTitle.Should().NotBeNull();
+        var firstBodySections = firstBody.GetChildren<BodySection>();
+        firstBodySections.Should().HaveCount(9);
+
+        var secondBody = document.Bodies[1];
+        var secondBodyAttributes = secondBody.Attributes.Should().HaveCount(1);
+        var secondBodyNameAttribute = secondBody.Attributes.First();
+        secondBodyNameAttribute.Key.Should().Be(AttributeNames.Name);
+        secondBodyNameAttribute.Value.Should().Be("notes");
+
+        var secondBodyTitle = secondBody.GetFirstChild<Title>();
+        secondBodyTitle.Should().NotBeNull();
+
+        var secondBodySections = secondBody.GetChildren<BodySection>();
+        secondBodySections.Should().HaveCount(20);
+
+        var thirdBody = document.Bodies[2];
+        var thirdBodySections = thirdBody.GetChildren<BodySection>();
+        thirdBodySections.Should().HaveCount(1);
+
+        document.BinaryImages.Should().HaveCount(33);
+        document.BookDescription.Should().NotBeNull();
+        document.Title.Should().NotBeNull();
+        document.DocumentInfo.Should().NotBeNull();
+
+        document.SourceTitle.Should().BeNull();
+        document.PublishInfo.Should().BeNull();
+        document.CustomInfo.Should().NotBeNull();
+
+        var strContent = document.ToString();
+        strContent.Should().NotBeNullOrEmpty();
+        var stringXmlContent = document.ToXmlString();
+        stringXmlContent.Should().NotBeNullOrEmpty();
+    }
+
+
+    [Fact]
     public async Task ExportDocument_AndReload_SameContent()
     {
         using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
