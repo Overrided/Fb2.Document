@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -21,6 +22,8 @@ namespace Fb2.Document.Models.Base;
 public abstract partial class Fb2Node : ICloneable
 {
     protected const string Whitespace = " ";
+    protected const string XmlNamespace = "xmlns";
+
     protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
 
     private List<Fb2Attribute>? attributes;
@@ -38,7 +41,9 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes] : [];
+    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ?
+        [.. attributes!] :
+        [];
 
     /// <summary>
     /// Indicates if element has any attributes.
@@ -88,7 +93,54 @@ public abstract partial class Fb2Node : ICloneable
     /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Fb2NodeLoadingException"></exception>
-    public virtual void Load(
+    //public virtual void Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    Validate(node);
+
+    //    Parent = parentNode;
+
+    //    if (node is not XElement element)
+    //        return;
+
+    //    var allAttributes = element.Attributes();
+
+    //    if (loadNamespaceMetadata)
+    //    {
+    //        var defaultNodeNamespace = element.GetDefaultNamespace();
+    //        var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
+
+    //        NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
+    //    }
+
+    //    if (!HasAllowedAttributes)
+    //        return;
+
+    //    var allFilteredAttributes = allAttributes
+    //        .DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
+    //        .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
+    //        .Select(attr =>
+    //        {
+    //            var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
+    //            var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+    //            var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+    //            return fb2Attribute;
+    //        })
+    //        .ToList();
+
+    //    if (allFilteredAttributes is not { Count: > 0 })
+    //        return;
+
+    //    EnsureAttributesInitialized(allFilteredAttributes.Count);
+
+    //    attributes!.AddRange(allFilteredAttributes);
+    //}
+
+    public async Task Load(
         [In] XNode node,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
@@ -97,78 +149,79 @@ public abstract partial class Fb2Node : ICloneable
     {
         Validate(node);
 
-        Parent = parentNode;
-
-        if (node is not XElement element)
-            return;
-
-        var allAttributes = element.Attributes();
-
-        if (loadNamespaceMetadata)
-        {
-            var defaultNodeNamespace = element.GetDefaultNamespace();
-            var namespaceDeclarationAttributes = allAttributes.Where(a => a.IsNamespaceDeclaration);
-
-            NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
-        }
-
-        if (!HasAllowedAttributes)
-            return;
-
-        var allFilteredAttributes = allAttributes
-            .DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
-            .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
-            .Select(attr =>
+        using var stream = new MemoryStream();
+        using var writer = XmlWriter.Create(
+            stream,
+            new XmlWriterSettings
             {
-                var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
-                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
-                return fb2Attribute;
-            })
-            .ToList();
+                Async = true,
+                ConformanceLevel = ConformanceLevel.Auto
+            });
 
-        if (allFilteredAttributes is not { Count: > 0 })
-            return;
+        // TODO : add cancellation token
+        await node.WriteToAsync(writer, default);
+        await writer.FlushAsync();
+        writer.Close();
 
-        EnsureAttributesInitialized(allFilteredAttributes.Count);
+        stream.Position = 0;
+        stream.Seek(0, SeekOrigin.Begin);
 
-        attributes!.AddRange(allFilteredAttributes);
+        using var reader = XmlReader.Create(stream, new XmlReaderSettings
+        {
+            Async = true,
+            ConformanceLevel = ConformanceLevel.Auto,
+            DtdProcessing = DtdProcessing.Parse
+        });
+        await reader.ReadAsync();
+        await this.Load(
+            reader,
+            parentNode,
+            preserveWhitespace,
+            loadUnsafe,
+            loadNamespaceMetadata);
     }
 
-    public virtual async Task LoadFromReaderAsync(
+    public virtual async Task Load(
         [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
+        ArgumentNullException.ThrowIfNull(reader, nameof(reader));
+
         if (reader.NodeType != XmlNodeType.Element)
             await reader.MoveToContentAsync();
 
         Parent = parentNode;
 
-        if (loadNamespaceMetadata || HasAllowedAttributes)
+        //var n = await XNode.ReadFromAsync(reader, default);
+        //    if (node is not XElement element)
+        //        return;
+
+
+        var rawAttributesCount = reader.AttributeCount;
+
+        if ((loadNamespaceMetadata || HasAllowedAttributes) && rawAttributesCount > 0)
         {
-            List<XAttribute> namespaceDeclrs = [];
-            HashSet<Fb2Attribute> fb2Attributes = [];
+            List<XAttribute> namespaceDeclrs = new(rawAttributesCount);
+            HashSet<Fb2Attribute> fb2Attributes = new(rawAttributesCount);
             XNamespace? defaultNamespace = null;
 
             while (reader.MoveToNextAttribute())
             {
                 var attrValue = reader.Value;
-                var attrNamespaceUri = reader.NamespaceURI;
-                var attrLocalName = reader.LocalName;
+                var attrLocalName = reader.LocalName.ToLowerInvariant();
 
-                if (attrLocalName == "xmlns")
+                if (attrLocalName == XmlNamespace)
                 {
-                    defaultNamespace = XNamespace.Get(attrValue); // TODO : use `attrValue` ?
+                    defaultNamespace = XNamespace.Get(attrValue);
                     continue;
                 }
 
-                var xName = XName.Get(attrLocalName, attrNamespaceUri);
-                var xAttr = new XAttribute(xName, attrValue);
+                var attrNamespaceUri = reader.NamespaceURI;
 
-                var xAttrLocName = xAttr.Name.LocalName;
+                var xAttr = new XAttribute(XName.Get(attrLocalName, attrNamespaceUri), attrValue);
 
                 if (xAttr.IsNamespaceDeclaration && loadNamespaceMetadata)
                 {
@@ -179,20 +232,18 @@ public abstract partial class Fb2Node : ICloneable
                 if (!HasAllowedAttributes)
                     continue;
 
-                var allowedAttrName = xAttrLocName.ToLowerInvariant();
-
-                if (!AllowedAttributes!.Contains(allowedAttrName) ||
-                    fb2Attributes.Any(a => a.Key.Equals(allowedAttrName))) // skip duplicate
+                if (!AllowedAttributes!.Contains(attrLocalName) ||
+                    fb2Attributes.Any(a => a.Key.Equals(attrLocalName))) // skip duplicate
                     continue;
 
-                var attributeNamespace = xAttr.Name.Namespace?.NamespaceName;
-                var fb2Attribute = new Fb2Attribute(allowedAttrName, attrValue, attributeNamespace);
+                var fb2Attribute = new Fb2Attribute(attrLocalName, attrValue, attrNamespaceUri);
                 fb2Attributes.Add(fb2Attribute);
             }
 
-            NodeMetadata = new Fb2NodeMetadata(defaultNamespace, namespaceDeclrs);
+            if (loadNamespaceMetadata)
+                NodeMetadata = new Fb2NodeMetadata(defaultNamespace, namespaceDeclrs);
 
-            if (fb2Attributes.Count > 0)
+            if (HasAllowedAttributes && fb2Attributes.Count > 0)
             {
                 EnsureAttributesInitialized(fb2Attributes.Count);
                 attributes!.AddRange(fb2Attributes);
@@ -640,9 +691,7 @@ public abstract partial class Fb2Node : ICloneable
         cloneNode.IsUnsafe = node.IsUnsafe;
 
         if (node.HasAttributes)
-            cloneNode.attributes = node.attributes!
-                .Select(a => new Fb2Attribute(a))
-                .ToList();
+            cloneNode.attributes = [.. node.attributes!.Select(a => new Fb2Attribute(a))];
 
         if (node.NodeMetadata != null)
             cloneNode.NodeMetadata = new(node.NodeMetadata);

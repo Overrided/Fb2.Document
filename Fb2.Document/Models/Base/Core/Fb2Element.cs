@@ -44,36 +44,36 @@ public abstract class Fb2Element : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Fb2NodeLoadingException"></exception>
     /// <remarks>Original content of <see cref="XNode"/> is  <c>NOT preserved</c>  except for <see cref="Code" />.</remarks>
-    public override void Load(
-        [In] XNode node,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
-    {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //public override void Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-        var rawContent = node.NodeType switch
-        {
-            XmlNodeType.Element => ((XElement)node).Value,
-            XmlNodeType.Text => ((XText)node).Value,
-            _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-        };
+    //    var rawContent = node.NodeType switch
+    //    {
+    //        XmlNodeType.Element => ((XElement)node).Value,
+    //        XmlNodeType.Text => ((XText)node).Value,
+    //        _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+    //    };
 
-        if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
-            content = trimWhitespace.Replace(rawContent, Whitespace);
-        else
-            content = rawContent;
-    }
+    //    if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
+    //        content = trimWhitespace.Replace(rawContent, Whitespace);
+    //    else
+    //        content = rawContent;
+    //}
 
-    public override async Task LoadFromReaderAsync(
+    public override async Task Load(
         [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        await base.LoadFromReaderAsync(
+        await base.Load(
             reader,
             parentNode,
             preserveWhitespace,

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
+using System.Threading.Tasks;
+using System.Xml;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -46,14 +47,25 @@ public class Image : Fb2Element
         return $"{Name} {result!.Value}";
     }
 
-    public sealed override void Load(
-        [In] XNode node,
+    //public sealed override void Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //    IsInline = GetInline(Parent?.Name);
+    //}
+
+    public sealed override async Task Load(
+        [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+        await base.Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
         IsInline = GetInline(Parent?.Name);
     }
 

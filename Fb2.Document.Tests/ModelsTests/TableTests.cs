@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models;
@@ -270,7 +271,7 @@ public class TableTests
     }
 
     [Fact]
-    public void Table_ToString_IgnoresNotTableRows()
+    public async Task Table_ToString_IgnoresNotTableRows()
     {
         var table = new Table();
 
@@ -282,7 +283,7 @@ public class TableTests
 
         var tableXElement = new XElement(ElementNames.Table, tableRowXElement, unsafeParagraphXElement);
 
-        table.Load(tableXElement);
+        await table.Load(tableXElement);
 
         var tableString = table.ToString();
         tableString
@@ -293,7 +294,7 @@ public class TableTests
     }
 
     [Fact]
-    public void Table_WithoutRows_ToString_ReturnEmptyString()
+    public async Task Table_WithoutRows_ToString_ReturnEmptyString()
     {
         var table = new Table();
 
@@ -301,7 +302,7 @@ public class TableTests
 
         var tableXElement = new XElement(ElementNames.Table, unsafeParagraphXElement);
 
-        table.Load(tableXElement);
+        await table.Load(tableXElement);
 
         var tableString = table.ToString();
         tableString.Should().BeEmpty();

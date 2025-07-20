@@ -9,7 +9,6 @@ using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests;
@@ -18,50 +17,54 @@ public class Fb2ElementTests
 {
     [Theory]
     [ClassData(typeof(Fb2ElementCollection))]
-    public void Fb2Element_Load_NullNode_Throws(Fb2Element fb2Element)
+    public async Task Fb2Element_Load_NullNode_Throws(Fb2Element fb2Element)
     {
         fb2Element.Should().NotBeNull();
 
-        fb2Element.Invoking(f => f.Load(null))
+        await fb2Element.Invoking(async f => await f.Load((XNode)null))
             .Should()
-            .ThrowExactly<ArgumentNullException>();
+            .ThrowExactlyAsync<ArgumentNullException>();
+
+        await fb2Element.Invoking(async f => await f.Load((XmlReader)null))
+            .Should()
+            .ThrowExactlyAsync<ArgumentNullException>();
     }
 
     [Theory]
     [ClassData(typeof(Fb2ElementCollection))]
-    public void Fb2Element_Load_InvalidNode_Throws(Fb2Element fb2Element)
+    public async Task Fb2Element_Load_InvalidNode_Throws(Fb2Element fb2Element)
     {
         fb2Element.Should().NotBeNull();
 
         var invalidXmlNode = new XElement("invalidName", "test content");
 
-        fb2Element.Invoking(f => f.Load(invalidXmlNode))
+        await fb2Element.Invoking(async f => await f.Load(invalidXmlNode))
             .Should()
-            .ThrowExactly<Fb2NodeLoadingException>();
+            .ThrowExactlyAsync<Fb2NodeLoadingException>();
     }
 
     [Theory]
     [ClassData(typeof(Fb2ElementCollection))]
-    public void Fb2Element_Load_InvalidXmlNodeType_Throws(Fb2Element fb2Element)
+    public async Task Fb2Element_Load_InvalidXmlNodeType_Throws(Fb2Element fb2Element)
     {
         fb2Element.Should().NotBeNull();
 
         var invalidXmlNode = new XComment("test comment");
 
-        fb2Element.Invoking(f => f.Load(invalidXmlNode))
+        await fb2Element.Invoking(async f => await f.Load(invalidXmlNode))
             .Should()
-        .ThrowExactly<Fb2NodeLoadingException>()
+            .ThrowExactlyAsync<Fb2NodeLoadingException>()
             .WithMessage($"Unsupported nodeType: received {XmlNodeType.Comment}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
     }
 
     [Fact]
-    public void Fb2Element_Load_ValidNode_Works()
+    public async Task Fb2Element_Load_ValidNode_Works()
     {
         var fb2Element = new TextItem(); // fb2 counterpart of XText, plain text node
 
         var validNode = new XText("test content");
 
-        fb2Element.Load(validNode);
+        await fb2Element.Load(validNode);
 
         fb2Element.Content.Should().Be("test content");
     }

@@ -1,7 +1,7 @@
 ﻿namespace Fb2.Document.LoadingOptions;
 
 /// <summary>
-/// Specifies a set of options to use with <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.LoadAsync(System.IO.Stream, Fb2StreamLoadingOptions?)"/>.
+/// Specifies a set of options to use with <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/>.
 /// </summary>
 public class Fb2StreamLoadingOptions : Fb2LoadingOptions
 {

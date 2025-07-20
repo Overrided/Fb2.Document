@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using System.Xml.Linq;
+using System.Threading.Tasks;
+using System.Xml;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -15,10 +16,17 @@ public class ProgramUsed : Fb2Element
     /// Specific override to preserve original string content 
     /// with '\t', ' ', '\r\n' etc. formatting.
     /// </summary>
-    public sealed override void Load(
-        [In] XNode node,
+    //public sealed override void Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true) => base.Load(node, parentNode, true, loadUnsafe, loadNamespaceMetadata);
+
+    public sealed override async Task Load(
+        [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true) => base.Load(node, parentNode, true, loadUnsafe, loadNamespaceMetadata);
+        bool loadNamespaceMetadata = true) => await base.Load(reader, parentNode, true, loadUnsafe, loadNamespaceMetadata);
 }

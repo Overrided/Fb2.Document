@@ -20,11 +20,11 @@ public class Program
         // only one resource
         using (var fb2FileContentStream = x.GetManifestResourceStream(names[0]))
         {
-            await fb2Document.LoadAsync(fb2FileContentStream, new Fb2StreamLoadingOptions { CloseInputStream = false });
+            await fb2Document.Load(fb2FileContentStream, new Fb2StreamLoadingOptions { CloseInputStream = false });
 
             fb2FileContentStream.Seek(0, System.IO.SeekOrigin.Begin);
 
-            await fb2Document1.LoadOptimizedAsync(fb2FileContentStream);
+            await fb2Document1.Load(fb2FileContentStream);
             var optContent = fb2Document1.ToString();
             var a = 1;
         }

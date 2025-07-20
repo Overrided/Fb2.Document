@@ -179,7 +179,7 @@ public class Fb2ContainerExtensionTests
 
         node.Content.Count.Should().Be(1);
         var second = node.Content.First();
-        second.Should().BeOfType(typeof(TextItem));
+        second.Should().BeOfType<TextItem>();
         (second as Fb2Element).Content.Should().Be("test text");
 
         ClearContainerContent(node);
@@ -316,11 +316,11 @@ public class Fb2ContainerExtensionTests
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.DeleteContent([null, null])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.DeleteContent([firstAllowedNode, null])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
     }

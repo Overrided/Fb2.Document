@@ -38,7 +38,7 @@ public class Fb2DocumentBenchmarks
     public async Task<Fb2Document> LoadDocument_Optimized_FromStreamAsync()
     {
         var doc = new Fb2Document();
-        await doc.LoadOptimizedAsync(fb2FileContentStream!);
+        await doc.Load(fb2FileContentStream!);
         return doc;
     }
 

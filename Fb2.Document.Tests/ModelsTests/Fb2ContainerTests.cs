@@ -574,7 +574,7 @@ public class Fb2ContainerTests
     }
 
     [Fact]
-    public void ContainerNode_Load_IgnoreUnsafeNode_Works()
+    public async Task ContainerNode_Load_IgnoreUnsafeNode_Works()
     {
         var strong = new Strong();
 
@@ -582,7 +582,7 @@ public class Fb2ContainerTests
         var validBoldXNode = new XElement(ElementNames.Strong, validStrongXNodeText);
 
         // normal scenario
-        strong.Load(validBoldXNode);
+        await strong.Load(validBoldXNode);
 
         strong.Content.Should().HaveCount(1);
         strong.Content.First().Should().BeOfType<TextItem>();

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
@@ -59,79 +60,95 @@ public abstract class Fb2Container : Fb2Node
     /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Fb2NodeLoadingException"></exception>
-    public override void Load(
-        [In] XNode node,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
-    {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //public override void Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-        var element = node as XElement;
+    //    var element = node as XElement;
 
-        if (element == null || element.IsEmpty)
-            return;
+    //    if (element == null || element.IsEmpty)
+    //        return;
 
-        var nodes = element.Nodes()
-            .Where(n =>
-            {
-                var nodeType = n.NodeType;
+    //    var nodes = element.Nodes()
+    //        .Where(n =>
+    //        {
+    //            var nodeType = n.NodeType;
 
-                if (nodeType == XmlNodeType.Text)
-                    return loadUnsafe || CanContainText;
+    //            if (nodeType == XmlNodeType.Text)
+    //                return loadUnsafe || CanContainText;
 
-                var isElement = nodeType == XmlNodeType.Element;
-                if (!isElement)
-                    return false;
+    //            if (nodeType != XmlNodeType.Element)
+    //                return false;
 
-                var childNode = (XElement)n;
-                var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
+    //            var childNode = (XElement)n;
+    //            var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
 
-                var isValid = !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+    //            var isValid = !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
+    //                                Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
 
-                if (!isValid)
-                    return false;
+    //            if (!isValid)
+    //                return false;
 
-                return loadUnsafe || AllowedElements.Contains(nodeLocalName);
-            })
-            .ToList();
+    //            return loadUnsafe || AllowedElements.Contains(nodeLocalName);
+    //        })
+    //        .ToList();
 
-        var nodesCount = nodes.Count;
-        if (nodesCount == 0)
-            return;
+    //    var nodesCount = nodes.Count;
+    //    if (nodesCount == 0)
+    //        return;
 
-        EnsureContentInitialized(nodesCount);
+    //    EnsureContentInitialized(nodesCount);
 
-        for (int i = 0; i < nodesCount; i++)
-        {
-            var validNode = nodes[i];
+    //    for (int i = 0; i < nodesCount; i++)
+    //    {
+    //        var validNode = nodes[i];
 
-            string localName = validNode.NodeType == XmlNodeType.Element ?
-                ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
-                ElementNames.FictionText;
+    //        string localName = validNode.NodeType == XmlNodeType.Element ?
+    //            ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
+    //            ElementNames.FictionText;
 
-            var isUnsafe = validNode.NodeType == XmlNodeType.Text ?
-                !CanContainText :
-                !AllowedElements.Contains(localName);
+    //        var isUnsafe = validNode.NodeType == XmlNodeType.Text ?
+    //            !CanContainText :
+    //            !AllowedElements.Contains(localName);
 
-            var elem = Fb2NodeFactory.GetNodeByName(localName);
-            elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-            elem.IsUnsafe = isUnsafe;
+    //        var elem = Fb2NodeFactory.GetNodeByName(localName);
+    //        elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //        elem.IsUnsafe = isUnsafe;
 
-            content!.Add(elem);
-        }
-    }
+    //        content!.Add(elem);
+    //    }
+    //}
 
-    public override async Task LoadFromReaderAsync(
+    //public override async Task Load(
+    //    [In] XNode node,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    var reader = node.CreateReader();
+    //    //Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata).RunSynchronously();
+    //    //var t = new Task(async () =>
+    //    //{
+    //    await Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //    //}
+
+    //    //t.GetAwaiter().GetResult();
+    //}
+
+    public override async Task Load(
         [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        await base.LoadFromReaderAsync(
+        await base.Load(
             reader,
             parentNode,
             preserveWhitespace,
@@ -141,7 +158,6 @@ public abstract class Fb2Container : Fb2Node
         EnsureContentInitialized(1);
 
         var readChild = await reader.ReadAsync();
-
         while (readChild)
         {
             var nodeType = reader.NodeType;
@@ -154,36 +170,40 @@ public abstract class Fb2Container : Fb2Node
                 continue;
             }
 
+            bool isChildUnsafe;
+
             if (isElementNode)
             {
                 // validity check for element
-
-                //var localName = reader.LocalName.ToLowerInvariant();
-                var localName = reader.LocalName;
-                var isKnownNode = Fb2NodeFactory.IsKnownNodeName(localName);
-                if (!isKnownNode || localName.EqualsIgnoreCase(ElementNames.FictionText))
+                var localName = reader.LocalName.ToLowerInvariant();
+                if (localName.Equals(ElementNames.FictionText) || !Fb2NodeFactory.IsKnownNodeName(localName))
                 {
                     await reader.SkipAsync();
                     continue;
                 }
 
                 // safety check for element
-
+                isChildUnsafe = !AllowedElements.Contains(localName);
             }
-            else
-            {
-                // safety check for text
+            else // safety check for text
+                isChildUnsafe = !CanContainText;
 
+            if (isChildUnsafe && !loadUnsafe)
+            {
+                await reader.SkipAsync();
+                continue;
             }
 
             Fb2Node node = Fb2NodeFactory.GetNodeByName(isTextNode ? ElementNames.FictionText : reader.LocalName);
             var childContentReader = isTextNode ? reader : reader.ReadSubtree();
-            await node.LoadFromReaderAsync(
+            await node.Load(
                 childContentReader,
                 this,
                 preserveWhitespace,
                 loadUnsafe,
-                loadNamespaceMetadata);
+            loadNamespaceMetadata);
+
+            node.IsUnsafe = isChildUnsafe;
 
             content!.Add(node);
 
@@ -913,8 +933,8 @@ public abstract class Fb2Container : Fb2Node
 
     private void EnsureContentInitialized(int capacity)
     {
-        if (capacity < 0)
-            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+        if (capacity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Should be more then zero!");
 
         if (HasContent)
             return;

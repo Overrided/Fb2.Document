@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
@@ -14,26 +13,25 @@ public class EmptyLine : Fb2Element
 
     public EmptyLine() => content = Environment.NewLine;
 
-    public sealed override void Load(
-        [In] XNode element,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
-    {
-        base.Load(element, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-        content = Environment.NewLine; // double-check, just in case
-    }
+    //public sealed override void Load(
+    //    [In] XNode element,
+    //    [In] Fb2Container? parentNode = null,
+    //    bool preserveWhitespace = false,
+    //    bool loadUnsafe = true,
+    //    bool loadNamespaceMetadata = true)
+    //{
+    //    base.Load(element, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+    //    content = Environment.NewLine; // double-check, just in case
+    //}
 
-    public override async Task LoadFromReaderAsync(
+    public sealed override async Task Load(
         [In] XmlReader reader,
-        //XmlNamespaceManager xmlNamespaceManager,
         [In] Fb2Container? parentNode = null,
         bool preserveWhitespace = false,
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        await base.LoadFromReaderAsync(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+        await base.Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
         content = Environment.NewLine; // double-check, just in cases
     }
 
