@@ -82,6 +82,12 @@ public abstract class Fb2Element : Fb2Node
 
         var originalNodeType = reader.NodeType;
 
+        if (originalNodeType != XmlNodeType.Element &&
+            originalNodeType != XmlNodeType.Text)
+        {
+            throw new Fb2NodeLoadingException($"Unsupported nodeType: received {originalNodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
+        }
+
         if (originalNodeType == XmlNodeType.Element) // go to text content inside node
             await reader.ReadAsync();
 
