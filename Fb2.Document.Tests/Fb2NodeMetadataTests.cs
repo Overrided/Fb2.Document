@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Fb2.Document.Models.Base;
@@ -32,11 +31,11 @@ public class Fb2NodeMetadataTests
         Action act = () =>
         {
             var namespaceAttribute = new XAttribute("xmlns", "www.fourthcoffee.com");
-            meta = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute> { namespaceAttribute });
+            meta = new Fb2NodeMetadata(XNamespace.Xml, [namespaceAttribute]);
             meta.Should().NotBeNull();
             meta.DefaultNamespace.Should().Be(XNamespace.Xml);
             meta.NamespaceDeclarations.Should().NotBeNullOrEmpty().And.HaveCount(1);
-            meta.NamespaceDeclarations.First().Should().NotBeNull().And.Be(namespaceAttribute);
+            meta.NamespaceDeclarations!.First().Should().NotBeNull().And.Be(namespaceAttribute);
         };
 
         act.Should().NotThrow();
@@ -53,10 +52,9 @@ public class Fb2NodeMetadataTests
 
         var fullMetadata = new Fb2NodeMetadata(
             XNamespace.Xml,
-            new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         var fullMetadataClone = new Fb2NodeMetadata(fullMetadata);
         fullMetadataClone.DefaultNamespace.Should().Be(XNamespace.Xml);
@@ -78,30 +76,30 @@ public class Fb2NodeMetadataTests
         metadataWithNamespaceOnly.Should().Be(metadataWithNamespaceOnlyClone);
 
         var metadataWithNamespaceAttributesOnly =
-            new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+            new Fb2NodeMetadata(namespaceDeclarations:
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         var metadataWithNamespaceAttributesOnlyClone =
-            new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+            new Fb2NodeMetadata(namespaceDeclarations:
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         metadataWithNamespaceAttributesOnly.Should().Be(metadataWithNamespaceAttributesOnlyClone);
 
-        var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+        var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml,
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         fullMetadata.Should().Be(fullMetadata); // Reference equals
 
-        var fullMetadataClone = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+        var fullMetadataClone = new Fb2NodeMetadata(XNamespace.Xml,
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         fullMetadata.Should().Be(fullMetadataClone);
     }
@@ -117,20 +115,20 @@ public class Fb2NodeMetadataTests
         var metadataWithNamespaceOnly = new Fb2NodeMetadata(XNamespace.Xmlns);
 
         var metadataWithNamespaceAttributesOnly =
-            new Fb2NodeMetadata(namespaceDeclarations: new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+            new Fb2NodeMetadata(namespaceDeclarations:
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
-        var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml, new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+        var fullMetadata = new Fb2NodeMetadata(XNamespace.Xml,
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
-        var fullMetadataWithDifferentNamespace = new Fb2NodeMetadata(XNamespace.Xmlns, new List<XAttribute>
-            {
-                new XAttribute("xmlns", "www.fourthcoffee.com")
-            });
+        var fullMetadataWithDifferentNamespace = new Fb2NodeMetadata(XNamespace.Xmlns,
+            [
+                new("xmlns", "www.fourthcoffee.com")
+            ]);
 
         emptyMetadata.Should()
             .NotBe(metadataWithNamespaceOnly)
@@ -171,7 +169,7 @@ public class Fb2NodeMetadataTests
         {
             var metadata = new Fb2NodeMetadata(
                 XNamespace.Xml,
-                new List<XAttribute> { attr });
+                [attr]);
         };
         action
             .Should()

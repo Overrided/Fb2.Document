@@ -25,7 +25,7 @@ public abstract class Fb2Container : Fb2Node
     /// <summary>
     /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
     /// </summary>
-    public ImmutableList<Fb2Node> Content => HasContent ? [.. content] : [];
+    public ImmutableList<Fb2Node> Content => HasContent ? [.. content!] : [];
 
     /// <summary>
     /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
@@ -68,9 +68,7 @@ public abstract class Fb2Container : Fb2Node
     {
         base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-        var element = node as XElement;
-
-        if (element == null || element.IsEmpty)
+        if (node is not XElement element || element.IsEmpty)
             return;
 
         var nodes = element.Nodes()
@@ -250,7 +248,7 @@ public abstract class Fb2Container : Fb2Node
     /// <exception cref="ArgumentNullException"></exception>
     public Fb2Container AddContent(params Fb2Node[] nodes)
     {
-        if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+        if (nodes == null || nodes.Length == 0 || nodes.All(n => n == null))
             throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
         EnsureContentInitialized(nodes.Length);
@@ -774,8 +772,7 @@ public abstract class Fb2Container : Fb2Node
 
         var result = new List<Fb2Node>();
 
-        if (predicate == null)
-            predicate = PredicateResolver.GetPredicate<T>();
+        predicate ??= PredicateResolver.GetPredicate<T>();
 
         for (int i = 0; i < content!.Count; i++)
         {
@@ -801,8 +798,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        if (predicate == null)
-            predicate = PredicateResolver.GetPredicate<T>();
+        predicate ??= PredicateResolver.GetPredicate<T>();
 
         for (int i = 0; i < content!.Count; i++)
         {

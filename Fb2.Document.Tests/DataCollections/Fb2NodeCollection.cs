@@ -12,7 +12,7 @@ namespace Fb2.Document.Tests.DataCollections;
 
 public class Fb2NodeCollection : IEnumerable<object[]>
 {
-    protected ElementNames names = new ElementNames();
+    protected ElementNames names = new();
 
     public List<string> AllElementsNames;
     public List<Type> AllModelTypes;
@@ -20,7 +20,7 @@ public class Fb2NodeCollection : IEnumerable<object[]>
     public Fb2NodeCollection()
     {
         var namesResult = Utils.GetAllFieldsOfType<ElementNames, string>(names);
-        AllElementsNames = new List<string>(namesResult);
+        AllElementsNames = [.. namesResult];
 
         var assembly = names.GetType().Assembly;
         AllModelTypes = assembly.GetExportedTypes()

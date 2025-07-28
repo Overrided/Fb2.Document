@@ -17,7 +17,7 @@ public class Fb2AttributeTests
     {
         Action action = () =>
         {
-            var attribute = new Fb2Attribute(emptyKey, "2");
+            var attribute = new Fb2Attribute(emptyKey!, "2");
         };
 
         action

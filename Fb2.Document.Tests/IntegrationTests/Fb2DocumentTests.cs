@@ -100,23 +100,23 @@ public class Fb2DocumentTests
         doc.IsLoaded.Should().BeFalse();
         doc.Book.Should().BeNull();
 
-        doc.Invoking(d => d.Load((Stream)null))
+        doc.Invoking(d => d.Load((Stream)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        doc.Invoking(d => d.Load((string)null))
+        doc.Invoking(d => d.Load((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        doc.Invoking(d => d.Load((XDocument)null))
+        doc.Invoking(d => d.Load((XDocument)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        doc.Invoking(async d => await d.LoadAsync((Stream)null))
+        doc.Invoking(async d => await d.LoadAsync((Stream)null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
-        doc.Invoking(async d => await d.LoadAsync((string)null))
+        doc.Invoking(async d => await d.LoadAsync((string)null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }
@@ -302,7 +302,9 @@ public class Fb2DocumentTests
 
 
         var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false, new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
-        firstDocXml.Declaration.Version.Should().Be("2.0");
+        firstDocXml.Should().NotBeNull();
+        firstDocXml!.Declaration.Should().NotBeNull();
+        firstDocXml.Declaration!.Version.Should().Be("2.0");
         firstDocXml.Declaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
     }
 
@@ -471,10 +473,7 @@ public class Fb2DocumentTests
             throw new Exception();
 
         var fb2FileContentStream = x.GetManifestResourceStream(normalizedName);
-        if (fb2FileContentStream is null)
-            throw new Exception();
-
-        return fb2FileContentStream;
+        return fb2FileContentStream is null ? throw new Exception() : fb2FileContentStream;
     }
 
     private static async Task<string> ReadFileAsString(Stream fileContent)

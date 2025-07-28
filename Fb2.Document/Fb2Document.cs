@@ -95,7 +95,7 @@ public sealed class Fb2Document
             if (!IsLoaded || Book == null)
                 return [];
 
-            return Book.GetChildren<BookBody>().ToImmutableList();
+            return [.. Book.GetChildren<BookBody>()];
         }
     }
 
@@ -109,7 +109,7 @@ public sealed class Fb2Document
             if (!IsLoaded || Book == null)
                 return [];
 
-            return Book.GetChildren<BinaryImage>().ToImmutableList();
+            return [.. Book.GetChildren<BinaryImage>()];
         }
     }
 
@@ -232,11 +232,9 @@ public sealed class Fb2Document
 
         LoadHandled(() =>
         {
-            using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
-            {
-                var document = XDocument.Load(reader);
-                Load(document.Root, options);
-            }
+            using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
+            var document = XDocument.Load(reader);
+            Load(document.Root, options);
         });
     }
 
@@ -338,7 +336,7 @@ public sealed class Fb2Document
         }
     }
 
-    private void Load([In] XElement root, [In] Fb2LoadingOptions? loadingOptions = null)
+    private void Load([In] XElement? root, [In] Fb2LoadingOptions? loadingOptions = null)
     {
         ArgumentNullException.ThrowIfNull(root, nameof(root));
 

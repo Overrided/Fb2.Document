@@ -38,7 +38,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <summary>
     /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes] : [];
+    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes!] : [];
 
     /// <summary>
     /// Indicates if element has any attributes.
@@ -188,7 +188,7 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAttributes)
             return false;
 
-        var hasAttribute = attributes.Contains(fb2Attribute);
+        var hasAttribute = attributes!.Contains(fb2Attribute);
         return hasAttribute;
     }
 
@@ -208,8 +208,8 @@ public abstract partial class Fb2Node : ICloneable
             return false;
 
         return ignoreCase ?
-            attributes.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
-            attributes.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+            attributes!.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
+            attributes!.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
     }
 
     /// <summary>
@@ -227,8 +227,8 @@ public abstract partial class Fb2Node : ICloneable
             return null;
 
         var attribute = ignoreCase ?
-            attributes.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
-            attributes.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+            attributes!.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
+            attributes!.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
 
         return attribute;
     }
@@ -461,7 +461,7 @@ public abstract partial class Fb2Node : ICloneable
         var result = new List<XAttribute>();
 
         var nodeNamespaceDeclarations = NodeMetadata?.NamespaceDeclarations;
-        if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
+        if (nodeNamespaceDeclarations is { Count: > 0 }) // namespaces
             result.AddRange(nodeNamespaceDeclarations);
 
         if (HasAttributes) // regular attributes

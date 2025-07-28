@@ -23,7 +23,7 @@ public class BinaryImage : Fb2Element
     {
         base.Load(node, parentNode, false, loadUnsafe, loadNamespaceMetadata);
 
-        if (trimWhitespace.IsMatch(content))
+        if (!string.IsNullOrEmpty(content) && trimWhitespace.IsMatch(content))
             content = trimWhitespace.Replace(content, string.Empty);
     }
 }
