@@ -37,7 +37,7 @@ public class BinaryImage : Fb2Element
     {
         await base.Load(reader, parentNode, false, loadUnsafe, loadNamespaceMetadata);
 
-        if (trimWhitespace.IsMatch(content))
+        if (content is { Length: > 0 } && trimWhitespace.IsMatch(content))
             content = trimWhitespace.Replace(content, string.Empty);
     }
 }

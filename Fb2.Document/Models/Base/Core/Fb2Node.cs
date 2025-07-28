@@ -188,17 +188,18 @@ public abstract partial class Fb2Node : ICloneable
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        ArgumentNullException.ThrowIfNull(reader, nameof(reader));
+        Validate(reader);
 
-        if (reader.NodeType != XmlNodeType.Element)
-            await reader.MoveToContentAsync();
+        var originalNodeType = reader.NodeType;
+        if (originalNodeType != XmlNodeType.Element)
+        {
+            var nextContentType = await reader.MoveToContentAsync();
+            if (nextContentType != XmlNodeType.Element &&
+                nextContentType != XmlNodeType.Text)
+                throw new Fb2NodeLoadingException($"Unsupported nodeType: received {originalNodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
+        }
 
         Parent = parentNode;
-
-        //var n = await XNode.ReadFromAsync(reader, default);
-        //    if (node is not XElement element)
-        //        return;
-
 
         var rawAttributesCount = reader.AttributeCount;
 
@@ -617,6 +618,17 @@ public abstract partial class Fb2Node : ICloneable
 
         if (node is XElement element && !element.Name.LocalName.EqualsIgnoreCase(Name))
             throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
+    }
+
+    protected void Validate(XmlReader reader)
+    {
+        ArgumentNullException.ThrowIfNull(reader, nameof(reader));
+
+        if (reader.NodeType != XmlNodeType.Element)
+            return;
+
+        if (!reader.LocalName.EqualsIgnoreCase(Name))
+            throw new Fb2NodeLoadingException($"Invalid element, element name is {reader.LocalName}, expected {Name}");
     }
 
     public override bool Equals(object? other)

@@ -124,23 +124,6 @@ public abstract class Fb2Container : Fb2Node
     //    }
     //}
 
-    //public override async Task Load(
-    //    [In] XNode node,
-    //    [In] Fb2Container? parentNode = null,
-    //    bool preserveWhitespace = false,
-    //    bool loadUnsafe = true,
-    //    bool loadNamespaceMetadata = true)
-    //{
-    //    var reader = node.CreateReader();
-    //    //Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata).RunSynchronously();
-    //    //var t = new Task(async () =>
-    //    //{
-    //    await Load(reader, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-    //    //}
-
-    //    //t.GetAwaiter().GetResult();
-    //}
-
     public override async Task Load(
         [In] XmlReader reader,
         [In] Fb2Container? parentNode = null,
@@ -170,20 +153,21 @@ public abstract class Fb2Container : Fb2Node
                 continue;
             }
 
+            var localName = reader.LocalName;
             bool isChildUnsafe;
 
             if (isElementNode)
             {
                 // validity check for element
-                var localName = reader.LocalName.ToLowerInvariant();
-                if (localName.Equals(ElementNames.FictionText) || !Fb2NodeFactory.IsKnownNodeName(localName))
+                var localNameLowerInv = localName.ToLowerInvariant();
+                if (localNameLowerInv.Equals(ElementNames.FictionText) || !Fb2NodeFactory.IsKnownNodeName(localNameLowerInv))
                 {
                     await reader.SkipAsync();
                     continue;
                 }
 
                 // safety check for element
-                isChildUnsafe = !AllowedElements.Contains(localName);
+                isChildUnsafe = !AllowedElements.Contains(localNameLowerInv);
             }
             else // safety check for text
                 isChildUnsafe = !CanContainText;
@@ -194,7 +178,7 @@ public abstract class Fb2Container : Fb2Node
                 continue;
             }
 
-            Fb2Node node = Fb2NodeFactory.GetNodeByName(isTextNode ? ElementNames.FictionText : reader.LocalName);
+            Fb2Node node = Fb2NodeFactory.GetNodeByName(isTextNode ? ElementNames.FictionText : localName);
             var childContentReader = isTextNode ? reader : reader.ReadSubtree();
             await node.Load(
                 childContentReader,

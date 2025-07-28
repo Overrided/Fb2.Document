@@ -31,7 +31,7 @@ public abstract class Fb2Element : Fb2Node
     /// <summary>
     /// Indicates if element has any content.
     /// </summary>
-    public override bool HasContent => !string.IsNullOrEmpty(content);
+    public override bool HasContent => content is { Length: > 0 };
 
     /// <summary>
     /// Text node loading mechanism. Loads <see cref="Content"/> after formatting and removal of unwanted characters.
@@ -82,21 +82,11 @@ public abstract class Fb2Element : Fb2Node
 
         var originalNodeType = reader.NodeType;
 
-        if (originalNodeType != XmlNodeType.Element &&
-            originalNodeType != XmlNodeType.Text)
-        {
-            throw new Fb2NodeLoadingException($"Unsupported nodeType: received {originalNodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
-        }
-
         if (originalNodeType == XmlNodeType.Element) // go to text content inside node
             await reader.ReadAsync();
 
         var rawContent = reader.Value;
-
-        if (trimWhitespace.IsMatch(rawContent))
-            content = trimWhitespace.Replace(rawContent, Whitespace);
-        else
-            content = rawContent;
+        content = rawContent;
     }
 
     /// <summary>
