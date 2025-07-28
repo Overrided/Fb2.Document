@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Threading.Tasks;
-using Fb2.Document.Constants;
 using Fb2.Document.LoadingOptions;
 
 namespace Fb2.Document.Playground;
@@ -18,16 +16,13 @@ public class Program
         var names = x.GetManifestResourceNames();
 
         // only one resource
-        using (var fb2FileContentStream = x.GetManifestResourceStream(names[0]))
-        {
-            await fb2Document.Load(fb2FileContentStream, new Fb2StreamLoadingOptions { CloseInputStream = false });
+        using var fb2FileContentStream = x.GetManifestResourceStream(names[0]);
+        await fb2Document.Load(fb2FileContentStream!, new Fb2StreamLoadingOptions { CloseInputStream = false });
 
-            fb2FileContentStream.Seek(0, System.IO.SeekOrigin.Begin);
+        fb2FileContentStream!.Seek(0, System.IO.SeekOrigin.Begin);
 
-            await fb2Document1.Load(fb2FileContentStream);
-            var optContent = fb2Document1.ToString();
-            var a = 1;
-        }
+        await fb2Document1.Load(fb2FileContentStream);
+        var optContent = fb2Document1.ToString();
         //await fb2Document.LoadAsync(fb2FileContentStream);
 
         //var documentString = fb2Document.ToString();

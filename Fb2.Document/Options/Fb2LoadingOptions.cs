@@ -3,17 +3,17 @@
 /// <summary>
 /// Specifies a set of options to use with <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/>.
 /// </summary>
-public class Fb2LoadingOptions
+public record Fb2LoadingOptions
 {
     /// <summary>
     /// Indicates if unsafe elements should be loaded.
     /// </summary>
-    public bool LoadUnsafeElements { get; set; }
+    public bool LoadUnsafeElements { get; init; }
 
     /// <summary>
     /// Indicates if <see cref="Models.Base.Fb2Node.NodeMetadata"/> should be loaded.
     /// </summary>
-    public bool LoadNamespaceMetadata { get; set; }
+    public bool LoadNamespaceMetadata { get; init; }
 
     /// <summary>
     /// Creates new instance of <see cref="Fb2LoadingOptions"/>.
