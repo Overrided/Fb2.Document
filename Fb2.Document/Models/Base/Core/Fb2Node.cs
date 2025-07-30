@@ -36,7 +36,7 @@ public abstract partial class Fb2Node : ICloneable
     public abstract bool HasContent { get; }
 
     /// <summary>
-    /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
+    /// Returns actual node's attributes in form of <see cref="ImmutableList{Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
     public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes!] : [];
 
@@ -126,6 +126,21 @@ public abstract partial class Fb2Node : ICloneable
                 return fb2Attribute;
             })
             .ToList();
+
+        // TODO : investigate memory
+        //var allFilteredAttributes = allAttributes
+        //    .Select(a => new ValueTuple<XAttribute, string>(a, a.Name.LocalName.ToLowerInvariant()))
+        //    .DistinctBy(a => a.Item2)
+        //    .Where(da => AllowedAttributes!.Contains(da.Item2))
+        //    .Select(attr =>
+        //    {
+        //        var allowedAttrName = attr.Item2;
+        //        var xAttr = attr.Item1;
+        //        var attributeNamespace = loadNamespaceMetadata ? xAttr.Name.Namespace?.NamespaceName : null;
+        //        var fb2Attribute = new Fb2Attribute(allowedAttrName, xAttr.Value, attributeNamespace);
+        //        return fb2Attribute;
+        //    })
+        //    .ToList();
 
         if (allFilteredAttributes is not { Count: > 0 })
             return;
@@ -568,9 +583,7 @@ public abstract partial class Fb2Node : ICloneable
         cloneNode.IsUnsafe = node.IsUnsafe;
 
         if (node.HasAttributes)
-            cloneNode.attributes = node.attributes!
-                .Select(a => new Fb2Attribute(a))
-                .ToList();
+            cloneNode.attributes = [.. node.attributes!.Select(a => new Fb2Attribute(a))];
 
         if (node.NodeMetadata != null)
             cloneNode.NodeMetadata = new(node.NodeMetadata);
