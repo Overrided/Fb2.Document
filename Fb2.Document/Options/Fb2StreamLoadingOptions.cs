@@ -3,7 +3,7 @@
 /// <summary>
 /// Specifies a set of options to use with <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.LoadAsync(System.IO.Stream, Fb2StreamLoadingOptions?)"/>.
 /// </summary>
-public class Fb2StreamLoadingOptions : Fb2LoadingOptions
+public record Fb2StreamLoadingOptions : Fb2LoadingOptions
 {
     /// <summary>
     /// Indicates if input stream should be closed after loading Fb2Document.

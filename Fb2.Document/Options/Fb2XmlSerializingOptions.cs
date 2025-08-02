@@ -5,7 +5,7 @@ namespace Fb2.Document.SerializingOptions;
 /// <summary>
 /// Specifies a set of options to use with <see cref="Fb2Document.ToXml(Fb2XmlSerializingOptions?)"/> and <see cref="Fb2Document.ToXmlString(Fb2XmlSerializingOptions?)"/>.
 /// </summary>
-public class Fb2XmlSerializingOptions
+public record Fb2XmlSerializingOptions
 {
     /// <summary>
     /// Indicates if Unsafe elements should be serialized.

@@ -3,7 +3,7 @@
 /// <summary>
 /// Specifies a set of options to use with <see cref="Fb2Document.Load(System.IO.Stream, Fb2StreamLoadingOptions?)"/> and <see cref="Fb2Document.LoadAsync(System.IO.Stream, Fb2StreamLoadingOptions?)"/>.
 /// </summary>
-public class Fb2LoadingOptions
+public record Fb2LoadingOptions
 {
     /// <summary>
     /// Indicates if unsafe elements should be loaded.

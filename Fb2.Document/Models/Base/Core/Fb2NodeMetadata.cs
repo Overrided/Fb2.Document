@@ -39,7 +39,7 @@ public class Fb2NodeMetadata
             if (!namespaceDeclarationsOnly)
                 throw new ArgumentException($"{nameof(namespaceDeclarations)} should contain Namespace Declarations attributes only.");
 
-            NamespaceDeclarations = new(namespaceDeclarations);
+            NamespaceDeclarations = [.. namespaceDeclarations];
         }
     }
 
@@ -52,7 +52,7 @@ public class Fb2NodeMetadata
         DefaultNamespace = other.DefaultNamespace;
 
         NamespaceDeclarations = other.NamespaceDeclarations is { Count: > 0 } ?
-            new(other.NamespaceDeclarations) :
+            [.. other.NamespaceDeclarations] :
             null;
     }
 
