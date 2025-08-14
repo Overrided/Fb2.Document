@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -93,11 +94,40 @@ public abstract class Fb2Element : Fb2Node
     /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
     /// </remarks>
     /// <exception cref="ArgumentNullException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Element> AddContentAsync(Func<Task<string>> contentProvider, string? separator = null)
     {
         ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = await contentProvider();
+
+        return AddContent(newContent, separator);
+    }
+
+    /// <summary>
+    /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
+    /// </summary>
+    /// <param name="contentProvider">Asynchronous content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <returns>Current element.</returns>
+    /// <remarks>
+    /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+    /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Element> AddContentAsync(
+        Func<CancellationToken, Task<string>> contentProvider,
+        string? separator = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newContent = await contentProvider(cancellationToken);
 
         return AddContent(newContent, separator);
     }

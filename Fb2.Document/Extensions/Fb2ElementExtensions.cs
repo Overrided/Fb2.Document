@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 
@@ -49,12 +50,23 @@ public static class Fb2ElementExtensions
     /// <param name="separator">Separator string used to join new text with existing content.</param>
     /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
     /// <exception cref="ArgumentNullException"></exception>
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public static async Task<T> AppendContentAsync<T>(
         this T fb2Element,
         Func<Task<string>> contentProvider,
         string? separator = null) where T : Fb2Element
     {
         var result = await fb2Element.AddContentAsync(contentProvider, separator);
+        return (T)result;
+    }
+
+    public static async Task<T> AppendContentAsync<T>(
+        this T fb2Element,
+        Func<CancellationToken, Task<string>> contentProvider,
+        string? separator = null,
+        CancellationToken cancellationToken = default) where T : Fb2Element
+    {
+        var result = await fb2Element.AddContentAsync(contentProvider, separator, cancellationToken);
         return (T)result;
     }
 

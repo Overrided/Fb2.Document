@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -125,27 +126,12 @@ public abstract partial class Fb2Node : ICloneable
                 var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
                 return fb2Attribute;
             })
-            .ToList();
+            .ToArray();
 
-        // TODO : investigate memory
-        //var allFilteredAttributes = allAttributes
-        //    .Select(a => new ValueTuple<XAttribute, string>(a, a.Name.LocalName.ToLowerInvariant()))
-        //    .DistinctBy(a => a.Item2)
-        //    .Where(da => AllowedAttributes!.Contains(da.Item2))
-        //    .Select(attr =>
-        //    {
-        //        var allowedAttrName = attr.Item2;
-        //        var xAttr = attr.Item1;
-        //        var attributeNamespace = loadNamespaceMetadata ? xAttr.Name.Namespace?.NamespaceName : null;
-        //        var fb2Attribute = new Fb2Attribute(allowedAttrName, xAttr.Value, attributeNamespace);
-        //        return fb2Attribute;
-        //    })
-        //    .ToList();
-
-        if (allFilteredAttributes is not { Count: > 0 })
+        if (allFilteredAttributes is not { Length: > 0 })
             return;
 
-        EnsureAttributesInitialized(allFilteredAttributes.Count);
+        EnsureAttributesInitialized(allFilteredAttributes.Length);
 
         attributes!.AddRange(allFilteredAttributes);
     }
@@ -287,12 +273,12 @@ public abstract partial class Fb2Node : ICloneable
     /// <param name="attributes">Set of attributes to add.</param>
     /// <returns>Current node.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Node AddAttributes(params Fb2Attribute[] attributes)
+    public Fb2Node AddAttributes(params List<Fb2Attribute> attributes)
     {
-        if (attributes == null || !attributes.Any())
+        if (attributes is not { Count: > 0 })
             throw new ArgumentNullException(nameof(attributes));
 
-        EnsureAttributesInitialized(attributes.Length);
+        EnsureAttributesInitialized(attributes.Count);
 
         foreach (var attribute in attributes)
             AddAttribute(attribute);
@@ -322,11 +308,36 @@ public abstract partial class Fb2Node : ICloneable
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
     /// <returns>Current node.</returns>
     /// <exception cref="ArgumentNullException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
     {
         ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 
         var attribute = await attributeProvider();
+
+        return AddAttribute(attribute);
+    }
+
+    /// <summary>
+    /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
+    /// </summary>
+    /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
+    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <returns>Current node.</returns>
+    /// <remarks>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Node> AddAttributeAsync(
+        Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var attribute = await attributeProvider(cancellationToken);
 
         return AddAttribute(attribute);
     }
@@ -412,7 +423,7 @@ public abstract partial class Fb2Node : ICloneable
 
         var attributesToDelete = attributes!
             .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsIgnoreCase(key) : existingAttr.Key.Equals(key))
-            .ToList();
+            .ToArray();
 
         foreach (var attributeToRemove in attributesToDelete)
             RemoveAttribute(attributeToRemove);
@@ -433,7 +444,7 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAttributes)
             return this;
 
-        var attrsToRemove = attributes!.Where(attributePredicate).ToList();
+        var attrsToRemove = attributes!.Where(attributePredicate).ToArray();
 
         foreach (var attributeToRemove in attrsToRemove)
             RemoveAttribute(attributeToRemove);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 
@@ -21,9 +22,21 @@ public static class Fb2ContainerExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.InvalidNodeException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
-    public static async Task<T> AppendContentAsync<T>(this T fb2Container, Func<Task<Fb2Node>> nodeProvider) where T : Fb2Container
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
+    public static async Task<T> AppendContentAsync<T>(
+        this T fb2Container,
+        Func<Task<Fb2Node>> nodeProvider) where T : Fb2Container
     {
         var result = await fb2Container.AddContentAsync(nodeProvider);
+        return (T)result;
+    }
+
+    public static async Task<T> AppendContentAsync<T>(
+        this T fb2Container,
+        Func<CancellationToken, Task<Fb2Node>> nodeProvider,
+        CancellationToken cancellationToken = default) where T : Fb2Container
+    {
+        var result = await fb2Container.AddContentAsync(nodeProvider, cancellationToken);
         return (T)result;
     }
 
@@ -52,7 +65,7 @@ public static class Fb2ContainerExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.InvalidNodeException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
-    public static T AppendContent<T>(this T fb2Container, params Fb2Node[] nodes) where T : Fb2Container =>
+    public static T AppendContent<T>(this T fb2Container, params List<Fb2Node> nodes) where T : Fb2Container =>
         (T)fb2Container.AddContent(nodes);
 
     /// <summary>
@@ -99,11 +112,19 @@ public static class Fb2ContainerExtensions
     /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public static async Task<T> AppendTextContentAsync<T>(
         this T fb2Container,
         Func<Task<string>> contentProvider,
         string? separator = null) where T : Fb2Container =>
             (T)(await fb2Container.AddTextContentAsync(contentProvider, separator));
+
+    public static async Task<T> AppendTextContentAsync<T>(
+       this T fb2Container,
+       Func<CancellationToken, Task<string>> contentProvider,
+       string? separator = null,
+       CancellationToken cancellationToken = default) where T : Fb2Container =>
+           (T)(await fb2Container.AddTextContentAsync(contentProvider, separator, cancellationToken));
 
     /// <summary>
     /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContent(IEnumerable{Fb2Node})"/> method.

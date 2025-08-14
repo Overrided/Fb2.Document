@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -169,8 +170,7 @@ public sealed class Fb2Document
         [In] string fileContent,
         [In] Fb2LoadingOptions? loadingOptions = null)
     {
-        if (string.IsNullOrWhiteSpace(fileContent))
-            throw new ArgumentNullException(nameof(fileContent));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(fileContent, nameof(fileContent));
 
         LoadHandled(() =>
         {
@@ -192,20 +192,20 @@ public sealed class Fb2Document
     /// </remarks>
     public async Task LoadAsync(
         [In] string fileContent,
-        [In] Fb2LoadingOptions? loadingOptions = null)
+        [In] Fb2LoadingOptions? loadingOptions = null,
+        CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(fileContent))
-            throw new ArgumentNullException(nameof(fileContent));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(fileContent, nameof(fileContent));
 
-        await LoadHandledAsync(async () =>
+        await LoadHandledAsync(async (CancellationToken innerCancellationToken) =>
         {
             using var reader = new StringReader(fileContent);
             var document = await XDocument
-                .LoadAsync(reader, LoadOptions.None, default)
+                .LoadAsync(reader, LoadOptions.None, innerCancellationToken)
                 .ConfigureAwait(false);
 
             Load(document.Root, loadingOptions);
-        });
+        }, cancellationToken);
     }
 
     /// <summary>
@@ -225,16 +225,14 @@ public sealed class Fb2Document
         if (!fileContent.CanRead)
             throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-        var options = loadingOptions ?? new Fb2StreamLoadingOptions();
-
         var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-        xmlReaderSetting.CloseInput = options.CloseInputStream;
+        xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
 
         LoadHandled(() =>
         {
             using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
             var document = XDocument.Load(reader);
-            Load(document.Root, options);
+            Load(document.Root, loadingOptions);
         });
     }
 
@@ -248,27 +246,26 @@ public sealed class Fb2Document
     /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
     public async Task LoadAsync(
         [In] Stream fileContent,
-        [In] Fb2StreamLoadingOptions? loadingOptions = null)
+        [In] Fb2StreamLoadingOptions? loadingOptions = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(fileContent, nameof(fileContent));
 
         if (!fileContent.CanRead)
             throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-        var options = loadingOptions ?? new Fb2StreamLoadingOptions();
-
         var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-        xmlReaderSetting.CloseInput = options.CloseInputStream;
+        xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
 
-        await LoadHandledAsync(async () =>
+        await LoadHandledAsync(async (CancellationToken innerCancellationToken) =>
         {
             using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
             var document = await XDocument
-                .LoadAsync(reader, LoadOptions.None, default)
+                .LoadAsync(reader, LoadOptions.None, innerCancellationToken)
                 .ConfigureAwait(false);
 
-            Load(document.Root, options);
-        });
+            Load(document.Root, loadingOptions);
+        }, cancellationToken);
     }
 
     /// <summary>
@@ -324,11 +321,18 @@ public sealed class Fb2Document
         }
     }
 
-    private static async Task LoadHandledAsync(Func<Task> loadingAsync)
+    private static async Task LoadHandledAsync(
+        Func<CancellationToken, Task> loadingAsync,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            await loadingAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            await loadingAsync(cancellationToken);
+        }
+        catch (OperationCanceledException opCanEx)
+        {
+            throw new Fb2DocumentLoadingException("Document asynchronous loading was cancelled.", opCanEx);
         }
         catch (Exception ex)
         {
@@ -340,12 +344,12 @@ public sealed class Fb2Document
     {
         ArgumentNullException.ThrowIfNull(root, nameof(root));
 
-        var options = loadingOptions ?? new Fb2LoadingOptions();
+        var options = loadingOptions ?? new();
 
         var loadUnsafeElements = options.LoadUnsafeElements;
         var loadNamespaceMetadata = options.LoadNamespaceMetadata;
 
-        Book = new FictionBook();
+        Book = new();
         Book.Load(root, loadUnsafe: loadUnsafeElements, loadNamespaceMetadata: loadNamespaceMetadata);
 
         IsLoaded = true;

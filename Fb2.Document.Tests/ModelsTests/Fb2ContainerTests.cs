@@ -171,7 +171,7 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        await node.Invoking(n => n.AddTextContentAsync(null!))
+        await node.Invoking(n => n.AddTextContentAsync((Func<Task<string>>)null!))
              .Should()
              .ThrowExactlyAsync<ArgumentNullException>();
 

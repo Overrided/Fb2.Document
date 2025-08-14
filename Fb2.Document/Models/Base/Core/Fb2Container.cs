@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -94,9 +95,9 @@ public abstract class Fb2Container : Fb2Node
 
                 return loadUnsafe || AllowedElements.Contains(nodeLocalName);
             })
-            .ToList();
+            .ToArray();
 
-        var nodesCount = nodes.Count;
+        var nodesCount = nodes.Length;
         if (nodesCount == 0)
             return;
 
@@ -203,7 +204,7 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
         {
-            var clonedContent = content!.Select(c => (Fb2Node)c.Clone()).ToList();
+            var clonedContent = content!.Select(c => (Fb2Node)c.Clone()).ToArray();
             clone.AddContent(clonedContent);
         }
 
@@ -217,12 +218,36 @@ public abstract class Fb2Container : Fb2Node
     /// </summary>
     /// <param name="nodeProvider">Asynchronous node provider function.</param>
     /// <returns>Current container.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
     {
         ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
 
         var newNode = await nodeProvider().ConfigureAwait(false);
+        return AddContent(newNode);
+    }
+
+    /// <summary>
+    /// Adds node to <see cref="Content"/> using asynchronous provider function.
+    /// </summary>
+    /// <param name="nodeProvider">Asynchronous node provider function.</param>
+    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <returns>Current container.</returns>
+    /// <remarks>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Container> AddContentAsync(
+        Func<CancellationToken, Task<Fb2Node>> nodeProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newNode = await nodeProvider(cancellationToken).ConfigureAwait(false);
         return AddContent(newNode);
     }
 
@@ -246,12 +271,12 @@ public abstract class Fb2Container : Fb2Node
     /// <param name="nodes">Nodes to add to <see cref="Content"/>.</param>
     /// <returns>Current container.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Container AddContent(params Fb2Node[] nodes)
+    public Fb2Container AddContent(params List<Fb2Node> nodes)
     {
-        if (nodes == null || nodes.Length == 0 || nodes.All(n => n == null))
+        if (nodes is not { Count: > 0 } || nodes.All(n => n == null))
             throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
-        EnsureContentInitialized(nodes.Length);
+        EnsureContentInitialized(nodes.Count);
 
         foreach (var node in nodes)
             AddContent(node);
@@ -305,8 +330,10 @@ public abstract class Fb2Container : Fb2Node
     /// <returns>Current container.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="UnexpectedNodeException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Container> AddTextContentAsync(
-        Func<Task<string>> contentProvider, string? separator = null)
+        Func<Task<string>> contentProvider,
+        string? separator = null)
     {
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
@@ -314,6 +341,22 @@ public abstract class Fb2Container : Fb2Node
         ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = await contentProvider();
+        return AddTextContent(newContent, separator);
+    }
+
+    public async Task<Fb2Container> AddTextContentAsync(
+        Func<CancellationToken, Task<string>> contentProvider,
+        string? separator = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CanContainText)
+            throw new UnexpectedNodeException(Name, ElementNames.FictionText);
+
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newContent = await contentProvider(cancellationToken);
         return AddTextContent(newContent, separator);
     }
 
@@ -414,7 +457,7 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
         {
-            var nodesToRemove = GetChildren(nodePredicate).ToList();
+            var nodesToRemove = GetChildren(nodePredicate).ToArray();
             foreach (var node in nodesToRemove)
                 RemoveContent(node);
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 
@@ -21,7 +22,7 @@ public static class Fb2NodeExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
     /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
-    public static T AppendAttributes<T>(this T fb2Node, params Fb2Attribute[] attributes) where T : Fb2Node =>
+    public static T AppendAttributes<T>(this T fb2Node, params List<Fb2Attribute> attributes) where T : Fb2Node =>
         (T)fb2Node.AddAttributes(attributes);
 
     /// <summary>
@@ -49,11 +50,21 @@ public static class Fb2NodeExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
     /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public static async Task<T> AppendAttributeAsync<T>(
         this T fb2Node,
         Func<Task<Fb2Attribute>> attributeProvider) where T : Fb2Node
     {
         var result = await fb2Node.AddAttributeAsync(attributeProvider);
+        return (T)result;
+    }
+
+    public static async Task<T> AppendAttributeAsync<T>(
+        this T fb2Node,
+        Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
+        CancellationToken cancellationToken = default) where T : Fb2Node
+    {
+        var result = await fb2Node.AddAttributeAsync(attributeProvider, cancellationToken);
         return (T)result;
     }
 

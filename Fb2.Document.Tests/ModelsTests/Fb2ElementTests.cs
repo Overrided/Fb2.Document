@@ -100,7 +100,7 @@ public class Fb2ElementTests
             .ThrowExactly<ArgumentNullException>();
 
         await fb2Element
-            .Invoking(n => n.AddContentAsync(null!))
+            .Invoking(n => n.AddContentAsync((Func<Task<string>>)null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }

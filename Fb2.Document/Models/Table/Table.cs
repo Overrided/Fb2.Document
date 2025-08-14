@@ -156,9 +156,9 @@ public class Table : Fb2Container
         var orderedActuals = effectiveRowSpans
             .OrderBy(trs => trs.RenderStartColumnIndex)
             .ThenBy(trs => trs.RenderStartRowIndex)
-            .ToList();
+            .ToArray();
 
-        for (int i = 0; i < orderedActuals.Count; i++)
+        for (int i = 0; i < orderedActuals.Length; i++)
         {
             var cellIndexDelta = orderedActuals[i];
 
@@ -254,10 +254,10 @@ public class Table : Fb2Container
         {
             var allColumnCharWidths = columnCharWidths
                 .Skip(cell.RenderStartColumnIndex)
-                .Take(cell.ColSpan).ToList();
+                .Take(cell.ColSpan).ToArray();
 
             return allColumnCharWidths
-                .Select((v, i) => i < allColumnCharWidths.Count - 1 ? v + 1 : v)
+                .Select((v, i) => i < allColumnCharWidths.Length - 1 ? v + 1 : v)
                 .Sum();
         }
 
