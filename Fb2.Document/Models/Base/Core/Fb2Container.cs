@@ -12,7 +12,6 @@ using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
-using Fb2.Document.Resolver;
 
 namespace Fb2.Document.Models.Base;
 
@@ -72,7 +71,8 @@ public abstract class Fb2Container : Fb2Node
         if (node is not XElement element || element.IsEmpty)
             return;
 
-        var nodes = element.Nodes()
+        var nodes = element
+            .Nodes()
             .Where(n =>
             {
                 var nodeType = n.NodeType;
@@ -87,8 +87,9 @@ public abstract class Fb2Container : Fb2Node
                 var childNode = (XElement)n;
                 var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
 
-                var isValid = !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+                var isValid =
+                    !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
+                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
 
                 if (!isValid)
                     return false;
@@ -751,7 +752,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return [];
 
-        var predicate = PredicateResolver.GetPredicate<T>();
+        var predicate = GetPredicate<T>();
         var result = content!.Where(predicate);
 
         return result.Any() ? result.Cast<T>() : [];
@@ -767,7 +768,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        var predicate = PredicateResolver.GetPredicate<T>();
+        var predicate = GetPredicate<T>();
         var result = content!.FirstOrDefault(predicate);
 
         if (result == null)
@@ -815,7 +816,7 @@ public abstract class Fb2Container : Fb2Node
 
         var result = new List<Fb2Node>();
 
-        predicate ??= PredicateResolver.GetPredicate<T>();
+        predicate ??= GetPredicate<T>();
 
         for (int i = 0; i < content!.Count; i++)
         {
@@ -841,7 +842,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        predicate ??= PredicateResolver.GetPredicate<T>();
+        predicate ??= GetPredicate<T>();
 
         for (int i = 0; i < content!.Count; i++)
         {
@@ -882,6 +883,22 @@ public abstract class Fb2Container : Fb2Node
 
     private static XNode ToXmlInternal(Fb2Node element, bool serializeUnsafeElements) =>
         element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
+
+    private static Func<Fb2Node, bool> GetAbstractClassPredicate(Type targetType)
+        => element => element.GetType().IsSubclassOf(targetType);
+
+    private static Func<Fb2Node, bool> GetClassPredicate(Type targetType)
+        => element => element.GetType().Equals(targetType);
+
+    internal static Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
+    {
+        var targetType = typeof(T);
+
+        if (targetType.IsAbstract)
+            return GetAbstractClassPredicate(targetType);
+
+        return GetClassPredicate(targetType);
+    }
 
     private void EnsureContentInitialized(int capacity)
     {
