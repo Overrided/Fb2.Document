@@ -881,8 +881,19 @@ public abstract class Fb2Container : Fb2Node
         return this;
     }
 
+    private void EnsureContentInitialized(int capacity)
+    {
+        if (capacity < 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
+        if (HasContent)
+            return;
+
+        content = new List<Fb2Node>(capacity);
+    }
+
     private static XNode ToXmlInternal(Fb2Node element, bool serializeUnsafeElements) =>
-        element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
+    element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
 
     private static Func<Fb2Node, bool> GetAbstractClassPredicate(Type targetType)
         => element => element.GetType().IsSubclassOf(targetType);
@@ -898,17 +909,6 @@ public abstract class Fb2Container : Fb2Node
             return GetAbstractClassPredicate(targetType);
 
         return GetClassPredicate(targetType);
-    }
-
-    private void EnsureContentInitialized(int capacity)
-    {
-        if (capacity < 0)
-            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
-
-        if (HasContent)
-            return;
-
-        content = new List<Fb2Node>(capacity);
     }
 
     #endregion
