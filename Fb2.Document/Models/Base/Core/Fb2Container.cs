@@ -225,7 +225,7 @@ public abstract class Fb2Container : Fb2Node
     {
         ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
 
-        var newNode = await nodeProvider().ConfigureAwait(false);
+        var newNode = await nodeProvider();
         return AddContent(newNode);
     }
 
@@ -248,7 +248,7 @@ public abstract class Fb2Container : Fb2Node
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var newNode = await nodeProvider(cancellationToken).ConfigureAwait(false);
+        var newNode = await nodeProvider(cancellationToken);
         return AddContent(newNode);
     }
 

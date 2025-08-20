@@ -201,8 +201,7 @@ public sealed class Fb2Document
         {
             using var reader = new StringReader(fileContent);
             var document = await XDocument
-                .LoadAsync(reader, LoadOptions.None, innerCancellationToken)
-                .ConfigureAwait(false);
+                .LoadAsync(reader, LoadOptions.None, innerCancellationToken);
 
             Load(document.Root, loadingOptions);
         }, cancellationToken);
@@ -261,8 +260,7 @@ public sealed class Fb2Document
         {
             using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
             var document = await XDocument
-                .LoadAsync(reader, LoadOptions.None, innerCancellationToken)
-                .ConfigureAwait(false);
+                .LoadAsync(reader, LoadOptions.None, innerCancellationToken);
 
             Load(document.Root, loadingOptions);
         }, cancellationToken);

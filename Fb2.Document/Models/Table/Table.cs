@@ -24,8 +24,8 @@ public class Table : Fb2Container
             return string.Empty;
 
         // omitting unsafe stuff etc
-        var rows = GetChildren<TableRow>().ToList();
-        var rowsCount = rows.Count;
+        var rows = GetChildren<TableRow>().ToArray();
+        var rowsCount = rows.Length;
 
         if (rowsCount == 0)
             return string.Empty;
@@ -47,9 +47,9 @@ public class Table : Fb2Container
 
     #region ToString implementation - black magic fuckery ahead
 
-    private static (List<TableCellModel> MetaTable, int ColumnsCount) BuildMetadataTable(List<TableRow> rows)
+    private static (List<TableCellModel> MetaTable, int ColumnsCount) BuildMetadataTable(TableRow[] rows)
     {
-        var rowsCount = rows.Count;
+        var rowsCount = rows.Length;
 
         var tableRowSpans = new List<TableCellModel>();
         var columnCountsInRow = new int[rowsCount]; // total number of columns in a row, at row's index
@@ -60,8 +60,8 @@ public class Table : Fb2Container
 
             var colSpanDeltaInRow = 0;
 
-            var cellsInRow = row.GetChildren<TableCellBase>().ToList();
-            var cellsInRowCount = cellsInRow.Count;
+            var cellsInRow = row.GetChildren<TableCellBase>().ToArray();
+            var cellsInRowCount = cellsInRow.Length;
 
             if (cellsInRowCount == 0)
                 continue; // skip empty rows
