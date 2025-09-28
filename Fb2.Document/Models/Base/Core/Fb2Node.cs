@@ -303,6 +303,9 @@ public abstract partial class Fb2Node : ICloneable
     }
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
     /// </summary>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
@@ -322,7 +325,7 @@ public abstract partial class Fb2Node : ICloneable
     /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
     /// </summary>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
-    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Current node.</returns>
     /// <remarks>
     /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.

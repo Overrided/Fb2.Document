@@ -143,6 +143,7 @@ public sealed class Fb2Document
     /// <param name="document">Content of a file read as xml</param>
     /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
     /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Fb2DocumentLoadingException"></exception>
     /// <remarks>
     /// This method is not Encoding-safe. 
     /// Loading will proceed with Encoding of XDocument received.
@@ -162,6 +163,7 @@ public sealed class Fb2Document
     /// <param name="fileContent">Content of a file read as string</param>
     /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
     /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Fb2DocumentLoadingException"></exception>
     /// <remarks>
     /// This method is not Encoding-safe.
     /// Loading will proceed with Encoding of string received.
@@ -184,8 +186,10 @@ public sealed class Fb2Document
     /// </summary>
     /// <param name="fileContent">Content of a file read as string</param>
     /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <remarks>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="fileContent"/> is null.</exception>
+    /// <exception cref="Fb2DocumentLoadingException"></exception>
+    /// <remarks> 
     /// This method is not Encoding-safe.
     /// Loading will proceed with Encoding of string received.
     /// This method exists mostly for lulz :)
@@ -214,6 +218,7 @@ public sealed class Fb2Document
     /// <param name="loadingOptions">Fb2Document stream loading options. This parameter is optional.</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="Fb2DocumentLoadingException"></exception>
     /// <remarks>Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used.</remarks>
     public void Load(
         [In] Stream fileContent,
@@ -240,8 +245,10 @@ public sealed class Fb2Document
     /// </summary>
     /// <param name="fileContent">Stream of file data, opened for read.</param>
     /// <param name="loadingOptions">Fb2Document stream loading options. This parameter is optional.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception> 
+    /// <exception cref="Fb2DocumentLoadingException"></exception>
     /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
     public async Task LoadAsync(
         [In] Stream fileContent,

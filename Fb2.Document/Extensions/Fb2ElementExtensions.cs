@@ -41,6 +41,9 @@ public static class Fb2ElementExtensions
         string? separator = null) where T : Fb2Element => (T)fb2Element.AddContent(contentProvider, separator);
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContentAsync(Func{Task{string}}, string?)"/> method.
     /// <para> Appends new plain text to given <paramref name="fb2Element"/> using async <paramref name="contentProvider"/> function.</para>
     /// </summary>
@@ -60,6 +63,17 @@ public static class Fb2ElementExtensions
         return (T)result;
     }
 
+    /// <summary>
+    /// "Type-accurate" wrapper for <see cref="Fb2Element.AddContentAsync(Func{CancellationToken, Task{string}}, string?, CancellationToken)"/> method.
+    /// <para> Appends new plain text to given <paramref name="fb2Element"/> using async <paramref name="contentProvider"/> function.</para>
+    /// </summary>
+    /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+    /// <param name="fb2Element"><see cref="Fb2Element"/> node instance to use extension on.</param>
+    /// <param name="contentProvider">Asynchronous content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns><paramref name="fb2Element"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static async Task<T> AppendContentAsync<T>(
         this T fb2Element,
         Func<CancellationToken, Task<string>> contentProvider,

@@ -84,6 +84,9 @@ public abstract class Fb2Element : Fb2Node
     }
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
     /// </summary>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
@@ -109,7 +112,7 @@ public abstract class Fb2Element : Fb2Node
     /// </summary>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
     /// <param name="separator">Separator string used to join new text with existing content.</param>
-    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Current element.</returns>
     /// <remarks>
     /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).

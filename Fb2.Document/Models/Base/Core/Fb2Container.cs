@@ -215,6 +215,9 @@ public abstract class Fb2Container : Fb2Node
     #region Content editing
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Adds node to <see cref="Content"/> using asynchronous provider function.
     /// </summary>
     /// <param name="nodeProvider">Asynchronous node provider function.</param>
@@ -233,7 +236,7 @@ public abstract class Fb2Container : Fb2Node
     /// Adds node to <see cref="Content"/> using asynchronous provider function.
     /// </summary>
     /// <param name="nodeProvider">Asynchronous node provider function.</param>
-    /// <param name="cancellationToken">Cancellatiion token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Current container.</returns>
     /// <remarks>
     /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
@@ -324,6 +327,9 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
     /// </summary>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
@@ -345,6 +351,15 @@ public abstract class Fb2Container : Fb2Node
         return AddTextContent(newContent, separator);
     }
 
+    /// <summary>
+    /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
+    /// </summary>
+    /// <param name="contentProvider">Asynchronous content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current container.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="UnexpectedNodeException"></exception>
     public async Task<Fb2Container> AddTextContentAsync(
         Func<CancellationToken, Task<string>> contentProvider,
         string? separator = null,
