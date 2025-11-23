@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -20,10 +21,10 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
-    private List<Fb2Attribute> attributes = [];
-
-    protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
     protected const string Whitespace = " ";
+    protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
+
+    private List<Fb2Attribute>? attributes;
 
     /// <summary>
     /// Node name, used during document parsing and validation.
@@ -36,19 +37,24 @@ public abstract partial class Fb2Node : ICloneable
     public abstract bool HasContent { get; }
 
     /// <summary>
-    /// Returns actual node's attributes in form of <see cref="ImmutableList{Fb2.Document.Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
+    /// Returns actual node's attributes in form of <see cref="ImmutableList{Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
     /// </summary>
-    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes] : [];
+    public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ? [.. attributes!] : [];
 
     /// <summary>
     /// Indicates if element has any attributes.
     /// </summary>
-    public bool HasAttributes => attributes.Any();
+    public bool HasAttributes => attributes is { Count: > 0 };
 
     /// <summary>
     /// List of allowed attribure names for particular element.
     /// </summary>
-    public virtual ImmutableHashSet<string> AllowedAttributes => [];
+    public virtual ImmutableHashSet<string>? AllowedAttributes { get; }
+
+    /// <summary>
+    /// Indicates if element has any AllowedAttibutes.
+    /// </summary>
+    public bool HasAllowedAttributes => AllowedAttributes is { Count: > 0 };
 
     /// <summary>
     /// Indicates if element sholud be inline or start from new line.
@@ -107,22 +113,27 @@ public abstract partial class Fb2Node : ICloneable
             NodeMetadata = new(defaultNodeNamespace, namespaceDeclarationAttributes);
         }
 
-        if (AllowedAttributes.IsEmpty)
+        if (!HasAllowedAttributes)
             return;
 
-        foreach (var allowedAttrName in AllowedAttributes)
-        {
-            var attr = allAttributes
-                .FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(allowedAttrName));
+        var allFilteredAttributes = allAttributes
+            .DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
+            .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
+            .Select(attr =>
+            {
+                var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
+                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+                return fb2Attribute;
+            })
+            .ToArray();
 
-            if (attr == null)
-                continue;
+        if (allFilteredAttributes is not { Length: > 0 })
+            return;
 
-            var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-            var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+        EnsureAttributesInitialized(allFilteredAttributes.Length);
 
-            attributes.Add(fb2Attribute);
-        }
+        attributes!.AddRange(allFilteredAttributes);
     }
 
     /// <summary>
@@ -178,7 +189,7 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAttributes)
             return false;
 
-        var hasAttribute = attributes.Contains(fb2Attribute);
+        var hasAttribute = attributes!.Contains(fb2Attribute);
         return hasAttribute;
     }
 
@@ -198,8 +209,8 @@ public abstract partial class Fb2Node : ICloneable
             return false;
 
         return ignoreCase ?
-            attributes.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
-            attributes.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+            attributes!.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
+            attributes!.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
     }
 
     /// <summary>
@@ -217,8 +228,8 @@ public abstract partial class Fb2Node : ICloneable
             return null;
 
         var attribute = ignoreCase ?
-            attributes.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
-            attributes.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+            attributes!.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
+            attributes!.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
 
         return attribute;
     }
@@ -262,10 +273,12 @@ public abstract partial class Fb2Node : ICloneable
     /// <param name="attributes">Set of attributes to add.</param>
     /// <returns>Current node.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Node AddAttributes(params Fb2Attribute[] attributes)
+    public Fb2Node AddAttributes(params List<Fb2Attribute> attributes)
     {
-        if (attributes == null || !attributes.Any())
+        if (attributes is not { Count: > 0 })
             throw new ArgumentNullException(nameof(attributes));
+
+        EnsureAttributesInitialized(attributes.Count);
 
         foreach (var attribute in attributes)
             AddAttribute(attribute);
@@ -284,23 +297,50 @@ public abstract partial class Fb2Node : ICloneable
         if (attributes == null || !attributes.Any())
             throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
-        foreach (var attribute in attributes)
-            AddAttribute(attribute);
+        AddAttributes([.. attributes]);
 
         return this;
+    }
+
+    /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
+    /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
+    /// </summary>
+    /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
+    /// <returns>Current node.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
+    public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
+
+        var attribute = await attributeProvider();
+
+        return AddAttribute(attribute);
     }
 
     /// <summary>
     /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
     /// </summary>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Current node.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
+    /// <remarks>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Node> AddAttributeAsync(
+        Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 
-        var attribute = await attributeProvider();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var attribute = await attributeProvider(cancellationToken);
 
         return AddAttribute(attribute);
     }
@@ -347,22 +387,24 @@ public abstract partial class Fb2Node : ICloneable
     {
         ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
-        if (AllowedAttributes.IsEmpty)
+        if (!HasAllowedAttributes)
             throw new NoAttributesAllowedException(Name);
 
         var key = fb2Attribute.Key;
 
-        if (!AllowedAttributes.Contains(key))
+        if (!AllowedAttributes!.Contains(key))
             throw new UnexpectedAttributeException(Name, key);
+
+        EnsureAttributesInitialized(1);
 
         // update or insert
         if (TryGetAttribute(key, true, out var existingAttribute))
         {
-            var existingAttributeIndex = attributes.IndexOf(existingAttribute!);
+            var existingAttributeIndex = attributes!.IndexOf(existingAttribute!);
             attributes[existingAttributeIndex] = fb2Attribute; // replace existing, should not be -1
         }
         else
-            attributes.Add(fb2Attribute);
+            attributes!.Add(fb2Attribute);
 
         return this;
     }
@@ -382,9 +424,9 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAttributes)
             return this;
 
-        var attributesToDelete = attributes
+        var attributesToDelete = attributes!
             .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsIgnoreCase(key) : existingAttr.Key.Equals(key))
-            .ToList();
+            .ToArray();
 
         foreach (var attributeToRemove in attributesToDelete)
             RemoveAttribute(attributeToRemove);
@@ -405,7 +447,7 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAttributes)
             return this;
 
-        var attrsToRemove = attributes.Where(attributePredicate).ToList();
+        var attrsToRemove = attributes!.Where(attributePredicate).ToArray();
 
         foreach (var attributeToRemove in attrsToRemove)
             RemoveAttribute(attributeToRemove);
@@ -424,7 +466,7 @@ public abstract partial class Fb2Node : ICloneable
         ArgumentNullException.ThrowIfNull(fb2Attribute, nameof(fb2Attribute));
 
         if (HasAttribute(fb2Attribute))
-            attributes.Remove(fb2Attribute);
+            attributes!.Remove(fb2Attribute);
 
         return this;
     }
@@ -436,7 +478,7 @@ public abstract partial class Fb2Node : ICloneable
     public Fb2Node ClearAttributes()
     {
         if (HasAttributes)
-            attributes.Clear();
+            attributes!.Clear();
 
         return this;
     }
@@ -448,12 +490,12 @@ public abstract partial class Fb2Node : ICloneable
         var result = new List<XAttribute>();
 
         var nodeNamespaceDeclarations = NodeMetadata?.NamespaceDeclarations;
-        if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
+        if (nodeNamespaceDeclarations is { Count: > 0 }) // namespaces
             result.AddRange(nodeNamespaceDeclarations);
 
         if (HasAttributes) // regular attributes
         {
-            var convertedAttributes = attributes.Select(attr =>
+            var convertedAttributes = attributes!.Select(attr =>
             {
                 if (string.IsNullOrWhiteSpace(attr.NamespaceName))
                     return new XAttribute(attr.Key, attr.Value); // no prefix - id attribute for example
@@ -495,7 +537,10 @@ public abstract partial class Fb2Node : ICloneable
             return true;
 
         var result = Name == otherNode.Name &&
-            AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
+            ((AllowedAttributes == null && otherNode.AllowedAttributes == null) ||
+            (AllowedAttributes != null && otherNode.AllowedAttributes != null &&
+            AllowedAttributes.Count == otherNode.AllowedAttributes.Count &&
+            AllowedAttributes.All(otherNode.AllowedAttributes.Contains))) &&
             AreAttributesEqual(otherNode.attributes) &&
             IsInline == otherNode.IsInline &&
             IsUnsafe == otherNode.IsUnsafe &&
@@ -506,12 +551,30 @@ public abstract partial class Fb2Node : ICloneable
         return result;
     }
 
-    private bool AreAttributesEqual(List<Fb2Attribute> otherAttributes)
+    private bool AreAttributesEqual(List<Fb2Attribute>? otherAttributes)
     {
+        if (attributes == null && otherAttributes == null)
+            return true;
+
         if (ReferenceEquals(attributes, otherAttributes))
             return true;
 
-        return attributes.Count == otherAttributes.Count && attributes.All(otherAttributes.Contains);
+        var equals = attributes != null && otherAttributes != null &&
+                        attributes.Count == otherAttributes.Count &&
+                        attributes.All(otherAttributes.Contains);
+
+        return equals;
+    }
+
+    private void EnsureAttributesInitialized(int capacity)
+    {
+        if (capacity < 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
+        if (HasAttributes)
+            return;
+
+        attributes = new List<Fb2Attribute>(capacity);
     }
 
     public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
@@ -534,9 +597,7 @@ public abstract partial class Fb2Node : ICloneable
         cloneNode.IsUnsafe = node.IsUnsafe;
 
         if (node.HasAttributes)
-            cloneNode.attributes = node.attributes
-                .Select(a => new Fb2Attribute(a))
-                .ToList();
+            cloneNode.attributes = [.. node.attributes!.Select(a => new Fb2Attribute(a))];
 
         if (node.NodeMetadata != null)
             cloneNode.NodeMetadata = new(node.NodeMetadata);

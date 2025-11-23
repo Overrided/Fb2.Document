@@ -16,7 +16,7 @@ public class EmptyLineTests
 
         emptyLine.Should().NotBeNull();
 
-        emptyLine.Content.Should().Be(Environment.NewLine);
+        emptyLine!.Content.Should().Be(Environment.NewLine);
 
         emptyLine.AddContent("test content", " ");
 
@@ -31,6 +31,6 @@ public class EmptyLineTests
     public void EmptyLine_HasContent_Returns_True()
     {
         var emptyLine = Fb2NodeFactory.GetNodeByName(ElementNames.EmptyLine) as Fb2Element;
-        emptyLine.HasContent.Should().BeTrue(); // funny, but Environment.Newline is not empty string ;)
+        emptyLine!.HasContent.Should().BeTrue(); // funny, but Environment.Newline is not empty string ;)
     }
 }

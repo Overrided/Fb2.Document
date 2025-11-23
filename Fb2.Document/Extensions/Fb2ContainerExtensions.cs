@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Fb2.Document.Models.Base;
 
@@ -11,6 +12,9 @@ namespace Fb2.Document.Extensions;
 public static class Fb2ContainerExtensions
 {
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContentAsync(Func{Task{Fb2Node}})"/> method.
     /// <para> Adds node to given <paramref name="fb2Container"/> using async <paramref name="nodeProvider"/> function.</para>
     /// </summary>
@@ -21,9 +25,33 @@ public static class Fb2ContainerExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.InvalidNodeException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
-    public static async Task<T> AppendContentAsync<T>(this T fb2Container, Func<Task<Fb2Node>> nodeProvider) where T : Fb2Container
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
+    public static async Task<T> AppendContentAsync<T>(
+        this T fb2Container,
+        Func<Task<Fb2Node>> nodeProvider) where T : Fb2Container
     {
         var result = await fb2Container.AddContentAsync(nodeProvider);
+        return (T)result;
+    }
+
+    /// <summary>
+    /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContentAsync(Func{CancellationToken, Task{Fb2Node}}, CancellationToken)"/> method.
+    /// <para> Adds node to given <paramref name="fb2Container"/> using async <paramref name="nodeProvider"/> function.</para>
+    /// </summary>
+    /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+    /// <param name="fb2Container"><see cref="Fb2Container"/> node instance to use extension on.</param>
+    /// <param name="nodeProvider">Async provider function for child node.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.InvalidNodeException"></exception>
+    /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
+    public static async Task<T> AppendContentAsync<T>(
+        this T fb2Container,
+        Func<CancellationToken, Task<Fb2Node>> nodeProvider,
+        CancellationToken cancellationToken = default) where T : Fb2Container
+    {
+        var result = await fb2Container.AddContentAsync(nodeProvider, cancellationToken);
         return (T)result;
     }
 
@@ -52,7 +80,7 @@ public static class Fb2ContainerExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.InvalidNodeException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
-    public static T AppendContent<T>(this T fb2Container, params Fb2Node[] nodes) where T : Fb2Container =>
+    public static T AppendContent<T>(this T fb2Container, params List<Fb2Node> nodes) where T : Fb2Container =>
         (T)fb2Container.AddContent(nodes);
 
     /// <summary>
@@ -89,6 +117,9 @@ public static class Fb2ContainerExtensions
             (T)fb2Container.AddTextContent(contentProvider, separator);
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContentAsync(Func{Task{string}}, string?)"/> method.
     /// <para> Adds new text node to given <paramref name="fb2Container"/> using async content provider function.</para>
     /// </summary>
@@ -99,11 +130,31 @@ public static class Fb2ContainerExtensions
     /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
+    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public static async Task<T> AppendTextContentAsync<T>(
         this T fb2Container,
         Func<Task<string>> contentProvider,
         string? separator = null) where T : Fb2Container =>
             (T)(await fb2Container.AddTextContentAsync(contentProvider, separator));
+
+    /// <summary>
+    /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContentAsync(Func{CancellationToken, Task{string}}, string?, CancellationToken)"/> method.
+    /// <para> Adds new text node to given <paramref name="fb2Container"/> using async content provider function.</para>
+    /// </summary>
+    /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
+    /// <param name="fb2Container"><see cref="Fb2Container"/> node instance to use extension on.</param>
+    /// <param name="contentProvider">Async content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns><paramref name="fb2Container"/> with it's original type.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
+    public static async Task<T> AppendTextContentAsync<T>(
+       this T fb2Container,
+       Func<CancellationToken, Task<string>> contentProvider,
+       string? separator = null,
+       CancellationToken cancellationToken = default) where T : Fb2Container =>
+           (T)(await fb2Container.AddTextContentAsync(contentProvider, separator, cancellationToken));
 
     /// <summary>
     /// "Type-accurate" wrapper for <see cref="Fb2Container.AddContent(IEnumerable{Fb2Node})"/> method.

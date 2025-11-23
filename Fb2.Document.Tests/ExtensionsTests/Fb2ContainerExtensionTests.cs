@@ -13,8 +13,7 @@ using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
 using Xunit;
 
-namespace Fb2.Document.Tests.ExtensionTests;
-
+namespace Fb2.Document.Tests.ExtensionsTests;
 
 public class Fb2ContainerExtensionTests
 {
@@ -25,7 +24,7 @@ public class Fb2ContainerExtensionTests
         node.Should().NotBeNull();
         var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-        node.Invoking(n => n.AppendContent((Fb2Node)null)) // Fb2Node 
+        node.Invoking(n => n.AppendContent((Fb2Node)null!)) // Fb2Node 
            .Should()
            .Throw<ArgumentNullException>();
 
@@ -33,42 +32,42 @@ public class Fb2ContainerExtensionTests
         node.Invoking(n => n.AppendContent("")).Should().Throw<ArgumentNullException>();
 
         //string nodeName
-        node.Invoking(n => n.AppendContent((string)null)).Should().Throw<ArgumentNullException>();
+        node.Invoking(n => n.AppendContent((string)null!)).Should().Throw<ArgumentNullException>();
 
         // params Fb2Node[] nodes
         node.Invoking(n => n.AppendContent()).Should().Throw<ArgumentNullException>();
 
         // params Fb2Node[] nodes
-        node.Invoking(n => n.AppendContent(null, null)) // lol
+        node.Invoking(n => n.AppendContent(null!, null!)) // lol
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AppendContent(() => null)) // Func<Fb2Node>
+        node.Invoking(n => n.AppendContent(() => null!)) // Func<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AppendContent((Func<Fb2Node>)null)) // Func<Fb2Node>
+        node.Invoking(n => n.AppendContent((Func<Fb2Node>)null!)) // Func<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AppendContent((List<Fb2Node>)null)) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AppendContent((List<Fb2Node>)null!)) // IEnumerable<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AppendContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AppendContent([null!, null!])) // IEnumerable<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AppendContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AppendContent([firstAllowedNode, null!])) // IEnumerable<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
         node.Invoking(async n => await n.AppendContentAsync(
-            async () => await Task.FromResult<Fb2Node>(null))) // async node provider
+            async () => await Task.FromResult<Fb2Node>(null!))) // async node provider
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
-        node.Invoking(async n => await n.AppendContentAsync(null))
+        node.Invoking(async n => await n.AppendContentAsync(null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }
@@ -149,7 +148,7 @@ public class Fb2ContainerExtensionTests
         await node
             .Invoking(async n => await n.AppendTextContentAsync(async () =>
             {
-                await Task.Delay(5);
+                await Task.Delay(1);
                 return "test text";
             }))
             .Should()
@@ -166,43 +165,59 @@ public class Fb2ContainerExtensionTests
         if (!node.CanContainText)
             return;
 
-        node.AddContent(new TextItem().AppendContent("test text"));
+        node.AddContent(new TextItem().AppendContent("test text 1"));
 
         node.Content.Count.Should().Be(1);
         var first = node.Content.First();
-        first.Should().BeOfType(typeof(TextItem));
-        (first as Fb2Element).Content.Should().Be("test text");
+        first
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should().Be("test text 1");
 
         ClearContainerContent(node);
 
-        node.AppendTextContent("test text");
+        node.AppendTextContent("test text 2");
 
         node.Content.Count.Should().Be(1);
         var second = node.Content.First();
-        second.Should().BeOfType(typeof(TextItem));
-        (second as Fb2Element).Content.Should().Be("test text");
+        second
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should().Be("test text 2");
 
         ClearContainerContent(node);
 
-        node.AppendTextContent(() => "test text");
+        node.AppendTextContent(() => "test text 3");
 
         node.Content.Count.Should().Be(1);
         var third = node.Content.First();
-        third.Should().BeOfType(typeof(TextItem));
-        (third as Fb2Element).Content.Should().Be("test text");
+        third
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should().Be("test text 3");
 
         ClearContainerContent(node);
 
         await node.AppendTextContentAsync(async () =>
         {
-            await Task.Delay(5);
-            return "test text";
+            await Task.Delay(1);
+            return "test text 4";
         });
 
         node.Content.Count.Should().Be(1);
         var forths = node.Content.First();
-        forths.Should().BeOfType(typeof(TextItem));
-        (forths as Fb2Element).Content.Should().Be("test text");
+        forths
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should().Be("test text 4");
     }
 
     [Theory]
@@ -304,23 +319,23 @@ public class Fb2ContainerExtensionTests
     {
         var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-        node.Invoking(n => n.DeleteContent((Fb2Node)null)) // Fb2Node 
+        node.Invoking(n => n.DeleteContent((Fb2Node)null!)) // Fb2Node 
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.DeleteContent((IEnumerable<Fb2Node>)null!)) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
+        node.Invoking(n => n.DeleteContent((Func<Fb2Node, bool>)null!)) // Func<Fb2Node, bool>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.DeleteContent([null!, null!])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.DeleteContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.DeleteContent([firstAllowedNode, null!])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
     }
@@ -370,7 +385,7 @@ public class Fb2ContainerExtensionTests
         lastAllowedNode.Parent.Should().NotBeNull();
         lastAllowedNode.Parent.Should().Be(node);
 
-        node.DeleteContent(new List<Fb2Node> { firstAllowedNode, lastAllowedNode }); // IEnumerable<Fb2Node>
+        node.DeleteContent([firstAllowedNode, lastAllowedNode]); // IEnumerable<Fb2Node>
 
         node.Content.Should().BeEmpty();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -14,12 +15,12 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Element : Fb2Node
 {
-    protected string content = string.Empty;
+    protected string? content = null;
 
     /// <summary>
     /// Content (value) of element. Available after Load(...) method call.
     /// </summary>
-    public string Content => content;
+    public string Content => HasContent ? content! : string.Empty;
 
     /// <summary>
     /// <para>Indicates if content of an element should be written from a new line.</para>
@@ -83,6 +84,9 @@ public abstract class Fb2Element : Fb2Node
     }
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
     /// </summary>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
@@ -93,11 +97,40 @@ public abstract class Fb2Element : Fb2Node
     /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
     /// </remarks>
     /// <exception cref="ArgumentNullException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Element> AddContentAsync(Func<Task<string>> contentProvider, string? separator = null)
     {
         ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = await contentProvider();
+
+        return AddContent(newContent, separator);
+    }
+
+    /// <summary>
+    /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
+    /// </summary>
+    /// <param name="contentProvider">Asynchronous content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current element.</returns>
+    /// <remarks>
+    /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+    /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Element> AddContentAsync(
+        Func<CancellationToken, Task<string>> contentProvider,
+        string? separator = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newContent = await contentProvider(cancellationToken);
 
         return AddContent(newContent, separator);
     }
@@ -137,7 +170,7 @@ public abstract class Fb2Element : Fb2Node
     public virtual Fb2Element ClearContent()
     {
         if (HasContent)
-            content = string.Empty;
+            content = null;
 
         return this;
     }
@@ -155,7 +188,7 @@ public abstract class Fb2Element : Fb2Node
     {
         var element = base.ToXml(serializeUnsafeNodes);
         if (HasContent)
-            element.Value = content;
+            element.Value = content!;
 
         return element;
     }
@@ -170,7 +203,21 @@ public abstract class Fb2Element : Fb2Node
         if (other is not Fb2Element otherElement)
             return false;
 
-        var result = content.Equals(otherElement.content, StringComparison.InvariantCulture);
+        var otherContent = otherElement.content;
+
+        var bothContensAreNull = content is null && otherContent is null;
+        if (bothContensAreNull)
+            return true;
+
+        var bothContensAreEmpty = string.IsNullOrEmpty(content) && string.IsNullOrEmpty(otherContent);
+        if (bothContensAreEmpty)
+            return true;
+
+        var bothContentsAreNotEmpty = !string.IsNullOrEmpty(content) && !string.IsNullOrEmpty(otherContent);
+        if (!bothContentsAreNotEmpty)
+            return false;
+
+        var result = content!.Equals(otherContent, StringComparison.InvariantCulture);
 
         return result;
     }

@@ -25,7 +25,7 @@ public class Fb2ContainerTests
         node.Should().NotBeNull();
         var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-        node.Invoking(n => n.AddContent((Fb2Node?)null)) // Fb2Node 
+        node.Invoking(n => n.AddContent((Fb2Node)null!)) // Fb2Node 
            .Should()
            .Throw<ArgumentNullException>();
 
@@ -35,42 +35,42 @@ public class Fb2ContainerTests
         node.Invoking(n => n.AddContent(string.Empty)).Should().ThrowExactly<ArgumentNullException>();
 
         //string nodeName
-        node.Invoking(n => n.AddContent((string?)null)).Should().ThrowExactly<ArgumentNullException>();
+        node.Invoking(n => n.AddContent((string)null!)).Should().ThrowExactly<ArgumentNullException>();
 
         // params Fb2Node[] nodes
         node.Invoking(n => n.AddContent()).Should().ThrowExactly<ArgumentNullException>();
 
         // params Fb2Node[] nodes
-        node.Invoking(n => n.AddContent(null, null)) // lol
+        node.Invoking(n => n.AddContent(null!, null!)) // lol
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AddContent(() => null)) // Func<Fb2Node>
+        node.Invoking(n => n.AddContent(() => null!)) // Func<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AddContent((Func<Fb2Node>)null)) // Func<Fb2Node>
+        node.Invoking(n => n.AddContent((Func<Fb2Node>)null!)) // Func<Fb2Node>
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.AddContent((List<Fb2Node>)null)) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AddContent((List<Fb2Node>)null!)) // IEnumerable<Fb2Node>
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.AddContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AddContent([null!, null!])) // IEnumerable<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
-        node.Invoking(n => n.AddContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.AddContent([firstAllowedNode, null!])) // IEnumerable<Fb2Node>
             .Should()
             .Throw<ArgumentNullException>();
 
         node.Invoking(async n => await n.AddContentAsync(
-            async () => await Task.FromResult<Fb2Node>(null))) // async node provider
+            async () => await Task.FromResult<Fb2Node>(null!))) // async node provider
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
-        node.Invoking(async n => await n.AddContentAsync(null))
+        node.Invoking(async n => await n.AddContentAsync(null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }
@@ -137,7 +137,7 @@ public class Fb2ContainerTests
         await node
             .Invoking(async n => await n.AddTextContentAsync(async () =>
             {
-                await Task.Delay(5);
+                await Task.Delay(1);
                 return "test text";
             }))
             .Should()
@@ -154,31 +154,32 @@ public class Fb2ContainerTests
         if (!node.CanContainText)
             return;
 
-        node.Invoking(n => n.AddContent(new TextItem().AddContent((string)null)))
+        // chaining
+        node.Invoking(n => n.AddContent(new TextItem().AddContent((string)null!)))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.AddTextContent((string)null))
+        node.Invoking(n => n.AddTextContent((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.AddTextContent(() => null))
+        node.Invoking(n => n.AddTextContent(() => null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.AddTextContent((Func<string>)null))
+        node.Invoking(n => n.AddTextContent((Func<string>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        await node.Invoking(n => n.AddTextContentAsync(null))
+        await node.Invoking(n => n.AddTextContentAsync((Func<Task<string>>)null!))
              .Should()
              .ThrowExactlyAsync<ArgumentNullException>();
 
         await node
             .Invoking(async n => await n.AddTextContentAsync(async () =>
             {
-                await Task.Delay(5);
-                return null;
+                await Task.Delay(1);
+                return null!;
             }))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
@@ -193,43 +194,61 @@ public class Fb2ContainerTests
         if (!node.CanContainText)
             return;
 
-        node.AddContent(new TextItem().AddContent("test text"));
+        node.AddContent(new TextItem().AddContent("test text 1"));
 
         node.Content.Count.Should().Be(1);
         var first = node.Content.First();
-        first.Should().BeOfType(typeof(TextItem));
-        (first as Fb2Element).Content.Should().Be("test text");
+        first
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should()
+            .Be("test text 1");
 
         ClearContainerContent(node);
 
-        node.AddTextContent("test text");
+        node.AddTextContent("test text 2");
 
         node.Content.Count.Should().Be(1);
         var second = node.Content.First();
-        second.Should().BeOfType(typeof(TextItem));
-        (second as Fb2Element).Content.Should().Be("test text");
+        second
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should()
+            .Be("test text 2");
 
         ClearContainerContent(node);
 
-        node.AddTextContent(() => "test text");
+        node.AddTextContent(() => "test text 3");
 
         node.Content.Count.Should().Be(1);
         var third = node.Content.First();
-        third.Should().BeOfType(typeof(TextItem));
-        (third as Fb2Element).Content.Should().Be("test text");
+        third.Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should()
+            .Be("test text 3");
 
         ClearContainerContent(node);
 
         await node.AddTextContentAsync(async () =>
             {
-                await Task.Delay(5);
-                return "test text";
+                await Task.Delay(1);
+                return "test text 4";
             });
 
         node.Content.Count.Should().Be(1);
         var forths = node.Content.First();
-        forths.Should().BeOfType(typeof(TextItem));
-        (forths as Fb2Element).Content.Should().Be("test text");
+        forths.Should()
+            .BeOfType<TextItem>()
+            .Subject
+            .Content
+            .Should()
+            .Be("test text 4");
     }
 
     [Theory]
@@ -246,14 +265,14 @@ public class Fb2ContainerTests
         node.Content.Count.Should().Be(1);
         var first = node.GetFirstChild<TextItem>();
         first.Should().NotBeNull();
-        first.Content.Should().Be("test text");
+        first!.Content.Should().Be("test text");
 
         node.AddContent(new TextItem().AddContent(" test text 2 "));
 
         node.Content.Count.Should().Be(1);
         var second = node.GetFirstChild<TextItem>();
         second.Should().NotBeNull();
-        second.Content.Should().Be("test text test text 2 ");
+        second!.Content.Should().Be("test text test text 2 ");
         first.Content.Should().Be("test text test text 2 ");
 
         node.AddContent(new TextItem().AddContent("test text 3 "));
@@ -320,14 +339,14 @@ public class Fb2ContainerTests
         node.Content.Count.Should().Be(1);
         var first = node.GetFirstChild<TextItem>();
         first.Should().NotBeNull();
-        first.Content.Should().Be("test text");
+        first!.Content.Should().Be("test text");
 
         node.AddTextContent("test text 2", " ");
 
         node.Content.Count.Should().Be(1);
         var second = node.GetFirstChild<TextItem>();
         second.Should().NotBeNull();
-        second.Content.Should().Be("test text test text 2");
+        second!.Content.Should().Be("test text test text 2");
         first.Content.Should().Be("test text test text 2");
 
         node.AddTextContent("test text 3", " ");
@@ -350,16 +369,22 @@ public class Fb2ContainerTests
 
         node.Content.Count.Should().Be(1);
         var first = node.GetFirstChild<TextItem>();
-        first.Should().NotBeNull();
-        first.Content.Should().Be("test text");
+        first!
+            .Content
+            .Should()
+            .Be("test text");
 
+        // merges 2 text nodes into 1
         node.AddTextContent("test text 2", "  ");
 
         node.Content.Count.Should().Be(1);
         var second = node.GetFirstChild<TextItem>();
-        second.Should().NotBeNull();
-        second.Content.Should().Be("test text  test text 2");
-        first.Content.Should().Be("test text  test text 2");
+        second!
+            .Content
+            .Should()
+            .Be("test text  test text 2");
+
+        first!.Content.Should().Be("test text  test text 2");
 
         node.AddContent(node.AllowedElements.First());
         node.Content.Count.Should().Be(2);
@@ -486,23 +511,23 @@ public class Fb2ContainerTests
     {
         var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-        node.Invoking(n => n.RemoveContent((Fb2Node)null)) // Fb2Node 
+        node.Invoking(n => n.RemoveContent((Fb2Node)null!)) // Fb2Node 
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.RemoveContent((IEnumerable<Fb2Node>)null!)) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
+        node.Invoking(n => n.RemoveContent((Func<Fb2Node, bool>)null!)) // Func<Fb2Node, bool>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.RemoveContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.RemoveContent([null!, null!])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.RemoveContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
+        node.Invoking(n => n.RemoveContent([firstAllowedNode, null!])) // IEnumerable<Fb2Node>
            .Should()
            .ThrowExactly<ArgumentNullException>();
     }
@@ -552,7 +577,7 @@ public class Fb2ContainerTests
         lastAllowedNode.Parent.Should().NotBeNull();
         lastAllowedNode.Parent.Should().Be(node);
 
-        node.RemoveContent(new List<Fb2Node> { firstAllowedNode, lastAllowedNode }); // IEnumerable<Fb2Node>
+        node.RemoveContent([firstAllowedNode, lastAllowedNode]); // IEnumerable<Fb2Node>
 
         node.Content.Should().BeEmpty();
 
@@ -585,9 +610,15 @@ public class Fb2ContainerTests
         strong.Load(validBoldXNode);
 
         strong.Content.Should().HaveCount(1);
-        strong.Content.First().Should().BeOfType<TextItem>();
-        (strong.Content.First() as TextItem).Content.Should().Be(validStrongXNodeText);
-        (strong.Content.First() as TextItem).IsUnsafe.Should().BeFalse();
+        var firstTextItem = strong
+            .Content
+            .First()
+            .Should()
+            .BeOfType<TextItem>()
+            .Subject;
+
+        firstTextItem.Content.Should().Be(validStrongXNodeText);
+        firstTextItem.IsUnsafe.Should().BeFalse();
 
         ClearContainerContent(strong);
 
@@ -598,8 +629,15 @@ public class Fb2ContainerTests
         strong.Load(boldXNodeWithParagraph);
 
         strong.Content.Should().HaveCount(1);
-        strong.Content.First().Should().BeOfType<Paragraph>(); // this is bad as most readers will not comply
-        (strong.Content.First() as Paragraph).IsUnsafe.Should().BeTrue();
+        strong
+            .Content
+            .First()
+            .Should()
+            .BeOfType<Paragraph>()
+            .Subject
+            .IsUnsafe
+            .Should()
+            .BeTrue(); // this is bad as most readers will not comply
 
         ClearContainerContent(strong);
 
@@ -623,8 +661,13 @@ public class Fb2ContainerTests
         strong.Load(boldXNodeWithParagraph);
 
         strong.Content.Should().HaveCount(1);
-        strong.Content.First().Should().BeOfType<Paragraph>(); // this is bad as most readers will not comply
-        (strong.Content.First() as Paragraph).IsUnsafe.Should().BeTrue();
+        strong
+            .Content
+            .First()
+            .Should()
+            .BeOfType<Paragraph>()
+            .Subject
+            .IsUnsafe.Should().BeTrue(); ; // this is bad as most readers will not comply
 
         var serialized = strong.ToXml(serializeUnsafe);
         serialized.Should().NotBeNull().And.BeOfType<XElement>();
@@ -655,20 +698,23 @@ public class Fb2ContainerTests
         paragraph.Content.Should().HaveCount(1);
 
         var firstChild = paragraph.Content.First();
-        firstChild.Should().BeOfType<Strong>();
+        var firstStrongChild = firstChild
+            .Should()
+            .BeOfType<Strong>()
+            .Subject;
 
-        var firstStrongChild = firstChild as Strong;
-        firstStrongChild.Content.Should().BeEmpty();
+        firstStrongChild
+            .Content
+            .Should()
+            .BeEmpty();
 
         firstStrongChild.AddTextContent("strong");
 
         firstStrongChild.Content.Should().HaveCount(1);
         firstStrongChild.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
 
-        //re-use prev variables, assert paragraph children anew
         var firstChild1 = paragraph.Content.First();
-        firstChild1.Should().BeOfType<Strong>();
-        var firstStrongChild1 = firstChild1 as Strong;
+        var firstStrongChild1 = firstChild1.Should().BeOfType<Strong>().Subject;
         firstStrongChild1.Content.Should().HaveCount(1);
         firstStrongChild1.Content.First().Should().BeOfType<TextItem>().Subject.Content.Should().Be("strong");
     }
@@ -677,7 +723,7 @@ public class Fb2ContainerTests
     [ClassData(typeof(Fb2ContainerCollection))]
     public void GetChildren_NullParam_Throws(Fb2Container node)
     {
-        node.Invoking(n => n.GetChildren((string)null))
+        node.Invoking(n => n.GetChildren((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
@@ -689,7 +735,7 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.GetChildren((Func<Fb2Node, bool>)null))
+        node.Invoking(n => n.GetChildren((Func<Fb2Node, bool>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -698,7 +744,7 @@ public class Fb2ContainerTests
     [ClassData(typeof(Fb2ContainerCollection))]
     public void GetDescendants_NullParam_Throws(Fb2Container node)
     {
-        node.Invoking(n => n.GetDescendants((string)null))
+        node.Invoking(n => n.GetDescendants((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
@@ -710,7 +756,7 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.GetDescendants((Func<Fb2Node, bool>)null))
+        node.Invoking(n => n.GetDescendants((Func<Fb2Node, bool>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -719,7 +765,7 @@ public class Fb2ContainerTests
     [ClassData(typeof(Fb2ContainerCollection))]
     public void GetFirstChild_NullParam_Throws(Fb2Container node)
     {
-        node.Invoking(n => n.GetFirstChild((Func<Fb2Node, bool>)null))
+        node.Invoking(n => n.GetFirstChild((Func<Fb2Node, bool>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -728,7 +774,7 @@ public class Fb2ContainerTests
     [ClassData(typeof(Fb2ContainerCollection))]
     public void GetFirstDescendant_NullParam_Throws(Fb2Container node)
     {
-        node.Invoking(n => n.GetFirstDescendant((string)null))
+        node.Invoking(n => n.GetFirstDescendant((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
@@ -740,7 +786,7 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.GetFirstDescendant((Func<Fb2Node, bool>)null))
+        node.Invoking(n => n.GetFirstDescendant((Func<Fb2Node, bool>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -749,7 +795,7 @@ public class Fb2ContainerTests
     [ClassData(typeof(Fb2ContainerCollection))]
     public void TryGetFirstDescendant_NullParam_Throws(Fb2Container node)
     {
-        node.Invoking(n => n.TryGetFirstDescendant((string)null, out var result))
+        node.Invoking(n => n.TryGetFirstDescendant((string)null!, out var result))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
@@ -761,7 +807,7 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        node.Invoking(n => n.TryGetFirstDescendant((Func<Fb2Node, bool>)null, out var result))
+        node.Invoking(n => n.TryGetFirstDescendant((Func<Fb2Node, bool>)null!, out var result))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -812,7 +858,7 @@ public class Fb2ContainerTests
 
         node.GetFirstChild(firstAllowedChildName).Should().BeNull();
         node.GetFirstChild(firstAllowedChildPredicate).Should().BeNull();
-        node.GetFirstChild((string)null).Should().BeNull();
+        node.GetFirstChild((string)null!).Should().BeNull();
         node.GetFirstChild("").Should().BeNull();
         node.GetFirstChild<Fb2Node>().Should().BeNull();
         node.GetFirstChild<BodySection>().Should().BeNull();

@@ -9,7 +9,6 @@ using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 using Fb2.Document.Tests.DataCollections;
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using Xunit;
 
 namespace Fb2.Document.Tests.ModelsTests;
@@ -22,7 +21,7 @@ public class Fb2ElementTests
     {
         fb2Element.Should().NotBeNull();
 
-        fb2Element.Invoking(f => f.Load(null))
+        fb2Element.Invoking(f => f.Load(null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
     }
@@ -91,17 +90,17 @@ public class Fb2ElementTests
             return;
 
         fb2Element
-            .Invoking(n => n.AddContent((string)null))
+            .Invoking(n => n.AddContent((string)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
         fb2Element
-            .Invoking(n => n.AddContent((Func<string>)null))
+            .Invoking(n => n.AddContent((Func<string>)null!))
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
         await fb2Element
-            .Invoking(n => n.AddContentAsync(null))
+            .Invoking(n => n.AddContentAsync((Func<Task<string>>)null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }

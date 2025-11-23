@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -11,7 +12,6 @@ using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
-using Fb2.Document.Resolver;
 
 namespace Fb2.Document.Models.Base;
 
@@ -20,12 +20,12 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract class Fb2Container : Fb2Node
 {
-    private readonly List<Fb2Node> content = [];
+    private List<Fb2Node>? content;
 
     /// <summary>
     /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
     /// </summary>
-    public ImmutableList<Fb2Node> Content => HasContent ? [.. content] : [];
+    public ImmutableList<Fb2Node> Content => HasContent ? [.. content!] : [];
 
     /// <summary>
     /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
@@ -47,7 +47,7 @@ public abstract class Fb2Container : Fb2Node
     /// <summary>
     /// Indicates if element has any content.
     /// </summary>
-    public override bool HasContent => content.Any();
+    public override bool HasContent => content is { Count: > 0 };
 
     /// <summary>
     /// Container Node loading mechanism. Loads <see cref="Content"/> and sequentially calls <see cref="Fb2Node.Load(XNode,Fb2Container?,bool, bool, bool)"/> on all child nodes.
@@ -68,32 +68,41 @@ public abstract class Fb2Container : Fb2Node
     {
         base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-        var element = node as XElement;
-
-        if (element == null || element.IsEmpty)
+        if (node is not XElement element || element.IsEmpty)
             return;
 
-        var nodes = element.Nodes()
+        var nodes = element
+            .Nodes()
             .Where(n =>
-                {
-                    if (n.NodeType == XmlNodeType.Text)
-                        return true;
+            {
+                var nodeType = n.NodeType;
 
-                    var isElement = n.NodeType == XmlNodeType.Element;
-                    if (!isElement)
-                        return false;
+                if (nodeType == XmlNodeType.Text)
+                    return loadUnsafe || CanContainText;
 
-                    var childNode = (XElement)n;
-                    var nodeLocalName = childNode.Name.LocalName;
-                    return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                           Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
-                })
-            .ToList();
+                var isElement = nodeType == XmlNodeType.Element;
+                if (!isElement)
+                    return false;
 
-        var nodesCount = nodes.Count;
+                var childNode = (XElement)n;
+                var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
 
+                var isValid =
+                    !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
+                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+
+                if (!isValid)
+                    return false;
+
+                return loadUnsafe || AllowedElements.Contains(nodeLocalName);
+            })
+            .ToArray();
+
+        var nodesCount = nodes.Length;
         if (nodesCount == 0)
             return;
+
+        EnsureContentInitialized(nodesCount);
 
         for (int i = 0; i < nodesCount; i++)
         {
@@ -107,25 +116,22 @@ public abstract class Fb2Container : Fb2Node
                 !CanContainText :
                 !AllowedElements.Contains(localName);
 
-            if (isUnsafe && !loadUnsafe)
-                continue;
-
             var elem = Fb2NodeFactory.GetNodeByName(localName);
             elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
             elem.IsUnsafe = isUnsafe;
 
-            content.Add(elem);
+            content!.Add(elem);
         }
     }
 
     public override string ToString()
     {
-        if (!HasContent && !HasAttributes)
+        if (!HasContent)
             return string.Empty;
 
         var builder = new StringBuilder();
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var child = content[i];
             var childContent = child.ToString();
@@ -151,7 +157,7 @@ public abstract class Fb2Container : Fb2Node
         {
             var childrenToSerialize = serializeUnsafeNodes ?
                 content :
-                content.Where(x => !x.IsUnsafe);
+                content!.Where(x => !x.IsUnsafe);
 
             if (childrenToSerialize == null || !childrenToSerialize.Any())
                 return element;
@@ -173,8 +179,11 @@ public abstract class Fb2Container : Fb2Node
 
         var actualContent = content;
         var otherContent = otherContainer.content;
-        var sameContent = actualContent.Count == otherContent.Count &&
-                          actualContent.SequenceEqual(otherContent);
+        var areBothContentsNull = actualContent is null && otherContent is null;
+
+        var sameContent = areBothContentsNull ||
+                          actualContent?.Count == otherContent?.Count &&
+                          (actualContent?.SequenceEqual(otherContent ?? []) ?? false);
 
         var result = sameContent &&
             CanContainText == otherContainer.CanContainText &&
@@ -196,7 +205,7 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
         {
-            var clonedContent = content.Select(c => (Fb2Node)c.Clone()).ToList();
+            var clonedContent = content!.Select(c => (Fb2Node)c.Clone()).ToArray();
             clone.AddContent(clonedContent);
         }
 
@@ -206,16 +215,43 @@ public abstract class Fb2Container : Fb2Node
     #region Content editing
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Adds node to <see cref="Content"/> using asynchronous provider function.
     /// </summary>
     /// <param name="nodeProvider">Asynchronous node provider function.</param>
     /// <returns>Current container.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
     {
         ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
 
-        var newNode = await nodeProvider().ConfigureAwait(false);
+        var newNode = await nodeProvider();
+        return AddContent(newNode);
+    }
+
+    /// <summary>
+    /// Adds node to <see cref="Content"/> using asynchronous provider function.
+    /// </summary>
+    /// <param name="nodeProvider">Asynchronous node provider function.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current container.</returns>
+    /// <remarks>
+    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+    public async Task<Fb2Container> AddContentAsync(
+        Func<CancellationToken, Task<Fb2Node>> nodeProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newNode = await nodeProvider(cancellationToken);
         return AddContent(newNode);
     }
 
@@ -239,10 +275,12 @@ public abstract class Fb2Container : Fb2Node
     /// <param name="nodes">Nodes to add to <see cref="Content"/>.</param>
     /// <returns>Current container.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Container AddContent(params Fb2Node[] nodes)
+    public Fb2Container AddContent(params List<Fb2Node> nodes)
     {
-        if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+        if (nodes is not { Count: > 0 } || nodes.All(n => n == null))
             throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
+
+        EnsureContentInitialized(nodes.Count);
 
         foreach (var node in nodes)
             AddContent(node);
@@ -289,6 +327,9 @@ public abstract class Fb2Container : Fb2Node
     }
 
     /// <summary>
+    /// <para> 
+    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
+    /// </para>
     /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
     /// </summary>
     /// <param name="contentProvider">Asynchronous content provider function.</param>
@@ -296,8 +337,10 @@ public abstract class Fb2Container : Fb2Node
     /// <returns>Current container.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="UnexpectedNodeException"></exception>
+    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
     public async Task<Fb2Container> AddTextContentAsync(
-        Func<Task<string>> contentProvider, string? separator = null)
+        Func<Task<string>> contentProvider,
+        string? separator = null)
     {
         if (!CanContainText)
             throw new UnexpectedNodeException(Name, ElementNames.FictionText);
@@ -305,6 +348,31 @@ public abstract class Fb2Container : Fb2Node
         ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = await contentProvider();
+        return AddTextContent(newContent, separator);
+    }
+
+    /// <summary>
+    /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
+    /// </summary>
+    /// <param name="contentProvider">Asynchronous content provider function.</param>
+    /// <param name="separator">Separator string used to join new text with existing content.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current container.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="UnexpectedNodeException"></exception>
+    public async Task<Fb2Container> AddTextContentAsync(
+        Func<CancellationToken, Task<string>> contentProvider,
+        string? separator = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CanContainText)
+            throw new UnexpectedNodeException(Name, ElementNames.FictionText);
+
+        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var newContent = await contentProvider(cancellationToken);
         return AddTextContent(newContent, separator);
     }
 
@@ -319,8 +387,7 @@ public abstract class Fb2Container : Fb2Node
         if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
             throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
-        foreach (var node in nodes)
-            AddContent(node);
+        AddContent([.. nodes]);
 
         return this;
     }
@@ -371,7 +438,9 @@ public abstract class Fb2Container : Fb2Node
         if (node.NodeMetadata == null && NodeMetadata != null) // copy parent default namespace to prevent serialization issues
             node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata.DefaultNamespace);
 
-        content.Add(node);
+        EnsureContentInitialized(1);
+
+        content!.Add(node);
         return this;
     }
 
@@ -404,7 +473,7 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
         {
-            var nodesToRemove = GetChildren(nodePredicate).ToList();
+            var nodesToRemove = GetChildren(nodePredicate).ToArray();
             foreach (var node in nodesToRemove)
                 RemoveContent(node);
         }
@@ -422,7 +491,7 @@ public abstract class Fb2Container : Fb2Node
     {
         ArgumentNullException.ThrowIfNull(node, nameof(node));
 
-        if (HasContent && content.Contains(node))
+        if (HasContent && content!.Contains(node))
         {
             content.Remove(node);
             node.Parent = null;
@@ -438,7 +507,7 @@ public abstract class Fb2Container : Fb2Node
     public Fb2Container ClearContent()
     {
         if (HasContent)
-            for (int i = content.Count - 1; i >= 0; i--)
+            for (int i = content!.Count - 1; i >= 0; i--)
                 RemoveContent(content[i]);
 
         return this;
@@ -464,7 +533,7 @@ public abstract class Fb2Container : Fb2Node
             throw new InvalidNodeException(name);
 
         if (HasContent)
-            return content.Where(elem => elem.Name.EqualsIgnoreCase(name));
+            return content!.Where(elem => elem.Name.EqualsIgnoreCase(name));
 
         return [];
     }
@@ -480,7 +549,7 @@ public abstract class Fb2Container : Fb2Node
         ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         if (HasContent)
-            return content.Where(c => predicate(c));
+            return content!.Where(c => predicate(c));
 
         return [];
     }
@@ -498,8 +567,8 @@ public abstract class Fb2Container : Fb2Node
 
         if (HasContent)
             return string.IsNullOrWhiteSpace(name) ?
-                content.FirstOrDefault() :
-                content.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
+                content!.FirstOrDefault() :
+                content!.FirstOrDefault(elem => elem.Name.EqualsIgnoreCase(name));
 
         return null;
     }
@@ -515,7 +584,7 @@ public abstract class Fb2Container : Fb2Node
         ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
         if (HasContent)
-            return content.FirstOrDefault(predicate);
+            return content!.FirstOrDefault(predicate);
 
         return null;
     }
@@ -540,7 +609,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return result;
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -574,7 +643,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return result;
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -611,7 +680,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -643,7 +712,7 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -698,8 +767,8 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return [];
 
-        var predicate = PredicateResolver.GetPredicate<T>();
-        var result = content.Where(predicate);
+        var predicate = GetPredicate<T>();
+        var result = content!.Where(predicate);
 
         return result.Any() ? result.Cast<T>() : [];
     }
@@ -714,8 +783,8 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        var predicate = PredicateResolver.GetPredicate<T>();
-        var result = content.FirstOrDefault(predicate);
+        var predicate = GetPredicate<T>();
+        var result = content!.FirstOrDefault(predicate);
 
         if (result == null)
             return null;
@@ -762,10 +831,9 @@ public abstract class Fb2Container : Fb2Node
 
         var result = new List<Fb2Node>();
 
-        if (predicate == null)
-            predicate = PredicateResolver.GetPredicate<T>();
+        predicate ??= GetPredicate<T>();
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -789,10 +857,9 @@ public abstract class Fb2Container : Fb2Node
         if (!HasContent)
             return null;
 
-        if (predicate == null)
-            predicate = PredicateResolver.GetPredicate<T>();
+        predicate ??= GetPredicate<T>();
 
-        for (int i = 0; i < content.Count; i++)
+        for (int i = 0; i < content!.Count; i++)
         {
             var element = content[i];
 
@@ -812,14 +879,16 @@ public abstract class Fb2Container : Fb2Node
 
     private Fb2Container TryMergeTextContent(string newContent, string? separator = null)
     {
-        var lastChildNode = HasContent ? content.LastOrDefault() : null;
+        EnsureContentInitialized(1);
+
+        var lastChildNode = HasContent ? content!.LastOrDefault() : null;
 
         // empty or last item is not text, so cant append actual content nowhere
         if (lastChildNode == null ||
             lastChildNode is not TextItem lastTextItem)
         {
             var textNode = new TextItem { Parent = this }.AddContent(newContent, separator);
-            content.Add(textNode);
+            content!.Add(textNode);
         }
         else
             lastTextItem.AddContent(newContent, separator);
@@ -827,8 +896,29 @@ public abstract class Fb2Container : Fb2Node
         return this;
     }
 
+    private void EnsureContentInitialized(int capacity)
+    {
+        if (capacity < 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
+        if (HasContent)
+            return;
+
+        content = new List<Fb2Node>(capacity);
+    }
+
     private static XNode ToXmlInternal(Fb2Node element, bool serializeUnsafeElements) =>
-        element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
+    element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
+
+    private static Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
+    {
+        var targetType = typeof(T);
+
+        if (targetType.IsAbstract)
+            return element => element.GetType().IsSubclassOf(targetType);
+
+        return element => element.GetType().Equals(targetType);
+    }
 
     #endregion
 }
