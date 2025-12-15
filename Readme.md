@@ -1,6 +1,6 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
-Fb2.Document is lightweight, fast .Net 8 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 10 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
@@ -66,6 +66,7 @@ Table below describes `.net` targets per package version:
 | 1.3.0           | netstandard2.0                     |
 | 2.3.0           | netcoreapp3.1;net5.0;net6.0;net7.0 |
 | 2.4.0           | net8.0                             |
+| 2.5.0           | net10.0                            |
 
 For more info on .Net versions support please see [.NET and .NET Core Support Policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
 
