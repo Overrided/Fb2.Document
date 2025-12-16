@@ -13,7 +13,7 @@ public class Fb2BenchmarkConfig : ManualConfig
 {
     public Fb2BenchmarkConfig() =>
         AddJob(Job.Default
-            .WithRuntime(CoreRuntime.Core90)
+            .WithRuntime(CoreRuntime.Core10_0)
             .WithWarmupCount(5)
             .WithLaunchCount(10)
             .WithIterationCount(1000)
