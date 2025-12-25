@@ -303,25 +303,6 @@ public abstract partial class Fb2Node : ICloneable
     }
 
     /// <summary>
-    /// <para> 
-    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
-    /// </para>
-    /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
-    /// </summary>
-    /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
-    /// <returns>Current node.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
-    public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
-    {
-        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
-
-        var attribute = await attributeProvider();
-
-        return AddAttribute(attribute);
-    }
-
-    /// <summary>
     /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
     /// </summary>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>

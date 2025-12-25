@@ -39,7 +39,7 @@ public class Fb2ElementExtensionsTests
         fb2Element.HasContent.Should().BeFalse();
         fb2Element.Content.Should().BeNullOrEmpty();
 
-        await fb2Element.AppendContentAsync(async () => await Task.FromResult("from result content"));
+        await fb2Element.AppendContentAsync(async (_) => await Task.FromResult("from result content"));
 
         fb2Element.HasContent.Should().BeTrue();
         fb2Element.Content.Should().Be("from result content");

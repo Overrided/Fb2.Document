@@ -195,7 +195,7 @@ public class Fb2NodeTests
             .Be(instance.Name);
 
         (await instance
-            .Invoking(async i => await i.AddAttributeAsync(() => Task.FromResult(new Fb2Attribute("testKey", "testValue"))))
+            .Invoking(async i => await i.AddAttributeAsync((_) => Task.FromResult(new Fb2Attribute("testKey", "testValue")), default))
             .Should()
             .ThrowExactlyAsync<NoAttributesAllowedException>()
             .WithMessage($"Node '{instance.Name}' has no allowed attributes."))
@@ -224,7 +224,7 @@ public class Fb2NodeTests
             .ThrowExactly<ArgumentNullException>();
 
         instance
-            .Invoking(i => i.AddAttributeAsync(null!))
+            .Invoking(i => i.AddAttributeAsync(null!, default))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
