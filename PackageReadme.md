@@ -17,18 +17,17 @@ For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
 
 ## .Net 10
 
-With version `2.5.0` project will target singular `latest LTS` (Long Term Support) version of `.net`.
-
+With version `2.5.0` project targets `.Net 10`.
 
 ## Other Updates
 
 * `Fb2LoadingOptions`,`Fb2StreamLoadingOptions`,`Fb2XmlSerializingOptions` are `record`s now.
 * `ElementNames` / `AttributeNames` are `struct`s now.
 * `Fb2Node`: introduced `HasAllowedAttributes` property.
-* Improved methods + corresponding extensions:
+* Following methods + corresponding extensions now support cancellation:
 	* `Fb2Node.AddAttributeAsync`
 	* `Fb2Container.AddContentAsync`
 	* `Fb2Element.AddContentAsync`
-  * `Fb2NodeExtensions.AppendAttributeAsync`
-  * `Fb2ContainerExtensions.AppendContentAsync`
-  * `Fb2ElementExtensions.AppendContentAsync`
+	* `Fb2NodeExtensions.AppendAttributeAsync`
+	* `Fb2ContainerExtensions.AppendContentAsync`
+	* `Fb2ElementExtensions.AppendContentAsync`

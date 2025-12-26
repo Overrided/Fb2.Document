@@ -417,12 +417,15 @@ paragraph.AddContent(ElementNames.Strong) // by node name
              DoWork();
              return new Strong().AddTextContent("sync bold text provider");
          });
-await paragraph.AddContentAsync(async () =>          // with async node function provider - Func<Task<Fb2Node>>
+
+var cancellationToken = ...;
+await paragraph.AddContentAsync(async (CancellationToken ct) =>   // with async node function provider - Func<CancellationToken, Task<CancellationToken, Fb2Node>>
 {
     // do async stuff, load, query content, etc.
-    var strongText = await GetStrongTextValue();
+    var strongText = await GetStrongTextValue(ct);
     return new Strong().AddTextContent(strongText);
-});
+},
+cancellationToken); // cancellationToken is optional
 ```
 
 5) To remove particular node / set of nodes, use `RemoveContent` method or one of it overloads:
@@ -464,10 +467,12 @@ paragraph.AddAttribute(new Fb2Attribute("id", "paragraph_id")); // adding single
 // or:
 paragraph.AddAttribute(() => new Fb2Attribute("id", "paragraph_id")); // adding single attribute via provider function
 // or:
-await paragraph.AddAttributeAsync(async () => { // adding single attribute via async provider function
-    var kvp = await attributeService.GetAttributeAsync();
+var cancellationToken = ...;
+await paragraph.AddAttributeAsync(async (CancellationToken ct) => { // adding single attribute via async provider function
+    var kvp = await attributeService.GetAttributeAsync(ct);
     return kvp;
-});
+},
+cancellationToken); // cancellationToken is optional
 ```
 
 2) To add multiple attributes to given `Fb2Node` at once, use overloaded `AddAttributes` method:
@@ -645,13 +650,13 @@ As in fact library operates on top of `XDocument` ([Linq to XML](https://docs.mi
 
 To simplify error-handling for different validation, loading and editing errors library provides custom exceptions:
 
-`Fb2DocumentLoadingException`  - thrown if `Fb2Document.Load(...)` or `Fb2Document.LoadAsync(...)` fails.
-`Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.
-`NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.
-`InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.
-`UnexpectedAttributeException`  - thrown on attempt to add attribute not listed in `AllowedAttributes`.
-`InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.
-`UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.
+* `Fb2DocumentLoadingException`  - thrown if `Fb2Document.Load(...)` or `Fb2Document.LoadAsync(...)` fails.
+* `Fb2NodeLoadingException`  - thrown if `Fb2Node.Load(...)` method fails.
+* `NoAttributesAllowedException`  - thrown on attempt to add attribute to node with no `AllowedAttributes`.
+* `InvalidAttributeException`    - thrown on attempt to add attribute with invalid key/value.
+* `UnexpectedAttributeException`  - thrown on attempt to add attribute not listed in `AllowedAttributes`.
+* `InvalidNodeException`  - thrown on attempt to add node to `Fb2Container.Content` using unknown `Fb2Node` name. Also being unhandled by `Fb2NodeFactory.GetNodeByName` method if supplied unknown name.
+* `UnexpectedNodeException`  - thrown on attempt to add not allowed node to `Fb2Container.Content` - like to put `plain text` into `BookBody` or try to fit `BodySection` inside `Paragraph`.
 
 For more examples on exceptions see ['Fb2ContainerTests'](https://github.com/Overrided/Fb2.Document/blob/master/Fb2.Document.Tests/ModelsTests/Fb2ContainerTests.cs).
 

@@ -21,7 +21,14 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
+    /// <summary>
+    /// Whitespace character " ".
+    /// </summary>
     protected const string Whitespace = " ";
+
+    /// <summary>
+    /// Provides a compiled regular expression that matches leading and trailing whitespace in a string ("\s+").
+    /// </summary>
     protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
 
     private List<Fb2Attribute>? attributes;
@@ -315,7 +322,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
     public async Task<Fb2Node> AddAttributeAsync(
         Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 
