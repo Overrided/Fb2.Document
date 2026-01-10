@@ -518,7 +518,7 @@ paragraph
     .AddContent(new Strong().AddTextContent("strong text 1 "))
     .AddContent(
         new Emphasis()
-            .WithTextContent("italic text 1 ")
+            .AddTextContent("italic text 1 ")
             .AddContent(
                 new Strong()
                     .AddTextContent("strong italic text ")
