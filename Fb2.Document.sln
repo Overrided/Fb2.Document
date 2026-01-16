@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31912.275
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{7D1A37B2-70C3-416C-9327-94C5862F9D94}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,11 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Tests", "Fb2.Document.Tests\Fb2.Document.Tests.csproj", "{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document", "Fb2.Document\Fb2.Document.csproj", "{64E4C263-5F77-4920-88BA-937C2C59D48D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fb2.Document.Playground", "Fb2.Document.Playground\Fb2.Document.Playground.csproj", "{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Document.Benchmark", "Fb2.Document.Benchmark\Fb2.Document.Benchmark.csproj", "{E9ECAD3F-BCC6-4471-A90F-B3C92B8D7031}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fb2.Document", "Fb2.Document\Fb2.Document.csproj", "{EDD51D37-5AF2-450D-B0CB-F818A2EABB52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,6 @@ Global
 		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E5A2D1-DA12-4F6C-837D-B34F121996DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64E4C263-5F77-4920-88BA-937C2C59D48D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5772CD6-0863-4242-A915-ACE8EEE9ECA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,6 +37,10 @@ Global
 		{E9ECAD3F-BCC6-4471-A90F-B3C92B8D7031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9ECAD3F-BCC6-4471-A90F-B3C92B8D7031}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9ECAD3F-BCC6-4471-A90F-B3C92B8D7031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD51D37-5AF2-450D-B0CB-F818A2EABB52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD51D37-5AF2-450D-B0CB-F818A2EABB52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD51D37-5AF2-450D-B0CB-F818A2EABB52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD51D37-5AF2-450D-B0CB-F818A2EABB52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

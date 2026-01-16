@@ -1,35 +1,42 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
 
-Fb2.Document is lightweight, fast .Net 8 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 10 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
 
-# Version 2.4.0
+# Version 2.5.0
 
-Latest release of an `Fb2.Document` library brings `.Net` version targeting strategy change, code updates and new minor cosmetic changes.
+Latest release of an `Fb2.Document` library brings `.Net 10` and few minor updates.
 
-- [.Net 8](#.net-8)
+- [.Net 10](#.net-10)
+- [Async methods updates](#async-methods-updates)
 - [Other Updates](#updates)
 
 For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
 
-## .Net 8
+## .Net 10
 
-Starting with version `2.4.0` project will target singular `latest LTS` (Long Term Support) version of `.net`.
+Package version `2.5.0` targets `.Net 10`.
 
-Version `2.4.0` introduces this change moving away from multiple framework versions target - `netcoreapp3.1;net5.0;net6.0;net7.0` - and targeting `net8.0` only instead.
+## Async Methods Updates
 
-This allows to use latest features and reduce package size.
+Following methods + corresponding extensions now support cancellation:
+
+* `Fb2Node.AddAttributeAsync`
+* `Fb2Element.AddContentAsync`
+* `Fb2Container.AddContentAsync`
+* `Fb2Container.AddTextContentAsync`
+* `Fb2NodeExtensions.AppendAttributeAsync`
+* `Fb2ElementExtensions.AppendContentAsync`
+* `Fb2ContainerExtensions.AppendContentAsync`
+* `Fb2ContainerExtensions.AppendTextContentAsync`
+
+This change can be consedered a **breaking change** since method signatures were changed.
 
 ## Other Updates
 
-* Added `Fb2XmlSerializingOptions`.
-* Enabled project trimming (`IsTrimmable` / `IsAotCompatible`).
-* Using `GeneratedRegexAttribute` to improve performance for underlying `RegEx`.
-* Exposing `DefaultXmlVersion`, `DefaultXDeclaration` and `DefaultXmlReaderSettings` members of `Fb2Document` class.
-* Moved library to `file-scoped namespaces` approach.
-* Using `Collection expressions` for `Enumerable` instances initialization.
-* Added `.editorconfig`.
-* `Tests` and `Benchmark` projects are now using same `Sample` folder contents via resourse embedding.
+* `Fb2Node`: introduced `HasAllowedAttributes` property.
+* `Fb2LoadingOptions`,`Fb2StreamLoadingOptions`,`Fb2XmlSerializingOptions` are `record`s now.
+* `ElementNames` / `AttributeNames` are `struct`s now.

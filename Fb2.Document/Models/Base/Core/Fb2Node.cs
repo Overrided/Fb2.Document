@@ -21,7 +21,14 @@ namespace Fb2.Document.Models.Base;
 /// </summary>
 public abstract partial class Fb2Node : ICloneable
 {
+    /// <summary>
+    /// Whitespace character " ".
+    /// </summary>
     protected const string Whitespace = " ";
+
+    /// <summary>
+    /// Provides a compiled regular expression that matches leading and trailing whitespace in a string ("\s+").
+    /// </summary>
     protected static readonly Regex trimWhitespace = TrimWhitespaceCompiledRegex();
 
     private List<Fb2Attribute>? attributes;
@@ -303,25 +310,6 @@ public abstract partial class Fb2Node : ICloneable
     }
 
     /// <summary>
-    /// <para> 
-    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
-    /// </para>
-    /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
-    /// </summary>
-    /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
-    /// <returns>Current node.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
-    public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
-    {
-        ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
-
-        var attribute = await attributeProvider();
-
-        return AddAttribute(attribute);
-    }
-
-    /// <summary>
     /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
     /// </summary>
     /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
@@ -334,7 +322,7 @@ public abstract partial class Fb2Node : ICloneable
     /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
     public async Task<Fb2Node> AddAttributeAsync(
         Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(attributeProvider, nameof(attributeProvider));
 

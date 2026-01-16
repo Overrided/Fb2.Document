@@ -66,7 +66,7 @@ public class Fb2ContainerTests
             .Throw<ArgumentNullException>();
 
         node.Invoking(async n => await n.AddContentAsync(
-            async () => await Task.FromResult<Fb2Node>(null!))) // async node provider
+            async (_) => await Task.FromResult<Fb2Node>(null!))) // async node provider
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
@@ -135,9 +135,9 @@ public class Fb2ContainerTests
             .WithMessage($"Node '{node.Name}' can not contain 'text'.");
 
         await node
-            .Invoking(async n => await n.AddTextContentAsync(async () =>
+            .Invoking(async n => await n.AddTextContentAsync(async (ct) =>
             {
-                await Task.Delay(1);
+                await Task.Delay(1, ct);
                 return "test text";
             }))
             .Should()
@@ -171,14 +171,14 @@ public class Fb2ContainerTests
             .Should()
             .ThrowExactly<ArgumentNullException>();
 
-        await node.Invoking(n => n.AddTextContentAsync((Func<Task<string>>)null!))
+        await node.Invoking(n => n.AddTextContentAsync(null!))
              .Should()
              .ThrowExactlyAsync<ArgumentNullException>();
 
         await node
-            .Invoking(async n => await n.AddTextContentAsync(async () =>
+            .Invoking(async n => await n.AddTextContentAsync(async (ct) =>
             {
-                await Task.Delay(1);
+                await Task.Delay(1, ct);
                 return null!;
             }))
             .Should()
@@ -235,9 +235,9 @@ public class Fb2ContainerTests
 
         ClearContainerContent(node);
 
-        await node.AddTextContentAsync(async () =>
+        await node.AddTextContentAsync(async (ct) =>
             {
-                await Task.Delay(1);
+                await Task.Delay(1, ct);
                 return "test text 4";
             });
 
@@ -435,7 +435,7 @@ public class Fb2ContainerTests
             .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
         node.Invoking(async n =>
-            await n.AddContentAsync(async () => await Task.FromResult(notAllowedNode))) // async node provider
+            await n.AddContentAsync(async (_) => await Task.FromResult(notAllowedNode))) // async node provider
             .Should()
             .ThrowExactlyAsync<UnexpectedNodeException>()
             .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
@@ -475,7 +475,7 @@ public class Fb2ContainerTests
         ClearContainerContent(node);
 
         // async node provider
-        await node.AddContentAsync(async () => await Task.FromResult(firstAllowedNode));
+        await node.AddContentAsync(async (_) => await Task.FromResult(firstAllowedNode));
 
         node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 

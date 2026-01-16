@@ -43,7 +43,7 @@ public class Fb2NodeExtensionsTests
         parag.HasAttributes.Should().BeFalse();
         parag.Attributes.Should().BeEmpty();
 
-        await parag.AppendAttributeAsync(() => Task.FromResult(new Fb2Attribute(AttributeNames.Id, "testId")));
+        await parag.AppendAttributeAsync((_) => Task.FromResult(new Fb2Attribute(AttributeNames.Id, "testId")));
 
         parag.HasAttributes.Should().BeTrue();
         parag.Attributes.Should().NotBeEmpty().And.HaveCount(1);

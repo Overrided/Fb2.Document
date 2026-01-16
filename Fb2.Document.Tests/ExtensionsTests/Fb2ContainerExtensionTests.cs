@@ -63,7 +63,7 @@ public class Fb2ContainerExtensionTests
             .Throw<ArgumentNullException>();
 
         node.Invoking(async n => await n.AppendContentAsync(
-            async () => await Task.FromResult<Fb2Node>(null!))) // async node provider
+            async (_) => await Task.FromResult<Fb2Node>(null!))) // async node provider
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
 
@@ -146,9 +146,9 @@ public class Fb2ContainerExtensionTests
             .WithMessage($"Node '{node.Name}' can not contain 'text'.");
 
         await node
-            .Invoking(async n => await n.AppendTextContentAsync(async () =>
+            .Invoking(async n => await n.AppendTextContentAsync(async (ct) =>
             {
-                await Task.Delay(1);
+                await Task.Delay(1, ct);
                 return "test text";
             }))
             .Should()
@@ -204,9 +204,9 @@ public class Fb2ContainerExtensionTests
 
         ClearContainerContent(node);
 
-        await node.AppendTextContentAsync(async () =>
+        await node.AppendTextContentAsync(async (ct) =>
         {
-            await Task.Delay(1);
+            await Task.Delay(1, ct);
             return "test text 4";
         });
 
@@ -261,7 +261,7 @@ public class Fb2ContainerExtensionTests
             .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
 
         node.Invoking(async n =>
-            await n.AppendContentAsync(async () => await Task.FromResult(notAllowedNode))) // async node provider
+            await n.AppendContentAsync(async (_) => await Task.FromResult(notAllowedNode))) // async node provider
             .Should()
             .ThrowExactlyAsync<UnexpectedNodeException>()
             .WithMessage($"Node '{node.Name}' can not contain '{notAllowedNode.Name}'.");
@@ -301,7 +301,7 @@ public class Fb2ContainerExtensionTests
         ClearContainerContent(node);
 
         // async node provider
-        await node.AppendContentAsync(async () => await Task.FromResult(firstAllowedNode));
+        await node.AppendContentAsync(async (_) => await Task.FromResult(firstAllowedNode));
 
         node.Content.Should().NotBeEmpty().And.Subject.Should().HaveCount(1);
 

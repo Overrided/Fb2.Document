@@ -215,24 +215,6 @@ public abstract class Fb2Container : Fb2Node
     #region Content editing
 
     /// <summary>
-    /// <para> 
-    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
-    /// </para>
-    /// Adds node to <see cref="Content"/> using asynchronous provider function.
-    /// </summary>
-    /// <param name="nodeProvider">Asynchronous node provider function.</param>
-    /// <returns>Current container.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
-    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
-    public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
-    {
-        ArgumentNullException.ThrowIfNull(nodeProvider, nameof(nodeProvider));
-
-        var newNode = await nodeProvider();
-        return AddContent(newNode);
-    }
-
-    /// <summary>
     /// Adds node to <see cref="Content"/> using asynchronous provider function.
     /// </summary>
     /// <param name="nodeProvider">Asynchronous node provider function.</param>
@@ -323,31 +305,6 @@ public abstract class Fb2Container : Fb2Node
         ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
 
         var newContent = contentProvider();
-        return AddTextContent(newContent, separator);
-    }
-
-    /// <summary>
-    /// <para> 
-    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
-    /// </para>
-    /// Appends plain text node to <see cref="Content"/> using asynchronous content provider function.
-    /// </summary>
-    /// <param name="contentProvider">Asynchronous content provider function.</param>
-    /// <param name="separator">Separator string used to join new text with existing content.</param>
-    /// <returns>Current container.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="UnexpectedNodeException"></exception>
-    [Obsolete("This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
-    public async Task<Fb2Container> AddTextContentAsync(
-        Func<Task<string>> contentProvider,
-        string? separator = null)
-    {
-        if (!CanContainText)
-            throw new UnexpectedNodeException(Name, ElementNames.FictionText);
-
-        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
-
-        var newContent = await contentProvider();
         return AddTextContent(newContent, separator);
     }
 

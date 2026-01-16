@@ -40,29 +40,6 @@ public static class Fb2NodeExtensions
         (T)fb2Node.AddAttributes(attributes);
 
     /// <summary>
-    /// <para> 
-    /// This method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.
-    /// </para>
-    /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributeAsync(Func{Task{Fb2Attribute}})"/> method.
-    /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.</para>
-    /// </summary>
-    /// <typeparam name="T">Type of node, inferred from usage implicitly.</typeparam>
-    /// <param name="fb2Node"><see cref="Fb2Node"/> instance to use extension on.</param>
-    /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
-    /// <returns><paramref name="fb2Node"/> with it's original type.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
-    /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
-    [Obsolete("This extension method is obsolete and will be removed in next release. Please use new implementation that supports cancellation.")]
-    public static async Task<T> AppendAttributeAsync<T>(
-        this T fb2Node,
-        Func<Task<Fb2Attribute>> attributeProvider) where T : Fb2Node
-    {
-        var result = await fb2Node.AddAttributeAsync(attributeProvider);
-        return (T)result;
-    }
-
-    /// <summary>
     /// "Type-accurate" wrapper for <see cref="Fb2Node.AddAttributeAsync(Func{CancellationToken, Task{Fb2Attribute}}, CancellationToken)"/> method.
     /// <para> Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.</para>
     /// </summary>

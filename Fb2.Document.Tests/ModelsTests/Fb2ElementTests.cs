@@ -100,7 +100,7 @@ public class Fb2ElementTests
             .ThrowExactly<ArgumentNullException>();
 
         await fb2Element
-            .Invoking(n => n.AddContentAsync((Func<Task<string>>)null!))
+            .Invoking(n => n.AddContentAsync(null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
     }
@@ -159,9 +159,9 @@ public class Fb2ElementTests
         fb2Element.ClearContent();
         fb2Element.HasContent.Should().BeFalse();
 
-        await fb2Element.AddContentAsync(async () =>
+        await fb2Element.AddContentAsync(async (ct) =>
         {
-            await Task.Delay(1);
+            await Task.Delay(1, ct);
             return "test content 1";
         }); // no separator
         fb2Element.HasContent.Should().BeTrue();
@@ -171,7 +171,7 @@ public class Fb2ElementTests
         fb2Element.AddContent(() => "test content 2", "   ");
         fb2Element.Content.Should().Be("test content 1   test content 2");
 
-        await fb2Element.AddContentAsync(() => Task.FromResult("test content 3")); // no separator
+        await fb2Element.AddContentAsync((_) => Task.FromResult("test content 3")); // no separator
         fb2Element.Content.Should().Be("test content 1   test content 2test content 3");
 
         fb2Element.AddContent(() => $"test {Environment.NewLine} content 4", " _blah_ ");
@@ -180,9 +180,9 @@ public class Fb2ElementTests
             .Should()
             .Be("test content 1   test content 2test content 3 _blah_ test   content 4");
 
-        await fb2Element.AddContentAsync(async () =>
+        await fb2Element.AddContentAsync(async (ct) =>
         {
-            await Task.Delay(2);
+            await Task.Delay(2, ct);
             return $"test {Environment.NewLine} content 5";
         }, "  _blah_ ");
         fb2Element
