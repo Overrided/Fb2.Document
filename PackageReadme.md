@@ -11,23 +11,32 @@ Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://
 Latest release of an `Fb2.Document` library brings `.Net 10` and few minor updates.
 
 - [.Net 10](#.net-10)
+- [Async methods updates](#async-methods-updates)
 - [Other Updates](#updates)
 
 For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
 
 ## .Net 10
 
-With version `2.5.0` project targets `.Net 10`.
+Package version `2.5.0` targets `.Net 10`.
+
+## Async Methods Updates
+
+Following methods + corresponding extensions now support cancellation:
+
+* `Fb2Node.AddAttributeAsync`
+* `Fb2Element.AddContentAsync`
+* `Fb2Container.AddContentAsync`
+* `Fb2Container.AddTextContentAsync`
+* `Fb2NodeExtensions.AppendAttributeAsync`
+* `Fb2ElementExtensions.AppendContentAsync`
+* `Fb2ContainerExtensions.AppendContentAsync`
+* `Fb2ContainerExtensions.AppendTextContentAsync`
+
+This change can be consedered a **breaking change** since method signatures were changed.
 
 ## Other Updates
 
+* `Fb2Node`: introduced `HasAllowedAttributes` property.
 * `Fb2LoadingOptions`,`Fb2StreamLoadingOptions`,`Fb2XmlSerializingOptions` are `record`s now.
 * `ElementNames` / `AttributeNames` are `struct`s now.
-* `Fb2Node`: introduced `HasAllowedAttributes` property.
-* Following methods + corresponding extensions now support cancellation:
-	* `Fb2Node.AddAttributeAsync`
-	* `Fb2Container.AddContentAsync`
-	* `Fb2Element.AddContentAsync`
-	* `Fb2NodeExtensions.AppendAttributeAsync`
-	* `Fb2ContainerExtensions.AppendContentAsync`
-	* `Fb2ElementExtensions.AppendContentAsync`

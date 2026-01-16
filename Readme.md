@@ -172,6 +172,9 @@ using(Stream stream = dataService.GetFileContentStream(Fb2FilePath))
     await fb2Document.LoadAsync(stream);
     // or:
     await fb2Document.LoadAsync(stream, new Fb2StreamLoadingOptions(false)); // options
+    // or with cancellation token:
+    var cancellationToken = ...;
+    await fb2Document.LoadAsync(stream, new Fb2StreamLoadingOptions(false), cancellationToken); // options + cancellation token
 }
 ```
 
