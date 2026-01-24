@@ -8,7 +8,6 @@ namespace Fb2.Document.Models
     {
         public override string Name => ElementNames.TextStyle;
 
-        public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Language);
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Name, AttributeNames.Language);
     }
 }
