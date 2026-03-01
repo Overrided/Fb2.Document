@@ -9,6 +9,7 @@ using Fb2.Document.Exceptions;
 
 namespace Fb2.Document.Models.Base
 {
+
     /// <summary>
     /// Represents text Node of <see cref="Fb2Document"/>.
     /// Any class derived from <see cref="Fb2Element"/> can contain text only.
@@ -145,10 +146,7 @@ namespace Fb2.Document.Models.Base
             var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
             normalizedNewContent = SecurityElement.Escape(normalizedNewContent);
 
-            if (content == null)
-                content = normalizedNewContent;
-            else
-                content = string.Join(normalizedSeparator, content, normalizedNewContent);
+            content = string.Join(normalizedSeparator, content, normalizedNewContent);
 
             return this;
         }
