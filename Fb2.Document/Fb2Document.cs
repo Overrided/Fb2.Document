@@ -253,29 +253,36 @@ namespace Fb2.Document
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception> 
-        /// <exception cref="Fb2DocumentLoadingException"></exception>
         /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
         public async Task LoadAsync(
             [In] Stream fileContent,
-            [In] Fb2StreamLoadingOptions loadingOptions = null)
+            Fb2StreamLoadingOptions loadingOptions = null,
+            CancellationToken cancellationToken = default)
         {
             if (fileContent == null)
-                throw new ArgumentNullException(nameof(fileContent));
+                throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
+                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
 
-            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-            xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
+            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
 
-            LoadHandled(() =>
+            await LoadHandledAsync(async (ct) =>
             {
-                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
+                using (var sr = new StreamReader(fileContent, detectEncodingFromByteOrderMarks: true))
                 {
-                    var document = XDocument.Load(reader, LoadOptions.None);
-                    Load(document.Root, loadingOptions);
+                    var content = await sr.ReadToEndAsync();
+                    var document = XDocument.Parse(content);
+
+                    Load(document.Root, options);
                 }
-            });
+            }, cancellationToken);
+
+            if (options.CloseInputStream)
+            {
+                fileContent.Close();
+                fileContent.Dispose();
+            }
         }
 
         /// <summary>
