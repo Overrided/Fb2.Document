@@ -309,7 +309,7 @@ namespace Fb2.Document.Models.Base
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
-            AddAttributes(attributes.ToList());
+            AddAttributes(attributes.ToArray());
 
             return this;
         }
