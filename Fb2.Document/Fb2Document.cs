@@ -263,13 +263,18 @@ namespace Fb2.Document
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
             var options = loadingOptions ?? new Fb2StreamLoadingOptions();
 
             await LoadHandledAsync(async (ct) =>
             {
-                using (var sr = new StreamReader(fileContent, detectEncodingFromByteOrderMarks: true))
+                using (var sr = new StreamReader(
+                    fileContent,
+                    Encoding.Default,
+                    detectEncodingFromByteOrderMarks: true,
+                    1024,
+                    leaveOpen: !options.CloseInputStream))
                 {
                     var content = await sr.ReadToEndAsync();
                     var document = XDocument.Parse(content);
