@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
@@ -273,7 +274,7 @@ namespace Fb2.Document
                     fileContent,
                     Encoding.Default,
                     detectEncodingFromByteOrderMarks: true,
-                    1024,
+                    LoadingConstants.DefaultBufferSize,
                     leaveOpen: !options.CloseInputStream))
                 {
                     var content = await sr.ReadToEndAsync();
