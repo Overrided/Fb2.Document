@@ -5,27 +5,33 @@ using System.Xml.Linq;
 
 namespace Fb2.Document.Models.Base
 {
+
     /// <summary>
-    /// Represents data used for serializing Fb2Node to XML.
+    /// Represents metadata used for serializing <see cref="Fb2Node"/> to XML.
     /// </summary>
     public class Fb2NodeMetadata
     {
         /// <summary>
-        /// Default Namespace of original XNode.
+        /// Default Namespace of original <see cref="XNode"/>.
         /// </summary>
         public XNamespace DefaultNamespace { get; private set; }
 
         /// <summary>
-        /// Namespace Declaration attributes of original XNode.
+        /// Namespace Declaration attributes of original <see cref="XNode"/>.
         /// </summary>
         public List<XAttribute> NamespaceDeclarations { get; private set; }
 
+        /// <summary>
+        /// Creates new instance of <see cref="Fb2NodeMetadata"/>.
+        /// </summary>
+        /// <param name="defaultNamespace"> Default Namespace of original <see cref="XNode"/>. Optional, <see langword="null"/> by default.</param>
+        /// <param name="namespaceDeclarations">Set of Namespace Declaration Attributes of original <see cref="XNode"/>. </param>
+        /// <exception cref="ArgumentException"></exception>
         public Fb2NodeMetadata(
             XNamespace defaultNamespace = null,
             IEnumerable<XAttribute> namespaceDeclarations = null)
         {
-            if (defaultNamespace != null)
-                DefaultNamespace = defaultNamespace;
+            DefaultNamespace = defaultNamespace;
 
             if (namespaceDeclarations != null && namespaceDeclarations.Any())
             {
@@ -33,7 +39,7 @@ namespace Fb2.Document.Models.Base
                 if (!namespaceDeclarationsOnly)
                     throw new ArgumentException($"{nameof(namespaceDeclarations)} should contain Namespace Declarations attributes only.");
 
-                NamespaceDeclarations = new List<XAttribute>(namespaceDeclarations);
+                NamespaceDeclarations = namespaceDeclarations.ToList();
             }
         }
 
@@ -45,7 +51,7 @@ namespace Fb2.Document.Models.Base
         {
             DefaultNamespace = other.DefaultNamespace;
 
-            NamespaceDeclarations = other.NamespaceDeclarations != null && other.NamespaceDeclarations.Any() ?
+            NamespaceDeclarations = other.NamespaceDeclarations != null && other.NamespaceDeclarations.Count > 0 ?
                 new List<XAttribute>(other.NamespaceDeclarations) :
                 null;
         }
@@ -55,7 +61,8 @@ namespace Fb2.Document.Models.Base
             if (obj == null)
                 return false;
 
-            if (!(obj is Fb2NodeMetadata otherMetadata))
+            var otherMetadata = obj as Fb2NodeMetadata;
+            if (otherMetadata == null)
                 return false;
 
             if (ReferenceEquals(this, otherMetadata))

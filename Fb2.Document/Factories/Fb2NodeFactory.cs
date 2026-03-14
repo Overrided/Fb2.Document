@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
@@ -13,7 +12,7 @@ namespace Fb2.Document.Factories
 {
     public static class Fb2NodeFactory
     {
-        private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>
+        private static readonly Dictionary<string, Type> KnownNodes = new Dictionary<string, Type>()
         {
             { ElementNames.FictionBook, typeof(FictionBook) },
             { ElementNames.BinaryImage, typeof(BinaryImage) },
@@ -91,7 +90,7 @@ namespace Fb2.Document.Factories
         };
 
         /// <summary>
-        /// Creates new Fb2Node by given name.
+        /// Creates new <see cref="Fb2Node"/> by given name.
         /// </summary>
         /// <param name="nodeName">Name to create node by.</param>
         /// <returns>New instance of node created by given <paramref name="nodeName"/>.</returns>
@@ -108,7 +107,7 @@ namespace Fb2.Document.Factories
             var result = KnownNodes.First(kvp => kvp.Key.EqualsIgnoreCase(nodeName));
             var modelType = result.Value;
 
-            var model = Activator.CreateInstance(modelType) as Fb2Node;
+            var model = Activator.CreateInstance(modelType) as Fb2Node; // suppressed warning
             return model;
         }
 
@@ -120,7 +119,7 @@ namespace Fb2.Document.Factories
         /// <exception cref="ArgumentNullException"></exception>
         public static bool IsKnownNode([In] Fb2Node node)
         {
-            if (node == null)
+            if (node is null)
                 throw new ArgumentNullException(nameof(node));
 
             var hasKnownName = IsKnownNodeName(node.Name);
@@ -140,7 +139,7 @@ namespace Fb2.Document.Factories
             if (string.IsNullOrWhiteSpace(nodeName))
                 throw new ArgumentNullException(nameof(nodeName));
 
-            var isKnownName = KnownNodes.Keys.Contains(nodeName, StringComparer.Create(CultureInfo.InvariantCulture, true));
+            var isKnownName = KnownNodes.ContainsKey(nodeName.ToLowerInvariant());
             return isKnownName;
         }
     }

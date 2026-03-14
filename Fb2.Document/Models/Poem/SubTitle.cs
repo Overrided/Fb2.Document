@@ -10,7 +10,6 @@ namespace Fb2.Document.Models
 
         public override bool IsInline => false;
 
-        public override ImmutableHashSet<string> AllowedAttributes =>
-            ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id, AttributeNames.Language);
     }
 }

@@ -3,13 +3,15 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
-using Fb2.Document.Extensions;
 using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
+using Fb2.Document.SerializingOptions;
 
 namespace Fb2.Document
 {
@@ -19,10 +21,20 @@ namespace Fb2.Document
     /// </summary>
     public sealed class Fb2Document
     {
-        private const string DefaultXmlVersion = "1.0";
+        /// <summary>
+        /// Default XML Version used for serialization in <see cref="DefaultXDeclaration"/>.
+        /// </summary>
+        public const string DefaultXmlVersion = "1.0";
 
-        private static readonly XDeclaration DefaultDeclaration = new XDeclaration(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
-        private static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
+        /// <summary>
+        /// Default <see cref="XDeclaration"/> used for serialization by <see cref="ToXml(Fb2XmlSerializingOptions?)"/> and <see cref="ToXmlString(Fb2XmlSerializingOptions?)"/>.
+        /// </summary>
+        public static readonly XDeclaration DefaultXDeclaration = new XDeclaration(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
+
+        /// <summary>
+        /// Default <see cref="XmlReaderSettings"/> used for document loading by <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/> and <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/>.
+        /// </summary>S
+        public static readonly XmlReaderSettings DefaultXmlReaderSettings = new XmlReaderSettings
         {
             Async = true,
             CheckCharacters = true,
@@ -33,7 +45,7 @@ namespace Fb2.Document
         /// <summary>
         /// Represents <FictionBook> - root element of a file.
         /// </summary>
-        public FictionBook Book { get; private set; } = null;
+        public FictionBook Book { get; private set; }
 
         /// <summary>
         /// Represents Description element of a FictionBook
@@ -85,7 +97,7 @@ namespace Fb2.Document
                 if (!IsLoaded || Book == null)
                     return ImmutableList<BookBody>.Empty;
 
-                return Book.GetChildren<BookBody>().ToImmutableList();
+                return ImmutableList.CreateRange(Book.GetChildren<BookBody>());
             }
         }
 
@@ -99,7 +111,7 @@ namespace Fb2.Document
                 if (!IsLoaded || Book == null)
                     return ImmutableList<BinaryImage>.Empty;
 
-                return Book.GetChildren<BinaryImage>().ToImmutableList();
+                return ImmutableList.CreateRange(Book.GetChildren<BinaryImage>());
             }
         }
 
@@ -132,11 +144,14 @@ namespace Fb2.Document
         /// <param name="document">Content of a file read as xml</param>
         /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Fb2DocumentLoadingException"></exception>
         /// <remarks>
         /// This method is not Encoding-safe. 
         /// Loading will proceed with Encoding of XDocument received.
         /// </remarks>
-        public void Load([In] XDocument document, Fb2LoadingOptions loadingOptions = null)
+        public void Load(
+            [In] XDocument document,
+            [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -150,11 +165,14 @@ namespace Fb2.Document
         /// <param name="fileContent">Content of a file read as string</param>
         /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Fb2DocumentLoadingException"></exception>
         /// <remarks>
         /// This method is not Encoding-safe.
         /// Loading will proceed with Encoding of string received.
         /// </remarks>
-        public void Load([In] string fileContent, Fb2LoadingOptions loadingOptions = null)
+        public void Load(
+            [In] string fileContent,
+            [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
                 throw new ArgumentNullException(nameof(fileContent));
@@ -173,8 +191,11 @@ namespace Fb2.Document
         /// <param name="loadingOptions">Fb2Document stream loading options. This parameter is optional.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="Fb2DocumentLoadingException"></exception>
         /// <remarks>Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used.</remarks>
-        public void Load([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
+        public void Load(
+            [In] Stream fileContent,
+            [In] Fb2StreamLoadingOptions loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -182,17 +203,15 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-            var options = loadingOptions ?? new Fb2StreamLoadingOptions();
-
             var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-            xmlReaderSetting.CloseInput = options.CloseInputStream;
+            xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
 
             LoadHandled(() =>
             {
                 using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
                 {
                     var document = XDocument.Load(reader);
-                    Load(document.Root, options);
+                    Load(document.Root, loadingOptions);
                 }
             });
         }
@@ -202,36 +221,38 @@ namespace Fb2.Document
         /// </summary>
         /// <param name="fileContent">Stream of file data, opened for read.</param>
         /// <param name="loadingOptions">Fb2Document stream loading options. This parameter is optional.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception> 
         /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
-        public async Task LoadAsync([In] Stream fileContent, Fb2StreamLoadingOptions loadingOptions = null)
+        public async Task LoadAsync(
+            [In] Stream fileContent,
+            [In] Fb2StreamLoadingOptions loadingOptions = null,
+            CancellationToken cancellationToken = default)
         {
             if (fileContent == null)
                 throw new ArgumentNullException($"{nameof(fileContent)} stream is null!");
 
             if (!fileContent.CanRead)
-                throw new ArgumentException($"Can`t read file content : {nameof(fileContent)}.CanRead is false");
+                throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
             var options = loadingOptions ?? new Fb2StreamLoadingOptions();
 
-            await LoadHandledAsync(async () =>
+            await LoadHandledAsync(async (ct) =>
             {
-                Encoding encoding = null;
-                using (var encodingClone = await fileContent.CloneAsync())
+                using (var sr = new StreamReader(
+                    fileContent,
+                    Encoding.Default,
+                    detectEncodingFromByteOrderMarks: true,
+                    LoadingConstants.DefaultBufferSize,
+                    leaveOpen: !options.CloseInputStream))
                 {
-                    encoding = encodingClone.GetXmlEncodingOrDefault(Encoding.Default);
-                }
-
-                var contentCopy = await fileContent.CloneAsync();
-                using (var reader = new StreamReader(contentCopy, encoding, true))
-                {
-                    var content = await reader.ReadToEndAsync();
+                    var content = await sr.ReadToEndAsync();
                     var document = XDocument.Parse(content);
 
                     Load(document.Root, options);
                 }
-            });
+            }, cancellationToken);
 
             if (options.CloseInputStream)
             {
@@ -241,33 +262,44 @@ namespace Fb2.Document
         }
 
         /// <summary>
-        /// Generates XDocument using previously loaded FictionBook.
+        /// Renders content of FictionBook as XDocument.
         /// </summary>
+        /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
         /// <returns>
         /// XDocument instance formatted accordingly to Fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
         /// </returns>
-        public XDocument ToXml()
+        public XDocument ToXml([In] Fb2XmlSerializingOptions fb2XmlSerializingOptions = null)
         {
             if (Book == null || !IsLoaded)
                 return null;
 
-            var xmlRoot = Book.ToXml();
-            var xmlDoc = new XDocument(DefaultDeclaration, xmlRoot);
+            var serializeUnsafeNodes = fb2XmlSerializingOptions?.SerializeUnsafeElements ?? true;
+            var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultXDeclaration;
+
+            var xmlRoot = Book.ToXml(serializeUnsafeNodes);
+            var xmlDoc = new XDocument(declaration, xmlRoot);
             return xmlDoc;
         }
 
         /// <summary>
-        /// Renders content of FictionBook as formatted xml string.
+        /// Renders content of FictionBook as formatted XML string.
         /// </summary>
-        /// <returns>String content of a XDocument.</returns>
-        public string ToXmlString()
+        /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
+        /// <returns>Content of a <see cref="Fb2Document"/> in <see cref="string"/> format if <see cref="Book"/> is loaded - otherwise <see langword="null"/>.
+        /// </returns> 
+        public string ToXmlString([In] Fb2XmlSerializingOptions fb2XmlSerializingOptions = null)
         {
-            var document = ToXml();
+            var document = ToXml(fb2XmlSerializingOptions);
 
             if (document == null)
                 return null;
 
-            return string.Join(Environment.NewLine, document.Declaration ?? DefaultDeclaration, document.ToString());
+            var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultXDeclaration;
+
+            return string.Join(
+                Environment.NewLine,
+                declaration,
+                document.ToString());
         }
 
         private static void LoadHandled(Action loadingAction)
@@ -282,11 +314,18 @@ namespace Fb2.Document
             }
         }
 
-        private static async Task LoadHandledAsync(Func<Task> loadingAsync)
+        private static async Task LoadHandledAsync(
+            Func<CancellationToken, Task> loadingAsync,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                await loadingAsync();
+                cancellationToken.ThrowIfCancellationRequested();
+                await loadingAsync(cancellationToken);
+            }
+            catch (OperationCanceledException opCanEx)
+            {
+                throw new Fb2DocumentLoadingException("Document asynchronous loading was cancelled.", opCanEx);
             }
             catch (Exception ex)
             {
@@ -294,7 +333,7 @@ namespace Fb2.Document
             }
         }
 
-        private void Load([In] XElement root, Fb2LoadingOptions loadingOptions = null)
+        private void Load([In] XElement root, [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (root == null)
                 throw new ArgumentNullException(nameof(root));

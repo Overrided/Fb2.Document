@@ -10,13 +10,12 @@ namespace Fb2.Document.Models
 
         public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(
-                ElementNames.BookName,
-                ElementNames.Publisher,
-                ElementNames.City,
-                ElementNames.Year,
-                ElementNames.ISBN,
-                ElementNames.Sequence);
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(
+            ElementNames.BookName,
+            ElementNames.Publisher,
+            ElementNames.City,
+            ElementNames.Year,
+            ElementNames.ISBN,
+            ElementNames.Sequence);
     }
 }

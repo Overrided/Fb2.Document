@@ -4,102 +4,101 @@ using Fb2.Document.Models.Base;
 using FluentAssertions;
 using Xunit;
 
-namespace Fb2.Document.Tests.ModelsTests
+namespace Fb2.Document.Tests.ModelsTests;
+
+public class SequenceInfoTests
 {
-    public class SequenceInfoTests
+    [Fact]
+    public void SequenceInfo_AddContent_Ignored()
     {
-        [Fact]
-        public void SequenceInfo_AddContent_Ignored()
-        {
-            var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
-            sequenceInfo.Should().NotBeNull();
+        var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
+        sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo!.Content.Should().BeEmpty();
 
-            sequenceInfo.AddContent("hello world");
+        sequenceInfo.AddContent("hello world");
 
-            sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo!.Content.Should().BeEmpty();
 
-            sequenceInfo.ClearContent();
+        sequenceInfo.ClearContent();
 
-            sequenceInfo!.Content.Should().BeEmpty();
-        }
+        sequenceInfo!.Content.Should().BeEmpty();
+    }
 
-        [Fact]
-        public void SequenceInfo_ToString_NoAttributes_ReturnsEmptyString()
-        {
-            var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
-            sequenceInfo.Should().NotBeNull();
+    [Fact]
+    public void SequenceInfo_ToString_NoAttributes_ReturnsEmptyString()
+    {
+        var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
+        sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo!.Content.Should().BeEmpty();
 
-            var sequenceInfoString = sequenceInfo.ToString();
-            sequenceInfoString.Should().NotBeNull();
-            sequenceInfoString.Should().BeEmpty();
-        }
+        var sequenceInfoString = sequenceInfo.ToString();
+        sequenceInfoString.Should().NotBeNull();
+        sequenceInfoString.Should().BeEmpty();
+    }
 
-        [Fact]
-        public void SequenceInfo_ToString_NameAttributeOnly()
-        {
-            var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
-            sequenceInfo.Should().NotBeNull();
+    [Fact]
+    public void SequenceInfo_ToString_NameAttributeOnly()
+    {
+        var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
+        sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasAttributes.Should().BeFalse();
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasAttributes.Should().BeFalse();
 
-            var testSequenceName = "Test Sequence Name";
-            sequenceInfo.AddAttribute(AttributeNames.Name, testSequenceName);
+        var testSequenceName = "Test Sequence Name";
+        sequenceInfo.AddAttribute(AttributeNames.Name, testSequenceName);
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasAttributes.Should().BeTrue();
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasAttributes.Should().BeTrue();
 
-            var sequenceInfoString = sequenceInfo.ToString();
-            sequenceInfoString.Should().NotBeNullOrEmpty();
-            sequenceInfoString.Should().Be(testSequenceName);
-        }
+        var sequenceInfoString = sequenceInfo.ToString();
+        sequenceInfoString.Should().NotBeNullOrEmpty();
+        sequenceInfoString.Should().Be(testSequenceName);
+    }
 
-        [Fact]
-        public void SequenceInfo_ToString_NumberAttributeOnly()
-        {
-            var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
-            sequenceInfo.Should().NotBeNull();
+    [Fact]
+    public void SequenceInfo_ToString_NumberAttributeOnly()
+    {
+        var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
+        sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasAttributes.Should().BeFalse();
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasAttributes.Should().BeFalse();
 
-            var testSequenceNumber = 2;
-            sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
+        var testSequenceNumber = 2;
+        sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasContent.Should().BeFalse();
-            sequenceInfo.HasAttributes.Should().BeTrue();
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasContent.Should().BeFalse();
+        sequenceInfo.HasAttributes.Should().BeTrue();
 
-            var sequenceInfoString = sequenceInfo.ToString();
-            sequenceInfoString.Should().NotBeNullOrEmpty();
-            sequenceInfoString.Should().Be(testSequenceNumber.ToString());
-        }
+        var sequenceInfoString = sequenceInfo.ToString();
+        sequenceInfoString.Should().NotBeNullOrEmpty();
+        sequenceInfoString.Should().Be(testSequenceNumber.ToString());
+    }
 
-        [Fact]
-        public void SequenceInfo_ToString_BothAttributes()
-        {
-            var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
-            sequenceInfo.Should().NotBeNull();
+    [Fact]
+    public void SequenceInfo_ToString_BothAttributes()
+    {
+        var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
+        sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasAttributes.Should().BeFalse();
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasAttributes.Should().BeFalse();
 
-            var testSequenceName = "Test Sequence Name";
-            sequenceInfo.AddAttribute(AttributeNames.Name, testSequenceName);
+        var testSequenceName = "Test Sequence Name";
+        sequenceInfo.AddAttribute(AttributeNames.Name, testSequenceName);
 
-            var testSequenceNumber = 2;
-            sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
+        var testSequenceNumber = 2;
+        sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
 
-            sequenceInfo!.Content.Should().BeEmpty();
-            sequenceInfo.HasContent.Should().BeFalse();
-            sequenceInfo.HasAttributes.Should().BeTrue();
-            var sequenceInfoString = sequenceInfo.ToString();
-            sequenceInfoString.Should().NotBeNullOrEmpty();
-            sequenceInfoString.Should().Be($"{testSequenceName} {testSequenceNumber}");
-        }
+        sequenceInfo!.Content.Should().BeEmpty();
+        sequenceInfo.HasContent.Should().BeFalse();
+        sequenceInfo.HasAttributes.Should().BeTrue();
+        var sequenceInfoString = sequenceInfo.ToString();
+        sequenceInfoString.Should().NotBeNullOrEmpty();
+        sequenceInfoString.Should().Be($"{testSequenceName} {testSequenceNumber}");
     }
 }

@@ -12,12 +12,11 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(
-                ElementNames.Paragraph,
-                ElementNames.Poem,
-                ElementNames.Quote,
-                ElementNames.EmptyLine,
-                ElementNames.TextAuthor);
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(
+            ElementNames.Paragraph,
+            ElementNames.Poem,
+            ElementNames.Quote,
+            ElementNames.EmptyLine,
+            ElementNames.TextAuthor);
     }
 }

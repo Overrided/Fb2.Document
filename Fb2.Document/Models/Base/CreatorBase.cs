@@ -7,14 +7,13 @@ namespace Fb2.Document.Models.Base
     {
         public override bool CanContainText => false;
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(
-                ElementNames.FirstName,
-                ElementNames.MiddleName,
-                ElementNames.LastName,
-                ElementNames.NickName,
-                ElementNames.Email,
-                ElementNames.HomePage,
-                ElementNames.FictionId);
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(
+            ElementNames.FirstName,
+            ElementNames.MiddleName,
+            ElementNames.LastName,
+            ElementNames.NickName,
+            ElementNames.Email,
+            ElementNames.HomePage,
+            ElementNames.FictionId);
     }
 }

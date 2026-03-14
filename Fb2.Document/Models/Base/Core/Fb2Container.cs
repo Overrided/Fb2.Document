@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -11,22 +12,21 @@ using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.Extensions;
 using Fb2.Document.Factories;
-using Fb2.Document.Resolver;
 
 namespace Fb2.Document.Models.Base
 {
+
     /// <summary>
     /// Represents container node, which can contain both text and other Fb2Node(s).
     /// </summary>
     public abstract class Fb2Container : Fb2Node
     {
-        private List<Fb2Node> content = new List<Fb2Node>();
+        private List<Fb2Node> content = null;
 
         /// <summary>
         /// Actual value is available after <see cref="Load(XNode, Fb2Container?, bool, bool, bool)"/> method call.
         /// </summary>
-        public ImmutableList<Fb2Node> Content => HasContent ?
-            content.ToImmutableList() : ImmutableList<Fb2Node>.Empty;
+        public ImmutableList<Fb2Node> Content => HasContent ? content.ToImmutableList() : ImmutableList<Fb2Node>.Empty;
 
         /// <summary>
         /// Indicates if instance of type <see cref="Fb2Container"/> can contain text.
@@ -48,14 +48,18 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any content.
         /// </summary>
-        public override bool HasContent => content.Any();
+        public override bool HasContent => content != null && content.Count > 0;
 
         /// <summary>
-        /// Container node loading mechanism. Loads attributes and sequentially calls `Load` on all child nodes.
+        /// Container Node loading mechanism. Loads <see cref="Content"/> and sequentially calls <see cref="Fb2Node.Load(XNode,Fb2Container?,bool, bool, bool)"/> on all child nodes.
         /// </summary>
-        /// <param name="node">Node to load as Fb2Container</param>
-        /// <param name="preserveWhitespace">Indicates if whitespace chars (\t, \n, \r) should be preserved. By default `false`.</param>
-        /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default `true`. </param>
+        /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Container"/>.</param>
+        /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+        /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+        /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Fb2NodeLoadingException"></exception>
         public override void Load(
             [In] XNode node,
             [In] Fb2Container parentNode = null,
@@ -66,31 +70,41 @@ namespace Fb2.Document.Models.Base
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
             var element = node as XElement;
-
             if (element == null || element.IsEmpty)
                 return;
 
-            var nodes = element.Nodes()
+            var nodes = element
+                .Nodes()
                 .Where(n =>
-                    {
-                        if (n.NodeType == XmlNodeType.Text)
-                            return true;
+                {
+                    var nodeType = n.NodeType;
 
-                        var isElement = n.NodeType == XmlNodeType.Element;
-                        if (!isElement)
-                            return false;
+                    if (nodeType == XmlNodeType.Text)
+                        return loadUnsafe || CanContainText;
 
-                        var childNode = (XElement)n;
-                        var nodeLocalName = childNode.Name.LocalName;
-                        return !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                               Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
-                    })
-                .ToList();
+                    var isElement = nodeType == XmlNodeType.Element;
+                    if (!isElement)
+                        return false;
 
-            var nodesCount = nodes.Count;
+                    var childNode = (XElement)n;
+                    var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
 
+                    var isValid =
+                        !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
+                        Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
+
+                    if (!isValid)
+                        return false;
+
+                    return loadUnsafe || AllowedElements.Contains(nodeLocalName);
+                })
+                .ToArray();
+
+            var nodesCount = nodes.Length;
             if (nodesCount == 0)
                 return;
+
+            EnsureContentInitialized(nodesCount);
 
             for (int i = 0; i < nodesCount; i++)
             {
@@ -104,9 +118,6 @@ namespace Fb2.Document.Models.Base
                     !CanContainText :
                     !AllowedElements.Contains(localName);
 
-                if (isUnsafe && !loadUnsafe)
-                    continue;
-
                 var elem = Fb2NodeFactory.GetNodeByName(localName);
                 elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
                 elem.IsUnsafe = isUnsafe;
@@ -117,7 +128,7 @@ namespace Fb2.Document.Models.Base
 
         public override string ToString()
         {
-            if (!HasContent && !HasAttributes)
+            if (!HasContent)
                 return string.Empty;
 
             var builder = new StringBuilder();
@@ -135,18 +146,26 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Converts Fb2Container to XElement with regards to all attributes, 
-        /// by calling `ToXml()` on every node in `Content`.
+        /// Converts <see cref="Fb2Container"/> to <see cref="XElement"/> with regards to all attributes, 
+        /// by calling <see cref="ToXml(bool)"/> on every descendant node in <see cref="Content"/> recursively.
         /// </summary>
-        /// <returns><see cref="XElement"/> reflected from given Fb2Node.</returns>
-        public override XElement ToXml()
+        /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
+        /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Container"/>.</returns>
+        public override XElement ToXml(bool serializeUnsafeNodes = true)
         {
-            var element = base.ToXml();
+            var element = base.ToXml(serializeUnsafeNodes);
 
             if (HasContent)
             {
-                var children = content.Select(ToXmlInternal);
-                element.Add(children);
+                var childrenToSerialize = serializeUnsafeNodes ?
+                    content :
+                    content.Where(x => !x.IsUnsafe);
+
+                if (childrenToSerialize == null || !childrenToSerialize.Any())
+                    return element;
+
+                var serializedChildren = childrenToSerialize.Select(n => ToXmlInternal(n, serializeUnsafeNodes));
+                element.Add(serializedChildren);
             }
 
             return element;
@@ -154,19 +173,20 @@ namespace Fb2.Document.Models.Base
 
         public override bool Equals(object other)
         {
-            if (other == null)
+            if (!base.Equals(other))
                 return false;
 
-            if (!(other is Fb2Container otherContainer))
-                return false;
-
-            if (!base.Equals(otherContainer))
+            var otherContainer = other as Fb2Container;
+            if (otherContainer == null)
                 return false;
 
             var actualContent = content;
             var otherContent = otherContainer.content;
-            var sameContent = actualContent.Count == otherContent.Count &&
-                              actualContent.SequenceEqual(otherContent);
+            var areBothContentsNull = actualContent is null && otherContent is null;
+
+            var sameContent = areBothContentsNull ||
+                              actualContent?.Count == otherContent?.Count &&
+                              (actualContent?.SequenceEqual(otherContent ?? Enumerable.Empty<Fb2Node>()) ?? false);
 
             var result = sameContent &&
                 CanContainText == otherContainer.CanContainText &&
@@ -180,10 +200,6 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Clones given <see cref="Fb2Container"/> creating new instance of same node, attaching attributes etc.
         /// </summary>
-        /// <remarks>
-        /// Attention. 
-        /// This method clones node's both <see cref="Fb2Node.Parent"/> and <see cref="Fb2Container.Content"/> and can be resource-demanding.
-        /// </remarks>
         /// <returns>New instance of given <see cref="Fb2Container"/>.</returns>
         public sealed override object Clone()
         {
@@ -192,7 +208,7 @@ namespace Fb2.Document.Models.Base
 
             if (HasContent)
             {
-                var clonedContent = content.Select(c => (Fb2Node)c.Clone()).ToList();
+                var clonedContent = content.Select(c => (Fb2Node)c.Clone()).ToArray();
                 clone.AddContent(clonedContent);
             }
 
@@ -205,14 +221,23 @@ namespace Fb2.Document.Models.Base
         /// Adds node to <see cref="Content"/> using asynchronous provider function.
         /// </summary>
         /// <param name="nodeProvider">Asynchronous node provider function.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Current container.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<Fb2Container> AddContentAsync(Func<Task<Fb2Node>> nodeProvider)
+        /// <remarks>
+        /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+        public async Task<Fb2Container> AddContentAsync(
+            Func<CancellationToken, Task<Fb2Node>> nodeProvider,
+            CancellationToken cancellationToken = default)
         {
-            if (nodeProvider == null)
+            if (nodeProvider is null)
                 throw new ArgumentNullException(nameof(nodeProvider));
 
-            var newNode = await nodeProvider().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var newNode = await nodeProvider(cancellationToken);
             return AddContent(newNode);
         }
 
@@ -224,7 +249,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(Func<Fb2Node> nodeProvider)
         {
-            if (nodeProvider == null)
+            if (nodeProvider is null)
                 throw new ArgumentNullException(nameof(nodeProvider));
 
             var node = nodeProvider();
@@ -239,8 +264,10 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container AddContent(params Fb2Node[] nodes)
         {
-            if (nodes == null || !nodes.Any() || nodes.All(n => n == null))
+            if (nodes == null || nodes.Length == 0 || nodes.All(n => n == null))
                 throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
+
+            EnsureContentInitialized(nodes.Length);
 
             foreach (var node in nodes)
                 AddContent(node);
@@ -277,14 +304,13 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="UnexpectedNodeException"></exception>
         public Fb2Container AddTextContent(Func<string> contentProvider, string separator = null)
         {
-            if (contentProvider == null)
-                throw new ArgumentNullException(nameof(contentProvider));
-
             if (!CanContainText)
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-            var newContent = contentProvider();
+            if (contentProvider is null)
+                throw new ArgumentNullException(nameof(contentProvider));
 
+            var newContent = contentProvider();
             return AddTextContent(newContent, separator);
         }
 
@@ -293,20 +319,24 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="contentProvider">Asynchronous content provider function.</param>
         /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Current container.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="UnexpectedNodeException"></exception>
         public async Task<Fb2Container> AddTextContentAsync(
-            Func<Task<string>> contentProvider, string separator = null)
+            Func<CancellationToken, Task<string>> contentProvider,
+            string separator = null,
+            CancellationToken cancellationToken = default)
         {
-            if (contentProvider == null)
-                throw new ArgumentNullException(nameof(contentProvider));
-
             if (!CanContainText)
                 throw new UnexpectedNodeException(Name, ElementNames.FictionText);
 
-            var newContent = await contentProvider();
+            if (contentProvider is null)
+                throw new ArgumentNullException(nameof(contentProvider));
 
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var newContent = await contentProvider(cancellationToken);
             return AddTextContent(newContent, separator);
         }
 
@@ -328,7 +358,7 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds new node to <see cref="Content"/> using node's `Name`.
+        /// Adds new node to <see cref="Content"/> using node's <see cref="Fb2Node.Name"/>.
         /// </summary>
         /// <param name="nodeName">Name to instantiate node by.</param>
         /// <returns>Current container.</returns>
@@ -339,12 +369,11 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(nodeName));
 
             var node = Fb2NodeFactory.GetNodeByName(nodeName);
-
             return AddContent(node);
         }
 
         /// <summary>
-        /// Adds given node to <see cref="Content"/>.
+        /// Adds given <paramref name="node"/> to <see cref="Content"/>.
         /// </summary>
         /// <param name="node">Child node to add to Content.</param>
         /// <returns>Current container.</returns>
@@ -353,7 +382,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="UnexpectedNodeException"></exception>
         public Fb2Container AddContent(Fb2Node node)
         {
-            if (node == null)
+            if (node is null)
                 throw new ArgumentNullException(nameof(node));
 
             if (!Fb2NodeFactory.IsKnownNode(node))
@@ -374,6 +403,8 @@ namespace Fb2.Document.Models.Base
             node.Parent = this;
             if (node.NodeMetadata == null && NodeMetadata != null) // copy parent default namespace to prevent serialization issues
                 node.NodeMetadata = new Fb2NodeMetadata(NodeMetadata.DefaultNamespace);
+
+            EnsureContentInitialized(1);
 
             content.Add(node);
             return this;
@@ -404,12 +435,12 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent([In] Func<Fb2Node, bool> nodePredicate)
         {
-            if (nodePredicate == null)
+            if (nodePredicate is null)
                 throw new ArgumentNullException(nameof(nodePredicate));
 
             if (HasContent)
             {
-                var nodesToRemove = GetChildren(nodePredicate).ToList();
+                var nodesToRemove = GetChildren(nodePredicate).ToArray();
                 foreach (var node in nodesToRemove)
                     RemoveContent(node);
             }
@@ -425,7 +456,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Container RemoveContent(Fb2Node node)
         {
-            if (node == null)
+            if (node is null)
                 throw new ArgumentNullException(nameof(node));
 
             if (HasContent && content.Contains(node))
@@ -498,10 +529,9 @@ namespace Fb2.Document.Models.Base
         /// <param name="name">Name to select child element by. Optional.</param>
         /// <returns>First matched child node or <see langword="null"/>.</returns>
         /// <exception cref="InvalidNodeException"></exception>
-        public Fb2Node GetFirstChild(string name)
+        public Fb2Node GetFirstChild(string name = null)
         {
-            if (!string.IsNullOrEmpty(name) &&
-                !Fb2NodeFactory.IsKnownNodeName(name))
+            if (!string.IsNullOrEmpty(name) && !Fb2NodeFactory.IsKnownNodeName(name))
                 throw new InvalidNodeException(name);
 
             if (HasContent)
@@ -709,7 +739,7 @@ namespace Fb2.Document.Models.Base
             if (!HasContent)
                 return Enumerable.Empty<T>();
 
-            var predicate = PredicateResolver.GetPredicate<T>();
+            var predicate = GetPredicate<T>();
             var result = content.Where(predicate);
 
             return result.Any() ? result.Cast<T>() : Enumerable.Empty<T>();
@@ -725,7 +755,7 @@ namespace Fb2.Document.Models.Base
             if (!HasContent)
                 return null;
 
-            var predicate = PredicateResolver.GetPredicate<T>();
+            var predicate = GetPredicate<T>();
             var result = content.FirstOrDefault(predicate);
 
             if (result == null)
@@ -774,7 +804,7 @@ namespace Fb2.Document.Models.Base
             var result = new List<Fb2Node>();
 
             if (predicate == null)
-                predicate = PredicateResolver.GetPredicate<T>();
+                predicate = GetPredicate<T>();
 
             for (int i = 0; i < content.Count; i++)
             {
@@ -801,7 +831,7 @@ namespace Fb2.Document.Models.Base
                 return null;
 
             if (predicate == null)
-                predicate = PredicateResolver.GetPredicate<T>();
+                predicate = GetPredicate<T>();
 
             for (int i = 0; i < content.Count; i++)
             {
@@ -823,11 +853,13 @@ namespace Fb2.Document.Models.Base
 
         private Fb2Container TryMergeTextContent(string newContent, string separator = null)
         {
+            EnsureContentInitialized(1);
+
             var lastChildNode = HasContent ? content.LastOrDefault() : null;
+            var lastTextItem = lastChildNode as TextItem;
 
             // empty or last item is not text, so cant append actual content nowhere
-            if (lastChildNode == null ||
-                !(lastChildNode is TextItem lastTextItem))
+            if (lastChildNode == null || lastTextItem == null)
             {
                 var textNode = new TextItem { Parent = this }.AddContent(newContent, separator);
                 content.Add(textNode);
@@ -838,8 +870,29 @@ namespace Fb2.Document.Models.Base
             return this;
         }
 
-        private XNode ToXmlInternal(Fb2Node element) =>
-            element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml();
+        private void EnsureContentInitialized(int capacity)
+        {
+            if (capacity < 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
+            if (HasContent)
+                return;
+
+            content = new List<Fb2Node>(capacity);
+        }
+
+        private static XNode ToXmlInternal(Fb2Node element, bool serializeUnsafeElements) =>
+            element is TextItem textItem ? (XNode)new XText(textItem.Content) : element.ToXml(serializeUnsafeElements);
+
+        private static Func<Fb2Node, bool> GetPredicate<T>() where T : Fb2Node
+        {
+            var targetType = typeof(T);
+
+            if (targetType.IsAbstract)
+                return element => element.GetType().IsSubclassOf(targetType);
+
+            return element => element.GetType().Equals(targetType);
+        }
 
         #endregion
     }

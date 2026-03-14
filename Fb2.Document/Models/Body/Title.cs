@@ -12,7 +12,6 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(ElementNames.Paragraph, ElementNames.EmptyLine);
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.Paragraph, ElementNames.EmptyLine);
     }
 }

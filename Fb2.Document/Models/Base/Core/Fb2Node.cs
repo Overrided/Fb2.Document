@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -19,10 +20,17 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Node : ICloneable
     {
-        private List<Fb2Attribute> attributes = new List<Fb2Attribute>();
-
-        protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
+        /// <summary>
+        /// Whitespace character " ".
+        /// </summary>
         protected const string Whitespace = " ";
+
+        /// <summary>
+        /// Provides a compiled regular expression that matches leading and trailing whitespace in a string ("\s+").
+        /// </summary>
+        protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
+
+        private List<Fb2Attribute> attributes = null;
 
         /// <summary>
         /// Node name, used during document parsing and validation.
@@ -44,12 +52,17 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Indicates if element has any attributes.
         /// </summary>
-        public bool HasAttributes => attributes.Any();
+        public bool HasAttributes => attributes != null && attributes.Count > 0;
 
         /// <summary>
         /// List of allowed attribure names for particular element.
         /// </summary>
-        public virtual ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet<string>.Empty;
+        public virtual ImmutableHashSet<string> AllowedAttributes { get; } = null;
+
+        /// <summary>
+        /// Indicates if element has any AllowedAttibutes.
+        /// </summary>
+        public bool HasAllowedAttributes => AllowedAttributes != null && AllowedAttributes.Count > 0;
 
         /// <summary>
         /// Indicates if element sholud be inline or start from new line.
@@ -75,13 +88,15 @@ namespace Fb2.Document.Models.Base
         public Fb2NodeMetadata NodeMetadata { get; set; } = null;
 
         /// <summary>
-        /// Basic Load of node - validation and populating Attributes.
+        /// Basic Load of node - <paramref name="node"/> validation and populating <see cref="Attributes"/> and <see cref="NodeMetadata"/>.
         /// </summary>
-        /// <param name="node">XNode to load as <c>Fb2Node</c>.</param>
-        /// <param name="parentNode">Parent node of node being loaded, can be <see langword="null"/>.</param>
-        /// <param name="preserveWhitespace">Is ignored during <c>Fb2Node</c> loading.</param>
-        /// <param name="loadUnsafe">Is ignored during <c>Fb2Node</c> loading.</param>
+        /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Node"/>.</param>
+        /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+        /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+        /// <param name="loadNamespaceMetadata">Indicates wheter XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Fb2NodeLoadingException"></exception>
         public virtual void Load(
             [In] XNode node,
             [In] Fb2Container parentNode = null,
@@ -93,7 +108,8 @@ namespace Fb2.Document.Models.Base
 
             Parent = parentNode;
 
-            if (!(node is XElement element))
+            var element = node as XElement;
+            if (element == null)
                 return;
 
             var allAttributes = element.Attributes();
@@ -106,29 +122,38 @@ namespace Fb2.Document.Models.Base
                 NodeMetadata = new Fb2NodeMetadata(defaultNodeNamespace, namespaceDeclarationAttributes);
             }
 
-            if (!AllowedAttributes.Any())
+            if (!HasAllowedAttributes)
                 return;
 
-            foreach (var allowedAttrName in AllowedAttributes)
-            {
-                var attr = allAttributes
-                    .FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(allowedAttrName));
+            var allFilteredAttributes = allAttributes
+                .GroupBy(a => a.Name.LocalName.ToLowerInvariant())
+                .Select(g => new { g.Key, Attribute = g.First() })
+                .Where(da => AllowedAttributes.Contains(da.Key))
+                .Select(item =>
+                {
+                    var attrName = item.Key;
+                    var attr = item.Attribute;
 
-                if (attr == null)
-                    continue;
+                    var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+                    var fb2Attribute = new Fb2Attribute(attrName, attr.Value, attributeNamespace);
+                    return fb2Attribute;
+                })
+                .ToArray();
 
-                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+            if (allFilteredAttributes == null || allFilteredAttributes.Length == 0)
+                return;
 
-                attributes.Add(fb2Attribute);
-            }
+            EnsureAttributesInitialized(allFilteredAttributes.Length);
+
+            attributes.AddRange(allFilteredAttributes);
         }
 
         /// <summary>
-        /// Basic method to serialize Fb2Node back to XElement.
+        /// Basic method to serialize <see cref="Fb2Node"/> back to <see cref="XElement"/>.
         /// </summary>
-        /// <returns>XElement instance with attributes reflecting Attributes property.</returns>
-        public virtual XElement ToXml()
+        /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
+        /// <returns><see cref="XElement"/> instance with attributes reflecting <see cref="Attributes"/> property.</returns>
+        public virtual XElement ToXml(bool serializeUnsafeNodes = true)
         {
             var defaultNamespace = NodeMetadata?.DefaultNamespace;
             XName xNodeName = defaultNamespace != null ? defaultNamespace + Name : Name;
@@ -171,7 +196,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public bool HasAttribute(Fb2Attribute fb2Attribute)
         {
-            if (fb2Attribute == null)
+            if (fb2Attribute is null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
             if (!HasAttributes)
@@ -226,7 +251,7 @@ namespace Fb2.Document.Models.Base
         /// Attempts to get first matching <c>Fb2Attribute</c> by given <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Key to match attribute by.</param>
-        /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+        /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
         public bool TryGetAttribute(string key, out Fb2Attribute result)
         {
@@ -241,7 +266,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         /// <param name="key">Key to match attribute by.</param>
         /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
-        /// <param name="result">First matching <seealso cref="Fb2Attribute"/> if found, otherwise <seealso cref="default(Fb2Attribute)"/>.</param>
+        /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
         public bool TryGetAttribute(string key, bool ignoreCase, out Fb2Attribute result)
         {
@@ -256,15 +281,17 @@ namespace Fb2.Document.Models.Base
         #region Node editing
 
         /// <summary>
-        /// Adds multiple attributes to node using <seealso cref="params Fb2Attribute[]"/>.
+        /// Adds multiple attributes to node using <see cref="params Fb2Attribute[]"/>.
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node AddAttributes(params Fb2Attribute[] attributes)
         {
-            if (attributes == null || !attributes.Any())
+            if (attributes == null || attributes.Length == 0)
                 throw new ArgumentNullException(nameof(attributes));
+
+            EnsureAttributesInitialized(attributes.Length);
 
             foreach (var attribute in attributes)
                 AddAttribute(attribute);
@@ -273,7 +300,7 @@ namespace Fb2.Document.Models.Base
         }
 
         /// <summary>
-        /// Adds multiple attributes using <seealso cref="IEnumerable{Fb2Attribute}." />
+        /// Adds multiple attributes using <see cref="IEnumerable{Fb2Attribute}." />
         /// </summary>
         /// <param name="attributes">Set of attributes to add.</param>
         /// <returns>Current node.</returns>
@@ -283,8 +310,7 @@ namespace Fb2.Document.Models.Base
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
-            foreach (var attribute in attributes)
-                AddAttribute(attribute);
+            AddAttributes(attributes.ToArray());
 
             return this;
         }
@@ -293,14 +319,23 @@ namespace Fb2.Document.Models.Base
         /// Adds single attribute to <see cref="Fb2Node.Attributes"/> using asynchronous <paramref name="attributeProvider"/> function.
         /// </summary>
         /// <param name="attributeProvider">Asynchronous attribute provider function.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Current node.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<Fb2Node> AddAttributeAsync(Func<Task<Fb2Attribute>> attributeProvider)
+        /// <remarks>
+        /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+        public async Task<Fb2Node> AddAttributeAsync(
+            Func<CancellationToken, Task<Fb2Attribute>> attributeProvider,
+            CancellationToken cancellationToken = default)
         {
-            if (attributeProvider == null)
+            if (attributeProvider is null)
                 throw new ArgumentNullException(nameof(attributeProvider));
 
-            var attribute = await attributeProvider();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var attribute = await attributeProvider(cancellationToken);
 
             return AddAttribute(attribute);
         }
@@ -313,7 +348,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node AddAttribute(Func<Fb2Attribute> attributeProvider)
         {
-            if (attributeProvider == null)
+            if (attributeProvider is null)
                 throw new ArgumentNullException(nameof(attributeProvider));
 
             var attribute = attributeProvider();
@@ -346,16 +381,18 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="UnexpectedAttributeException"></exception>
         public Fb2Node AddAttribute(Fb2Attribute fb2Attribute)
         {
-            if (fb2Attribute == null)
+            if (fb2Attribute is null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
-            if (!AllowedAttributes.Any())
+            if (!HasAllowedAttributes)
                 throw new NoAttributesAllowedException(Name);
 
             var key = fb2Attribute.Key;
 
             if (!AllowedAttributes.Contains(key))
                 throw new UnexpectedAttributeException(Name, key);
+
+            EnsureAttributesInitialized(1);
 
             // update or insert
             if (TryGetAttribute(key, true, out var existingAttribute))
@@ -386,7 +423,7 @@ namespace Fb2.Document.Models.Base
 
             var attributesToDelete = attributes
                 .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsIgnoreCase(key) : existingAttr.Key.Equals(key))
-                .ToList();
+                .ToArray();
 
             foreach (var attributeToRemove in attributesToDelete)
                 RemoveAttribute(attributeToRemove);
@@ -402,13 +439,13 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node RemoveAttribute(Func<Fb2Attribute, bool> attributePredicate)
         {
-            if (attributePredicate == null)
+            if (attributePredicate is null)
                 throw new ArgumentNullException(nameof(attributePredicate));
 
             if (!HasAttributes)
                 return this;
 
-            var attrsToRemove = attributes.Where(attributePredicate).ToList();
+            var attrsToRemove = attributes.Where(attributePredicate).ToArray();
 
             foreach (var attributeToRemove in attrsToRemove)
                 RemoveAttribute(attributeToRemove);
@@ -424,7 +461,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="ArgumentNullException"></exception>
         public Fb2Node RemoveAttribute(Fb2Attribute fb2Attribute)
         {
-            if (fb2Attribute == null)
+            if (fb2Attribute is null)
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
             if (HasAttribute(fb2Attribute))
@@ -452,7 +489,7 @@ namespace Fb2.Document.Models.Base
             var result = new List<XAttribute>();
 
             var nodeNamespaceDeclarations = NodeMetadata?.NamespaceDeclarations;
-            if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Any()) // namespaces
+            if (nodeNamespaceDeclarations != null && nodeNamespaceDeclarations.Count > 0) // namespaces
                 result.AddRange(nodeNamespaceDeclarations);
 
             if (HasAttributes) // regular attributes
@@ -478,7 +515,7 @@ namespace Fb2.Document.Models.Base
 
         protected void Validate(XNode node)
         {
-            if (node == null)
+            if (node is null)
                 throw new ArgumentNullException(nameof(node));
 
             if (node.NodeType != XmlNodeType.Element)
@@ -493,14 +530,18 @@ namespace Fb2.Document.Models.Base
             if (other == null)
                 return false;
 
-            if (!(other is Fb2Node otherNode))
+            var otherNode = other as Fb2Node;
+            if (otherNode == null)
                 return false;
 
             if (ReferenceEquals(this, otherNode))
                 return true;
 
             var result = Name == otherNode.Name &&
-                AllowedAttributes.SequenceEqual(otherNode.AllowedAttributes) &&
+                ((AllowedAttributes == null && otherNode.AllowedAttributes == null) ||
+                (AllowedAttributes != null && otherNode.AllowedAttributes != null &&
+                AllowedAttributes.Count == otherNode.AllowedAttributes.Count &&
+                AllowedAttributes.All(otherNode.AllowedAttributes.Contains))) &&
                 AreAttributesEqual(otherNode.attributes) &&
                 IsInline == otherNode.IsInline &&
                 IsUnsafe == otherNode.IsUnsafe &&
@@ -513,11 +554,28 @@ namespace Fb2.Document.Models.Base
 
         private bool AreAttributesEqual(List<Fb2Attribute> otherAttributes)
         {
+            if (attributes == null && otherAttributes == null)
+                return true;
+
             if (ReferenceEquals(attributes, otherAttributes))
                 return true;
 
-            return attributes.Count == otherAttributes.Count &&
-                   attributes.All(k => otherAttributes.Contains(k));
+            var equals = attributes != null && otherAttributes != null &&
+                            attributes.Count == otherAttributes.Count &&
+                            attributes.All(otherAttributes.Contains);
+
+            return equals;
+        }
+
+        private void EnsureAttributesInitialized(int capacity)
+        {
+            if (capacity < 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity), "Should not be less then zero!");
+
+            if (HasAttributes)
+                return;
+
+            attributes = new List<Fb2Attribute>(capacity);
         }
 
         public override int GetHashCode() => HashCode.Combine(Name, attributes, AllowedAttributes, IsInline, IsUnsafe);
@@ -525,7 +583,6 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Clones given <see cref="Fb2Node"/> creating new instance of same node, attaching attributes etc.
         /// </summary>
-        /// <remarks>Attention. This method also clones node's <see cref="Fb2Node.Parent"/> and can be resource-demanding.</remarks>
         /// <returns>New instance of given <see cref="Fb2Node"/>.</returns>
         public virtual object Clone()
         {
@@ -533,7 +590,7 @@ namespace Fb2.Document.Models.Base
             return cloneNode;
         }
 
-        protected Fb2Node CloneNodeInternal(Fb2Node node)
+        protected static Fb2Node CloneNodeInternal(Fb2Node node)
         {
             var cloneNode = Fb2NodeFactory.GetNodeByName(node.Name);
 

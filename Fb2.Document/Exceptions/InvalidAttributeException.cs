@@ -3,7 +3,7 @@
 namespace Fb2.Document.Exceptions
 {
     /// <summary>
-    /// Thrown on attempt to create <seealso cref="Models.Attributes.Fb2Attribute"/> with null or empty <seealso cref="Models.Attributes.Fb2Attribute.Key"/>.
+    /// Thrown on attempt to create <see cref="Models.Base.Fb2Attribute"/> with null or empty <see cref="Models.Base.Fb2Attribute.Key"/>.
     /// </summary>
     public class InvalidAttributeException : Exception
     {
@@ -12,6 +12,10 @@ namespace Fb2.Document.Exceptions
         /// </summary>
         public string AttributeKey { get; }
 
+        /// <summary>
+        /// Creates new instance of <see cref="InvalidAttributeException"/>.
+        /// </summary>
+        /// <param name="attributeKey">Attribute Name that caused exception.</param>
         public InvalidAttributeException(string attributeKey) :
             base("AttributeKey is null or empty string, or contains invalid characters.")
         {

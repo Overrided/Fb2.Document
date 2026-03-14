@@ -13,8 +13,7 @@ namespace Fb2.Document.Models
 
         public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Align);
 
-        public override ImmutableHashSet<string> AllowedElements =>
-            ImmutableHashSet.Create(ElementNames.TableHeader, ElementNames.TableCell);
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(ElementNames.TableHeader, ElementNames.TableCell);
 
         public sealed override string ToString() => string.Join(Whitespace, Content.Select(cell => $"{cell}{Whitespace}|"));
     }
