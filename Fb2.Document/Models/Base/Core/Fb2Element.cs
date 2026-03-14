@@ -55,15 +55,8 @@ namespace Fb2.Document.Models.Base
         {
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-            //string rawContent;
-
-            //if (node.NodeType == XmlNodeType.Element)
-            //    rawContent = ((XElement)node).Value;
-            //else if (node.NodeType == XmlNodeType.Text)
-            //    rawContent = ((XText)node).Value;
-            //else
-            //    throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
             string rawContent;
+
             if (node.NodeType == XmlNodeType.Element)
                 rawContent = ((XElement)node).Value;
             else if (node.NodeType == XmlNodeType.Text)

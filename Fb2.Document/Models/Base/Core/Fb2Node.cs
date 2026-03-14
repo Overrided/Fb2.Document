@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -19,7 +18,7 @@ namespace Fb2.Document.Models.Base
     /// Base class - describes basic node of fb2 document.
     /// Has Name, list of valid attributes and actual attribute values.
     /// </summary>
-    public abstract partial class Fb2Node : ICloneable
+    public abstract class Fb2Node : ICloneable
     {
         /// <summary>
         /// Whitespace character " ".
@@ -606,9 +605,5 @@ namespace Fb2.Document.Models.Base
 
             return cloneNode;
         }
-
-        //[ExcludeFromCodeCoverage(Justification = @"Compile-time code-generated '\s+' Regex implementation.")]
-        //[GeneratedRegex(@"\s+", RegexOptions.Multiline)]
-        //private static partial Regex TrimWhitespaceCompiledRegex();
     }
 }
