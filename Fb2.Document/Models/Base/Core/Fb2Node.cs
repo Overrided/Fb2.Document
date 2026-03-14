@@ -127,13 +127,15 @@ namespace Fb2.Document.Models.Base
 
             var allFilteredAttributes = allAttributes
                 .GroupBy(a => a.Name.LocalName.ToLowerInvariant())
-                .Select(g => g.First())
-                .Where(da => AllowedAttributes.Contains(da.Name.LocalName.ToLowerInvariant()))
-                .Select(attr =>
+                .Select(g => new { g.Key, Attribute = g.First() })
+                .Where(da => AllowedAttributes.Contains(da.Key))
+                .Select(item =>
                 {
-                    var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
+                    var attrName = item.Key;
+                    var attr = item.Attribute;
+
                     var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                    var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+                    var fb2Attribute = new Fb2Attribute(attrName, attr.Value, attributeNamespace);
                     return fb2Attribute;
                 })
                 .ToArray();
