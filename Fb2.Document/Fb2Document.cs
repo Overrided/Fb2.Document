@@ -184,36 +184,6 @@ namespace Fb2.Document
             });
         }
 
-        ///// <summary>
-        ///// Loads fb2 file's content into Fb2Document model from string.
-        ///// </summary>
-        ///// <param name="fileContent">Content of a file read as string</param>
-        ///// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
-        ///// <exception cref="ArgumentNullException">Thrown if <paramref name="fileContent"/> is null.</exception>
-        ///// <exception cref="Fb2DocumentLoadingException"></exception>
-        ///// <remarks> 
-        ///// This method is not Encoding-safe.
-        ///// Loading will proceed with Encoding of string received.
-        ///// This method exists mostly for lulz :)
-        ///// </remarks>
-        //public void Load(
-        //    [In] string fileContent,
-        //    [In] Fb2LoadingOptions loadingOptions = null,
-        //    CancellationToken cancellationToken = default)
-        //{
-        //    if (string.IsNullOrWhiteSpace(fileContent))
-        //        throw new ArgumentNullException(nameof(fileContent));
-
-        //    LoadHandled(() =>
-        //    {
-        //        using (var reader = new StringReader(fileContent))
-        //        {
-        //            var document = XDocument.Load(reader, LoadOptions.None);
-        //            Load(document.Root, loadingOptions);
-        //        }
-        //    });
-        //}
-
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>
@@ -257,7 +227,7 @@ namespace Fb2.Document
         /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
         public async Task LoadAsync(
             [In] Stream fileContent,
-            Fb2StreamLoadingOptions loadingOptions = null,
+            [In] Fb2StreamLoadingOptions loadingOptions = null,
             CancellationToken cancellationToken = default)
         {
             if (fileContent == null)
