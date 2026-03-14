@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -19,7 +18,7 @@ namespace Fb2.Document.Models.Base
     /// Base class - describes basic node of fb2 document.
     /// Has Name, list of valid attributes and actual attribute values.
     /// </summary>
-    public abstract partial class Fb2Node : ICloneable
+    public abstract class Fb2Node : ICloneable
     {
         /// <summary>
         /// Whitespace character " ".
@@ -128,13 +127,15 @@ namespace Fb2.Document.Models.Base
 
             var allFilteredAttributes = allAttributes
                 .GroupBy(a => a.Name.LocalName.ToLowerInvariant())
-                .Select(g => g.First())
-                .Where(da => AllowedAttributes.Contains(da.Name.LocalName.ToLowerInvariant()))
-                .Select(attr =>
+                .Select(g => new { g.Key, Attribute = g.First() })
+                .Where(da => AllowedAttributes.Contains(da.Key))
+                .Select(item =>
                 {
-                    var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
+                    var attrName = item.Key;
+                    var attr = item.Attribute;
+
                     var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                    var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
+                    var fb2Attribute = new Fb2Attribute(attrName, attr.Value, attributeNamespace);
                     return fb2Attribute;
                 })
                 .ToArray();
@@ -309,7 +310,7 @@ namespace Fb2.Document.Models.Base
             if (attributes == null || !attributes.Any())
                 throw new ArgumentNullException(nameof(attributes), $"{nameof(attributes)} is null or empty dictionary.");
 
-            AddAttributes(attributes.ToList());
+            AddAttributes(attributes.ToArray());
 
             return this;
         }
@@ -606,9 +607,5 @@ namespace Fb2.Document.Models.Base
 
             return cloneNode;
         }
-
-        //[ExcludeFromCodeCoverage(Justification = @"Compile-time code-generated '\s+' Regex implementation.")]
-        //[GeneratedRegex(@"\s+", RegexOptions.Multiline)]
-        //private static partial Regex TrimWhitespaceCompiledRegex();
     }
 }

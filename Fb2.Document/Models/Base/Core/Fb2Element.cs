@@ -145,10 +145,7 @@ namespace Fb2.Document.Models.Base
             var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
             normalizedNewContent = SecurityElement.Escape(normalizedNewContent);
 
-            if (content == null)
-                content = normalizedNewContent;
-            else
-                content = string.Join(normalizedSeparator, content, normalizedNewContent);
+            content = string.Join(normalizedSeparator, content, normalizedNewContent);
 
             return this;
         }

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
 using Fb2.Document.LoadingOptions;
 using Fb2.Document.Models;
@@ -183,36 +184,6 @@ namespace Fb2.Document
             });
         }
 
-        ///// <summary>
-        ///// Loads fb2 file's content into Fb2Document model from string.
-        ///// </summary>
-        ///// <param name="fileContent">Content of a file read as string</param>
-        ///// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
-        ///// <exception cref="ArgumentNullException">Thrown if <paramref name="fileContent"/> is null.</exception>
-        ///// <exception cref="Fb2DocumentLoadingException"></exception>
-        ///// <remarks> 
-        ///// This method is not Encoding-safe.
-        ///// Loading will proceed with Encoding of string received.
-        ///// This method exists mostly for lulz :)
-        ///// </remarks>
-        //public void Load(
-        //    [In] string fileContent,
-        //    [In] Fb2LoadingOptions loadingOptions = null,
-        //    CancellationToken cancellationToken = default)
-        //{
-        //    if (string.IsNullOrWhiteSpace(fileContent))
-        //        throw new ArgumentNullException(nameof(fileContent));
-
-        //    LoadHandled(() =>
-        //    {
-        //        using (var reader = new StringReader(fileContent))
-        //        {
-        //            var document = XDocument.Load(reader, LoadOptions.None);
-        //            Load(document.Root, loadingOptions);
-        //        }
-        //    });
-        //}
-
         /// <summary>
         /// Loads fb2 file's content into Fb2Document model from stream.
         /// </summary>
@@ -257,7 +228,8 @@ namespace Fb2.Document
         /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
         public async Task LoadAsync(
             [In] Stream fileContent,
-            [In] Fb2StreamLoadingOptions loadingOptions = null)
+            [In] Fb2StreamLoadingOptions loadingOptions = null,
+            CancellationToken cancellationToken = default)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -265,17 +237,29 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-            xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
+            var closeInput = loadingOptions?.CloseInputStream ?? false;
 
-            LoadHandled(() =>
+            await LoadHandledAsync(async (ct) =>
             {
-                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
+                using (var sr = new StreamReader(
+                    fileContent,
+                    Encoding.Default,
+                    detectEncodingFromByteOrderMarks: true,
+                    LoadingConstants.DefaultBufferSize,
+                    leaveOpen: !closeInput))
                 {
-                    var document = XDocument.Load(reader, LoadOptions.None);
+                    var content = await sr.ReadToEndAsync();
+                    var document = XDocument.Parse(content);
+
                     Load(document.Root, loadingOptions);
                 }
-            });
+            }, cancellationToken);
+
+            if (closeInput)
+            {
+                fileContent.Close();
+                fileContent.Dispose();
+            }
         }
 
         /// <summary>
