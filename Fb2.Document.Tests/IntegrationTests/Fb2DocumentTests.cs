@@ -115,10 +115,6 @@ public class Fb2DocumentTests
         doc.Invoking(async d => await d.LoadAsync((Stream)null!))
             .Should()
             .ThrowExactlyAsync<ArgumentNullException>();
-
-        //doc.Invoking(async d => await d.LoadAsync((string)null!))
-        //    .Should()
-        //    .ThrowExactlyAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -384,9 +380,6 @@ public class Fb2DocumentTests
         var stringLoadedFb2Document = new Fb2Document();
         stringLoadedFb2Document.Load(fileStringContent); // string
 
-        //var stringLoadedAsyncFb2Document = new Fb2Document();
-        //await stringLoadedAsyncFb2Document.LoadAsync(fileStringContent);
-
         var xmlLoadedFb2Document = new Fb2Document();
         xmlLoadedFb2Document.Load(xDocument); // xDocument
 
@@ -399,7 +392,6 @@ public class Fb2DocumentTests
         await streamLoadedAsyncFb2Document.LoadAsync(sampleFileInfoStream); // async stream
 
         stringLoadedFb2Document
-            //.Should().Be(stringLoadedAsyncFb2Document)
             .Should().Be(xmlLoadedFb2Document)
             .And.Be(streamLoadedFb2Document)
             .And.Be(streamLoadedAsyncFb2Document);
