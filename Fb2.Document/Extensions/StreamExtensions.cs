@@ -1,8 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace Fb2.Document.Extensions
 {
@@ -15,32 +12,6 @@ namespace Fb2.Document.Extensions
 
             stream.Seek(0, SeekOrigin.Begin);
             stream.Position = 0; // double check
-        }
-
-        public static async Task<MemoryStream> CloneAsync(this Stream source)
-        {
-            if (source.Position != 0)
-                source.SeekZero();
-
-            var result = new MemoryStream();
-            await source.CopyToAsync(result);
-
-            if (result.Position != 0)
-                result.SeekZero();
-
-            return result;
-        }
-
-        public static Encoding GetXmlEncodingOrDefault(this Stream xmlContent, Encoding defaultEncoding)
-        {
-            if (defaultEncoding == null)
-                throw new ArgumentNullException($"{nameof(defaultEncoding)} is null!");
-
-            using (var xmlreader = new XmlTextReader(xmlContent))
-            {
-                xmlreader.MoveToContent();
-                return xmlreader.Encoding ?? defaultEncoding;
-            }
         }
     }
 }
