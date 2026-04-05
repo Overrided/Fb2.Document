@@ -201,7 +201,7 @@ public sealed class Fb2Document
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(fileContent, nameof(fileContent));
 
-        await LoadHandledAsync(async (CancellationToken innerCancellationToken) =>
+        await LoadHandledAsync(async innerCancellationToken =>
         {
             using var reader = new StringReader(fileContent);
             var document = await XDocument
@@ -263,7 +263,7 @@ public sealed class Fb2Document
         var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
         xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
 
-        await LoadHandledAsync(async (CancellationToken innerCancellationToken) =>
+        await LoadHandledAsync(async innerCancellationToken =>
         {
             using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
             var document = await XDocument
