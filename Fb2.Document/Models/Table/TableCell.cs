@@ -1,8 +1,9 @@
 ﻿using Fb2.Document.Constants;
 
-namespace Fb2.Document.Models;
-
-public class TableCell : TableCellBase
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.TableCell;
+    public class TableCell : TableCellBase
+    {
+        public override string Name => ElementNames.TableCell;
+    }
 }

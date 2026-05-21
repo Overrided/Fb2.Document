@@ -1,8 +1,9 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace Fb2.Document.Benchmark;
-
-public class Program
+namespace Fb2.Document.Benchmark
 {
-    public static void Main(string[] args) => _ = BenchmarkRunner.Run<Fb2DocumentBenchmarks>();
+    public class Program
+    {
+        public static void Main(string[] args) => _ = BenchmarkRunner.Run<Fb2DocumentBenchmarks>();
+    }
 }

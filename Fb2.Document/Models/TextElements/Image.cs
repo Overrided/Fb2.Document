@@ -5,68 +5,70 @@ using System.Xml.Linq;
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class Image : Fb2Element
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.Image;
-
-    public override ImmutableHashSet<string> AllowedAttributes =>
-    [
-        AttributeNames.Id,
-        AttributeNames.Alt,
-        AttributeNames.Title,
-        AttributeNames.XHref,
-        AttributeNames.Type
-    ];
-
-    private static readonly HashSet<string> InlineParentNodes =
-    [
-        ElementNames.Paragraph,
-        ElementNames.StanzaV,
-        ElementNames.SubTitle,
-        ElementNames.TableHeader,
-        ElementNames.TableCell,
-        ElementNames.TextAuthor
-    ];
-
-    private static readonly HashSet<string> NotInlineParentNodes =
-    [
-        ElementNames.BookBody,
-        ElementNames.BookBodySection,
-        ElementNames.Coverpage
-    ];
-
-    public sealed override string ToString()
+    public class Image : Fb2Element
     {
-        var hasHref = TryGetAttribute(AttributeNames.XHref, true, out var result);
-        if (!hasHref)
-            return Name;
+        public override string Name => ElementNames.Image;
 
-        return $"{Name} {result!.Value}";
-    }
+        public override ImmutableHashSet<string> AllowedAttributes =>
+            ImmutableHashSet.Create(
+                AttributeNames.Id,
+                AttributeNames.Alt,
+                AttributeNames.Title,
+                AttributeNames.XHref,
+                AttributeNames.Type);
 
-    public sealed override void Load(
-        [In] XNode node,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
-    {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
-        IsInline = GetInline(Parent?.Name);
-    }
+        private static readonly HashSet<string> InlineParentNodes =
+            new HashSet<string>()
+            {
+                ElementNames.Paragraph,
+                ElementNames.StanzaV,
+                ElementNames.SubTitle,
+                ElementNames.TableHeader,
+                ElementNames.TableCell,
+                ElementNames.TextAuthor
+            };
 
-    private static bool GetInline(string? parentNodeName)
-    {
-        if (string.IsNullOrEmpty(parentNodeName))
+        private static readonly HashSet<string> NotInlineParentNodes =
+            new HashSet<string>()
+            {
+                ElementNames.BookBody,
+                ElementNames.BookBodySection,
+                ElementNames.Coverpage
+            };
+
+        public sealed override string ToString()
+        {
+            var hasHref = TryGetAttribute(AttributeNames.XHref, true, out var result);
+            if (!hasHref)
+                return Name;
+
+            return $"{Name} {result!.Value}";
+        }
+
+        public sealed override void Load(
+            [In] XNode node,
+            [In] Fb2Container? parentNode = null,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
+        {
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+            IsInline = GetInline(Parent?.Name);
+        }
+
+        private static bool GetInline(string? parentNodeName)
+        {
+            if (string.IsNullOrEmpty(parentNodeName))
+                return true;
+
+            if (InlineParentNodes.Contains(parentNodeName))
+                return true;
+            else if (NotInlineParentNodes.Contains(parentNodeName))
+                return false;
+
             return true;
-
-        if (InlineParentNodes.Contains(parentNodeName))
-            return true;
-        else if (NotInlineParentNodes.Contains(parentNodeName))
-            return false;
-
-        return true;
+        }
     }
 }

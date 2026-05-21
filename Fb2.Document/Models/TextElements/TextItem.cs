@@ -1,9 +1,10 @@
 ﻿using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class TextItem : Fb2Element
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.FictionText;
+    public class TextItem : Fb2Element
+    {
+        public override string Name => ElementNames.FictionText;
+    }
 }

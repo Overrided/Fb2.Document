@@ -2,17 +2,17 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public abstract class TableCellBase : TextContainerBase
+namespace Fb2.Document.Models
 {
-    public override ImmutableHashSet<string> AllowedAttributes =>
-    [
-        AttributeNames.Id,
-        AttributeNames.ColumnSpan,
-        AttributeNames.RowSpan,
-        AttributeNames.Align,
-        AttributeNames.VerticalAlign,
-        AttributeNames.Language
-    ];
+    public abstract class TableCellBase : TextContainerBase
+    {
+        public override ImmutableHashSet<string> AllowedAttributes =>
+        ImmutableHashSet.Create(
+            AttributeNames.Id,
+            AttributeNames.ColumnSpan,
+            AttributeNames.RowSpan,
+            AttributeNames.Align,
+            AttributeNames.VerticalAlign,
+            AttributeNames.Language);
+    }
 }

@@ -2,13 +2,17 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class Stanza : Fb2Container
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.Stanza;
+    public class Stanza : Fb2Container
+    {
+        public override string Name => ElementNames.Stanza;
 
-    public override bool CanContainText => false;
+        public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Title, ElementNames.SubTitle, ElementNames.StanzaV];
+        public override ImmutableHashSet<string> AllowedElements => ImmutableHashSet.Create(
+            ElementNames.Title,
+            ElementNames.SubTitle,
+            ElementNames.StanzaV);
+    }
 }

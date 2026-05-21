@@ -2,13 +2,14 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class Nickname : Fb2Element
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.NickName;
+    public class Nickname : Fb2Element
+    {
+        public override string Name => ElementNames.NickName;
 
-    public override bool IsInline => false;
+        public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Language];
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Language);
+    }
 }

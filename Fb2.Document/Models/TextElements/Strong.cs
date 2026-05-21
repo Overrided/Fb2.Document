@@ -1,9 +1,10 @@
 ﻿using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class Strong : TextContainerBase
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.Strong;
+    public class Strong : TextContainerBase
+    {
+        public override string Name => ElementNames.Strong;
+    }
 }

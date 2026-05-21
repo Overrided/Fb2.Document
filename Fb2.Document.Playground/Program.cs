@@ -3,25 +3,26 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Fb2.Document.Constants;
 
-namespace Fb2.Document.Playground;
-
-public class Program
+namespace Fb2.Document.Playground
 {
-    public async static Task Main(string[] args)
+    public class Program
     {
-        var fb2Document = new Fb2Document();
+        public async static Task Main(string[] args)
+        {
+            var fb2Document = new Fb2Document();
 
-        var x = Assembly.GetExecutingAssembly();
-        var names = x.GetManifestResourceNames();
+            var x = Assembly.GetExecutingAssembly();
+            var names = x.GetManifestResourceNames();
 
-        // only one resource
-        using (var fb2FileContentStream = x.GetManifestResourceStream(names[0]))
-            await fb2Document.LoadAsync(fb2FileContentStream);
+            // only one resource
+            using (var fb2FileContentStream = x.GetManifestResourceStream(names[0]))
+                await fb2Document.LoadAsync(fb2FileContentStream);
 
-        var documentString = fb2Document.ToString();
-        var xmlString = fb2Document.ToXmlString();
+            var documentString = fb2Document.ToString();
+            var xmlString = fb2Document.ToXmlString();
 
-        var binaryImages = fb2Document.BinaryImages;
-        var firstBodyTitle = fb2Document.Bodies.FirstOrDefault()?.GetFirstChild(ElementNames.Title);
+            var binaryImages = fb2Document.BinaryImages;
+            var firstBodyTitle = fb2Document.Bodies.FirstOrDefault()?.GetFirstChild(ElementNames.Title);
+        }
     }
 }

@@ -2,13 +2,14 @@
 using Fb2.Document.Constants;
 using Fb2.Document.Models.Base;
 
-namespace Fb2.Document.Models;
-
-public class TextAuthor : TextContainerBase
+namespace Fb2.Document.Models
 {
-    public override string Name => ElementNames.TextAuthor;
+    public class TextAuthor : TextContainerBase
+    {
+        public override string Name => ElementNames.TextAuthor;
 
-    public override bool IsInline => false;
+        public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
+        public override ImmutableHashSet<string> AllowedAttributes => ImmutableHashSet.Create(AttributeNames.Id);
+    }
 }

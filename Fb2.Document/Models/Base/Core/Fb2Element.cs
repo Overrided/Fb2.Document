@@ -7,210 +7,213 @@ using System.Xml;
 using System.Xml.Linq;
 using Fb2.Document.Exceptions;
 
-namespace Fb2.Document.Models.Base;
-
-/// <summary>
-/// Represents text Node of <see cref="Fb2Document"/>.
-/// Any class derived from <see cref="Fb2Element"/> can contain text only.
-/// </summary>
-public abstract class Fb2Element : Fb2Node
+namespace Fb2.Document.Models.Base
 {
-    protected string? content = null;
-
     /// <summary>
-    /// Content (value) of element. Available after Load(...) method call.
+    /// Represents text Node of <see cref="Fb2Document"/>.
+    /// Any class derived from <see cref="Fb2Element"/> can contain text only.
     /// </summary>
-    public string Content => HasContent ? content! : string.Empty;
-
-    /// <summary>
-    /// <para>Indicates if content of an element should be written from a new line.</para>
-    /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
-    /// <remarks>For most <see cref="Fb2Element"/> <see cref="Fb2Element.IsInline"/> is <see langword="true"/> by default, however, some models override this property.</remarks>
-    /// </summary>
-    public override bool IsInline { get; protected set; } = true;
-
-    /// <summary>
-    /// Indicates if element has any content.
-    /// </summary>
-    public override bool HasContent => !string.IsNullOrEmpty(content);
-
-    /// <summary>
-    /// Text node loading mechanism. Loads <see cref="Content"/> after formatting and removal of unwanted characters.
-    /// </summary>
-    /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Element"/>.</param>
-    /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
-    /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
-    /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
-    /// <param name="loadNamespaceMetadata">Indicates whether XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="Fb2NodeLoadingException"></exception>
-    /// <remarks>Original content of <see cref="XNode"/> is  <c>NOT preserved</c>  except for <see cref="Code" />.</remarks>
-    public override void Load(
-        [In] XNode node,
-        [In] Fb2Container? parentNode = null,
-        bool preserveWhitespace = false,
-        bool loadUnsafe = true,
-        bool loadNamespaceMetadata = true)
+    public abstract class Fb2Element : Fb2Node
     {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+        protected string? content = null;
 
-        var rawContent = node.NodeType switch
+        /// <summary>
+        /// Content (value) of element. Available after Load(...) method call.
+        /// </summary>
+        public string Content => HasContent ? content! : string.Empty;
+
+        /// <summary>
+        /// <para>Indicates if content of an element should be written from a new line.</para>
+        /// <para><see langword="true"/> if element is inline, otherwise - <see langword="false"/>.</para>
+        /// <remarks>For most <see cref="Fb2Element"/> <see cref="Fb2Element.IsInline"/> is <see langword="true"/> by default, however, some models override this property.</remarks>
+        /// </summary>
+        public override bool IsInline { get; protected set; } = true;
+
+        /// <summary>
+        /// Indicates if element has any content.
+        /// </summary>
+        public override bool HasContent => !string.IsNullOrEmpty(content);
+
+        /// <summary>
+        /// Text node loading mechanism. Loads <see cref="Content"/> after formatting and removal of unwanted characters.
+        /// </summary>
+        /// <param name="node"><see cref="XNode"/> to load as <see cref="Fb2Element"/>.</param>
+        /// <param name="parentNode">Parent node (<see cref="Fb2Container"/>). By default <see langword="null"/>.</param>
+        /// <param name="preserveWhitespace">Indicates if whitespace characters (\t, \n, \r) should be preserved. By default <see langword="false"/>.</param>
+        /// <param name="loadUnsafe">Indicates whether "Unsafe" children should be loaded. By default <see langword="true"/>. </param>
+        /// <param name="loadNamespaceMetadata">Indicates whether XML Namespace Metadata should be preserved. By default <see langword="true"/>.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Fb2NodeLoadingException"></exception>
+        /// <remarks>Original content of <see cref="XNode"/> is  <c>NOT preserved</c>  except for <see cref="Code" />.</remarks>
+        public override void Load(
+            [In] XNode node,
+            [In] Fb2Container? parentNode = null,
+            bool preserveWhitespace = false,
+            bool loadUnsafe = true,
+            bool loadNamespaceMetadata = true)
         {
-            XmlNodeType.Element => ((XElement)node).Value,
-            XmlNodeType.Text => ((XText)node).Value,
-            _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-        };
+            base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-        if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
-            content = trimWhitespace.Replace(rawContent, Whitespace);
-        else
-            content = rawContent;
-    }
+            var rawContent = node.NodeType switch
+            {
+                XmlNodeType.Element => ((XElement)node).Value,
+                XmlNodeType.Text => ((XText)node).Value,
+                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
+            };
 
-    /// <summary>
-    /// Appends new plain text to <see cref="Content"/> using provider function.
-    /// </summary>
-    /// <param name="contentProvider">Content provider function.</param>
-    /// <param name="separator">Separator to split text from rest of the content.</param>
-    /// <returns>Current element.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
-    {
-        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+            if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
+                content = trimWhitespace.Replace(rawContent, Whitespace);
+            else
+                content = rawContent;
+        }
 
-        var content = contentProvider();
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/> using provider function.
+        /// </summary>
+        /// <param name="contentProvider">Content provider function.</param>
+        /// <param name="separator">Separator to split text from rest of the content.</param>
+        /// <returns>Current element.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
 
-        return AddContent(content, separator);
-    }
+            var content = contentProvider();
 
-    /// <summary>
-    /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
-    /// </summary>
-    /// <param name="contentProvider">Asynchronous content provider function.</param>
-    /// <param name="separator">Separator string used to join new text with existing content.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Current element.</returns>
-    /// <remarks>
-    /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
-    /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
-    /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
-    /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
-    public async Task<Fb2Element> AddContentAsync(
-        Func<CancellationToken, Task<string>> contentProvider,
-        string? separator = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(contentProvider, nameof(contentProvider));
+            return AddContent(content, separator);
+        }
 
-        cancellationToken.ThrowIfCancellationRequested();
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/> using asynchronous content provider function.
+        /// </summary>
+        /// <param name="contentProvider">Asynchronous content provider function.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Current element.</returns>
+        /// <remarks>
+        /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+        /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+        /// <see cref="OperationCanceledException"/> is not handled if cancellation is requested.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="attributeProvider"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
+        public async Task<Fb2Element> AddContentAsync(
+            Func<CancellationToken, Task<string>> contentProvider,
+            string? separator = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (contentProvider == null)
+                throw new ArgumentNullException(nameof(contentProvider));
 
-        var newContent = await contentProvider(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
-        return AddContent(newContent, separator);
-    }
+            var newContent = await contentProvider(cancellationToken);
 
-    /// <summary>
-    /// Appends new plain text to <see cref="Content"/>.
-    /// </summary>
-    /// <param name="newContent">Plain text to append.</param>
-    /// <param name="separator">Separator string used to join new text with existing content.</param>
-    /// <returns>Current element.</returns>
-    /// <remarks>
-    /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
-    /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"></exception>
-    public virtual Fb2Element AddContent(string newContent, string? separator = null)
-    {
-        if (string.IsNullOrEmpty(newContent))
-            throw new ArgumentNullException(nameof(newContent));
+            return AddContent(newContent, separator);
+        }
 
-        var normalizedSeparator = string.IsNullOrEmpty(separator) ?
-            string.Empty :
-            SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
+        /// <summary>
+        /// Appends new plain text to <see cref="Content"/>.
+        /// </summary>
+        /// <param name="newContent">Plain text to append.</param>
+        /// <param name="separator">Separator string used to join new text with existing content.</param>
+        /// <returns>Current element.</returns>
+        /// <remarks>
+        /// If <paramref name="separator"/> contains <see cref="Environment.NewLine"/> - it will be replaced with " " (whitespace).
+        /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"></exception>
+        public virtual Fb2Element AddContent(string newContent, string? separator = null)
+        {
+            if (string.IsNullOrEmpty(newContent))
+                throw new ArgumentNullException(nameof(newContent));
 
-        var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
-        normalizedNewContent = SecurityElement.Escape(normalizedNewContent)!;
+            var normalizedSeparator = string.IsNullOrEmpty(separator) ?
+                string.Empty :
+                SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
-        content = string.Join(normalizedSeparator, content, normalizedNewContent);
+            var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
+            normalizedNewContent = SecurityElement.Escape(normalizedNewContent)!;
 
-        return this;
-    }
+            content = string.Join(normalizedSeparator, content, normalizedNewContent);
 
-    /// <summary>
-    /// Clears <see cref="Content"/>.
-    /// </summary>
-    /// <returns>Current element.</returns>
-    public virtual Fb2Element ClearContent()
-    {
-        if (HasContent)
-            content = null;
+            return this;
+        }
 
-        return this;
-    }
+        /// <summary>
+        /// Clears <see cref="Content"/>.
+        /// </summary>
+        /// <returns>Current element.</returns>
+        public virtual Fb2Element ClearContent()
+        {
+            if (HasContent)
+                content = null;
 
-    /// <summary>
-    /// Converts <see cref="Fb2Element"/> to <see cref="XElement"/> with regards to all attributes.
-    /// </summary>
-    /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
-    /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Element"/>.</returns>
-    /// <remarks>
-    /// Only formatted content is serialized.
-    /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/>.</para>
-    /// </remarks>
-    public override XElement ToXml(bool serializeUnsafeNodes = true)
-    {
-        var element = base.ToXml(serializeUnsafeNodes);
-        if (HasContent)
-            element.Value = content!;
+            return this;
+        }
 
-        return element;
-    }
+        /// <summary>
+        /// Converts <see cref="Fb2Element"/> to <see cref="XElement"/> with regards to all attributes.
+        /// </summary>
+        /// <param name="serializeUnsafeNodes">Indicates is "Unsafe" content should be serialized. By default <see langword="true"/>. </param>
+        /// <returns><see cref="XElement"/> reflected from given <see cref="Fb2Element"/>.</returns>
+        /// <remarks>
+        /// Only formatted content is serialized.
+        /// <para>Original symbols from string value of XNode passed to Load method can be replaced and/or removed during <see cref="Fb2Element.Load(XNode, bool, bool)"/>.</para>
+        /// </remarks>
+        public override XElement ToXml(bool serializeUnsafeNodes = true)
+        {
+            var element = base.ToXml(serializeUnsafeNodes);
+            if (HasContent)
+                element.Value = content!;
 
-    public override string ToString() => Content;
+            return element;
+        }
 
-    public override bool Equals(object? other)
-    {
-        if (!base.Equals(other))
-            return false;
+        public override string ToString() => Content;
 
-        if (other is not Fb2Element otherElement)
-            return false;
+        public override bool Equals(object? other)
+        {
+            if (!base.Equals(other))
+                return false;
 
-        var otherContent = otherElement.content;
+            if (!(other is Fb2Element otherElement))
+                return false;
 
-        var bothContensAreNull = content is null && otherContent is null;
-        if (bothContensAreNull)
-            return true;
+            var otherContent = otherElement.content;
 
-        var bothContensAreEmpty = string.IsNullOrEmpty(content) && string.IsNullOrEmpty(otherContent);
-        if (bothContensAreEmpty)
-            return true;
+            var bothContensAreNull = content is null && otherContent is null;
+            if (bothContensAreNull)
+                return true;
 
-        var bothContentsAreNotEmpty = !string.IsNullOrEmpty(content) && !string.IsNullOrEmpty(otherContent);
-        if (!bothContentsAreNotEmpty)
-            return false;
+            var bothContensAreEmpty = string.IsNullOrEmpty(content) && string.IsNullOrEmpty(otherContent);
+            if (bothContensAreEmpty)
+                return true;
 
-        var result = content!.Equals(otherContent, StringComparison.InvariantCulture);
+            var bothContentsAreNotEmpty = !string.IsNullOrEmpty(content) && !string.IsNullOrEmpty(otherContent);
+            if (!bothContentsAreNotEmpty)
+                return false;
 
-        return result;
-    }
+            var result = content!.Equals(otherContent, StringComparison.InvariantCulture);
 
-    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);
+            return result;
+        }
 
-    /// <summary>
-    /// Clones given <see cref="Fb2Element"/> creating new instance of same node, attaching attributes etc.
-    /// </summary>
-    /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
-    public sealed override object Clone()
-    {
-        var clone = base.Clone() as Fb2Element;
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), content);
 
-        if (HasContent)
-            clone!.content = new(content);
+        /// <summary>
+        /// Clones given <see cref="Fb2Element"/> creating new instance of same node, attaching attributes etc.
+        /// </summary>
+        /// <returns>New instance of given <see cref="Fb2Element"/>.</returns>
+        public sealed override object Clone()
+        {
+            var clone = base.Clone() as Fb2Element;
 
-        return clone!;
+            if (HasContent)
+                clone!.content = new string(content);
+
+            return clone!;
+        }
     }
 }
