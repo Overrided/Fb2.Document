@@ -1,24 +1,19 @@
 # Fb2 Document Library&nbsp;[![Fb2.Document CI](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml/badge.svg)](https://github.com/Overrided/Fb2.Document/actions/workflows/ci_build.yml)
 
 
-Fb2.Document is lightweight, fast .Net 10 lib with bunch of APIs to operate `fb2` file's contents.
+Fb2.Document is lightweight, fast .Net 8 lib with bunch of APIs to operate `fb2` file's contents.
 
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
 
-# Version 2.5.0
+# Version 2.3.1
 
-Latest release of an `Fb2.Document` library brings `.Net 10` and few minor updates.
+`2.3.1` version of `Fb2.Document` library is basically backport of latest version - `2.5.0` - to .Net 8.
 
-- [.Net 10](#.net-10)
 - [Async methods updates](#async-methods-updates)
 - [Other Updates](#updates)
 
 For more info please see [Readme](https://github.com/Overrided/Fb2.Document).
-
-## .Net 10
-
-Package version `2.5.0` targets `.Net 10`.
 
 ## Async Methods Updates
 
