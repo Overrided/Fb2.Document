@@ -22,7 +22,7 @@ public static class Fb2NodeExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
     /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
-    public static T AppendAttributes<T>(this T fb2Node, params List<Fb2Attribute> attributes) where T : Fb2Node =>
+    public static T AppendAttributes<T>(this T fb2Node, params Fb2Attribute[] attributes) where T : Fb2Node =>
         (T)fb2Node.AddAttributes(attributes);
 
     /// <summary>

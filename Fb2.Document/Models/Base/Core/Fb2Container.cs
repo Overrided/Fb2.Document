@@ -257,12 +257,12 @@ public abstract class Fb2Container : Fb2Node
     /// <param name="nodes">Nodes to add to <see cref="Content"/>.</param>
     /// <returns>Current container.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Container AddContent(params List<Fb2Node> nodes)
+    public Fb2Container AddContent(params Fb2Node[] nodes)
     {
-        if (nodes is not { Count: > 0 } || nodes.All(n => n == null))
+        if (nodes is not { Length: > 0 } || nodes.All(n => n == null))
             throw new ArgumentNullException(nameof(nodes), $"{nameof(nodes)} is null or empty array, or contains only null's");
 
-        EnsureContentInitialized(nodes.Count);
+        EnsureContentInitialized(nodes.Length);
 
         foreach (var node in nodes)
             AddContent(node);

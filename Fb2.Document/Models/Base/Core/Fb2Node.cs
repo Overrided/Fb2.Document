@@ -280,12 +280,12 @@ public abstract partial class Fb2Node : ICloneable
     /// <param name="attributes">Set of attributes to add.</param>
     /// <returns>Current node.</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public Fb2Node AddAttributes(params List<Fb2Attribute> attributes)
+    public Fb2Node AddAttributes(params Fb2Attribute[] attributes)
     {
-        if (attributes is not { Count: > 0 })
+        if (attributes is not { Length: > 0 })
             throw new ArgumentNullException(nameof(attributes));
 
-        EnsureAttributesInitialized(attributes.Count);
+        EnsureAttributesInitialized(attributes.Length);
 
         foreach (var attribute in attributes)
             AddAttribute(attribute);

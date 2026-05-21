@@ -57,7 +57,7 @@ public static class Fb2ContainerExtensions
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="Exceptions.InvalidNodeException"></exception>
     /// <exception cref="Exceptions.UnexpectedNodeException"></exception>
-    public static T AppendContent<T>(this T fb2Container, params List<Fb2Node> nodes) where T : Fb2Container =>
+    public static T AppendContent<T>(this T fb2Container, params Fb2Node[] nodes) where T : Fb2Container =>
         (T)fb2Container.AddContent(nodes);
 
     /// <summary>
