@@ -7,7 +7,7 @@ namespace Fb2.Document.Tests.Common
     {
         private string nodeName = "Impostor";
 
-        public ImpostorNode(string? nodeName = null)
+        public ImpostorNode(string nodeName = null)
         {
             if (!string.IsNullOrEmpty(nodeName))
                 this.nodeName = nodeName;

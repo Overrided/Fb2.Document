@@ -23,7 +23,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Metadata part, points to attribute XML Namespace if any. Used for serialization.
         /// </summary>
-        public string? NamespaceName { get; }
+        public string NamespaceName { get; } = null;
 
         /// <summary>
         /// Creates new instance of <see cref="Fb2Attribute"/>.
@@ -32,7 +32,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="value">Attribute value.</param>
         /// <param name="namespaceName">Metadata part, points to attribute XML Namespace if any. Used for serialization. This parameter is optional.</param>
         /// <exception cref="InvalidAttributeException"></exception>
-        public Fb2Attribute(string key, string value, string? namespaceName = null)
+        public Fb2Attribute(string key, string value, string namespaceName = null)
         {
             var escapedKey = SecurityElement.Escape(key);
             if (string.IsNullOrWhiteSpace(escapedKey))
@@ -63,7 +63,7 @@ namespace Fb2.Document.Models.Base
             NamespaceName = other.NamespaceName;
         }
 
-        public override bool Equals(object? obj) =>
+        public override bool Equals(object obj) =>
             obj != null &&
             obj is Fb2Attribute attribute &&
             (ReferenceEquals(this, attribute) ||

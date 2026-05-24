@@ -44,12 +44,12 @@ namespace Fb2.Document.Models
             if (!hasHref)
                 return Name;
 
-            return $"{Name} {result!.Value}";
+            return $"{Name} {result.Value}";
         }
 
         public sealed override void Load(
             [In] XNode node,
-            [In] Fb2Container? parentNode = null,
+            [In] Fb2Container parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
@@ -58,7 +58,7 @@ namespace Fb2.Document.Models
             IsInline = GetInline(Parent?.Name);
         }
 
-        private static bool GetInline(string? parentNodeName)
+        private static bool GetInline(string parentNodeName)
         {
             if (string.IsNullOrEmpty(parentNodeName))
                 return true;

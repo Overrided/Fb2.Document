@@ -24,7 +24,7 @@ namespace Fb2.Document.Tests.ExtensionsTests
             node.Should().NotBeNull();
             var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-            node.Invoking(n => n.AppendContent((Fb2Node)null!)) // Fb2Node 
+            node.Invoking(n => n.AppendContent((Fb2Node)null)) // Fb2Node 
                .Should()
                .Throw<ArgumentNullException>();
 
@@ -32,42 +32,42 @@ namespace Fb2.Document.Tests.ExtensionsTests
             node.Invoking(n => n.AppendContent("")).Should().Throw<ArgumentNullException>();
 
             //string nodeName
-            node.Invoking(n => n.AppendContent((string)null!)).Should().Throw<ArgumentNullException>();
+            node.Invoking(n => n.AppendContent((string)null)).Should().Throw<ArgumentNullException>();
 
             // params Fb2Node[] nodes
             node.Invoking(n => n.AppendContent()).Should().Throw<ArgumentNullException>();
 
             // params Fb2Node[] nodes
-            node.Invoking(n => n.AppendContent(null!, null!)) // lol
+            node.Invoking(n => n.AppendContent(null, null)) // lol
                 .Should()
                 .Throw<ArgumentNullException>();
 
-            node.Invoking(n => n.AppendContent(() => null!)) // Func<Fb2Node>
+            node.Invoking(n => n.AppendContent(() => null)) // Func<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
-            node.Invoking(n => n.AppendContent((Func<Fb2Node>)null!)) // Func<Fb2Node>
+            node.Invoking(n => n.AppendContent((Func<Fb2Node>)null)) // Func<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
-            node.Invoking(n => n.AppendContent((List<Fb2Node>)null!)) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.AppendContent((List<Fb2Node>)null)) // IEnumerable<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
-            node.Invoking(n => n.AppendContent(new List<Fb2Node> { null!, null! })) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.AppendContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
-            node.Invoking(n => n.AppendContent(new List<Fb2Node> { firstAllowedNode, null! })) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.AppendContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
                 .Should()
                 .Throw<ArgumentNullException>();
 
             node.Invoking(async n => await n.AppendContentAsync(
-                async (_) => await Task.FromResult<Fb2Node>(null!))) // async node provider
+                async (_) => await Task.FromResult<Fb2Node>(null))) // async node provider
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
 
-            node.Invoking(async n => await n.AppendContentAsync(null!))
+            node.Invoking(async n => await n.AppendContentAsync(null))
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
         }
@@ -319,23 +319,23 @@ namespace Fb2.Document.Tests.ExtensionsTests
         {
             var firstAllowedNode = Fb2NodeFactory.GetNodeByName(node.AllowedElements.First());
 
-            node.Invoking(n => n.DeleteContent((Fb2Node)null!)) // Fb2Node 
+            node.Invoking(n => n.DeleteContent((Fb2Node)null)) // Fb2Node 
                .Should()
                .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.DeleteContent((IEnumerable<Fb2Node>)null!)) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.DeleteContent((IEnumerable<Fb2Node>)null)) // IEnumerable<Fb2Node>
                .Should()
                .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.DeleteContent((Func<Fb2Node, bool>)null!)) // Func<Fb2Node, bool>
+            node.Invoking(n => n.DeleteContent((Func<Fb2Node, bool>)null)) // Func<Fb2Node, bool>
                .Should()
                .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.DeleteContent(new List<Fb2Node> { null!, null! })) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.DeleteContent(new List<Fb2Node> { null, null })) // IEnumerable<Fb2Node>
                .Should()
                .ThrowExactly<ArgumentNullException>();
 
-            node.Invoking(n => n.DeleteContent(new List<Fb2Node> { firstAllowedNode, null! })) // IEnumerable<Fb2Node>
+            node.Invoking(n => n.DeleteContent(new List<Fb2Node> { firstAllowedNode, null })) // IEnumerable<Fb2Node>
                .Should()
                .ThrowExactly<ArgumentNullException>();
         }

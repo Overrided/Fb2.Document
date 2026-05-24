@@ -14,7 +14,7 @@ namespace Fb2.Document.Models
 
         public sealed override void Load(
             [In] XNode element,
-            [In] Fb2Container? parentNode = null,
+            [In] Fb2Container parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
@@ -23,7 +23,7 @@ namespace Fb2.Document.Models
             content = Environment.NewLine; // double-check, just in case
         }
 
-        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
+        public sealed override Fb2Element AddContent(string newContent, string separator = null) => this;
 
         public sealed override Fb2Element ClearContent() => this;
     }

@@ -21,7 +21,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             fb2Element.Should().NotBeNull();
 
-            fb2Element.Invoking(f => f.Load(null!))
+            fb2Element.Invoking(f => f.Load(null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
         }
@@ -90,17 +90,17 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             fb2Element
-                .Invoking(n => n.AddContent((string)null!))
+                .Invoking(n => n.AddContent((string)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             fb2Element
-                .Invoking(n => n.AddContent((Func<string>)null!))
+                .Invoking(n => n.AddContent((Func<string>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             await fb2Element
-                .Invoking(n => n.AddContentAsync(null!))
+                .Invoking(n => n.AddContentAsync(null))
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
         }

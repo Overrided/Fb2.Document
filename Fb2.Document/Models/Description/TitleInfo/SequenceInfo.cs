@@ -16,7 +16,7 @@ namespace Fb2.Document.Models
             AttributeNames.Number,
             AttributeNames.Language);
 
-        public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
+        public sealed override Fb2Element AddContent(string newContent, string separator = null) => this;
 
         public sealed override Fb2Element ClearContent() => this;
 
@@ -28,10 +28,10 @@ namespace Fb2.Document.Models
             var sb = new StringBuilder();
 
             if (TryGetAttribute(AttributeNames.Name, true, out var nameAttr))
-                sb.Append(nameAttr!.Value);
+                sb.Append(nameAttr.Value);
 
             if (TryGetAttribute(AttributeNames.Number, true, out var numberAttr))
-                sb.Append(sb.Length > 0 ? $" {numberAttr!.Value}" : numberAttr!.Value);
+                sb.Append(sb.Length > 0 ? $" {numberAttr.Value}" : numberAttr.Value);
 
             return sb.ToString();
         }

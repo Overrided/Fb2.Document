@@ -13,7 +13,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             var textLink = (Fb2NodeFactory.GetNodeByName(ElementNames.TextLink) as Fb2Container);
             textLink.Should().NotBeNull();
-            textLink!.HasAttributes.Should().BeFalse();
+            textLink.HasAttributes.Should().BeFalse();
             textLink.HasContent.Should().BeFalse();
 
             textLink.AddTextContent("test link text");
@@ -31,7 +31,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             var textLink = (Fb2NodeFactory.GetNodeByName(ElementNames.TextLink) as Fb2Container);
             textLink.Should().NotBeNull();
-            textLink!.HasAttributes.Should().BeFalse();
+            textLink.HasAttributes.Should().BeFalse();
             textLink.HasContent.Should().BeFalse();
 
             textLink.AddAttribute(AttributeNames.XHref, "www.test.com");
@@ -49,7 +49,7 @@ namespace Fb2.Document.Tests.ModelsTests
         {
             var textLink = (Fb2NodeFactory.GetNodeByName(ElementNames.TextLink) as Fb2Container);
             textLink.Should().NotBeNull();
-            textLink!.HasAttributes.Should().BeFalse();
+            textLink.HasAttributes.Should().BeFalse();
             textLink.HasContent.Should().BeFalse();
 
             textLink.AddTextContent("test link text");

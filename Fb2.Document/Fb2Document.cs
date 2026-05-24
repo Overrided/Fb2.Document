@@ -21,6 +21,12 @@ namespace Fb2.Document
     public sealed class Fb2Document
     {
         /// <summary>
+        /// Default buffer size used for stream reading in <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?, CancellationToken)"/>.
+        /// This private constant is netstandard2.0-version specific, and does not exist in newer versions of the Fb2.Document library.
+        /// </summary>
+        private const int DefaultBufferSize = 1024;
+
+        /// <summary>
         /// Default XML Version used for serialization in <see cref="DefaultXDeclaration"/>.
         /// </summary>
         public const string DefaultXmlVersion = "1.0";
@@ -44,12 +50,12 @@ namespace Fb2.Document
         /// <summary>
         /// Represents <FictionBook> - root element of a file.
         /// </summary>
-        public FictionBook? Book { get; private set; }
+        public FictionBook Book { get; private set; }
 
         /// <summary>
         /// Represents Description element of a FictionBook
         /// </summary>
-        public BookDescription? BookDescription
+        public BookDescription BookDescription
         {
             get
             {
@@ -63,28 +69,28 @@ namespace Fb2.Document
         /// <summary>
         /// Shortcut property. Gets Title of Description from FictionBook
         /// </summary>
-        public TitleInfo? Title => BookDescription?.GetFirstChild<TitleInfo>();
+        public TitleInfo Title => BookDescription?.GetFirstChild<TitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets SrcTitle of Description from FictionBook
         /// Mainly exists if book is translated - and contains Title in original language
         /// </summary>
-        public SrcTitleInfo? SourceTitle => BookDescription?.GetFirstChild<SrcTitleInfo>();
+        public SrcTitleInfo SourceTitle => BookDescription?.GetFirstChild<SrcTitleInfo>();
 
         /// <summary>
         /// Shortcut property. Gets DocumentInfo of Description from FictionBook
         /// </summary>
-        public DocumentInfo? DocumentInfo => BookDescription?.GetFirstChild<DocumentInfo>();
+        public DocumentInfo DocumentInfo => BookDescription?.GetFirstChild<DocumentInfo>();
 
         /// <summary>
         /// Shortcut property. Gets PublishInfo of Description from FictionBook
         /// </summary>
-        public PublishInfo? PublishInfo => BookDescription?.GetFirstChild<PublishInfo>();
+        public PublishInfo PublishInfo => BookDescription?.GetFirstChild<PublishInfo>();
 
         /// <summary>
         /// Shortcut property. Gets CustomInfo of Description from FictionBook
         /// </summary>
-        public CustomInfo? CustomInfo => BookDescription?.GetFirstChild<CustomInfo>();
+        public CustomInfo CustomInfo => BookDescription?.GetFirstChild<CustomInfo>();
 
         /// <summary>
         /// Shortcut property. Gets list of BookBody elements from FictionBook.
@@ -126,7 +132,7 @@ namespace Fb2.Document
         /// Optional parameter. Book to use with Fb2Document. If ommited, <see cref="Book"/> property of created document returns <see langword="null"/>.
         /// </param>
         /// <returns>New instance of Fb2Document.</returns>
-        public static Fb2Document CreateDocument(FictionBook? fictionBook = null)
+        public static Fb2Document CreateDocument(FictionBook fictionBook = null)
         {
             var document = new Fb2Document
             {
@@ -150,7 +156,7 @@ namespace Fb2.Document
         /// </remarks>
         public void Load(
             [In] XDocument document,
-            [In] Fb2LoadingOptions? loadingOptions = null)
+            [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -171,7 +177,7 @@ namespace Fb2.Document
         /// </remarks>
         public void Load(
             [In] string fileContent,
-            [In] Fb2LoadingOptions? loadingOptions = null)
+            [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
                 throw new ArgumentNullException(nameof(fileContent));
@@ -181,37 +187,6 @@ namespace Fb2.Document
                 var document = XDocument.Parse(fileContent);
                 Load(document.Root, loadingOptions);
             });
-        }
-
-        /// <summary>
-        /// Loads fb2 file's content into Fb2Document model from string asynchronously
-        /// </summary>
-        /// <param name="fileContent">Content of a file read as string</param>
-        /// <param name="loadingOptions">Fb2Document loading options. This parameter is optional.</param>
-        /// <param name="cancellationToken"></param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="fileContent"/> is null.</exception>
-        /// <exception cref="Fb2DocumentLoadingException"></exception>
-        /// <remarks> 
-        /// This method is not Encoding-safe.
-        /// Loading will proceed with Encoding of string received.
-        /// This method exists mostly for lulz :)
-        /// </remarks>
-        public async Task LoadAsync(
-            [In] string fileContent,
-            [In] Fb2LoadingOptions? loadingOptions = null,
-            CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(fileContent))
-                throw new ArgumentNullException(nameof(fileContent));
-
-            await LoadHandledAsync(async innerCancellationToken =>
-            {
-                using var reader = new StringReader(fileContent);
-                var document = await XDocument
-                    .LoadAsync(reader, LoadOptions.None, innerCancellationToken);
-
-                Load(document.Root, loadingOptions);
-            }, cancellationToken);
         }
 
         /// <summary>
@@ -225,7 +200,7 @@ namespace Fb2.Document
         /// <remarks>Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used.</remarks>
         public void Load(
             [In] Stream fileContent,
-            [In] Fb2StreamLoadingOptions? loadingOptions = null)
+            [In] Fb2StreamLoadingOptions loadingOptions = null)
         {
             if (fileContent == null)
                 throw new ArgumentNullException(nameof(fileContent));
@@ -238,9 +213,11 @@ namespace Fb2.Document
 
             LoadHandled(() =>
             {
-                using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
-                var document = XDocument.Load(reader);
-                Load(document.Root, loadingOptions);
+                using (var reader = XmlReader.Create(fileContent, xmlReaderSetting))
+                {
+                    var document = XDocument.Load(reader);
+                    Load(document.Root, loadingOptions);
+                }
             });
         }
 
@@ -256,7 +233,7 @@ namespace Fb2.Document
         /// <remarks> Actual encoding of content will be determined automatically or <see cref="Encoding.Default"/> will be used. </remarks>
         public async Task LoadAsync(
             [In] Stream fileContent,
-            [In] Fb2StreamLoadingOptions? loadingOptions = null,
+            [In] Fb2StreamLoadingOptions loadingOptions = null,
             CancellationToken cancellationToken = default)
         {
             if (fileContent == null)
@@ -265,17 +242,34 @@ namespace Fb2.Document
             if (!fileContent.CanRead)
                 throw new ArgumentException($"Can`t read {nameof(fileContent)}, {nameof(Stream.CanRead)} is {false}");
 
-            var xmlReaderSetting = DefaultXmlReaderSettings.Clone();
-            xmlReaderSetting.CloseInput = loadingOptions?.CloseInputStream ?? false;
+            var closeInput = loadingOptions?.CloseInputStream ?? false;
 
             await LoadHandledAsync(async innerCancellationToken =>
             {
-                using var reader = XmlReader.Create(fileContent, xmlReaderSetting);
-                var document = await XDocument
-                    .LoadAsync(reader, LoadOptions.None, innerCancellationToken);
+                using (var sr = new StreamReader(
+                    fileContent,
+                    Encoding.Default,
+                    detectEncodingFromByteOrderMarks: true,
+                    DefaultBufferSize,
+                    leaveOpen: !closeInput))
+                {
+                    innerCancellationToken.ThrowIfCancellationRequested();
 
-                Load(document.Root, loadingOptions);
+                    var content = await sr.ReadToEndAsync();
+                    var document = XDocument.Parse(content);
+
+                    innerCancellationToken.ThrowIfCancellationRequested();
+
+                    Load(document.Root, loadingOptions);
+                }
+
             }, cancellationToken);
+
+            if (closeInput)
+            {
+                fileContent.Close();
+                fileContent.Dispose();
+            }
         }
 
         /// <summary>
@@ -285,7 +279,7 @@ namespace Fb2.Document
         /// <returns>
         /// XDocument instance formatted accordingly to Fb2 rules or <see langword="null"/> if <see cref="Book"/> is <see langword="null"/> or <see cref="IsLoaded"/> is <see langword="false"/>.
         /// </returns>
-        public XDocument? ToXml([In] Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
+        public XDocument ToXml([In] Fb2XmlSerializingOptions fb2XmlSerializingOptions = null)
         {
             if (Book == null || !IsLoaded)
                 return null;
@@ -304,7 +298,7 @@ namespace Fb2.Document
         /// <param name="fb2XmlSerializingOptions">Fb2Document to XML serialization options. This parameter is optional.</param>
         /// <returns>Content of a <see cref="Fb2Document"/> in <see cref="string"/> format if <see cref="Book"/> is loaded - otherwise <see langword="null"/>.
         /// </returns> 
-        public string? ToXmlString([In] Fb2XmlSerializingOptions? fb2XmlSerializingOptions = null)
+        public string ToXmlString([In] Fb2XmlSerializingOptions fb2XmlSerializingOptions = null)
         {
             var document = ToXml(fb2XmlSerializingOptions);
 
@@ -350,7 +344,7 @@ namespace Fb2.Document
             }
         }
 
-        private void Load([In] XElement? root, [In] Fb2LoadingOptions? loadingOptions = null)
+        private void Load([In] XElement root, [In] Fb2LoadingOptions loadingOptions = null)
         {
             if (root == null)
                 throw new ArgumentNullException(nameof(root));
@@ -366,7 +360,7 @@ namespace Fb2.Document
             IsLoaded = true;
         }
 
-        public override bool Equals(object? obj) =>
+        public override bool Equals(object obj) =>
             obj != null &&
             obj is Fb2Document other && // if `Book` is `null` and `other.Book` is also null - those are equal
             IsLoaded == other.IsLoaded &&

@@ -100,25 +100,25 @@ namespace Fb2.Document.Tests.IntegrationTests
             doc.IsLoaded.Should().BeFalse();
             doc.Book.Should().BeNull();
 
-            doc.Invoking(d => d.Load((Stream)null!))
+            doc.Invoking(d => d.Load((Stream)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            doc.Invoking(d => d.Load((string)null!))
+            doc.Invoking(d => d.Load((string)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            doc.Invoking(d => d.Load((XDocument)null!))
+            doc.Invoking(d => d.Load((XDocument)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
-            doc.Invoking(async d => await d.LoadAsync((Stream)null!))
+            doc.Invoking(async d => await d.LoadAsync((Stream)null))
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
 
-            doc.Invoking(async d => await d.LoadAsync((string)null!))
-                .Should()
-                .ThrowExactlyAsync<ArgumentNullException>();
+            //doc.Invoking(async d => await d.LoadAsync((string)null))
+            //    .Should()
+            //    .ThrowExactlyAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -161,255 +161,272 @@ namespace Fb2.Document.Tests.IntegrationTests
         [Fact]
         public async Task InstancesOfBookAreSame()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
-            RewindStream(sampleFileInfoStream);
+                RewindStream(sampleFileInfoStream);
 
-            var secondDocument = Fb2Document.CreateDocument();
-            await secondDocument.LoadAsync(sampleFileInfoStream);
+                var secondDocument = Fb2Document.CreateDocument();
+                await secondDocument.LoadAsync(sampleFileInfoStream);
 
-            firstDocument.Should().Be(secondDocument);
+                firstDocument.Should().Be(secondDocument);
 
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
+                var firstBook = firstDocument.Book;
+                var secondBook = secondDocument.Book;
 
-            firstBook.Should().Be(secondBook);
-            sampleFileInfoStream.Close();
+                firstBook.Should().Be(secondBook);
+                sampleFileInfoStream.Close();
+            }
         }
 
         [Fact]
         public async Task BookContentCheck()
         {
-            using var sampleFileInfo = GetSampleFileInfo(SampleFileName);
-            var document = new Fb2Document();
-            await document.LoadAsync(sampleFileInfo);
+            using (var sampleFileInfo = GetSampleFileInfo(SampleFileName))
+            {
+                var document = new Fb2Document();
+                await document.LoadAsync(sampleFileInfo);
 
-            document.Bodies.Should().HaveCount(3);
+                document.Bodies.Should().HaveCount(3);
 
-            var firstBody = document.Bodies[0];
-            var firstBodyTitle = firstBody.GetFirstChild<Title>();
-            firstBodyTitle.Should().NotBeNull();
-            var firstBodySections = firstBody.GetChildren<BodySection>();
-            firstBodySections.Should().HaveCount(9);
+                var firstBody = document.Bodies[0];
+                var firstBodyTitle = firstBody.GetFirstChild<Title>();
+                firstBodyTitle.Should().NotBeNull();
+                var firstBodySections = firstBody.GetChildren<BodySection>();
+                firstBodySections.Should().HaveCount(9);
 
-            var secondBody = document.Bodies[1];
-            var secondBodyAttributes = secondBody.Attributes.Should().HaveCount(1);
-            var secondBodyNameAttribute = secondBody.Attributes.First();
-            secondBodyNameAttribute.Key.Should().Be(AttributeNames.Name);
-            secondBodyNameAttribute.Value.Should().Be("notes");
+                var secondBody = document.Bodies[1];
+                var secondBodyAttributes = secondBody.Attributes.Should().HaveCount(1);
+                var secondBodyNameAttribute = secondBody.Attributes.First();
+                secondBodyNameAttribute.Key.Should().Be(AttributeNames.Name);
+                secondBodyNameAttribute.Value.Should().Be("notes");
 
-            var secondBodyTitle = secondBody.GetFirstChild<Title>();
-            secondBodyTitle.Should().NotBeNull();
+                var secondBodyTitle = secondBody.GetFirstChild<Title>();
+                secondBodyTitle.Should().NotBeNull();
 
-            var secondBodySections = secondBody.GetChildren<BodySection>();
-            secondBodySections.Should().HaveCount(20);
+                var secondBodySections = secondBody.GetChildren<BodySection>();
+                secondBodySections.Should().HaveCount(20);
 
-            var thirdBody = document.Bodies[2];
-            var thirdBodySections = thirdBody.GetChildren<BodySection>();
-            thirdBodySections.Should().HaveCount(1);
+                var thirdBody = document.Bodies[2];
+                var thirdBodySections = thirdBody.GetChildren<BodySection>();
+                thirdBodySections.Should().HaveCount(1);
 
-            document.BinaryImages.Should().HaveCount(33);
-            document.BookDescription.Should().NotBeNull();
-            document.Title.Should().NotBeNull();
-            document.DocumentInfo.Should().NotBeNull();
+                document.BinaryImages.Should().HaveCount(33);
+                document.BookDescription.Should().NotBeNull();
+                document.Title.Should().NotBeNull();
+                document.DocumentInfo.Should().NotBeNull();
 
-            document.SourceTitle.Should().BeNull();
-            document.PublishInfo.Should().BeNull();
-            document.CustomInfo.Should().NotBeNull();
+                document.SourceTitle.Should().BeNull();
+                document.PublishInfo.Should().BeNull();
+                document.CustomInfo.Should().NotBeNull();
 
-            var strContent = document.ToString();
-            strContent.Should().NotBeNullOrEmpty();
-            var stringXmlContent = document.ToXmlString();
-            stringXmlContent.Should().NotBeNullOrEmpty();
+                var strContent = document.ToString();
+                strContent.Should().NotBeNullOrEmpty();
+                var stringXmlContent = document.ToXmlString();
+                stringXmlContent.Should().NotBeNullOrEmpty();
+            }
         }
 
         [Fact]
         public async Task ExportDocument_AndReload_SameContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
-            var firstDocXml = firstDocument.ToXml();
-            var secondDocument = new Fb2Document();
-            secondDocument.Load(firstDocXml!);
+                var firstDocXml = firstDocument.ToXml();
+                var secondDocument = new Fb2Document();
+                secondDocument.Load(firstDocXml);
 
-            firstDocument.Should().Be(secondDocument);
+                firstDocument.Should().Be(secondDocument);
 
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
+                var firstBook = firstDocument.Book;
+                var secondBook = secondDocument.Book;
 
-            firstBook.Should().Be(secondBook);
+                firstBook.Should().Be(secondBook);
+            }
         }
 
         [Fact]
         public async Task ExportDocument_AsString_AndReload_SameContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
-            var docXmlString = firstDocument.ToXmlString(new Fb2XmlSerializingOptions(xDeclaration: new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
-            docXmlString.Should().StartWith("<?xml version=\"2.0\" encoding=\"utf-8\"?>");
+                var docXmlString = firstDocument.ToXmlString(new Fb2XmlSerializingOptions(xDeclaration: new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
+                docXmlString.Should().StartWith("<?xml version=\"2.0\" encoding=\"utf-8\"?>");
 
-            var docXmlStringNoOptions = firstDocument.ToXmlString();
-            docXmlStringNoOptions.Should().StartWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                var docXmlStringNoOptions = firstDocument.ToXmlString();
+                docXmlStringNoOptions.Should().StartWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+            }
         }
 
         [Fact]
         public async Task ExportDocument_WithoutUnsafeNodes_AndReload_DifferentContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
+
+                var firstUnsafeNodes = firstDocument.Book.GetDescendants(n => n.IsUnsafe).ToList();
+                firstUnsafeNodes.Should().NotBeNullOrEmpty();
 
 
-            var firstUnsafeNodes = firstDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
-            firstUnsafeNodes.Should().NotBeNullOrEmpty();
+                var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false));
+                var secondDocument = new Fb2Document();
+                secondDocument.Load(firstDocXml);
 
+                var secondUnsafeNodes = secondDocument.Book.GetDescendants(n => n.IsUnsafe).ToList();
+                secondUnsafeNodes.Should().BeNullOrEmpty();
 
-            var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false));
-            var secondDocument = new Fb2Document();
-            secondDocument.Load(firstDocXml!);
+                firstDocument.Should().NotBe(secondDocument);
 
-            var secondUnsafeNodes = secondDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
-            secondUnsafeNodes.Should().BeNullOrEmpty();
+                var firstBook = firstDocument.Book;
+                var secondBook = secondDocument.Book;
 
-            firstDocument.Should().NotBe(secondDocument);
-
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
-
-            firstBook.Should().NotBe(secondBook);
+                firstBook.Should().NotBe(secondBook);
+            }
         }
 
         [Fact]
         public async Task ExportDocument_WithDifferentOptions()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
 
-            var firstUnsafeNodes = firstDocument.Book!.GetDescendants(n => n.IsUnsafe).ToList();
-            firstUnsafeNodes.Should().NotBeNullOrEmpty();
+                var firstUnsafeNodes = firstDocument.Book.GetDescendants(n => n.IsUnsafe).ToList();
+                firstUnsafeNodes.Should().NotBeNullOrEmpty();
 
 
-            var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false, new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
-            firstDocXml.Should().NotBeNull();
-            firstDocXml!.Declaration.Should().NotBeNull();
-            firstDocXml.Declaration!.Version.Should().Be("2.0");
-            firstDocXml.Declaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
+                var firstDocXml = firstDocument.ToXml(new Fb2XmlSerializingOptions(false, new XDeclaration("2.0", Encoding.UTF8.HeaderName, null)));
+                firstDocXml.Should().NotBeNull();
+                firstDocXml.Declaration.Should().NotBeNull();
+                firstDocXml.Declaration.Version.Should().Be("2.0");
+                firstDocXml.Declaration.Encoding.Should().Be(Encoding.UTF8.HeaderName);
+            }
         }
 
         [Fact]
         public async Task LoadWithoutUnsafeNodes_DifferentContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
-            RewindStream(sampleFileInfoStream);
+                RewindStream(sampleFileInfoStream);
 
-            // loading document without unsafe nodes
-            var secondDocument = new Fb2Document();
-            await secondDocument.LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(false));
+                // loading document without unsafe nodes
+                var secondDocument = new Fb2Document();
+                await secondDocument.LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(false));
 
-            firstDocument.Should().NotBe(secondDocument);
+                firstDocument.Should().NotBe(secondDocument);
 
-            var firstBook = firstDocument.Book;
-            var secondBook = secondDocument.Book;
+                var firstBook = firstDocument.Book;
+                var secondBook = secondDocument.Book;
 
-            // different content due to skipped unsafe nodes
-            firstBook.Should().NotBe(secondBook);
+                // different content due to skipped unsafe nodes
+                firstBook.Should().NotBe(secondBook);
+            }
         }
 
         [Fact]
         public async Task LoadWithoutMetadata_DifferentContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                // loading document first time
+                var firstDocument = new Fb2Document();
+                await firstDocument.LoadAsync(sampleFileInfoStream);
 
-            // loading document first time
-            var firstDocument = new Fb2Document();
-            await firstDocument.LoadAsync(sampleFileInfoStream);
+                RewindStream(sampleFileInfoStream);
 
-            RewindStream(sampleFileInfoStream);
+                // loading document without unsafe nodes
+                var secondDocument = new Fb2Document();
+                await secondDocument.LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(loadNamespaceMetadata: false));
 
-            // loading document without unsafe nodes
-            var secondDocument = new Fb2Document();
-            await secondDocument.LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(loadNamespaceMetadata: false));
+                firstDocument.Book.NodeMetadata.Should().NotBeNull();
+                secondDocument.Book.NodeMetadata.Should().BeNull();
 
-            firstDocument.Book!.NodeMetadata.Should().NotBeNull();
-            secondDocument.Book!.NodeMetadata.Should().BeNull();
+                firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
+                secondDocument.Bodies.First().NodeMetadata.Should().BeNull();
 
-            firstDocument.Bodies.First().NodeMetadata.Should().NotBeNull();
-            secondDocument.Bodies.First().NodeMetadata.Should().BeNull();
-
-            firstDocument.Should().NotBe(secondDocument);
+                firstDocument.Should().NotBe(secondDocument);
+            }
         }
 
         [Fact]
         public async Task Load_WithCloseInput_ClosesStream()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
 
-            // loading document without unsafe nodes
-            var firstDocument = new Fb2Document();
-            await firstDocument
-                .LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(closeInputStream: true));
+                // loading document without unsafe nodes
+                var firstDocument = new Fb2Document();
+                await firstDocument
+                    .LoadAsync(sampleFileInfoStream, new Fb2StreamLoadingOptions(closeInputStream: true));
 
-            await sampleFileInfoStream
-                .Invoking(async s => await s.WriteAsync(new byte[5] { 4, 2, 0, 6, 9 }))
-                .Should()
-                .ThrowExactlyAsync<ObjectDisposedException>();
+                await sampleFileInfoStream
+                    .Invoking(async s => await s.WriteAsync(new byte[5] { 4, 2, 0, 6, 9 }, 0, 5))
+                    .Should()
+                    .ThrowExactlyAsync<ObjectDisposedException>();
+            }
         }
 
         [Fact]
         public async Task SameFile_DifferentLoads_SameContent()
         {
-            using var sampleFileInfoStream = GetSampleFileInfo(SampleFileName);
+            using (var sampleFileInfoStream = GetSampleFileInfo(SampleFileName))
+            {
+                var fileStringContent = await ReadFileAsString(sampleFileInfoStream);
+                RewindStream(sampleFileInfoStream);
+                var xDocument = ReadFileAsXDocument(sampleFileInfoStream);
+                RewindStream(sampleFileInfoStream);
 
-            var fileStringContent = await ReadFileAsString(sampleFileInfoStream);
-            RewindStream(sampleFileInfoStream);
-            var xDocument = await ReadFileAsXDocument(sampleFileInfoStream);
-            RewindStream(sampleFileInfoStream);
+                var stringLoadedFb2Document = new Fb2Document();
+                stringLoadedFb2Document.Load(fileStringContent); // string
 
-            var stringLoadedFb2Document = new Fb2Document();
-            stringLoadedFb2Document.Load(fileStringContent); // string
+                var stringLoadedAsyncFb2Document = new Fb2Document();
+                stringLoadedAsyncFb2Document.Load(fileStringContent);
 
-            var stringLoadedAsyncFb2Document = new Fb2Document();
-            await stringLoadedAsyncFb2Document.LoadAsync(fileStringContent);
+                var xmlLoadedFb2Document = new Fb2Document();
+                xmlLoadedFb2Document.Load(xDocument); // xDocument
 
-            var xmlLoadedFb2Document = new Fb2Document();
-            xmlLoadedFb2Document.Load(xDocument); // xDocument
-
-            var streamLoadedFb2Document = new Fb2Document();
-            var streamLoadedAsyncFb2Document = new Fb2Document();
-
-
-            streamLoadedFb2Document.Load(sampleFileInfoStream); // sync stream
-            RewindStream(sampleFileInfoStream);
-            await streamLoadedAsyncFb2Document.LoadAsync(sampleFileInfoStream); // async stream
-
-            stringLoadedFb2Document
-                .Should().Be(stringLoadedAsyncFb2Document)
-                .And.Be(xmlLoadedFb2Document)
-                .And.Be(streamLoadedFb2Document)
-                .And.Be(streamLoadedAsyncFb2Document);
+                var streamLoadedFb2Document = new Fb2Document();
+                var streamLoadedAsyncFb2Document = new Fb2Document();
 
 
-            stringLoadedFb2Document.Book
-                .Should().Be(stringLoadedAsyncFb2Document.Book)
-                .And.Be(xmlLoadedFb2Document.Book)
-                .And.Be(streamLoadedFb2Document.Book)
-                .And.Be(streamLoadedAsyncFb2Document.Book);
+                streamLoadedFb2Document.Load(sampleFileInfoStream); // sync stream
+                RewindStream(sampleFileInfoStream);
+                await streamLoadedAsyncFb2Document.LoadAsync(sampleFileInfoStream); // async stream
+
+                stringLoadedFb2Document
+                    .Should().Be(stringLoadedAsyncFb2Document)
+                    .And.Be(xmlLoadedFb2Document)
+                    .And.Be(streamLoadedFb2Document)
+                    .And.Be(streamLoadedAsyncFb2Document);
+
+
+                stringLoadedFb2Document.Book
+                    .Should().Be(stringLoadedAsyncFb2Document.Book)
+                    .And.Be(xmlLoadedFb2Document.Book)
+                    .And.Be(streamLoadedFb2Document.Book)
+                    .And.Be(streamLoadedAsyncFb2Document.Book);
+            }
         }
 
         [Fact]
@@ -484,7 +501,7 @@ namespace Fb2.Document.Tests.IntegrationTests
         }
 
         // recommended setting to read xml
-        private static async Task<XDocument> ReadFileAsXDocument(Stream fileContent)
+        private static XDocument ReadFileAsXDocument(Stream fileContent)
         {
             var reader = XmlReader.Create(fileContent, new XmlReaderSettings
             {
@@ -494,7 +511,7 @@ namespace Fb2.Document.Tests.IntegrationTests
                 ConformanceLevel = ConformanceLevel.Document
             });
 
-            var xDocument = await XDocument.LoadAsync(reader, LoadOptions.None, default);
+            var xDocument = XDocument.Load(reader, LoadOptions.None);
             return xDocument;
         }
 

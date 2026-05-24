@@ -13,11 +13,11 @@ namespace Fb2.Document.Tests.ModelsTests
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("  ")]
-        public void Fb2Attribute_Create_EmptyKey_Throws(string? emptyKey)
+        public void Fb2Attribute_Create_EmptyKey_Throws(string emptyKey)
         {
             Action action = () =>
             {
-                var attribute = new Fb2Attribute(emptyKey!, "2");
+                var attribute = new Fb2Attribute(emptyKey, "2");
             };
 
             action

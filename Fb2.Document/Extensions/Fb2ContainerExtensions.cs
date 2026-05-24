@@ -74,7 +74,7 @@ namespace Fb2.Document.Extensions
         public static T AppendTextContent<T>(
             this T fb2Container,
             string content,
-            string? separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
+            string separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(content, separator);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContent(Func{string}, string?)"/> method.
@@ -90,8 +90,7 @@ namespace Fb2.Document.Extensions
         public static T AppendTextContent<T>(
             this T fb2Container,
             Func<string> contentProvider,
-            string? separator = null) where T : Fb2Container =>
-                (T)fb2Container.AddTextContent(contentProvider, separator);
+            string separator = null) where T : Fb2Container => (T)fb2Container.AddTextContent(contentProvider, separator);
 
         /// <summary>
         /// "Type-accurate" wrapper for <see cref="Fb2Container.AddTextContentAsync(Func{CancellationToken, Task{string}}, string?, CancellationToken)"/> method.
@@ -108,7 +107,7 @@ namespace Fb2.Document.Extensions
         public static async Task<T> AppendTextContentAsync<T>(
            this T fb2Container,
            Func<CancellationToken, Task<string>> contentProvider,
-           string? separator = null,
+           string separator = null,
            CancellationToken cancellationToken = default) where T : Fb2Container =>
                (T)(await fb2Container.AddTextContentAsync(contentProvider, separator, cancellationToken));
 

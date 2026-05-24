@@ -13,12 +13,12 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Default Namespace of original <see cref="XNode"/>.
         /// </summary>
-        public XNamespace? DefaultNamespace { get; private set; }
+        public XNamespace DefaultNamespace { get; private set; } = null;
 
         /// <summary>
         /// Namespace Declaration attributes of original <see cref="XNode"/>.
         /// </summary>
-        public List<XAttribute>? NamespaceDeclarations { get; private set; }
+        public List<XAttribute> NamespaceDeclarations { get; private set; } = null;
 
         /// <summary>
         /// Creates new instance of <see cref="Fb2NodeMetadata"/>.
@@ -27,8 +27,8 @@ namespace Fb2.Document.Models.Base
         /// <param name="namespaceDeclarations">Set of Namespace Declaration Attributes of original <see cref="XNode"/>. </param>
         /// <exception cref="ArgumentException"></exception>
         public Fb2NodeMetadata(
-            XNamespace? defaultNamespace = null,
-            IEnumerable<XAttribute>? namespaceDeclarations = null)
+            XNamespace defaultNamespace = null,
+            IEnumerable<XAttribute> namespaceDeclarations = null)
         {
             if (defaultNamespace != null)
                 DefaultNamespace = defaultNamespace;
@@ -56,7 +56,7 @@ namespace Fb2.Document.Models.Base
                 null;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj == null)
                 return false;
@@ -82,7 +82,7 @@ namespace Fb2.Document.Models.Base
                 (NamespaceDeclarations?.Count == otherMetadata.NamespaceDeclarations?.Count &&
                 NamespaceDeclarations != null && otherMetadata.NamespaceDeclarations != null &&
                 NamespaceDeclarations.All(nd =>
-                    otherMetadata.NamespaceDeclarations!.Any(nd2 =>
+                    otherMetadata.NamespaceDeclarations.Any(nd2 =>
                         nd2.IsNamespaceDeclaration == nd.IsNamespaceDeclaration &&
                         nd2.Name == nd.Name &&
                         nd2.Value.Equals(nd.Value)

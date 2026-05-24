@@ -14,15 +14,15 @@ namespace Fb2.Document.Tests.ModelsTests
             var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
             sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
 
             sequenceInfo.AddContent("hello world");
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
 
             sequenceInfo.ClearContent();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
             sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
 
             var sequenceInfoString = sequenceInfo.ToString();
             sequenceInfoString.Should().NotBeNull();
@@ -44,13 +44,13 @@ namespace Fb2.Document.Tests.ModelsTests
             var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
             sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasAttributes.Should().BeFalse();
 
             var testSequenceName = "Test Sequence Name";
             sequenceInfo.AddAttribute(AttributeNames.Name, testSequenceName);
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasAttributes.Should().BeTrue();
 
             var sequenceInfoString = sequenceInfo.ToString();
@@ -64,13 +64,13 @@ namespace Fb2.Document.Tests.ModelsTests
             var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
             sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasAttributes.Should().BeFalse();
 
             var testSequenceNumber = 2;
             sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasContent.Should().BeFalse();
             sequenceInfo.HasAttributes.Should().BeTrue();
 
@@ -85,7 +85,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var sequenceInfo = Fb2NodeFactory.GetNodeByName(ElementNames.Sequence) as Fb2Element;
             sequenceInfo.Should().NotBeNull();
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasAttributes.Should().BeFalse();
 
             var testSequenceName = "Test Sequence Name";
@@ -94,7 +94,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var testSequenceNumber = 2;
             sequenceInfo.AddAttribute(AttributeNames.Number, testSequenceNumber.ToString());
 
-            sequenceInfo!.Content.Should().BeEmpty();
+            sequenceInfo.Content.Should().BeEmpty();
             sequenceInfo.HasContent.Should().BeFalse();
             sequenceInfo.HasAttributes.Should().BeTrue();
             var sequenceInfoString = sequenceInfo.ToString();

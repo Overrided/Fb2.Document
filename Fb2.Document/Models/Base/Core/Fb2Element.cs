@@ -15,12 +15,12 @@ namespace Fb2.Document.Models.Base
     /// </summary>
     public abstract class Fb2Element : Fb2Node
     {
-        protected string? content = null;
+        protected string content = null;
 
         /// <summary>
         /// Content (value) of element. Available after Load(...) method call.
         /// </summary>
-        public string Content => HasContent ? content! : string.Empty;
+        public string Content => HasContent ? content : string.Empty;
 
         /// <summary>
         /// <para>Indicates if content of an element should be written from a new line.</para>
@@ -47,19 +47,25 @@ namespace Fb2.Document.Models.Base
         /// <remarks>Original content of <see cref="XNode"/> is  <c>NOT preserved</c>  except for <see cref="Code" />.</remarks>
         public override void Load(
             [In] XNode node,
-            [In] Fb2Container? parentNode = null,
+            [In] Fb2Container parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
         {
             base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
 
-            var rawContent = node.NodeType switch
+            string rawContent = null;
+            switch (node.NodeType)
             {
-                XmlNodeType.Element => ((XElement)node).Value,
-                XmlNodeType.Text => ((XText)node).Value,
-                _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
-            };
+                case XmlNodeType.Element:
+                    rawContent = ((XElement)node).Value;
+                    break;
+                case XmlNodeType.Text:
+                    rawContent = ((XText)node).Value;
+                    break;
+                default:
+                    throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}");
+            }
 
             if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
                 content = trimWhitespace.Replace(rawContent, Whitespace);
@@ -74,7 +80,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="separator">Separator to split text from rest of the content.</param>
         /// <returns>Current element.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Element AddContent(Func<string> contentProvider, string? separator = null)
+        public Fb2Element AddContent(Func<string> contentProvider, string separator = null)
         {
             if (contentProvider == null)
                 throw new ArgumentNullException(nameof(contentProvider));
@@ -100,7 +106,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
         public async Task<Fb2Element> AddContentAsync(
             Func<CancellationToken, Task<string>> contentProvider,
-            string? separator = null,
+            string separator = null,
             CancellationToken cancellationToken = default)
         {
             if (contentProvider == null)
@@ -124,7 +130,7 @@ namespace Fb2.Document.Models.Base
         /// <para>To insert new line use <see cref="EmptyLine"/> Fb2Element instead.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual Fb2Element AddContent(string newContent, string? separator = null)
+        public virtual Fb2Element AddContent(string newContent, string separator = null)
         {
             if (string.IsNullOrEmpty(newContent))
                 throw new ArgumentNullException(nameof(newContent));
@@ -134,7 +140,7 @@ namespace Fb2.Document.Models.Base
                 SecurityElement.Escape(separator.Replace(Environment.NewLine, Whitespace));
 
             var normalizedNewContent = newContent.Replace(Environment.NewLine, Whitespace);
-            normalizedNewContent = SecurityElement.Escape(normalizedNewContent)!;
+            normalizedNewContent = SecurityElement.Escape(normalizedNewContent);
 
             content = string.Join(normalizedSeparator, content, normalizedNewContent);
 
@@ -166,14 +172,14 @@ namespace Fb2.Document.Models.Base
         {
             var element = base.ToXml(serializeUnsafeNodes);
             if (HasContent)
-                element.Value = content!;
+                element.Value = content;
 
             return element;
         }
 
         public override string ToString() => Content;
 
-        public override bool Equals(object? other)
+        public override bool Equals(object other)
         {
             if (!base.Equals(other))
                 return false;
@@ -195,7 +201,7 @@ namespace Fb2.Document.Models.Base
             if (!bothContentsAreNotEmpty)
                 return false;
 
-            var result = content!.Equals(otherContent, StringComparison.InvariantCulture);
+            var result = content.Equals(otherContent, StringComparison.InvariantCulture);
 
             return result;
         }
@@ -211,9 +217,9 @@ namespace Fb2.Document.Models.Base
             var clone = base.Clone() as Fb2Element;
 
             if (HasContent)
-                clone!.content = new string(content);
+                clone.content = new string(content.ToCharArray());
 
-            return clone!;
+            return clone;
         }
     }
 }

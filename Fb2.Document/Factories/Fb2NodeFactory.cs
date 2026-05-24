@@ -108,7 +108,7 @@ namespace Fb2.Document.Factories
             var modelType = result.Value;
 
             var model = Activator.CreateInstance(modelType) as Fb2Node; // suppressed warning
-            return model!;
+            return model;
         }
 
         /// <summary>

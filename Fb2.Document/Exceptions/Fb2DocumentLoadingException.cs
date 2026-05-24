@@ -12,7 +12,7 @@ namespace Fb2.Document.Exceptions
         /// </summary>
         /// <param name="message">Exception message.</param>
         /// <param name="innerException">Inner exception. This parameter is optional.</param>
-        public Fb2DocumentLoadingException(string message, Exception? innerException = null)
+        public Fb2DocumentLoadingException(string message, Exception innerException = null)
             : base(message, innerException) { }
     }
 }

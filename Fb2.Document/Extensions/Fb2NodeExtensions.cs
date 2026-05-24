@@ -104,7 +104,7 @@ namespace Fb2.Document.Extensions
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exceptions.NoAttributesAllowedException"></exception>
         /// <exception cref="Exceptions.UnexpectedAttributeException"></exception>
-        public static T AppendAttribute<T>(this T fb2Node, string key, string value, string? namespaceName = null) where T : Fb2Node =>
+        public static T AppendAttribute<T>(this T fb2Node, string key, string value, string namespaceName = null) where T : Fb2Node =>
             (T)fb2Node.AddAttribute(key, value, namespaceName);
 
         /// <summary>

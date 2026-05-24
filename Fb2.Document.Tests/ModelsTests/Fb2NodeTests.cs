@@ -48,7 +48,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             var instanceTwo = instance.Clone() as Fb2Node;
-            instanceTwo!.AddAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "testValue"));
+            instanceTwo.AddAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "testValue"));
 
             instance.Should().NotBe(instanceTwo);
 
@@ -73,7 +73,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var instanceTwo = instance.Clone() as Fb2Node;
 
             instanceTwo.Should().NotBeNull();
-            instanceTwo!.HasAttributes.Should().BeTrue();
+            instanceTwo.HasAttributes.Should().BeTrue();
             instanceTwo.Attributes.Should().HaveCount(1);
             instanceTwo.NodeMetadata.Should().NotBeNull();
 
@@ -110,7 +110,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var xNode = document.FirstNode;
 
             var paragraphNode = new Paragraph();
-            paragraphNode.Load(xNode!);
+            paragraphNode.Load(xNode);
 
             paragraphNode.HasContent.Should().BeTrue();
             paragraphNode.Content.Count.Should().Be(1);
@@ -122,16 +122,16 @@ namespace Fb2.Document.Tests.ModelsTests
                 .FirstOrDefault(a => a.Key.Equals(AttributeNames.Id));
 
             idAttr.Should().NotBeNull();
-            idAttr!.Key.Should().Be(AttributeNames.Id);
-            idAttr!.Value.Should().Be("p_1");
+            idAttr.Key.Should().Be(AttributeNames.Id);
+            idAttr.Value.Should().Be("p_1");
 
             var langAttr = paragraphNode
                 .Attributes
                 .FirstOrDefault(a => a.Key.Equals(AttributeNames.Language));
 
             langAttr.Should().NotBeNull();
-            langAttr!.Key.Should().Be(AttributeNames.Language);
-            langAttr!.Value.Should().Be("ua");
+            langAttr.Key.Should().Be(AttributeNames.Language);
+            langAttr.Value.Should().Be("ua");
         }
 
         [Theory]
@@ -215,17 +215,17 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.AddAttribute((Fb2Attribute)null!))
+                .Invoking(i => i.AddAttribute((Fb2Attribute)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.AddAttribute((Func<Fb2Attribute>)null!))
+                .Invoking(i => i.AddAttribute((Func<Fb2Attribute>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.AddAttributeAsync(null!, default))
+                .Invoking(i => i.AddAttributeAsync(null, default))
                 .Should()
                 .ThrowExactlyAsync<ArgumentNullException>();
 
@@ -245,7 +245,7 @@ namespace Fb2.Document.Tests.ModelsTests
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.AddAttributes((List<Fb2Attribute>)null!))
+                .Invoking(i => i.AddAttributes((List<Fb2Attribute>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
         }
@@ -358,7 +358,7 @@ namespace Fb2.Document.Tests.ModelsTests
             if (!instance.HasAllowedAttributes)
                 return;
 
-            var firstAlowedAttributeName = instance.AllowedAttributes!.First();
+            var firstAlowedAttributeName = instance.AllowedAttributes.First();
 
             instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "testValue"));
 
@@ -376,7 +376,7 @@ namespace Fb2.Document.Tests.ModelsTests
             if (!instance.HasAllowedAttributes)
                 return;
 
-            var firstAlowedAttributeName = instance.AllowedAttributes!.First();
+            var firstAlowedAttributeName = instance.AllowedAttributes.First();
 
             instance.AddAttribute(new Fb2Attribute(firstAlowedAttributeName, "<testValue"));
             CheckAttributes(instance, 1, firstAlowedAttributeName, "&lt;testValue");
@@ -493,19 +493,19 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.RemoveAttribute((Fb2Attribute)null!))
+                .Invoking(i => i.RemoveAttribute((Fb2Attribute)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>()
                 .WithParameterName("fb2Attribute");
 
             instance
-                .Invoking(i => i.RemoveAttribute((Func<Fb2Attribute, bool>)null!))
+                .Invoking(i => i.RemoveAttribute((Func<Fb2Attribute, bool>)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>()
                 .WithParameterName("attributePredicate");
 
             instance
-                .Invoking(i => i.RemoveAttribute((string)null!))
+                .Invoking(i => i.RemoveAttribute((string)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>()
                 .WithParameterName("key");
@@ -526,17 +526,17 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.RemoveAttribute(instance.AllowedAttributes!.First()))
+                .Invoking(i => i.RemoveAttribute(instance.AllowedAttributes.First()))
                 .Should()
                 .NotThrow();
 
             instance
-                .Invoking(i => i.RemoveAttribute((a) => a.Key == instance.AllowedAttributes!.First()))
+                .Invoking(i => i.RemoveAttribute((a) => a.Key == instance.AllowedAttributes.First()))
                 .Should()
                 .NotThrow();
 
             instance
-                .Invoking(i => i.RemoveAttribute(new Fb2Attribute(instance.AllowedAttributes!.First(), "test")))
+                .Invoking(i => i.RemoveAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "test")))
                 .Should()
                 .NotThrow();
         }
@@ -574,12 +574,12 @@ namespace Fb2.Document.Tests.ModelsTests
                 return;
 
             instance
-                .Invoking(i => i.HasAttribute((Fb2Attribute)null!))
+                .Invoking(i => i.HasAttribute((Fb2Attribute)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
             instance
-                .Invoking(i => i.HasAttribute((string)null!))
+                .Invoking(i => i.HasAttribute((string)null))
                 .Should()
                 .ThrowExactly<ArgumentNullException>();
 
@@ -600,11 +600,11 @@ namespace Fb2.Document.Tests.ModelsTests
 
             instance.Attributes.Should().BeEmpty();
 
-            instance.HasAttribute(instance.AllowedAttributes!.First()).Should().BeFalse();
-            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes!.First(), "blah")).Should().BeFalse();
+            instance.HasAttribute(instance.AllowedAttributes.First()).Should().BeFalse();
+            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah")).Should().BeFalse();
 
-            instance.HasAttribute(instance.AllowedAttributes!.First(), true).Should().BeFalse();
-            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes!.First(), "blah", "http://www.w3.org//xlink")).Should().BeFalse();
+            instance.HasAttribute(instance.AllowedAttributes.First(), true).Should().BeFalse();
+            instance.HasAttribute(new Fb2Attribute(instance.AllowedAttributes.First(), "blah", "http://www.w3.org//xlink")).Should().BeFalse();
         }
 
         [Theory]
@@ -616,8 +616,8 @@ namespace Fb2.Document.Tests.ModelsTests
 
             instance.Attributes.Should().BeEmpty();
 
-            instance.GetAttribute(instance.AllowedAttributes!.First()).Should().BeNull();
-            instance.GetAttribute(instance.AllowedAttributes!.First(), true).Should().BeNull();
+            instance.GetAttribute(instance.AllowedAttributes.First()).Should().BeNull();
+            instance.GetAttribute(instance.AllowedAttributes.First(), true).Should().BeNull();
         }
 
         [Theory]
@@ -629,13 +629,13 @@ namespace Fb2.Document.Tests.ModelsTests
 
             instance.Attributes.Should().BeEmpty();
 
-            instance.TryGetAttribute(instance.AllowedAttributes!.First(), out var result)
+            instance.TryGetAttribute(instance.AllowedAttributes.First(), out var result)
                 .Should()
                 .BeFalse();
 
             result.Should().BeNull();
 
-            instance.TryGetAttribute(instance.AllowedAttributes!.First(), true, out var resultIgnoreCase)
+            instance.TryGetAttribute(instance.AllowedAttributes.First(), true, out var resultIgnoreCase)
                 .Should()
                 .BeFalse();
 
@@ -842,7 +842,7 @@ namespace Fb2.Document.Tests.ModelsTests
             var leafText = parent1.Content.First();
             leafText.Should().NotBeNull();
             leafText.Should().BeOfType<TextItem>();
-            (leafText as TextItem)!.Content.Should().Be("leaf node text");
+            (leafText as TextItem).Content.Should().Be("leaf node text");
 
             parent1.Parent.Should().BeNull();
             parent1.GetAncestors().Should().NotBeNull().And.BeEmpty();
@@ -865,9 +865,9 @@ namespace Fb2.Document.Tests.ModelsTests
             string expectedValue)
         {
             instance.Should().NotBeNull();
-            instance!.Attributes.Should().HaveCount(expectedCount);
+            instance.Attributes.Should().HaveCount(expectedCount);
             instance.Attributes.Should().Contain((attr) => attr.Key == expectedName);
-            instance!.GetAttribute(expectedName)!.Value.Should().Be(expectedValue);
+            instance.GetAttribute(expectedName).Value.Should().Be(expectedValue);
         }
     }
 }

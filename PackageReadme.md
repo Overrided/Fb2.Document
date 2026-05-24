@@ -6,9 +6,9 @@ Fb2.Document is lightweight, fast .Net 3.1/5/6/7 lib with bunch of APIs to opera
 Fb2.Document is the easiest way to build reader or editor app for [Fb2](https://en.wikipedia.org/wiki/FictionBook) book format.
 
 
-# Version 2.3.1
+# Version 1.3.1
 
-`2.3.1` version of `Fb2.Document` library is basically backport of latest version - `2.5.0` - to .Net 3.1/5/6/7.
+`1.3.1` version of `Fb2.Document` library is basically backport of latest version - `2.5.0` - to `.Net Standard 2.0`.
 
 - [Async methods updates](#async-methods-updates)
 - [Other Updates](#updates)

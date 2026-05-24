@@ -31,7 +31,7 @@ namespace Fb2.Document.Models.Base
         /// </summary>
         protected static readonly Regex trimWhitespace = new Regex(@"\s+", RegexOptions.Multiline);
 
-        private List<Fb2Attribute>? attributes;
+        private List<Fb2Attribute> attributes = null;
 
         /// <summary>
         /// Node name, used during document parsing and validation.
@@ -47,7 +47,7 @@ namespace Fb2.Document.Models.Base
         /// Returns actual node's attributes in form of <see cref="ImmutableList{Models.Fb2Attribute}"/>, <c>T is</c> <see cref="Fb2Attribute"/>.
         /// </summary>
         public ImmutableHashSet<Fb2Attribute> Attributes => HasAttributes ?
-            attributes!.ToImmutableHashSet() :
+            attributes.ToImmutableHashSet() :
             ImmutableHashSet<Fb2Attribute>.Empty;
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// List of allowed attribure names for particular element.
         /// </summary>
-        public virtual ImmutableHashSet<string>? AllowedAttributes { get; }
+        public virtual ImmutableHashSet<string> AllowedAttributes { get; } = null;
 
         /// <summary>
         /// Indicates if element has any AllowedAttibutes.
@@ -79,14 +79,14 @@ namespace Fb2.Document.Models.Base
         /// <summary>
         /// Returns Parent node for current node.
         /// </summary>
-        public Fb2Container? Parent { get; internal set; } // as far as we can go to prevent public access to setter of Parent
+        public Fb2Container Parent { get; internal set; } = null; // as far as we can go to prevent public access to setter of Parent
 
         /// <summary>
         /// <para>Includes XML info: Default Namespace and namespace declarations attributes.</para>
         /// <para>Is applied during loading/serialization of Fb2Node.</para>
         /// <para>Is not used in Equals and GetHashCode overrides.</para>
         /// </summary>
-        public Fb2NodeMetadata? NodeMetadata { get; set; }
+        public Fb2NodeMetadata NodeMetadata { get; set; } = null;
 
         /// <summary>
         /// Basic Load of node - <paramref name="node"/> validation and populating <see cref="Attributes"/> and <see cref="NodeMetadata"/>.
@@ -100,7 +100,7 @@ namespace Fb2.Document.Models.Base
         /// <exception cref="Fb2NodeLoadingException"></exception>
         public virtual void Load(
             [In] XNode node,
-            [In] Fb2Container? parentNode = null,
+            [In] Fb2Container parentNode = null,
             bool preserveWhitespace = false,
             bool loadUnsafe = true,
             bool loadNamespaceMetadata = true)
@@ -129,7 +129,7 @@ namespace Fb2.Document.Models.Base
                 //.DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
                 .GroupBy(a => a.Name.LocalName.ToLowerInvariant())
                 .Select(g => g.First())
-                .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
+                .Where(da => AllowedAttributes.Contains(da.Name.LocalName.ToLowerInvariant()))
                 .Select(attr =>
                 {
                     var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
@@ -144,7 +144,7 @@ namespace Fb2.Document.Models.Base
 
             EnsureAttributesInitialized(allFilteredAttributes.Length);
 
-            attributes!.AddRange(allFilteredAttributes);
+            attributes.AddRange(allFilteredAttributes);
         }
 
         /// <summary>
@@ -201,7 +201,7 @@ namespace Fb2.Document.Models.Base
             if (!HasAttributes)
                 return false;
 
-            var hasAttribute = attributes!.Contains(fb2Attribute);
+            var hasAttribute = attributes.Contains(fb2Attribute);
             return hasAttribute;
         }
 
@@ -221,8 +221,8 @@ namespace Fb2.Document.Models.Base
                 return false;
 
             return ignoreCase ?
-                attributes!.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
-                attributes!.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+                attributes.Any(attr => attr.Key.EqualsIgnoreCase(key)) :
+                attributes.Any(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
         }
 
         /// <summary>
@@ -234,14 +234,14 @@ namespace Fb2.Document.Models.Base
         /// Returns first matching attribute by given <paramref name="key"/> or <c>default(Fb2Attribute)</c> if no such element is found.
         /// </returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public Fb2Attribute? GetAttribute(string key, bool ignoreCase = false)
+        public Fb2Attribute GetAttribute(string key, bool ignoreCase = false)
         {
             if (!HasAttribute(key, ignoreCase))
                 return null;
 
             var attribute = ignoreCase ?
-                attributes!.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
-                attributes!.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
+                attributes.FirstOrDefault(attr => attr.Key.EqualsIgnoreCase(key)) :
+                attributes.FirstOrDefault(attr => attr.Key.Equals(key, StringComparison.InvariantCulture));
 
             return attribute;
         }
@@ -252,7 +252,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="key">Key to match attribute by.</param>
         /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
-        public bool TryGetAttribute(string key, out Fb2Attribute? result)
+        public bool TryGetAttribute(string key, out Fb2Attribute result)
         {
             var attribute = GetAttribute(key, false);
 
@@ -267,7 +267,7 @@ namespace Fb2.Document.Models.Base
         /// <param name="ignoreCase">Indicates if case-sensitive <paramref name="key"/> comparison should be used.</param>
         /// <param name="result">First matching <see cref="Fb2Attribute"/> if found, otherwise <see cref="default(Fb2Attribute)"/>.</param>
         /// <returns><see langword="true"/> if attribute with given <paramref name="key"/> found, otherwise <see langword="false"/>.</returns>
-        public bool TryGetAttribute(string key, bool ignoreCase, out Fb2Attribute? result)
+        public bool TryGetAttribute(string key, bool ignoreCase, out Fb2Attribute result)
         {
             var attribute = GetAttribute(key, ignoreCase);
 
@@ -364,7 +364,7 @@ namespace Fb2.Document.Models.Base
         /// <para>Optional, can be <see langword="null"/>.</para>
         /// <para>NamespaceName for attribute, used by <see cref="ToXml"/> serialization.</para></param>
         /// <returns>Current node.</returns>
-        public Fb2Node AddAttribute(string key, string value, string? namespaceName = null)
+        public Fb2Node AddAttribute(string key, string value, string namespaceName = null)
         {
             var fb2Attribute = new Fb2Attribute(key, value, namespaceName);
             return AddAttribute(fb2Attribute);
@@ -388,7 +388,7 @@ namespace Fb2.Document.Models.Base
 
             var key = fb2Attribute.Key;
 
-            if (!AllowedAttributes!.Contains(key))
+            if (!AllowedAttributes.Contains(key))
                 throw new UnexpectedAttributeException(Name, key);
 
             EnsureAttributesInitialized(1);
@@ -396,11 +396,11 @@ namespace Fb2.Document.Models.Base
             // update or insert
             if (TryGetAttribute(key, true, out var existingAttribute))
             {
-                var existingAttributeIndex = attributes!.IndexOf(existingAttribute!);
+                var existingAttributeIndex = attributes.IndexOf(existingAttribute);
                 attributes[existingAttributeIndex] = fb2Attribute; // replace existing, should not be -1
             }
             else
-                attributes!.Add(fb2Attribute);
+                attributes.Add(fb2Attribute);
 
             return this;
         }
@@ -420,7 +420,7 @@ namespace Fb2.Document.Models.Base
             if (!HasAttributes)
                 return this;
 
-            var attributesToDelete = attributes!
+            var attributesToDelete = attributes
                 .Where(existingAttr => ignoreCase ? existingAttr.Key.EqualsIgnoreCase(key) : existingAttr.Key.Equals(key))
                 .ToArray();
 
@@ -444,7 +444,7 @@ namespace Fb2.Document.Models.Base
             if (!HasAttributes)
                 return this;
 
-            var attrsToRemove = attributes!.Where(attributePredicate).ToArray();
+            var attrsToRemove = attributes.Where(attributePredicate).ToArray();
 
             foreach (var attributeToRemove in attrsToRemove)
                 RemoveAttribute(attributeToRemove);
@@ -464,7 +464,7 @@ namespace Fb2.Document.Models.Base
                 throw new ArgumentNullException(nameof(fb2Attribute));
 
             if (HasAttribute(fb2Attribute))
-                attributes!.Remove(fb2Attribute);
+                attributes.Remove(fb2Attribute);
 
             return this;
         }
@@ -476,7 +476,7 @@ namespace Fb2.Document.Models.Base
         public Fb2Node ClearAttributes()
         {
             if (HasAttributes)
-                attributes!.Clear();
+                attributes.Clear();
 
             return this;
         }
@@ -493,7 +493,7 @@ namespace Fb2.Document.Models.Base
 
             if (HasAttributes) // regular attributes
             {
-                var convertedAttributes = attributes!.Select(attr =>
+                var convertedAttributes = attributes.Select(attr =>
                 {
                     if (string.IsNullOrWhiteSpace(attr.NamespaceName))
                         return new XAttribute(attr.Key, attr.Value); // no prefix - id attribute for example
@@ -524,7 +524,7 @@ namespace Fb2.Document.Models.Base
                 throw new Fb2NodeLoadingException($"Invalid element, element name is {element.Name.LocalName}, expected {Name}");
         }
 
-        public override bool Equals(object? other)
+        public override bool Equals(object other)
         {
             if (other == null)
                 return false;
@@ -550,7 +550,7 @@ namespace Fb2.Document.Models.Base
             return result;
         }
 
-        private bool AreAttributesEqual(List<Fb2Attribute>? otherAttributes)
+        private bool AreAttributesEqual(List<Fb2Attribute> otherAttributes)
         {
             if (attributes == null && otherAttributes == null)
                 return true;
@@ -596,7 +596,7 @@ namespace Fb2.Document.Models.Base
             cloneNode.IsUnsafe = node.IsUnsafe;
 
             if (node.HasAttributes)
-                cloneNode.attributes = node.attributes!.Select(a => new Fb2Attribute(a)).ToList();
+                cloneNode.attributes = node.attributes.Select(a => new Fb2Attribute(a)).ToList();
 
             if (node.NodeMetadata != null)
                 cloneNode.NodeMetadata = new Fb2NodeMetadata(node.NodeMetadata);

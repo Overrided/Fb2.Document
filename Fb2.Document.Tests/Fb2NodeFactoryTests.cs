@@ -16,9 +16,9 @@ namespace Fb2.Document.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("    ")]
-        public void IsKnownNodeName_NullOrEmptyName_Throws(string? nodeName)
+        public void IsKnownNodeName_NullOrEmptyName_Throws(string nodeName)
         {
-            Action act = () => { var node = Fb2NodeFactory.IsKnownNodeName(nodeName!); };
+            Action act = () => { var node = Fb2NodeFactory.IsKnownNodeName(nodeName); };
 
             act.Should().Throw<ArgumentNullException>();
         }
@@ -26,7 +26,7 @@ namespace Fb2.Document.Tests
         [Fact]
         public void IsKnownNode_NullNode_Throws()
         {
-            Action act = () => { var node = Fb2NodeFactory.IsKnownNode(null!); };
+            Action act = () => { var node = Fb2NodeFactory.IsKnownNode(null); };
 
             act.Should().Throw<ArgumentNullException>();
         }
@@ -35,9 +35,9 @@ namespace Fb2.Document.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("    ")]
-        public void GetNodeByName_NullOrEmptyName_Throws(string? nodeName)
+        public void GetNodeByName_NullOrEmptyName_Throws(string nodeName)
         {
-            Action act = () => { var node = Fb2NodeFactory.GetNodeByName(nodeName!); };
+            Action act = () => { var node = Fb2NodeFactory.GetNodeByName(nodeName); };
 
             act.Should().Throw<ArgumentNullException>();
         }

@@ -36,7 +36,7 @@ namespace Fb2.Document.Tests
                 meta.Should().NotBeNull();
                 meta.DefaultNamespace.Should().Be(XNamespace.Xml);
                 meta.NamespaceDeclarations.Should().NotBeNullOrEmpty().And.HaveCount(1);
-                meta.NamespaceDeclarations!.First().Should().NotBeNull().And.Be(namespaceAttribute);
+                meta.NamespaceDeclarations.First().Should().NotBeNull().And.Be(namespaceAttribute);
             };
 
             act.Should().NotThrow();
