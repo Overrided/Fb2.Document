@@ -86,7 +86,11 @@ public abstract class Fb2Element : Fb2Node
             await reader.ReadAsync();
 
         var rawContent = reader.Value;
-        content = rawContent;
+
+        if (trimWhitespace.IsMatch(rawContent))
+            content = trimWhitespace.Replace(rawContent, Whitespace);
+        else
+            content = rawContent;
     }
 
     /// <summary>
