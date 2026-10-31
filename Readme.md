@@ -69,6 +69,9 @@ Table below describes `.net` targets per package version:
 | 2.4.1           | net8.0                             |
 | 2.5.0           | net10.0                            |
 
+For more info on .Net versions support please see [.NET and .NET Core Support Policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
+
+
 ### Deprecated and Unlisted package versions
 
 Versions listed in table below are deprecated, not listed on NuGet and not recommended for use.
@@ -78,9 +81,6 @@ Versions listed in table below are deprecated, not listed on NuGet and not recom
 | 1.0.0, 1.0.1, 1.0.2, 1.1.0, 1.2.0, 1.3.0 | netstandard2.0                     |
 | 2.0.0, 2.1.0, 2.2.0, 2.3.0               | netcoreapp3.1;net5.0;net6.0;net7.0 |
 | 2.4.0                                    | net8.0                             |
-
-
-For more info on .Net versions support please see [.NET and .NET Core Support Policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
 
 
 ## Document infrastructure
