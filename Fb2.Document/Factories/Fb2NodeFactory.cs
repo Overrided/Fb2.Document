@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Fb2.Document.Constants;
 using Fb2.Document.Exceptions;
-using Fb2.Document.Extensions;
 using Fb2.Document.Models;
 using Fb2.Document.Models.Base;
 
@@ -13,7 +11,7 @@ namespace Fb2.Document.Factories;
 
 public static class Fb2NodeFactory
 {
-    private static readonly Dictionary<string, Type> KnownNodes = new()
+    private static readonly Dictionary<string, Type> KnownNodes = new(StringComparer.InvariantCultureIgnoreCase)
     {
         { ElementNames.FictionBook, typeof(FictionBook) },
         { ElementNames.BinaryImage, typeof(BinaryImage) },
@@ -106,11 +104,8 @@ public static class Fb2NodeFactory
         if (string.IsNullOrWhiteSpace(nodeName))
             throw new ArgumentNullException(nameof(nodeName));
 
-        if (!IsKnownNodeName(nodeName))
+        if (!KnownNodes.TryGetValue(nodeName, out var modelType))
             throw new InvalidNodeException(nodeName);
-
-        var result = KnownNodes.First(kvp => kvp.Key.EqualsIgnoreCase(nodeName));
-        var modelType = result.Value;
 
         var model = Activator.CreateInstance(modelType) as Fb2Node; // suppressed warning
         return model!;
@@ -143,7 +138,7 @@ public static class Fb2NodeFactory
         if (string.IsNullOrWhiteSpace(nodeName))
             throw new ArgumentNullException(nameof(nodeName));
 
-        var isKnownName = KnownNodes.ContainsKey(nodeName.ToLowerInvariant());
+        var isKnownName = KnownNodes.ContainsKey(nodeName);
         return isKnownName;
     }
 }

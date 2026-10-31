@@ -52,7 +52,12 @@ public abstract class Fb2Element : Fb2Node
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+        base.Load(
+            node,
+            parentNode,
+            preserveWhitespace,
+            loadUnsafe,
+            loadNamespaceMetadata);
 
         var rawContent = node.NodeType switch
         {
@@ -61,10 +66,9 @@ public abstract class Fb2Element : Fb2Node
             _ => throw new Fb2NodeLoadingException($"Unsupported nodeType: received {node.NodeType}, expected {XmlNodeType.Element} or {XmlNodeType.Text}"),
         };
 
-        if (!preserveWhitespace && trimWhitespace.IsMatch(rawContent))
-            content = trimWhitespace.Replace(rawContent, Whitespace);
-        else
-            content = rawContent;
+        content = preserveWhitespace ?
+            rawContent :
+            trimWhitespace.Replace(rawContent, Whitespace);
     }
 
     /// <summary>

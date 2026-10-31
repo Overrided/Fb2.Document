@@ -21,9 +21,10 @@ public class BinaryImage : Fb2Element
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        base.Load(node, parentNode, false, loadUnsafe, loadNamespaceMetadata);
+        // preserveWhitespace `true` to ommit regex usage in base.Load() - only one regex usage on line 28 here
+        base.Load(node, parentNode, true, loadUnsafe, loadNamespaceMetadata);
 
-        if (!string.IsNullOrEmpty(content) && trimWhitespace.IsMatch(content))
+        if (!string.IsNullOrEmpty(content))
             content = trimWhitespace.Replace(content, string.Empty);
     }
 }

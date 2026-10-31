@@ -66,59 +66,55 @@ public abstract class Fb2Container : Fb2Node
         bool loadUnsafe = true,
         bool loadNamespaceMetadata = true)
     {
-        base.Load(node, parentNode, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+        base.Load(
+            node,
+            parentNode,
+            preserveWhitespace,
+            loadUnsafe,
+            loadNamespaceMetadata);
 
         if (node is not XElement element || element.IsEmpty)
             return;
 
-        var nodes = element
-            .Nodes()
-            .Where(n =>
-            {
-                var nodeType = n.NodeType;
-
-                if (nodeType == XmlNodeType.Text)
-                    return loadUnsafe || CanContainText;
-
-                var isElement = nodeType == XmlNodeType.Element;
-                if (!isElement)
-                    return false;
-
-                var childNode = (XElement)n;
-                var nodeLocalName = childNode.Name.LocalName.ToLowerInvariant();
-
-                var isValid =
-                    !nodeLocalName.EqualsIgnoreCase(ElementNames.FictionText) &&
-                    Fb2NodeFactory.IsKnownNodeName(nodeLocalName);
-
-                if (!isValid)
-                    return false;
-
-                return loadUnsafe || AllowedElements.Contains(nodeLocalName);
-            })
-            .ToArray();
-
-        var nodesCount = nodes.Length;
-        if (nodesCount == 0)
-            return;
-
-        EnsureContentInitialized(nodesCount);
-
-        for (int i = 0; i < nodesCount; i++)
+        foreach (var childNode in element.Nodes())
         {
-            var validNode = nodes[i];
+            string localName;
+            bool isUnsafe;
 
-            string localName = validNode.NodeType == XmlNodeType.Element ?
-                ((XElement)validNode).Name.LocalName.ToLowerInvariant() :
-                ElementNames.FictionText;
+            if (childNode.NodeType == XmlNodeType.Text)
+            {
+                localName = ElementNames.FictionText;
+                isUnsafe = !CanContainText;
 
-            var isUnsafe = validNode.NodeType == XmlNodeType.Text ?
-                !CanContainText :
-                !AllowedElements.Contains(localName);
+                if (!loadUnsafe && isUnsafe)
+                    continue;
+            }
+            else if (childNode is XElement childElement)
+            {
+                localName = childElement.Name.LocalName.ToLowerInvariant();
+                isUnsafe = !AllowedElements.Contains(localName);
+
+                if ((!loadUnsafe && isUnsafe) ||
+                    !Fb2NodeFactory.IsKnownNodeName(localName) ||
+                    localName.EqualsIgnoreCase(ElementNames.FictionText))
+                    continue;
+            }
+            else
+                continue;
 
             var elem = Fb2NodeFactory.GetNodeByName(localName);
-            elem.Load(validNode, this, preserveWhitespace, loadUnsafe, loadNamespaceMetadata);
+
+            elem.Load(
+                childNode,
+                this,
+                preserveWhitespace,
+                loadUnsafe,
+                loadNamespaceMetadata);
+
             elem.IsUnsafe = isUnsafe;
+
+            if (!HasContent)
+                EnsureContentInitialized(1);
 
             content!.Add(elem);
         }

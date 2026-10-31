@@ -30,6 +30,15 @@ public sealed class Fb2Document
     /// </summary>
     public static readonly XDeclaration DefaultXDeclaration = new(DefaultXmlVersion, Encoding.UTF8.HeaderName, null);
 
+    private static readonly XmlWriterSettings DefaultXmlSerializerSettings = new()
+    {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        NamespaceHandling = NamespaceHandling.OmitDuplicates,
+        Async = true,
+        CheckCharacters = true
+    };
+
     /// <summary>
     /// Default <see cref="XmlReaderSettings"/> used for document loading by <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/> and <see cref="LoadAsync(Stream, Fb2StreamLoadingOptions?)"/>.
     /// </summary>S
@@ -306,12 +315,13 @@ public sealed class Fb2Document
         if (document == null)
             return null;
 
-        var declaration = fb2XmlSerializingOptions?.XDeclaration ?? DefaultXDeclaration;
+        var result = new StringBuilder();
+        result.AppendLine(document.Declaration!.ToString());
 
-        return string.Join(
-            Environment.NewLine,
-            declaration,
-            document.ToString());
+        using var writer = XmlWriter.Create(result, DefaultXmlSerializerSettings);
+        document.WriteTo(writer);
+
+        return result.ToString();
     }
 
     private static void LoadHandled(Action loadingAction)
