@@ -123,24 +123,30 @@ public abstract partial class Fb2Node : ICloneable
         if (!HasAllowedAttributes)
             return;
 
-        var allFilteredAttributes = allAttributes
-            .DistinctBy(a => a.Name.LocalName.ToLowerInvariant())
-            .Where(da => AllowedAttributes!.Contains(da.Name.LocalName.ToLowerInvariant()))
-            .Select(attr =>
-            {
-                var allowedAttrName = attr.Name.LocalName.ToLowerInvariant();
-                var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
-                var fb2Attribute = new Fb2Attribute(allowedAttrName, attr.Value, attributeNamespace);
-                return fb2Attribute;
-            })
-            .ToArray();
+        Dictionary<string, Fb2Attribute>? visitedAttrs = null;
 
-        if (allFilteredAttributes is not { Length: > 0 })
-            return;
+        foreach (var attr in allAttributes)
+        {
+            var attrName = attr.Name.LocalName.ToLowerInvariant();
 
-        EnsureAttributesInitialized(allFilteredAttributes.Length);
+            if (!AllowedAttributes!.Contains(attrName))
+                continue;
 
-        attributes!.AddRange(allFilteredAttributes);
+            if (visitedAttrs?.ContainsKey(attrName) == true)
+                continue;
+
+            var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
+            var fb2Attribute = new Fb2Attribute(attrName, attr.Value, attributeNamespace);
+
+            visitedAttrs ??= new Dictionary<string, Fb2Attribute>(StringComparer.InvariantCultureIgnoreCase);
+            visitedAttrs.Add(attrName, fb2Attribute);
+        }
+
+        if (visitedAttrs is { Count: > 0 })
+        {
+            EnsureAttributesInitialized(visitedAttrs.Count);
+            attributes!.AddRange(visitedAttrs.Values);
+        }
     }
 
     /// <summary>
