@@ -120,8 +120,8 @@ public class Table : Fb2Container
 
     private static string GetCellAlignment(Fb2Node cell, string alignAttributeName)
     {
-        if (cell == null || string.IsNullOrWhiteSpace(alignAttributeName))
-            throw new ArgumentNullException();
+        ArgumentNullException.ThrowIfNull(cell, nameof(cell));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(alignAttributeName, nameof(alignAttributeName));
 
         if (cell.TryGetAttribute(alignAttributeName, true, out var align))
             return align!.Value;
@@ -132,8 +132,8 @@ public class Table : Fb2Container
     // if no span found return 1 as minimal cell unit width/height
     private static int GetCellSpan(Fb2Node cell, string spanAttributeName)
     {
-        if (cell == null || string.IsNullOrWhiteSpace(spanAttributeName))
-            throw new ArgumentNullException();
+        ArgumentNullException.ThrowIfNull(cell, nameof(cell));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(spanAttributeName, nameof(spanAttributeName));
 
         if (cell.TryGetAttribute(spanAttributeName, true, out var span) &&
             int.TryParse(span!.Value, out int spanNumber) && spanNumber > 1)
@@ -230,7 +230,7 @@ public class Table : Fb2Container
                 int colWidth = CalculateCellCharWidth(columnCharWidths, actualColIndex, cell);
 
                 if (cell.ColSpan > 1)
-                    actualColIndex = actualColIndex + (cell.ColSpan - 1); // move to next cell
+                    actualColIndex += (cell.ColSpan - 1); // move to next cell
 
                 var cellString = StringifyTableCell(tableRowSpans, cell, rowIndex, actualColIndex, colWidth);
 
