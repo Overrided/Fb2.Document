@@ -6,7 +6,9 @@ namespace Fb2.Document.Models;
 
 public class Stylesheet : Fb2Element
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Type];
+
     public override string Name => ElementNames.Stylesheet;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Type];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 }

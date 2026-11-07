@@ -6,14 +6,9 @@ namespace Fb2.Document.Models;
 
 public class Quote : Fb2Container
 {
-    public override string Name => ElementNames.Quote;
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Id, AttributeNames.Language];
 
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.Paragraph,
         ElementNames.SubTitle,
         ElementNames.EmptyLine,
@@ -21,4 +16,12 @@ public class Quote : Fb2Container
         ElementNames.Table,
         ElementNames.TextAuthor
     ];
+
+    public override string Name => ElementNames.Quote;
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

@@ -7,11 +7,17 @@ namespace Fb2.Document.Models;
 
 public class SequenceInfo : Fb2Element
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [
+        AttributeNames.Name,
+        AttributeNames.Number,
+        AttributeNames.Language
+    ];
+
     public override string Name => ElementNames.Sequence;
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Number, AttributeNames.Language];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 
     public sealed override Fb2Element AddContent(string newContent, string? separator = null) => this;
 

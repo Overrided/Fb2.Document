@@ -5,10 +5,7 @@ namespace Fb2.Document.Models.Base;
 
 public abstract class CreatorBase : Fb2Container
 {
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.FirstName,
         ElementNames.MiddleName,
         ElementNames.LastName,
@@ -17,4 +14,8 @@ public abstract class CreatorBase : Fb2Container
         ElementNames.HomePage,
         ElementNames.FictionId
     ];
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

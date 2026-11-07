@@ -6,12 +6,7 @@ namespace Fb2.Document.Models;
 
 public class DocumentInfo : Fb2Container
 {
-    public override string Name => ElementNames.DocumentInfo;
-
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.Author,
         ElementNames.ProgramUsed,
         ElementNames.Date,
@@ -22,4 +17,10 @@ public class DocumentInfo : Fb2Container
         ElementNames.History,
         ElementNames.Publisher
     ];
+
+    public override string Name => ElementNames.DocumentInfo;
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

@@ -6,9 +6,11 @@ namespace Fb2.Document.Models;
 
 public class Coverpage : Fb2Container
 {
+    private static readonly ImmutableHashSet<string> allowedElements = [ElementNames.Image];
+
     public override string Name => ElementNames.Coverpage;
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedElements => [ElementNames.Image];
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

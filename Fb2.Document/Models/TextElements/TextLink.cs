@@ -7,9 +7,11 @@ namespace Fb2.Document.Models;
 
 public class TextLink : TextContainerBase
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.XHref, AttributeNames.Type];
+
     public override string Name => ElementNames.TextLink;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.XHref, AttributeNames.Type];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 
     public sealed override string ToString()
     {

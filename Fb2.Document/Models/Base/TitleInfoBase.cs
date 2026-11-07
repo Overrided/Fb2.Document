@@ -5,10 +5,7 @@ namespace Fb2.Document.Models.Base;
 
 public abstract class TitleInfoBase : Fb2Container
 {
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.Genre,
         ElementNames.Author,
         ElementNames.BookTitle,
@@ -22,4 +19,8 @@ public abstract class TitleInfoBase : Fb2Container
         ElementNames.Lang,
         ElementNames.SrcLang
     ];
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

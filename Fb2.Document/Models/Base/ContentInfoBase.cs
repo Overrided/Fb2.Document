@@ -5,12 +5,12 @@ namespace Fb2.Document.Models.Base;
 
 public abstract class ContentInfoBase : Fb2Container
 {
-    public override bool CanContainText => false;
+    private static readonly ImmutableHashSet<string> allowedAttributes = [
+        AttributeNames.Id,
+        AttributeNames.Language
+    ];
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id, AttributeNames.Language];
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.Paragraph,
         ElementNames.Poem,
         ElementNames.Quote,
@@ -18,4 +18,10 @@ public abstract class ContentInfoBase : Fb2Container
         ElementNames.EmptyLine,
         ElementNames.Table
     ];
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

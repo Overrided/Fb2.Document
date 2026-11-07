@@ -8,11 +8,13 @@ namespace Fb2.Document.Models;
 
 public class CustomInfo : Fb2Element
 {
+    public static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.InfoType];
+
     public override string Name => ElementNames.CustomInfo;
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.InfoType];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 
     /// <summary>
     /// Specific override to preserve original string content 

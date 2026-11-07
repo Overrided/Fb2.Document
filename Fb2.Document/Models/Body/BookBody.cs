@@ -6,17 +6,23 @@ namespace Fb2.Document.Models;
 
 public class BookBody : Fb2Container
 {
-    public override string Name => ElementNames.BookBody;
+    private static readonly ImmutableHashSet<string> allowedAttributes = [
+        AttributeNames.Name,
+        AttributeNames.Language
+    ];
 
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Language];
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.Image,
         ElementNames.Title,
         ElementNames.Epigraph,
         ElementNames.BookBodySection
     ];
+
+    public override string Name => ElementNames.BookBody;
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

@@ -6,7 +6,9 @@ namespace Fb2.Document.Models;
 
 public class TextStyle : TextContainerBase
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Name, AttributeNames.Language];
+
     public override string Name => ElementNames.TextStyle;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Name, AttributeNames.Language];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 }

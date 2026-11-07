@@ -6,12 +6,7 @@ namespace Fb2.Document.Models;
 
 public class PublishInfo : Fb2Container
 {
-    public override string Name => ElementNames.PublishInfo;
-
-    public override bool CanContainText => false;
-
-    public override ImmutableHashSet<string> AllowedElements =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         ElementNames.BookName,
         ElementNames.Publisher,
         ElementNames.City,
@@ -19,4 +14,10 @@ public class PublishInfo : Fb2Container
         ElementNames.ISBN,
         ElementNames.Sequence
     ];
+
+    public override string Name => ElementNames.PublishInfo;
+
+    public override bool CanContainText => false;
+
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 }

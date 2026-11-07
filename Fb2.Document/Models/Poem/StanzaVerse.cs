@@ -6,9 +6,11 @@ namespace Fb2.Document.Models;
 
 public class StanzaVerse : TextContainerBase
 {
+    public static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Id];
+
     public override string Name => ElementNames.StanzaV;
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 }

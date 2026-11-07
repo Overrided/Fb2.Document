@@ -6,9 +6,11 @@ namespace Fb2.Document.Models;
 
 public class BookGenre : Fb2Element
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Match];
+
     public override string Name => ElementNames.Genre;
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Match];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 }

@@ -8,11 +8,16 @@ namespace Fb2.Document.Models;
 
 public class BinaryImage : Fb2Element
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [
+        AttributeNames.ContentType,
+        AttributeNames.Id
+    ];
+
     public override string Name => ElementNames.BinaryImage;
 
     public override bool IsInline => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.ContentType, AttributeNames.Id];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 
     public sealed override void Load(
         [In] XNode node,

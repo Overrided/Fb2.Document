@@ -9,10 +9,7 @@ namespace Fb2.Document.Models;
 
 public class Image : Fb2Element
 {
-    public override string Name => ElementNames.Image;
-
-    public override ImmutableHashSet<string> AllowedAttributes =>
-    [
+    private static readonly ImmutableHashSet<string> allowedElements = [
         AttributeNames.Id,
         AttributeNames.Alt,
         AttributeNames.Title,
@@ -20,8 +17,11 @@ public class Image : Fb2Element
         AttributeNames.Type
     ];
 
-    private static readonly HashSet<string> InlineParentNodes =
-    [
+    public override string Name => ElementNames.Image;
+
+    public override ImmutableHashSet<string> AllowedAttributes => allowedElements;
+
+    private static readonly HashSet<string> InlineParentNodes = [
         ElementNames.Paragraph,
         ElementNames.StanzaV,
         ElementNames.SubTitle,
@@ -30,8 +30,7 @@ public class Image : Fb2Element
         ElementNames.TextAuthor
     ];
 
-    private static readonly HashSet<string> NotInlineParentNodes =
-    [
+    private static readonly HashSet<string> NotInlineParentNodes = [
         ElementNames.BookBody,
         ElementNames.BookBodySection,
         ElementNames.Coverpage

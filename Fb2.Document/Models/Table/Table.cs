@@ -10,13 +10,17 @@ namespace Fb2.Document.Models;
 
 public class Table : Fb2Container
 {
+    private static readonly ImmutableHashSet<string> allowedAttributes = [AttributeNames.Id];
+
+    private static readonly ImmutableHashSet<string> allowedElements = [ElementNames.TableRow];
+
     public override string Name => ElementNames.Table;
 
     public override bool CanContainText => false;
 
-    public override ImmutableHashSet<string> AllowedAttributes => [AttributeNames.Id];
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 
-    public override ImmutableHashSet<string> AllowedElements => [ElementNames.TableRow];
+    public override ImmutableHashSet<string> AllowedElements => allowedElements;
 
     public sealed override string ToString()
     {

@@ -6,8 +6,7 @@ namespace Fb2.Document.Models;
 
 public abstract class TableCellBase : TextContainerBase
 {
-    public override ImmutableHashSet<string> AllowedAttributes =>
-    [
+    private static readonly ImmutableHashSet<string> allowedAttributes = [
         AttributeNames.Id,
         AttributeNames.ColumnSpan,
         AttributeNames.RowSpan,
@@ -15,4 +14,6 @@ public abstract class TableCellBase : TextContainerBase
         AttributeNames.VerticalAlign,
         AttributeNames.Language
     ];
+
+    public override ImmutableHashSet<string> AllowedAttributes => allowedAttributes;
 }
