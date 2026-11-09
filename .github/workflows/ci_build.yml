@@ -33,7 +33,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run tests
-        run: dotnet test --no-restore --collect:"XPlat Code Coverage"
+        run: dotnet test --no-restore --coverage --coverage-output-format cobertura
 
       - name: NuGet pack
         run: dotnet pack 'Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --no-restore --output dist
@@ -47,7 +47,7 @@ jobs:
       - name: ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
         with:
-          reports: "**/TestResults/**/*.xml"
+          reports: "**/TestResults/**/*.cobertura.xml"
           targetdir: "coveragereport"
           reporttypes: "Html"
           verbosity: "Info"
