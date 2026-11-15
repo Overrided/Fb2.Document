@@ -138,7 +138,7 @@ public abstract partial class Fb2Node : ICloneable
             var attributeNamespace = loadNamespaceMetadata ? attr.Name.Namespace?.NamespaceName : null;
             var fb2Attribute = new Fb2Attribute(attrName, attr.Value, attributeNamespace);
 
-            visitedAttrs ??= new Dictionary<string, Fb2Attribute>(StringComparer.InvariantCultureIgnoreCase);
+            visitedAttrs ??= new(StringComparer.InvariantCultureIgnoreCase);
             visitedAttrs.Add(attrName, fb2Attribute);
         }
 
