@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Setup .NET 10.0.x
-        uses: actions/setup-dotnet@v5.0.1
+        uses: actions/setup-dotnet@v6.1.0
         with:
           dotnet-version: 10.0.x
 
@@ -39,13 +39,13 @@ jobs:
         run: dotnet pack 'Fb2.Document/Fb2.Document.csproj' --configuration Release --no-build --no-restore --output dist
 
       - name: Upload NuGet package artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ matrix.os }}-nuget
           path: dist
 
       - name: ReportGenerator
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.6.0
         with:
           reports: "**/TestResults/**/*.cobertura.xml"
           targetdir: "coveragereport"
@@ -53,7 +53,7 @@ jobs:
           verbosity: "Info"
 
       - name: Upload coverage report artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ matrix.os }}-coverageReport
           path: coveragereport
